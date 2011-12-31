@@ -43,7 +43,7 @@ class View {
 	public function __toString() {
 		try {
 			$content = $this->render();
-		} catch (ViewNotFoundException $e) {
+		} catch (\Exception $e) {
 			return $e->getMessage();
 		}
 		return $content;
@@ -80,11 +80,7 @@ class View {
 			throw new ViewNotFoundException("Could not load view file $this->file");
 		}
 		ob_start();
-		try {
 		include $this->file;
-		} catch (\Exception $e) {
-			return $e->getMessage();
-		}
 		return ob_get_clean();
 	}
 
