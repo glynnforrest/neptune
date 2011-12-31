@@ -80,7 +80,11 @@ class View {
 			throw new ViewNotFoundException("Could not load view file $this->file");
 		}
 		ob_start();
+		try {
 		include $this->file;
+		} catch (\Exception $e) {
+			return $e->getMessage();
+		}
 		return ob_get_clean();
 	}
 
