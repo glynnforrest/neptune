@@ -35,15 +35,16 @@ class Assets {
 		return $content;
 	}
 
-	public static function addCss($href, $options = array()) {
-		self::$css[] = array('href' => $href,
+	public static function addCss($name, $src, $dependencies = array(), $options = array()) {
+		self::$css[$name] = array('src' => $src,
+			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
 	}
 
 	public static function css() {
 		$content = '';
-		foreach(self::$css as $k => $v) {
-			$content .= Html::css($v['href'], $v['opts']);
+		foreach(self::getInstance()->sort(self::$css) as $k => $v) {
+			$content .= Html::css($v, self::$css[$k]['opts']);
 		}
 		return $content;
 

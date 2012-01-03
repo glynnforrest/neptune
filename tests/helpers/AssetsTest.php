@@ -24,18 +24,18 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testCss() {
-		Assets::addCss('css/style.css');
+		Assets::addCss('style', 'css/style.css');
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" />' . PHP_EOL, Assets::css());
 	}
 
 	public function testCssOptions() {
-		Assets::addCss('css/style.css', array('id' => 'my_style', 'class' => 'style'));
+		Assets::addCss('style', 'css/style.css', null, array('id' => 'my_style', 'class' => 'style'));
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" id="my_style" class="style" />' . PHP_EOL, Assets::css());
 	}
 
 	public function testCssMultiple() {
-		Assets::addCss('css/style.css');
-		Assets::addCss('css/main.css');
+		Assets::addCss('style', 'css/style.css');
+		Assets::addCss('main', 'css/main.css');
 		$expected = '<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" />' . PHP_EOL . '<link rel="stylesheet" type="text/css" href="http://myapp.local/css/main.css" />' . PHP_EOL ;
 		$this->assertEquals($expected, Assets::css());
 	}
@@ -48,7 +48,7 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testJsOptions() {
-		Assets::addJs('main', 'js/main.js',null ,array('id' => 'my_script'));
+		Assets::addJs('main', 'js/main.js', null ,array('id' => 'my_script'));
 		$expected = '<script type="text/javascript" src="http://myapp.local/js/main.js" id="my_script"></script>' . PHP_EOL;
 		$this->assertEquals($expected, Assets::js());
 	}
