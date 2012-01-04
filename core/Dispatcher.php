@@ -61,7 +61,7 @@ class Dispatcher {
 			'controller' => isset($options['controller']) ? $options['controller'] : null,
 			'function' => isset($options['function']) ? $options['function'] : null,
 			'args' => isset($options['args']) ? $options['args'] : null,
-			'method' => isset($options['method']) ? explode('|', $options['method']) : null,
+			'method' => isset($options['method']) ? explode('|', strtoupper($options['method'])) : null,
 			'format' => isset($options['format']) ? explode('|', $options['format']) : null,
 			'transforms' => isset($options['transforms']) ? $options['transforms'] : null,
 			'rules' => isset($options['rules']) ? $options['rules'] : null,
@@ -114,7 +114,7 @@ class Dispatcher {
 		}
 		//Check if the request method is supported by this route.
 		if ($rule['method']) {
-			if (!in_array(Request::method(), $rule['method'])) {
+			if (!in_array(strtoupper(Request::method()), $rule['method'])) {
 				return false;
 			}
 		}
