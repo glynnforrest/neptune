@@ -3,6 +3,7 @@
 namespace neptune\core;
 
 use neptune\core\Neptune;
+use neptune\core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -35,7 +36,18 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 			return $class;
 		});
 		$this->assertEquals('value', Neptune::get('class')->key);
+	}
 
+	public function testFunctionNotCalledBeforeAccess() {
+		Config::bluff('test');
+		Config::set('some_key', 'value');	
+		Neptune::set('config_change', function() {
+			Config::set('some_key', 'changed');
+			return 1;
+		});
+		$this->assertEquals('value', Config::get('some_key'));
+		$res = Neptune::get('config_change');
+		$this->assertEquals('changed', Config::get('some_key'));
 	}
 }
 ?>
