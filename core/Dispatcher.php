@@ -66,6 +66,7 @@ class Dispatcher {
 			'rules' => isset($options['rules']) ? $options['rules'] : null,
 			'defaults' => isset($options['defaults']) ? $options['defaults'] : null,
 			'catchAll' => isset($options['catchAll']) ? true : null,
+			'callHidden' => isset($options['callHidden']) ? true : null,
 			'argsFormat' => isset($options['argsFormat']) ? $options['argsFormat'] : self::ARGS_EXPLODE,
 			'url' => $url,
 		);
@@ -259,7 +260,11 @@ class Dispatcher {
 			try {
 				set_error_handler('\neptune\core\Dispatcher::missingArgsHandler');
 				ob_start();
-				$body = call_user_func_array(array($c, $method), $args);
+				if ($this->routes[$this->pointer - 1]['callHidden']) {
+					$body = $c->callHidden($method, $args);
+				} else {
+					$body = call_user_func_array(array($c, $method), $args);
+				}
 				$other = ob_get_clean();
 				restore_error_handler();
 				if (!Response::getFormat()) {

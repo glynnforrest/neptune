@@ -13,6 +13,10 @@ abstract class Controller {
 		throw new MethodNotFoundException('Function not found: ' . $method);
 	}
 
+	public function callHidden($method, $args) {
+		return call_user_func_array(array($this, $method), $args);
+	}
+
 }
 
 ?>
