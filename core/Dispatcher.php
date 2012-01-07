@@ -2,13 +2,12 @@
 
 namespace neptune\core;
 
-use neptune\error\ErrorHandler;
 use neptune\core\Loader;
 use neptune\view\View;
 use neptune\http\Response;
 use neptune\http\Request;
 use neptune\validate\Validator;
-use neptune\error\NeptuneError;
+use neptune\exceptions\NeptuneError;
 use neptune\exceptions\MethodNotFoundException;
 use neptune\exceptions\ArgumentMissingException;
 

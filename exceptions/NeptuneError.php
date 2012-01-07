@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\error;
+namespace neptune\exceptions;
 
 use \Exception;
 

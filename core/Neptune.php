@@ -2,6 +2,9 @@
 
 namespace neptune\core;
 
+use neptune\exceptions\NeptuneError;
+use neptune\core\Events;
+
 class Neptune {
 
 	protected static $instance;
@@ -28,6 +31,20 @@ class Neptune {
 		}
 		return null;
 	}
+
+	public static function handleErrors() {
+		set_error_handler('\neptune\core\Neptune::dealWithError');
+		set_exception_handler('\neptune\core\Neptune::dealWithException');
+	}
+
+	public static function dealWithError($errno, $errstr, $errfile, $errline, $errcontext) {
+		throw new NeptuneError($errno, $errstr, $errfile, $errline, $errcontext);
+	}
+
+	public static function dealWithException($exception) {
+		Events::getInstance()->send($exception);
+	}
+
 
 	//TODO Remove, give to Cache instead (like Logger)
 	public static function enableCache() {

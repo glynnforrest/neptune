@@ -3,7 +3,6 @@
 namespace neptune\cache;
 
 use neptune\core\Config;
-use neptune\error\ErrorHandler;
 use neptune\exceptions\ConfigKeyException;
 use neptune\exceptions\RequiredConfigKeyException;
 use neptune\exceptions\FileException;

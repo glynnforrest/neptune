@@ -29,9 +29,18 @@ class Events {
 	}
 
 	public function send($name, $args = null) {
-		if(isset($this->handlers[$name])) {
-			$args = (array) $args;
-			return call_user_func_array($this->handlers[$name], $args);
+		if(is_object($name)) {
+			foreach($this->handlers as $k => $v) {
+				if($name instanceof $k) {
+					$v($name);
+				}
+			}
+		} else {
+			$name = (string) $name;
+			if(isset($this->handlers[$name])) {
+				$args = (array) $args;
+				return call_user_func_array($this->handlers[$name], $args);
+			}
 		}
 	}
 

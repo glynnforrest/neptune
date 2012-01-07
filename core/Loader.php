@@ -5,7 +5,7 @@ namespace neptune\core;
 use neptune\exceptions\NamespaceException;
 use neptune\exceptions\ClassNotFoundException;
 use neptune\exceptions\FileException;
-use neptune\error\ErrorHandler;
+use neptune\core\Neptune;
 
 class Loader {
 
@@ -29,7 +29,7 @@ class Loader {
 				throw new FileException("File $path not found");
 			}
 		} catch (\Exception $e) {
-			ErrorHandler::dealWithException($e);
+			Neptune::dealWithException($e);
 		}
 	}
 
