@@ -26,8 +26,12 @@ class Neptune {
 	}
 
 	public static function get($key) {
-		if (isset(self::getInstance()->registry[$key])) {
-			return self::getInstance()->registry[$key];
+		$me = self::getInstance();
+		if (isset($me->registry[$key])) {
+			if(is_callable($me->registry[$key])) {
+				return $me->registry[$key]();
+			}
+			return $me->registry[$key];
 		}
 		return null;
 	}
@@ -44,7 +48,6 @@ class Neptune {
 	public static function dealWithException($exception) {
 		Events::getInstance()->send($exception);
 	}
-
 
 	//TODO Remove, give to Cache instead (like Logger)
 	public static function enableCache() {
