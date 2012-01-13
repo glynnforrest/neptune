@@ -1,8 +1,12 @@
 <?php
-namespace neptune\exceptions;
-class ViewNotFoundException extends \Exception {
-public $fatal = true;
 
+namespace neptune\exceptions;
+
+/**
+ * ViewNotFoundException
+ * @author Glynn Forrest me@glynnforrest.com
+ **/
+class ViewNotFoundException extends \Exception {
 	
 }
 
