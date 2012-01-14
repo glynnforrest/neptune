@@ -16,7 +16,7 @@ class Logger {
 	protected static $enabled;
 	protected $logs = array();
 	protected $temp = false;
-	protected $format = ':date [:type] :message';
+	protected $format = ':date :time [:type] :message';
 
 	protected function __construct() {
 		if(Config::get('log.format')) {
