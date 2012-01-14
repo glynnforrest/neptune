@@ -101,6 +101,30 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($v->check('seven', 'alphadash'));
 	}
 
+	public function testAlphaspace() {
+		$v = new Validator(array('a' => '1', 2 => 'a_bc', 'three' => 'sjhb347', 'four' => array(),
+						'five' => '', 'six' => 'hf jf', 'seven' => 'hello'));
+		$this->assertTrue($v->check('a', 'alphaspace'));
+		$this->assertFalse($v->check('2', 'required|alphaspace'));
+		$this->assertTrue($v->check('three', 'alphaspace|required'));
+		$this->assertFalse($v->check('four', 'alphaspace'));
+		$this->assertFalse($v->check('five', 'alphaspace'));
+		$this->assertTrue($v->check('six', 'alphaspace'));
+		$this->assertTrue($v->check('seven', 'alphaspace'));
+	}
+
+	public function testAlphadashspace() {
+		$v = new Validator(array('a' => '1', 2 => 'a_bc', 'three' => 'sjhb347', 'four' => array(),
+						'five' => '', 'six' => 'hf jf', 'seven' => 'hello this is a sentence'));
+		$this->assertTrue($v->check('a', 'alphadashspace'));
+		$this->assertTrue($v->check('2', 'required|alphadashspace'));
+		$this->assertTrue($v->check('three', 'alphadashspace|required'));
+		$this->assertFalse($v->check('four', 'alphadashspace'));
+		$this->assertFalse($v->check('five', 'alphadashspace'));
+		$this->assertTrue($v->check('six', 'alphadashspace'));
+		$this->assertTrue($v->check('seven', 'alphadashspace'));
+	}
+
 	public function testLength() {
 		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
 		$this->assertTrue($v->check('foo', 'length:3'));

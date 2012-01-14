@@ -26,6 +26,8 @@ class Validator implements ArrayDataSource {
 		 'alpha' => ':name is not alphabetical.',
 		 'alphanum' => ':name is not alphanumeric.',
 		 'alphadash' => ':name contains disallowed characters.',
+		 'alphaspace' => ':name contains disallowed characters.',
+		 'alphadashspace' => ':name contains disallowed characters.',
 		 'between' => ':name is not between :min and :max characters in length.',
 		 'email' => ':value is not a valid email address.',
 		 'hex' => ':name is not hexadecimal.',
@@ -67,6 +69,10 @@ class Validator implements ArrayDataSource {
 
 	public function __get($value) {
 		return isset($this->input_array[$value]) ? $this->input_array[$value] : null;
+	}
+
+	public function __set($key, $value) {
+		$this->input_array[$key] = $value;
 	}
 
 	public function __isset($name) {
@@ -228,6 +234,16 @@ class Validator implements ArrayDataSource {
 
 	protected function checkAlphadash($value) {
 		$value = str_replace(array('_', '-'), '', $value);
+		return ctype_alnum($value);
+	}
+
+	protected function checkAlphaspace($value) {
+		$value = str_replace(' ', '', $value);
+		return ctype_alnum($value);
+	}
+
+	protected function checkAlphadashspace($value) {
+		$value = str_replace(array('_', '-', ' '), '', $value);
 		return ctype_alnum($value);
 	}
 
