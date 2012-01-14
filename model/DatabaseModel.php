@@ -8,6 +8,8 @@ use neptune\database\DBObject;
 use neptune\database\DBObjectSet;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
+use neptune\system\ArrayDataSource;
+use neptune\exceptions\TypeException;
 
 /**
  * DatabaseModel
@@ -39,7 +41,7 @@ class DatabaseModel extends Cacheable {
 		return self::$models[$model_name];
 	}
 
-	private function __construct() {
+	protected function __construct() {
 		
 	}
 
@@ -51,7 +53,25 @@ class DatabaseModel extends Cacheable {
 	public static function createOne($database = false) {
 		$me = self::getInstance($database);
 		$obj = new DBObject($database, $me->table);
-		return $me->applyMappings($obj);
+		$me->applyMappings($obj);
+		return $obj;
+	}
+
+	public static function createOneFrom($data, $database = false) {
+		if($data instanceof ArrayDataSource) {
+			$data = $data->getValues();
+		}
+		if(!is_array($data)) {
+			throw new TypeException('Data supplied to createOneFrom must be
+				either an array or an instance of ArrayDataSource.');
+		}
+		$me = self::getInstance($database);
+		$obj = new DBObject($database, $me->table);
+		$me->applyMappings($obj);
+		foreach($data as $k => $v) {
+			$obj->$k = $v;
+		}
+		return $obj;
 	}
 
 	public static function create($count, $database = false) {
@@ -90,13 +110,13 @@ class DatabaseModel extends Cacheable {
 			$me->applyMappings($result);
 		}
 		$objectset = new DBObjectSet($database, $me->table, $results);
-		return $me->applyMappings($objectset);
+		$me->applyMappings($objectset);
+		return $objectset;
 	}
 
-	protected function applyMappings($obj, $use_foreign = false) {
+	protected function applyMappings(&$obj, $use_foreign = false) {
 		$obj->setFields($this->fields);
 		$obj->setPrimaryKey($this->primary_key);
-		return $obj;
 	}
 
 	/**
