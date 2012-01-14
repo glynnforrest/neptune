@@ -79,6 +79,10 @@ class Validator {
 		return true;
 	}
 
+	public function getValues() {
+		return $this->input_array;
+	}
+
 	public function check($name, $validator_string) {
 		$this->checked = true;
 		if (!array_key_exists($name, $this->input_array)) {
@@ -307,15 +311,6 @@ class Validator {
 			}
 		}
 		return true;
-	}
-
-	public function bindTo(DBObject $object) {
-		foreach ($this->input_array as $k => $v) {
-			if (!in_array($k, $this->fails)) {
-				$object->$k = $v;
-			}
-		}
-		return $object;
 	}
 
 }
