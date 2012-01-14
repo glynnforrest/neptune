@@ -30,6 +30,9 @@ class GenericSQLBuilder extends SQLQuery {
 				case 'ORDER BY':
 					$this->addOrderBy($query);
 					break;
+				case 'DISTINCT':
+					$this->addDistinct($query);
+					break;
 				default:
 					$query .= ' ' . $action . ' ' . $this->query[$action];
 					break;
@@ -160,6 +163,10 @@ class GenericSQLBuilder extends SQLQuery {
 			$query .= $this->query['TABLES'][$i] . ', ';
 		}
 		$query .= $this->query['TABLES'][$i];
+	}
+
+	protected function addDistinct(&$query) {
+		$query .= ' DISTINCT';
 	}
 }
 

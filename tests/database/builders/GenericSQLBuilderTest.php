@@ -72,6 +72,13 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('SELECT one, two, 3 FROM test', $q->__toString());
 	}
 
+	public function testSelectDistinct() {
+		$q = SQLQuery::select()->distinct()->from('table')->fields(array('id',
+			'name'));
+		$this->assertEquals('SELECT DISTINCT id, name FROM table',
+			$q->__toString());
+	}
+
 	public function testWhereNoValue() {
 		$q = SQLQuery::select();
 		$q->from('test')->where('column1 = column2');

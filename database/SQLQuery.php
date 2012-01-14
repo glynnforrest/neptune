@@ -14,7 +14,7 @@ abstract class SQLQuery {
 	protected $query = array();
 	protected $type;
 	protected $types = array
-		 ('SELECT' => array('FIELDS', 'FROM', 'WHERE', 'ORDER BY', 'LIMIT'),
+		 ('SELECT' => array('DISTINCT', 'FIELDS', 'FROM', 'WHERE', 'ORDER BY', 'LIMIT'),
 		 'INSERT' => array('INTO', 'FIELDS'),
 		 'UPDATE' => array('TABLES', 'FIELDS', 'WHERE'),
 		 'DELETE' => array('FROM', 'WHERE'));
@@ -147,6 +147,11 @@ abstract class SQLQuery {
 
 	public function limit($int) {
 		$this->query['LIMIT'] = $int;
+		return $this;
+	}
+
+	public function distinct() {
+		$this->query['DISTINCT'] = true;
 		return $this;
 	}
 
