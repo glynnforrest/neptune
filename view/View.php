@@ -30,14 +30,8 @@ class View {
 	}
 
 	public function __get($name) {
-		if (isset($this->vars[$name])) {
-			if (is_array($name)) {
-				return array("$this->vars->[$name]");
-			}
-			return $this->vars[$name];
-		} else {
-			return Neptune::get($name);
-		}
+		return isset($this->vars[$name]) ? $this->vars[$name] :
+			Neptune::get($name);
 	}
 
 	public function __toString() {
