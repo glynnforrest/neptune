@@ -3,11 +3,8 @@
 namespace neptune\cache;
 
 use neptune\core\Config;
-use neptune\exceptions\ConfigKeyException;
-use neptune\exceptions\RequiredConfigKeyException;
-use neptune\exceptions\FileException;
 use neptune\core\Loader;
-use neptune\cache\drivers\DummyDriver;
+use neptune\exceptions\DriverNotFoundException;
 
 /**
  * CacheFactory
@@ -39,21 +36,19 @@ class CacheFactory {
 	public static function createFromConfig($name = null) {
 		if ($name) {
 			$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
-			$host = Config::getRequired("cache.$name.host");
-			$port = Config::getRequired("cache.$name.port");
 		} else {
 			$array = Config::getRequired('cache');
 			reset($array);
 			$name = key($array);
 			$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
-			$host = Config::getRequired("cache.$name.host");
-			$port = Config::getRequired("cache.$name.port");
 		}
+		$port = Config::getRequired("cache.$name.port");
+		$host = Config::getRequired("cache.$name.host");
 		if (Loader::softLoad($driver)) {
 			self::$caches[$name] = new $driver($host, $port);
 			return self::$caches[$name];
 		} else {
-			throw new FileException("Cache driver not found: $driver");
+			throw new DriverNotFoundException("Cache driver not found: $driver");
 		}
 	}
 
