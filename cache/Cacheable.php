@@ -21,14 +21,14 @@ abstract class Cacheable {
 					$key .= $k . '=' . $v . '&';
 				}
 				//check it exists. if it does, return the value
-				$result = CacheFactory::getCacheDriver()->get($key);
+				$result = CacheFactory::getCache()->get($key);
 				if($result) {
 					return $result;
 				}
 				//doesn't, lets call the function and cache it
 				$result = call_user_func_array(array($this, $method), $args);
 				if($result) {
-					CacheFactory::getCacheDriver()->set($key, $result);
+					CacheFactory::getCache()->set($key, $result);
 					return $result;
 				}
 			}

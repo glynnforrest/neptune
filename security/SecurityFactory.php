@@ -19,7 +19,7 @@ class SecurityFactory {
 	 * @return SecurityDriver
 	 * A neptune security driver.
 	 */
-	public static function getDriver($name = null) {
+	public static function getSecurity($name = null) {
 		if ($name == null) {
 			if (!empty(self::$drivers)) {
 				reset(self::$drivers);

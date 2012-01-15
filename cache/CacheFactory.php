@@ -18,30 +18,28 @@ class CacheFactory {
 	 * @return CacheDriver
 	 * A neptune cache driver.
 	 */
-	public static function getCacheDriver($name = null) {
+	public static function getCache($name = null) {
 		if ($name == null) {
 			if (!empty(self::$caches)) {
 				reset(self::$caches);
 				$name = key(self::$caches);
 			} else {
-				return self::createFromConfig();
+				return self::create();
 			}
 		}
 		if (!array_key_exists($name, self::$caches)) {
-			self::$caches[$name] = self::createFromConfig($name);
+			self::$caches[$name] = self::create($name);
 		}
 		return self::$caches[$name];
 	}
 
-	public static function createFromConfig($name = null) {
-		if ($name) {
-			$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
-		} else {
+	protected static function create($name = null) {
+		if(!$name) {
 			$array = Config::getRequired('cache');
 			reset($array);
 			$name = key($array);
-			$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
 		}
+		$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
 		$port = Config::getRequired("cache.$name.port");
 		$host = Config::getRequired("cache.$name.host");
 		if (Loader::softLoad($driver)) {

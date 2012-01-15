@@ -47,7 +47,7 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetDatabaseUndefinedDriver() {
-		$this->setExpectedException('\\neptune\\exceptions\\FileException');
+		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
 		DatabaseFactory::getDatabase('fake');
 	}
 

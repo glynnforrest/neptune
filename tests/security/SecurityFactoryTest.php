@@ -23,19 +23,19 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGet() {
-		$this->assertTrue(SecurityFactory::getDriver() instanceof DebugDriver);
-		$this->assertTrue(SecurityFactory::getDriver('one') instanceof DebugDriver);
+		$this->assertTrue(SecurityFactory::getSecurity() instanceof DebugDriver);
+		$this->assertTrue(SecurityFactory::getSecurity('one') instanceof DebugDriver);
 	}
 
 	public function testGetBadConfig() {
 		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
 		Config::set('security', array());
-		SecurityFactory::getDriver('wrong');
+		SecurityFactory::getSecurity('wrong');
 	}
 
 	public function testGetUndefinedDriver() {
 		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
-		SecurityFactory::getDriver('two');
+		SecurityFactory::getSecurity('two');
 	}
 	
 }
