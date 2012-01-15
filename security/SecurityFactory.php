@@ -7,10 +7,10 @@ use neptune\core\Loader;
 use neptune\exceptions\DriverNotFoundException;
 
 /**
- * Security
+ * SecurityFactory
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Security {
+class SecurityFactory {
 
 	protected static $drivers = array();
 	protected static $registered = array();
@@ -19,7 +19,7 @@ class Security {
 	 * @return SecurityDriver
 	 * A neptune security driver.
 	 */
-	public static function get($name = null) {
+	public static function getDriver($name = null) {
 		if ($name == null) {
 			if (!empty(self::$drivers)) {
 				reset(self::$drivers);

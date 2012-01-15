@@ -8,10 +8,10 @@ use neptune\security\drivers\DebugDriver;
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
 /**
- * SecurityTest
+ * SecurityFactoryTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class SecurityTest extends \PHPUnit_Framework_TestCase {
+class SecurityFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		Config::bluff('unittest');
@@ -23,19 +23,19 @@ class SecurityTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGet() {
-		$this->assertTrue(Security::get() instanceof DebugDriver);
-		$this->assertTrue(Security::get('one') instanceof DebugDriver);
+		$this->assertTrue(SecurityFactory::getDriver() instanceof DebugDriver);
+		$this->assertTrue(SecurityFactory::getDriver('one') instanceof DebugDriver);
 	}
 
 	public function testGetBadConfig() {
 		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
 		Config::set('security', array());
-		Security::get('wrong');
+		SecurityFactory::getDriver('wrong');
 	}
 
 	public function testGetUndefinedDriver() {
 		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
-		Security::get('two');
+		SecurityFactory::getDriver('two');
 	}
 	
 }
