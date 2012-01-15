@@ -53,6 +53,10 @@ class SecurityFactory {
 		}
 	}
 
+	public static function registerDriver($name, $class_name) {
+		self::$registered[$name] = $class_name;
+	}
+
 }
 
 ?>

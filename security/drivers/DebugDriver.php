@@ -2,20 +2,22 @@
 
 namespace neptune\security\drivers;
 
-use neptune\security\drivers\SecurityDriver;
-use neptune\security\User;
-
 /**
  * DebugDriver
  * @author Glynn Forrest me@glynnforrest.com
  **/
 class DebugDriver implements SecurityDriver {
 
-	public function hasRole(User $u, $role) {
+
+	public function loggedIn() {
 		return true;
 	}
 
-	public function loggedIn(User $u, $role) {
+	public function login($identifier, $password) {
+		return true;
+	}
+
+	public function logout() {
 		return true;
 	}
 
