@@ -38,6 +38,10 @@ class Session {
 		return $_SESSION['csrf_token'];
 	}
 
+	public static function flush() {
+		$_SESSION = array();
+	}
+
 }
 
 ?>
