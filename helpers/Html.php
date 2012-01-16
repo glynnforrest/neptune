@@ -37,6 +37,19 @@ class Html {
 		return empty($text) ? '' : ' ' . implode(' ', $text);
 	}
 
+	public static function formHeader($action, $method = 'post', $options = array()) {
+		return '<form action="' . $action . '" method="' . $method . '"' .
+			self::options($options) . ' >';
+	}
+
+	public static function input($type, $name, $value = null, $options = array()) {
+		if($type === 'password') {
+			$value = null;
+		}
+		return '<input type="'. $type . '" name="' . $name . '" value="' .
+			$value . '"' . self::options($options) . '/>';
+	}
+
 
 }
 
