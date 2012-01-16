@@ -2,6 +2,8 @@
 
 namespace neptune\http;
 
+use neptune\helpers\Url;
+
 /**
  * Response
  * @author Glynn Forrest <me@glynnforrest.com>
@@ -104,7 +106,8 @@ class Response {
 		echo self::$body;
 	}
 
-	public static function redirect($url) {
+	public static function redirect($url, $protocol = 'http') {
+		$url = Url::to($url, $protocol);
 		self::$status_code = 302;
 		self::header('Location', $url);
 		self::send();
