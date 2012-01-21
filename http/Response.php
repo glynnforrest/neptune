@@ -110,7 +110,8 @@ class Response {
 		$url = Url::to($url, $protocol);
 		self::$status_code = 302;
 		self::header('Location', $url);
-		self::send();
+		self::sendHeaders();
+		exit();
 	}
 
 }
