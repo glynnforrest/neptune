@@ -54,13 +54,13 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 	public function testOneFieldSelect() {
 		$q = SQLQuery::select();
 		$q->from('test')->fields('id');
-		$this->assertEquals('SELECT id FROM test', $q->__toString());
+		$this->assertEquals('SELECT `id` FROM test', $q->__toString());
 	}
 
 	public function testFieldsSelect() {
 		$q = SQLQuery::select();
 		$q->from('test')->fields(array('id','name','age'));
-		$this->assertEquals('SELECT id, name, age FROM test', $q->__toString());
+		$this->assertEquals('SELECT `id`, `name`, `age` FROM test', $q->__toString());
 	}
 
 	public function testFieldsSelectSplit() {
@@ -69,13 +69,13 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q->fields('two');
 		$q->fields(3);
 		$q->from('test');
-		$this->assertEquals('SELECT one, two, 3 FROM test', $q->__toString());
+		$this->assertEquals('SELECT `one`, `two`, `3` FROM test', $q->__toString());
 	}
 
 	public function testSelectDistinct() {
 		$q = SQLQuery::select()->distinct()->from('table')->fields(array('id',
 			'name'));
-		$this->assertEquals('SELECT DISTINCT id, name FROM table',
+		$this->assertEquals('SELECT DISTINCT `id`, `name` FROM table',
 			$q->__toString());
 	}
 
@@ -158,7 +158,7 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q = SQLQuery::select();
 		$q->from(array('test', 'test2'))->fields(array('test.id', 'test.name'));
 		$q->fields('test2.id')->where('test.id = test2.id');
-		$this->assertEquals('SELECT test.id, test.name, test2.id FROM test, test2 WHERE test.id = test2.id', $q->__toString());
+		$this->assertEquals('SELECT `test.id`, `test.name`, `test2.id` FROM test, test2 WHERE test.id = test2.id', $q->__toString());
 	}
 
 	public function testSelectMultipleTablesSplit() {
@@ -169,7 +169,7 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q->fields('test.name');
 		$q->fields('test2.id');
 		$q->where('test.id = test2.id');
-		$this->assertEquals('SELECT test.id, test.name, test2.id FROM test, test2 WHERE test.id = test2.id', $q->__toString());
+		$this->assertEquals('SELECT `test.id`, `test.name`, `test2.id` FROM test, test2 WHERE test.id = test2.id', $q->__toString());
 	}
 
 	public function testSelectOrderBy() {
@@ -209,28 +209,28 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q = SQLQuery::insert();
 		$q->into('users');
 		$q->fields('one_field');
-		$this->assertEquals('INSERT INTO users (one_field) VALUES (?)', $q->__toString());
+		$this->assertEquals('INSERT INTO users (`one_field`) VALUES (?)', $q->__toString());
 	}
 
 	public function testInsertMultiple() {
 		$q = SQLQuery::insert();
 		$q->into('users');
 		$q->fields(array('one', 'two', 'three'));
-		$this->assertEquals('INSERT INTO users (one, two, three) VALUES (?, ?, ?)', $q->__toString());
+		$this->assertEquals('INSERT INTO users (`one`, `two`, `three`) VALUES (?, ?, ?)', $q->__toString());
 	}
 
 	public function testUpdate() {
 		$q = SQLQuery::update();
 		$q->tables('test');
 		$q->fields(array('field_1', 'field_2'));
-		$this->assertEquals('UPDATE test SET field_1 = ?, field_2 = ?', $q->__toString());
+		$this->assertEquals('UPDATE test SET `field_1` = ?, `field_2` = ?', $q->__toString());
 	}
 
 	public function testUpdateWhere() {
 		$q = SQLQuery::update();
 		$q->tables('test')->where('id =', '?');
 		$q->fields(array('field_1', 'field_2'));
-		$this->assertEquals('UPDATE test SET field_1 = ?, field_2 = ? WHERE id = ?', $q->__toString());
+		$this->assertEquals('UPDATE test SET `field_1` = ?, `field_2` = ? WHERE id = ?', $q->__toString());
 	}
 
 	public function testDelete() {

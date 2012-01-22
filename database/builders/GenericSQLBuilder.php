@@ -111,9 +111,9 @@ class GenericSQLBuilder extends SQLQuery {
 	protected function addFields(&$query) {
 		$query .= ' ';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= $this->query['FIELDS'][$i] . ', ';
+			$query .= '`'. $this->query['FIELDS'][$i] . '`, ';
 		}
-		$query .= $this->query['FIELDS'][$i];
+		$query .= '`' . $this->query['FIELDS'][$i] . '`';
 	}
 
 	protected function addWhere(&$query) {
@@ -139,9 +139,9 @@ class GenericSQLBuilder extends SQLQuery {
 	protected function addinsertfields(&$query) {
 		$query .= ' (';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= $this->query['FIELDS'][$i] . ', ';
+			$query .= '`' . $this->query['FIELDS'][$i] . '`, ';
 		}
-		$query .= $this->query['FIELDS'][$i];
+		$query .= '`' . $this->query['FIELDS'][$i] . '`';
 		$query .= ') VALUES (';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
 			$query .= '?, ';
@@ -152,9 +152,9 @@ class GenericSQLBuilder extends SQLQuery {
 	protected function addUpdateFields(&$query) {
 		$query .= ' SET ';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= $this->query['FIELDS'][$i] . ' = ?, ';
+			$query .= '`' . $this->query['FIELDS'][$i] . '` = ?, ';
 		}
-		$query .= $this->query['FIELDS'][$i] . ' = ?';
+		$query .= '`' . $this->query['FIELDS'][$i] . '` = ?';
 	}
 
 	protected function addTables(&$query) {
