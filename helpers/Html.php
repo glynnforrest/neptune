@@ -37,9 +37,8 @@ class Html {
 		return empty($text) ? '' : ' ' . implode(' ', $text);
 	}
 
-	public static function formHeader($action, $method = 'post', $options = array()) {
-		return '<form action="' . $action . '" method="' . $method . '"' .
-			self::options($options) . ' >';
+	public static function openTag($tag, $options) {
+		return '<' . $tag . self::options($options) . '>';
 	}
 
 	public static function input($type, $name, $value = null, $options = array()) {
