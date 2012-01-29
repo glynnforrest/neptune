@@ -216,7 +216,7 @@ class Dispatcher {
 
 	public function go() {
 		//TODO: Check for a cached response to this exact request.
-		$this->reset();
+		$this->resetPointer();
 		while ($vars = $this->getNextAction()) {
 			if ($this->runAction($vars['controller'], $vars['function'], $vars['args'])) {
 				return true;
