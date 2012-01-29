@@ -204,12 +204,12 @@ class Dispatcher {
 		$this->globals = $options;
 	}
 
-	public function clear() {
+	public function clearRoutes() {
 		$this->routes = array();
 		return $this;
 	}
 
-	public function reset() {
+	public function resetPointer() {
 		$this->pointer = 0;
 		return $this;
 	}

@@ -2,6 +2,8 @@
 
 namespace neptune\core;
 
+use neptune\http\Request;
+
 include dirname(__FILE__) . ('/../test_bootstrap.php');
 
 /**
@@ -17,64 +19,79 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		return $expected == $array;
 	}
 
+	public function setUp() {
+		Dispatcher::getInstance()->resetPointer()->clearRoutes();
+		Request::getInstance()->resetStoredVars();
+	}
+
+	public function tearDown() {
+		Dispatcher::getInstance()->resetPointer()->clearRoutes();
+		Request::getInstance()->resetStoredVars();
+	}
+
+	protected function reset() {
+		Dispatcher::getInstance()->resetPointer();
+		Request::getInstance()->resetStoredVars();
+	}
+
 	public function testHomeRoute() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/', array(
 			 'controller' => 'test',
 			 'function' => 'foo'
 		));
 		$_SERVER['REQUEST_URI'] = '/';
 		$this->assertTrue($this->compare('test', 'foo', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hi';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = ' / ';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testCatchAll() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->catchAll('test');
 		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '';
 		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '5.*7';
 		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
 	}
 
 	public function testExplicitMatch() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/hello', array(
 			 'controller' => 'hello',
 			 'function' => 'world'
 		));
 		$_SERVER['REQUEST_URI'] = '/hello';
 		$this->assertTrue($this->compare('hello', 'world', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hel';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/helloagain';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/h/e/l/l/o';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testControllerMatch() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/test/:controller', array(
 			 'function' => 'index'
 		));
@@ -83,19 +100,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/test/test';
 		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/foo';
 		$this->assertTrue($this->compare('foo', 'index', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/testing/test';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'foo';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testGlobalsController() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->globals(array(
 			 'controller' => 'default'
 		));
@@ -108,13 +125,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/';
 		$this->assertTrue($this->compare('foo', 'index', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/func';
 		$this->assertTrue($this->compare('default', 'testFunction', array(), $d->getNextAction()));
 	}
 
 	public function testArgsExplicitMatch() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/explicit', array(
 			 'controller' => 'foo',
 			 'function' => 'test',
@@ -125,7 +142,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testNamedArgs() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/args/:id', array(
 			 'controller' => 'foo',
 			 'function' => 'test'
@@ -136,19 +153,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/args/4';
 		$this->assertTrue($this->compare('foo', 'test', array('id' => 4), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/args/2/5/hello';
 		$this->assertTrue($this->compare('bar', 'go', array('id' => 2,
 						'id2' => 5,
 						'id3' => 'hello')
 							 , $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/fails';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testDefaultArgs() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/hello(/:place)', array(
 			 'controller' => 'foo',
 			 'function' => 'hello',
@@ -156,29 +173,29 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/hello';
 		$this->assertTrue($this->compare('foo', 'hello', array('place' => 'world'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hello/earth';
 		$this->assertTrue($this->compare('foo', 'hello', array('place' => 'earth'), $d->getNextAction()));
 	}
 
 	public function testAutoRoute() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/:controller(/:function)(/:args)', array(
 			 'function' => 'index',
 			 'args' => array(1)
 		));
 		$_SERVER['REQUEST_URI'] = '/foo';
 		$this->assertTrue($this->compare('foo', 'index', array(1), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/foo/test';
 		$this->assertTrue($this->compare('foo', 'test', array(1), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/foo/test/4';
 		$this->assertTrue($this->compare('foo', 'test', array(4), $d->getNextAction()));
 	}
 
 	public function testAutoArgsArray() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->globals(array(
 			 'argsFormat' => Dispatcher::ARGS_EXPLODE
 		));
@@ -188,19 +205,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/hello';
 		$this->assertTrue($this->compare('testController', 'foo', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hello/test';
 		$this->assertTrue($this->compare('testController', 'foo', array(0 => 'test'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hello/test/hello';
 		$this->assertTrue($this->compare('testController', 'foo', array(0 => 'test', 1 => 'hello'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/hello/test/hello/h3llo*&';
 		$this->assertTrue($this->compare('testController', 'foo', array(0 => 'test', 1 => 'hello', 2 => 'h3llo*&'), $d->getNextAction()));
 	}
 
 	public function testAutoArgsSingle() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->globals(array(
 			 'argsFormat' => Dispatcher::ARGS_SINGLE
 		));
@@ -210,13 +227,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = 'f00/argument';
 		$this->assertTrue($this->compare('test', 'hmm', array(0 => 'argument'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'f00/a/r/gu/mentwith_some_therstuff$4';
 		$this->assertTrue($this->compare('test', 'hmm', array(0 => 'a/r/gu/mentwith_some_therstuff$4'), $d->getNextAction()));
 	}
 
 	public function testValidatedArgs() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/email/:email', array(
 			 'rules' => array(
 				  'email' => 'email'
@@ -226,9 +243,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/email/me@glynnforrest.com.html';
 		$this->assertTrue($this->compare('emailController', 'sendMail', array('email' => 'me@glynnforrest.com'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/email/me@glynnforrestcom';
 		$this->assertFalse($d->getNextAction());
+		$this->reset();
 		$d->route('/int/:int', array(
 			 'rules' => array(
 				  'int' => 'int'
@@ -238,16 +256,16 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/int/4';
 		$this->assertTrue($this->compare('intController', 'int', array('int' => '4'), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/int/four';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/int/4.3/.html';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testTransforms() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->globals(array(
 			 'transforms' => array(
 				  'controller' => function($string) {
@@ -267,7 +285,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				  }
 			 )
 		));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/bar/hello';
 		$this->assertTrue($this->compare('BarController', 'HELLO', array(), $d->getNextAction()));
 		$d->route('/:controller/:function/:name/:age', array(
@@ -283,7 +301,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				  }
 			 )
 		));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/person/name_age/glynn/20';
 		$this->assertTrue($this->compare('PersonController', 'NAME_AGE', array(
 						'name' => 'Glynn',
@@ -292,7 +310,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testOneFormat() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->globals(array());
 		$d->route('/foo', array(
 			 'controller' => 'test',
@@ -306,19 +324,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		));
 		$_SERVER['REQUEST_URI'] = '/foo.json';
 		$this->assertTrue($this->compare('test', 'foo', array(), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/sweet.xml';
 		$this->assertTrue($this->compare('sweet', 'index', array(0 => 1), $d->getNextAction()));
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/sweet.ml';
 		$this->assertFalse($d->getNextAction());
-		$d->reset();
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/sweet';
 		$this->assertFalse($d->getNextAction());
 	}
 
 	public function testGetRouteUrlZeroIndex() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/foo', array(
 			 'controller' => 'test',
 			 'function' => 'foo',
@@ -328,7 +346,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRouteUrl() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/var', array());
 		$d->route('/foo/:variable(/:second)', array(
 			 'controller' => 'test',
@@ -340,7 +358,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRouteUrlNull() {
-		$d = Dispatcher::getInstance()->reset()->clear();
+		$d = Dispatcher::getInstance();
 		$d->route('/var', array());
 		$this->assertNull($d->getRouteUrl('route'));
 	}

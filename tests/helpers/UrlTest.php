@@ -38,25 +38,25 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSimpleRoute() {
-		$d = Dispatcher::getInstance()->clear()->reset();
+		$d = Dispatcher::getInstance()->resetPointer()->clearRoutes();
 		$d->route('/url', array('name' => 'first route'));
 		$this->assertEquals('http://myapp.local/url', Url::toRoute('first route'));
 	}
 
 	public function testSimpleFtpRoute() {
-		$d = Dispatcher::getInstance()->clear()->reset();
+		$d = Dispatcher::getInstance()->resetPointer()->clearRoutes();
 		$d->route('/url', array('name' => 'first route'));
 		$this->assertEquals('ftp://myapp.local/url', Url::toRoute('first route', array(), 'ftp'));
 	}
 
 	public function testRouteArgs() {
-		$d = Dispatcher::getInstance()->clear()->reset();
+		$d = Dispatcher::getInstance()->resetPointer()->clearRoutes();
 		$d->route('/url/:var/:second', array('name' => 'first route'));
 		$this->assertEquals('http://myapp.local/url/foo/bar', Url::toRoute('first route', array('var' => 'foo', 'second' => 'bar')));
 	}
 
 	public function testRouteArgsFtp() {
-		$d = Dispatcher::getInstance()->clear()->reset();
+		$d = Dispatcher::getInstance()->resetPointer()->clearRoutes();
 		$d->route('/url/:var/:second', array('name' => 'first route'));
 		$this->assertEquals('ftp://myapp.local/url/foo/bar', Url::toRoute('first route', array('var' => 'foo', 'second' => 'bar'), 'ftp'));
 	}
