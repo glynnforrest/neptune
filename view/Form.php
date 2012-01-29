@@ -17,15 +17,32 @@ class Form extends View {
 	protected $row_string = '<li>:label:input:error</li>';
 	//todo add strings for each.
 
-	public static function load($view, $values = array(), $errors = array()) {
+	public static function loadAbsolute($view, $values = array(), $errors = array()) {
 		$me = parent::loadAbsolute($view, $values);
 		$me->addErrors($errors);
 		return $me;
 	}
 
+	public static function load($view, $values = array(), $errors = array()) {
+		$me = parent::load($view, $values);
+		$me->addErrors($errors);
+		return $me;
+	}
+
+	public static function create($action, $method = 'post', $options = array()) {
+		$form = new self();
+		$form->header($action, $method, $options);
+		return $form;
+	}
+
 	public function render() {
-		$form = Html::formHeader($this->header[0],
-			$this->header[1], $this->header[2]);
+		if(isset($this->file)) {
+			return parent::render();
+		}
+		$options = $this->header[2];
+		$options['action'] = $this->header[0];
+		$options['method'] = $this->header[1];
+		$form = Html::openTag('form', $options);
 		$form .= '<ul>';
 		foreach($this->vars as $k => $v) {
 			$form .= $this->row($k);
@@ -63,7 +80,7 @@ class Form extends View {
 	}
 
 	public function label($name) {
-		return '<label for="' . $name .'">' . $name . '</label>';
+		return '<label for="' . $name .'">' . ucfirst($name) . '</label>';
 	}
 
 	public function row($name) {
