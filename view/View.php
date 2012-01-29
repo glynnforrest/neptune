@@ -47,6 +47,7 @@ class View {
 		foreach ($values as $k => $v) {
 			$this->vars[$k] = $v;
 		}
+		return $this;
 	}
 
 	public function getVars() {
