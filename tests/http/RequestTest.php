@@ -16,48 +16,69 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		$this->request = Request::getInstance();
 	}
 
+	protected function reset() {
+		$this->request->reset();
+	}
+
 	public function testUri() {
 		$this->assertNull($this->request->uri());
 		$_SERVER['REQUEST_URI'] = 'test';
 		$this->assertEquals('test', $this->request->uri());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.xml';
 		$this->assertEquals('test.xml', $this->request->uri());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test?foo=bar';
 		$this->assertEquals('test', $this->request->uri());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test?foo=b.ar';
 		$this->assertEquals('test', $this->request->uri());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.xml?foo=bar';
 		$this->assertEquals('test.xml', $this->request->uri());
+		$this->reset();
 	}
 
 	public function testFormat() {
 		$_SERVER['REQUEST_URI'] = 'test';
 		$this->assertEquals('html', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.json';
 		$this->assertEquals('json', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 't.e.s.t.json';
 		$this->assertEquals('json', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test?foo=bar';
 		$this->assertEquals('html', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.xml?foo=bar';
 		$this->assertEquals('xml', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.csv?foo=b?ar';
 		$this->assertEquals('csv', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.htm?foo=b.ar';
 		$this->assertEquals('htm', $this->request->format());
+		$this->reset();
 	}
 
 	public function testPath() {
 		$_SERVER['REQUEST_URI'] = 'test';
 		$this->assertEquals('test', $this->request->path());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.xml';
 		$this->assertEquals('test', $this->request->path());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test?foo=bar';
 		$this->assertEquals('test', $this->request->path());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.xml?foo=bar';
 		$this->assertEquals('test', $this->request->path());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.again.and.again.xml?f00=ok';
 		$this->assertEquals('test.again.and.again', $this->request->path());
+		$this->reset();
 	}
 
 	public function testGet() {

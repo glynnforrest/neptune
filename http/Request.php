@@ -23,6 +23,12 @@ class Request {
 	protected function __construct() { 
 	}
 
+	public function resetStoredVars() {
+		$this->path = null;
+		$this->uri = null;
+		$this->format = null;
+	}
+
 	public function path() {
 		if($this->path) {
 			return $this->path;
@@ -61,14 +67,19 @@ class Request {
 	}
 
 	public function format() {
+		if($this->format) {
+			return $this->format;
+		}
 		$format = self::uri();
 		if ($format) {
 			$dot = strrpos($format, '.');
 			if ($dot) {
 				$format = substr($format, $dot + 1);
+				$this->format = $format;
 				return $format;
 			}
 		}
+		$this->format = 'html';
 		return 'html';
 	}
 
