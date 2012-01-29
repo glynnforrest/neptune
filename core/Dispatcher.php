@@ -28,9 +28,11 @@ class Dispatcher {
 	protected $names = array();
 	protected $globals = array();
 	protected $pointer = 0;
+	protected $request;
 
 	protected function __construct() {
-
+		$this->request = Request::getInstance();
+		$this->response = Response::getInstance();
 	}
 
 	public static function getInstance() {
@@ -109,24 +111,24 @@ class Dispatcher {
 	 */
 	protected function testRoute($rule) {
 		//Check if the regex matches.
-		if (!preg_match($rule['regex'], Request::path(), $vars)) {
+		if (!preg_match($rule['regex'], $this->request->path(), $vars)) {
 			return false;
 		}
 		//Check if the request method is supported by this route.
 		if ($rule['method']) {
-			if (!in_array(strtoupper(Request::method()), $rule['method'])) {
+			if (!in_array(strtoupper($this->request->method()), $rule['method'])) {
 				return false;
 			}
 		}
 		//Check if the format requested is supported by this route.
 		if ($rule['format']) {
-			if (!in_array(Request::format(), $rule['format'])) {
+			if (!in_array($this->request->format(), $rule['format'])) {
 				if (!in_array('any', $rule['format'])) {
 					return false;
 				}
 			}
 		} else {
-			if (Request::format() !== 'html') {
+			if ($this->request->format() !== 'html') {
 				return false;
 			}
 		}
@@ -248,7 +250,7 @@ class Dispatcher {
 	protected function getAllowedResponseFormat() {
 		if ($this->routes[$this->pointer - 1]['format']) {
 			if (!$this->routes[$this->pointer - 1]['catchAll']) {
-				return Request::format();
+				return $this->request->format();
 			}
 		}
 		return 'html';
@@ -267,10 +269,10 @@ class Dispatcher {
 				}
 				$other = ob_get_clean();
 				restore_error_handler();
-				if (!Response::getFormat()) {
-					Response::format($this->getAllowedResponseFormat());
+				if (!$this->response->getFormat()) {
+					$this->response->format($this->getAllowedResponseFormat());
 				}
-				Response::sendHeaders();
+				$this->response->sendHeaders();
 				if ($this->routes[$this->pointer - 1]['format']) {
 					if(!$this->formatBody($body)) {
 						echo $other;
@@ -278,8 +280,8 @@ class Dispatcher {
 				} else {
 					echo $other;
 				}
-				Response::body($body);
-				Response::send();
+				$this->response->body($body);
+				$this->response->send();
 			} catch (MethodNotFoundException $e) {
 				restore_error_handler();
 				return false;
@@ -295,14 +297,14 @@ class Dispatcher {
 
 	protected function formatBody(&$body) {
 		if($body instanceof View) {
-			$view = 'neptune\\view\\' . ucfirst(Response::getFormat()) . 'View';
+			$view = 'neptune\\view\\' . ucfirst($this->response->getFormat()) . 'View';
 			if(get_class($body) !== $view) {
 				if (Loader::softLoad($view)) {
 					$body = $view::load(null, $body->getVars());
 				}
 			}
 		} else {
-			$view = 'neptune\\view\\' . ucfirst(Response::getFormat()) . 'View';
+			$view = 'neptune\\view\\' . ucfirst($this->response->getFormat()) . 'View';
 			if (Loader::softLoad($view)) {
 				$body = $view::load(null, array($body));
 			} else {

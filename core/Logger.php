@@ -71,7 +71,7 @@ class Logger {
 		$log = str_replace(':date', date('d/m/y'), $log);
 		$log = str_replace(':time', date('H:i:s'), $log);
 		$log = str_replace(':type', $type, $log);
-		$log = str_replace(':ip', Request::ip(), $log);
+		$log = str_replace(':ip', Request::getInstance()->ip(), $log);
 		return $log;
 	}
 
