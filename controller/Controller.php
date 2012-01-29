@@ -22,6 +22,10 @@ abstract class Controller {
 	public function __construct() {
 		$this->request = Request::getInstance();
 		$this->response = Response::getInstance();
+		try {
+			$this->_before();
+		} catch (MethodNotFoundException $e) {
+		}
 	}
 
 	public function callHidden($method, $args) {
