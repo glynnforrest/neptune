@@ -10,9 +10,8 @@ namespace neptune\validate;
 use neptune\database\DBObject;
 use neptune\helpers\String;
 use neptune\http\Session;
-use neptune\system\ArrayDataSource;
 
-class Validator implements ArrayDataSource {
+class Validator {
 
 	protected $input_array;
 	protected $fails = array();

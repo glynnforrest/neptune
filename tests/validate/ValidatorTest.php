@@ -4,8 +4,6 @@ namespace neptune\validate;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
-use neptune\system\ArrayDataSource;
-
 /**
  * ValidatorTest
  * @author Glynn Forrest <me@glynnforrest.com>
@@ -211,11 +209,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($v->validate());
 	}
 
-	public function testArrayDataSource() {
-		$v = new Validator(array('one' => 1));
-		$this->assertTrue($v instanceof ArrayDataSource);
-		$this->assertEquals(array('one' => 1), $v->getValues());
-	}
 }
 
 ?>

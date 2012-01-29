@@ -8,7 +8,6 @@ use neptune\database\DBObject;
 use neptune\database\DBObjectSet;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
-use neptune\system\ArrayDataSource;
 use neptune\exceptions\TypeException;
 
 /**
@@ -58,13 +57,7 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public static function createOneFrom($data, $database = false) {
-		if($data instanceof ArrayDataSource) {
-			$data = $data->getValues();
-		}
-		if(!is_array($data)) {
-			throw new TypeException('Data supplied to createOneFrom must be
-				either an array or an instance of ArrayDataSource.');
-		}
+		$data = (array) $data;
 		$me = self::getInstance($database);
 		$obj = new DBObject($database, $me->table);
 		$me->applyMappings($obj);
