@@ -112,5 +112,12 @@ END;
 		$this->assertEquals(Html::input('password', 'pass', 'secret'), $v->input('pass'));
 	}
 
+	public function testRowUndefinedVar() {
+		$v = Form::create('/url');
+		$this->assertNull($v->row('name'));
+		$v->name = 'value';
+		$this->assertEquals(Html::input('text', 'name', 'value'), $v->input('name'));
+	}
+
 }
 ?>

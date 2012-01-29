@@ -84,6 +84,9 @@ class Form extends View {
 	}
 
 	public function row($name) {
+		if(!array_key_exists($name, $this->vars)) {
+			return null;
+		}
 		$type = isset($this->types[$name]) ? $this->types[$name] : null;
 		if($type) {
 			if($type == 'hidden' ) {
