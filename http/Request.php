@@ -33,12 +33,16 @@ class Request {
 	}
 
 	public function uri() {
+		if($this->uri) {
+			return $this->uri;
+		}
 		if (isset($_SERVER['REQUEST_URI'])) {
 			$uri = $_SERVER['REQUEST_URI'];
 			$mark = strpos($_SERVER['REQUEST_URI'], '?');
 			if ($mark) {
 				$uri = substr($uri, 0, $mark);
 			}
+			$this->uri = $uri;
 			return $uri;
 		}
 		return null;
