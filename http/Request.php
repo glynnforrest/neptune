@@ -8,7 +8,22 @@ namespace neptune\http;
  */
 class Request {
 
-	public static function path() {
+	protected static $instance;
+	protected $path;
+	protected $uri;
+	protected $format;
+
+	public static function getInstance() {
+		if(!self::$instance) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	protected function __construct() { 
+	}
+
+	public function path() {
 		$path = self::uri();
 		$dot = strrpos($path, '.');
 		if ($dot) {
@@ -17,7 +32,7 @@ class Request {
 		return $path;
 	}
 
-	public static function uri() {
+	public function uri() {
 		if (isset($_SERVER['REQUEST_URI'])) {
 			$uri = $_SERVER['REQUEST_URI'];
 			$mark = strpos($_SERVER['REQUEST_URI'], '?');
@@ -29,15 +44,15 @@ class Request {
 		return null;
 	}
 
-	public static function ip() {
+	public function ip() {
 		return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
 	}
 
-	public static function method() {
+	public function method() {
 		return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
 	}
 
-	public static function format() {
+	public function format() {
 		$format = self::uri();
 		if ($format) {
 			$dot = strrpos($format, '.');
@@ -49,7 +64,7 @@ class Request {
 		return 'html';
 	}
 
-	public static function get($key = null) {
+	public function get($key = null) {
 		if (!$key) {
 			return $_GET;
 		}
