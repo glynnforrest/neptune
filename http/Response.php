@@ -10,10 +10,11 @@ use neptune\helpers\Url;
  */
 class Response {
 
-	protected static $headers = array();
-	protected static $body;
-	protected static $status_code = 200;
-	protected static $status_codes = array(
+	protected static $instance;
+	protected $headers = array();
+	protected $body;
+	protected $status_code = 200;
+	protected $status_codes = array(
 		 100 => 'Continue',
 		 101 => 'Switching Protocols',
 		 102 => 'Processing',
@@ -63,54 +64,64 @@ class Response {
 		 507 => 'Insufficient Storage',
 		 509 => 'Bandwidth Limit Exceeded'
 	);
-	protected static $format;
-	protected static $formats = array(
+	protected $format;
+	protected $formats = array(
 		 'html' => 'text/html',
 		 'xml' => 'text/xml',
 		 'json' => 'application/json',
 		 'txt' => 'text/plain'
 	);
 
-	public static function body($body) {
-		self::$body = $body;
+	public static function getInstance() {
+		if(!self::$instance) {
+			self::$instance = new self();
+		}
+		return self::$instance;
 	}
 
-	public static function header($name, $value) {
-		self::$headers[$name] = $value;
+	protected function __construct() { 
 	}
 
-	public static function format($format) {
-		self::$format = $format;
+	public function body($body) {
+		$this->body = $body;
 	}
 
-	public static function getFormat() {
-		return self::$format;
+	public function header($name, $value) {
+		$this->headers[$name] = $value;
 	}
 
-	public static function sendHeaders() {
+	public function format($format) {
+		$this->format = $format;
+	}
+
+	public function getFormat() {
+		return $this->format;
+	}
+
+	public function sendHeaders() {
 		if (!headers_sent()) {
-			header('HTTP/1.1 ' . self::$status_code . ' ' . self::$status_codes[self::$status_code]);
-			if (array_key_exists(self::$format, self::$formats)) {
-				self::header('Content-Type', self::$formats[self::$format]);
+			header('HTTP/1.1 ' . $this->status_code . ' ' . $this->status_codes[$this->status_code]);
+			if (array_key_exists($this->format, $this->formats)) {
+				$this->header('Content-Type', $this->formats[$this->format]);
 			} else {
-				self::header('Content-Type', self::$format);
+				$this->header('Content-Type', $this->format);
 			}
-			foreach (self::$headers as $key => $value) {
+			foreach ($this->headers as $key => $value) {
 				header($key . ': ' . $value);
 			}
 		}
 	}
 
-	public static function send() {
-		self::sendHeaders();
-		echo self::$body;
+	public function send() {
+		$this->sendHeaders();
+		echo $this->body;
 	}
 
-	public static function redirect($url, $protocol = 'http') {
+	public function redirect($url, $protocol = 'http') {
 		$url = Url::to($url, $protocol);
-		self::$status_code = 302;
-		self::header('Location', $url);
-		self::sendHeaders();
+		$this->status_code = 302;
+		$this->header('Location', $url);
+		$this->sendHeaders();
 		exit();
 	}
 
