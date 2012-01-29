@@ -24,11 +24,15 @@ class Request {
 	}
 
 	public function path() {
+		if($this->path) {
+			return $this->path;
+		}
 		$path = self::uri();
 		$dot = strrpos($path, '.');
 		if ($dot) {
 			$path = substr($path, 0, $dot);
 		}
+		$this->path = $path;
 		return $path;
 	}
 
