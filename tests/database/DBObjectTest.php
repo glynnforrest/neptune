@@ -96,7 +96,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (id, column) VALUES (1, value)', 
+		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (1, value)', 
 		DatabaseFactory::getDatabase('db')->getExecutedQuery());
 	}
 
@@ -106,7 +106,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->setPrimaryKey('id');
 		$d->column = 'changed';
 		$d->save();
-		$this->assertEquals('UPDATE table SET column = changed WHERE id = 1',
+		$this->assertEquals('UPDATE table SET `column` = changed WHERE id = 1',
 		DatabaseFactory::getDatabase('db')->getExecutedQuery());
 	}
 
@@ -159,7 +159,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'changed';
 		$d->id = 2;
 		$d->save();
-		$this->assertEquals('UPDATE table SET column = changed, id = 2 WHERE id = 1',
+		$this->assertEquals('UPDATE table SET `column` = changed, `id` = 2 WHERE id = 1',
 		DatabaseFactory::getDatabase('db')->getExecutedQuery());
 	}
 
@@ -171,7 +171,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 3;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (id, column) VALUES (3, value)', 
+		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (3, value)', 
 		DatabaseFactory::getDatabase('db')->getExecutedQuery());
 	}
 
