@@ -17,7 +17,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	protected function reset() {
-		$this->request->reset();
+		$this->request->resetStoredVars();
 	}
 
 	public function testUri() {
