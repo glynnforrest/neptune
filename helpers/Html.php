@@ -41,12 +41,35 @@ class Html {
 		return '<' . $tag . self::options($options) . '>';
 	}
 
+	public static function closeTag($tag) {
+		return '</' . $tag . '>';
+	}
+
 	public static function input($type, $name, $value = null, $options = array()) {
 		if($type === 'password') {
 			$value = null;
 		}
 		return '<input type="'. $type . '" name="' . $name . '" value="' .
 			$value . '"' . self::options($options) . '/>';
+	}
+
+	public static function select($name, $values, $selected = null, $options = array()) {
+		$options['name'] = $name;
+		$text = self::openTag('select', $options);
+		foreach($values as $k => $v) {
+			if(is_numeric($k)) {
+				$k = $v;
+			}
+			if($v === $selected) {
+				$text .= self::openTag('option', array('value' => $v, 'selected'));
+			} else {
+				$text .= self::openTag('option', array('value' => $v));
+			}
+			$text .= $k .  self::closeTag('option');
+		}
+		$text .= self::closeTag('select');
+		return $text;
+
 	}
 
 
