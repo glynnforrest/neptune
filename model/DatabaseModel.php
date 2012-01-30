@@ -155,6 +155,10 @@ class DatabaseModel extends Cacheable {
 		$this->database = $database;
 	}
 
+	public function getFields() {
+		return $this->fields;
+	}
+
 	public static function bindValidation($names, $input_array = 'POST') {
 		if (!is_array($names)) {
 			$names = array($names);
