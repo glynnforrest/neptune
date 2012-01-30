@@ -15,6 +15,7 @@ class Form extends View {
 	protected $types = array();
 	protected $options = array();
 	protected $row_string = '<li>:label:input:error</li>';
+	protected $selected = array();
 	//todo add strings for each.
 
 	public static function loadAbsolute($view, $values = array(), $errors = array()) {
@@ -67,11 +68,21 @@ class Form extends View {
 		}
 	}
 
+	public function createFields($list = array()) {
+		foreach ($list as $item) {
+			$this->vars[$item] = null;
+		}
+	}
+
 	public function input($name) {
 		$value = isset($this->vars[$name]) ? $this->vars[$name] : null;
 		$type = isset($this->types[$name]) ? $this->types[$name] : 'text';
 		$options = isset($this->options[$name]) ? $this->options[$name] :
 			array();
+		if(is_array($value)) {
+			$selected = isset($this->selected[$name]) ? $this->selected[$name] : null;
+			return Html::select($name, $value, $selected, $options);
+		}
 		return Html::input($type, $name, $value, $options);
 	}
 
@@ -113,6 +124,10 @@ class Form extends View {
 
 	public function setOptions($name, $options) {
 		$this->options[$name] = $options;
+	}
+
+	public function setSelected($name, $selected) {
+		$this->selected[$name] = $selected;
 	}
 
 }
