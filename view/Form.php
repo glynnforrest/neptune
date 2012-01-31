@@ -60,7 +60,7 @@ class Form extends View {
 		$this->header = array($action, $method, $options);
 	}
 
-	public function add($type, $name, $value = null, $options = array()) {
+	public function add($name, $type, $value = null, $options = array()) {
 		$this->types[$name] = $type; 
 		$this->vars[$name] = $value;
 		if($options) {

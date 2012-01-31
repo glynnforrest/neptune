@@ -40,13 +40,13 @@ END;
 
 	public function testRowHiddenField() {
 		$v = Form::create('url');
-		$v->add('hidden', 'name');
+		$v->add('name', 'hidden');
 		$this->assertEquals(Html::input('hidden', 'name'), $v->row('name'));
 	}
 
 	public function testCreateSimpleForm() {
 		$v = Form::create('/post/url');
-		$v->add('text', 'name');
+		$v->add('name', 'text');
 		$expected = Html::openTag('form', array('action' => '/post/url', 'method' => 'post'));
 		$expected .= '<ul><li><label for="name">Name</label>';
 		$expected .= Html::input('text', 'name');
