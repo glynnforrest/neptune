@@ -167,7 +167,7 @@ class DatabaseModel extends Cacheable {
 		return $v;
 	}
 
-	public static function buildForm($action, $method = 'POST', $values = array(), $errors = array()) {
+	public static function buildForm($action, $values = array(), $errors = array(), $method = 'POST') {
 		$me = self::getInstance();
 		$f = Form::create($action, $method);
 		foreach($me->fields as $field) {
