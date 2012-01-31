@@ -49,15 +49,7 @@ class DatabaseModel extends Cacheable {
 	 * @param string $database
 	 * @return DBObject
 	 */
-	public static function createOne($database = false) {
-		$me = self::getInstance($database);
-		$obj = new DBObject($database, $me->table);
-		$me->applyMappings($obj);
-		return $obj;
-	}
-
-	public static function createOneFrom($data, $database = false) {
-		$data = (array) $data;
+	public static function createOne($data = array(), $database = false) {
 		$me = self::getInstance($database);
 		$obj = new DBObject($database, $me->table);
 		$me->applyMappings($obj);
