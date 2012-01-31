@@ -9,6 +9,7 @@ use neptune\database\DBObjectSet;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
 use neptune\exceptions\TypeException;
+use neptune\view\Form;
 
 /**
  * DatabaseModel
@@ -164,6 +165,19 @@ class DatabaseModel extends Cacheable {
 		}
 		$v = new Validator($input_array, $rules, $me->messages);
 		return $v;
+	}
+
+	public static function buildForm($action, $method = 'POST', $values = array(), $errors = array()) {
+		$me = self::getInstance();
+		$f = Form::create($action, $method);
+		foreach($me->fields as $field) {
+			$f->add($field, 'text');
+		}
+		$f->add('submit', 'submit', 'Submit');
+		$f->setType($me->primary_key, 'hidden');
+		$f->set($values);
+		$f->addErrors($errors);
+		return $f;
 	}
 
 }
