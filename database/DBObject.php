@@ -72,6 +72,13 @@ class DBObject {
 		}		
 	}
 
+	public function setValues($values = array(), $overwrite = true) {
+		foreach ($values as $k => $v) {
+			$this->set($k, $v, $overwrite);
+		}
+		return $this;
+	}
+
 	public function __isset($key) {
 		return isset($this->values[$key]);
 	}
@@ -102,6 +109,28 @@ class DBObject {
 		} else {
 			return $this->insert();
 		}
+	}
+
+	public function delete() {
+		if (!isset($this->primary_key)) {
+			throw new \Exception('Can\'t update with no index key');
+		}
+		$q = SQLQuery::delete($this->database);
+		$q->from($this->table);
+		if (!isset($this->values[$this->primary_key])) {
+			throw new \Exception('Can\'t update with no index key');
+		}
+		$q->where("$this->primary_key =", '?');
+		$stmt = $q->prepare();
+		if($this->current_index) {
+			$index = $this->current_index;
+		} else {
+			$index = $this->values[$this->primary_key];
+		}
+		if ($stmt->execute(array($index))) {
+			return true;
+		}
+		return false;
 	}
 
 	protected function update() {
