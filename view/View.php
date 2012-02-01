@@ -70,6 +70,14 @@ class View {
 		return $me;
 	}
 
+	public function setView($view, $absolute = false) {
+		$view = $view . self::EXTENSION;
+		if(!$absolute) {
+			$view = Config::getRequired('view_dir') . $view;
+		}
+		$this->file = $view;
+	}
+
 	public function render() {
 		if (!file_exists($this->file)) {
 			throw new ViewNotFoundException("Could not load view file $this->file");
