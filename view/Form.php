@@ -24,15 +24,19 @@ class Form extends View {
 		return $me;
 	}
 
-	public static function load($view, $values = array(), $errors = array()) {
+	public static function load($view, $values = array(), $errors = array(),
+		$action = null) {
 		$me = parent::load($view, $values);
 		$me->addErrors($errors);
+		if($action) {
+			$me->header[0] = $action;
+		}
 		return $me;
 	}
 
 	public static function create($action, $method = 'post', $options = array()) {
 		$form = new self();
-		$form->header($action, $method, $options);
+		$form->setHeader($action, $method, $options);
 		return $form;
 	}
 
@@ -40,10 +44,11 @@ class Form extends View {
 		if(isset($this->file)) {
 			return parent::render();
 		}
-		$options = $this->header[2];
-		$options['action'] = $this->header[0];
-		$options['method'] = $this->header[1];
-		$form = Html::openTag('form', $options);
+		return $this->renderForm();
+	}
+
+	public function renderForm() {
+		$form = $this->header();
 		$form .= '<ul>';
 		foreach($this->vars as $k => $v) {
 			$form .= $this->row($k);
@@ -56,7 +61,7 @@ class Form extends View {
 		$this->errors = $errors;
 	}
 
-	public function header($action, $method = 'post', $options = array()) {
+	public function setHeader($action, $method = 'post', $options = array()) {
 		$this->header = array($action, $method, $options);
 	}
 
@@ -72,6 +77,13 @@ class Form extends View {
 		foreach ($list as $item) {
 			$this->vars[$item] = null;
 		}
+	}
+
+	public function header() {
+		$options = $this->header[2];
+		$options['action'] = $this->header[0];
+		$options['method'] = $this->header[1];
+		return Html::openTag('form', $options);
 	}
 
 	public function input($name) {
