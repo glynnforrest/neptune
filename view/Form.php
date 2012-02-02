@@ -47,6 +47,22 @@ class Form extends View {
 		return $this->renderForm();
 	}
 
+	public function __set($name, $value) {
+		if(array_key_exists($name, $this->vars)) {
+			$this->vars[$name] = $value;
+		}
+		return $this;
+	}
+
+	public function set(array $values=array(), $create_fields = false) {
+		foreach ($values as $k => $v) {
+			if ($create_fields || array_key_exists($k, $this->vars)) {
+				$this->vars[$k] = $v;
+			}
+		}
+		return $this;
+	}
+
 	public function renderForm() {
 		$form = $this->header();
 		$form .= '<ul>';
@@ -59,24 +75,28 @@ class Form extends View {
 
 	public function addErrors($errors) {
 		$this->errors = $errors;
+		return $this;
 	}
 
 	public function setHeader($action, $method = 'post', $options = array()) {
 		$this->header = array($action, $method, $options);
+		return $this;
 	}
 
-	public function add($name, $type, $value = null, $options = array()) {
+	public function add($name, $type = 'text', $value = null, $options = array()) {
 		$this->types[$name] = $type; 
 		$this->vars[$name] = $value;
 		if($options) {
 			$this->options[$name] = $options; 
 		}
+		return $this;
 	}
 
 	public function createFields($list = array()) {
 		foreach ($list as $item) {
 			$this->vars[$item] = null;
 		}
+		return $this;
 	}
 
 	public function header() {
@@ -132,14 +152,17 @@ class Form extends View {
 
 	public function setType($name, $type) {
 		$this->types[$name] = $type;
+		return $this;
 	}
 
 	public function setOptions($name, $options) {
 		$this->options[$name] = $options;
+		return $this;
 	}
 
 	public function setSelected($name, $selected) {
 		$this->selected[$name] = $selected;
+		return $this;
 	}
 
 }

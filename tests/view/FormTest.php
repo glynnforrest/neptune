@@ -57,6 +57,7 @@ END;
 
 	public function testSetAndGet() {
 		$v = Form::create('some/url');
+		$v->createFields(array('key', 'arr', 'obj'));
 		$v->key = 'value';
 		$this->assertEquals('value', $v->key);
 		$v->arr = array();
@@ -66,9 +67,27 @@ END;
 		$this->assertEquals($obj, $v->obj);
 	}
 
+	public function test__SetOnlyWorksWhenFieldDefined() {
+		$v = Form::create('/url');
+		$v->field = 'value';
+		$this->assertNull($v->field);
+		$v->add('field');
+		$v->field = 'value';
+		$this->assertEquals('value', $v->field);
+	}
+
+	public function testSetOnlyWorksWhenFieldDefined() {
+		$v = Form::create('/url');
+		$v->set(array('field' => 'value'));
+		$this->assertNull($v->field);
+		$v->add('field');
+		$v->set(array('field' => 'value'));
+		$this->assertEquals('value', $v->field);
+	}
+
 	public function testIsset() {
 		$v = Form::create('/url');
-		$v->set = 'value';
+		$v->add('set', 'text', 'value');
 		$this->assertTrue(isset($v->set));
 		$this->assertFalse(isset($v->unset));
 	}
@@ -86,14 +105,15 @@ END;
 
 	public function testFormVarIsNotOverridden() {
 		$v = Form::loadAbsolute(self::view);
-		$v->file = 'foo';
+		$v->add('file', 'text', 'foo');
 		$this->assertEquals('foo', $v->file);
 		$this->assertEquals('testing', $v->render());
 	}
 
 	public function testCreateFromArray() {
 		$values = array('name' => 'foo', 'age' => 100);
-		$v = Form::create('/url')->set($values);
+		$v = Form::create('/url');
+		$v->set($values, true);
 		$expected = Html::openTag('form', array('action' => '/url', 'method' => 'post'));
 		$expected .= '<ul><li><label for="name">Name</label>';
 		$expected .= Html::input('text', 'name', 'foo');
@@ -115,7 +135,7 @@ END;
 	public function testRowUndefinedVar() {
 		$v = Form::create('/url');
 		$this->assertNull($v->row('name'));
-		$v->name = 'value';
+		$v->add('name', 'text', 'value');
 		$this->assertEquals(Html::input('text', 'name', 'value'), $v->input('name'));
 	}
 
