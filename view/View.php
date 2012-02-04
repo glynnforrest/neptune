@@ -50,7 +50,7 @@ class View {
 		return $this;
 	}
 
-	public function getVars() {
+	public function getValues() {
 		return $this->vars;
 	}
 

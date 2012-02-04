@@ -300,7 +300,7 @@ class Dispatcher {
 			$view = 'neptune\\view\\' . ucfirst($this->response->getFormat()) . 'View';
 			if(get_class($body) !== $view) {
 				if (Loader::softLoad($view)) {
-					$body = $view::load(null, $body->getVars());
+					$body = $view::load(null, $body->getValues());
 				}
 			}
 		} else {
