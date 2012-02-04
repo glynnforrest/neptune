@@ -26,7 +26,8 @@ class Form extends View {
 
 	public static function load($view, $values = array(), $errors = array(),
 		$action = null) {
-		$me = parent::load($view, $values);
+		$me = parent::load($view);
+		$me->set($values, true);
 		$me->addErrors($errors);
 		if($action) {
 			$me->header[0] = $action;
