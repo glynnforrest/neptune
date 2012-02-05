@@ -11,6 +11,7 @@ use neptune\helpers\Html;
 class Form extends View {
 
 	protected $header;
+	protected $fields = array();
 	protected $errors = array();
 	protected $types = array();
 	protected $options = array();
@@ -19,7 +20,8 @@ class Form extends View {
 	//todo add strings for each.
 
 	public static function loadAbsolute($view, $values = array(), $errors = array()) {
-		$me = parent::loadAbsolute($view, $values);
+		$me = parent::loadAbsolute($view);
+		$me->set($values, true);
 		$me->addErrors($errors);
 		return $me;
 	}
@@ -48,17 +50,13 @@ class Form extends View {
 		return $this->renderForm();
 	}
 
-	public function __set($name, $value) {
-		if(array_key_exists($name, $this->vars)) {
-			$this->vars[$name] = $value;
-		}
-		return $this;
-	}
-
 	public function set(array $values=array(), $create_fields = false) {
 		foreach ($values as $k => $v) {
-			if ($create_fields || array_key_exists($k, $this->vars)) {
+			if ($create_fields || in_array($k, $this->fields)) {
 				$this->vars[$k] = $v;
+				if(!in_array($k, $this->fields)) {
+					$this->fields[] = $k;
+				}
 			}
 		}
 		return $this;
@@ -87,6 +85,7 @@ class Form extends View {
 	public function add($name, $type = 'text', $value = null, $options = array()) {
 		$this->types[$name] = $type; 
 		$this->vars[$name] = $value;
+		$this->fields[] = $name;
 		if($options) {
 			$this->options[$name] = $options; 
 		}
@@ -108,6 +107,9 @@ class Form extends View {
 	}
 
 	public function input($name) {
+		if(!in_array($name, $this->fields)) {
+			return null;
+		}
 		$value = isset($this->vars[$name]) ? $this->vars[$name] : null;
 		$type = isset($this->types[$name]) ? $this->types[$name] : 'text';
 		$options = isset($this->options[$name]) ? $this->options[$name] :
@@ -128,7 +130,7 @@ class Form extends View {
 	}
 
 	public function row($name) {
-		if(!array_key_exists($name, $this->vars)) {
+		if(!in_array($name, $this->fields)) {
 			return null;
 		}
 		$type = isset($this->types[$name]) ? $this->types[$name] : null;

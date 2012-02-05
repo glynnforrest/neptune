@@ -57,7 +57,6 @@ END;
 
 	public function testSetAndGet() {
 		$v = Form::create('some/url');
-		$v->createFields(array('key', 'arr', 'obj'));
 		$v->key = 'value';
 		$this->assertEquals('value', $v->key);
 		$v->arr = array();
@@ -67,22 +66,12 @@ END;
 		$this->assertEquals($obj, $v->obj);
 	}
 
-	public function test__SetOnlyWorksWhenFieldDefined() {
+	public function testOnlyFieldsRendered() {
 		$v = Form::create('/url');
-		$v->field = 'value';
-		$this->assertNull($v->field);
-		$v->add('field');
-		$v->field = 'value';
-		$this->assertEquals('value', $v->field);
-	}
-
-	public function testSetOnlyWorksWhenFieldDefined() {
-		$v = Form::create('/url');
-		$v->set(array('field' => 'value'));
-		$this->assertNull($v->field);
-		$v->add('field');
-		$v->set(array('field' => 'value'));
-		$this->assertEquals('value', $v->field);
+		$v->add('name');
+		$this->assertEquals(Html::input('text', 'name'), $v->input('name'));
+		$v->var = 'hello';
+		$this->assertNull($v->input('var'));
 	}
 
 	public function testIsset() {
