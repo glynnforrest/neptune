@@ -203,6 +203,11 @@ class Validator {
 		return $errors;
 	}
 
+	public function setError($name, $message) {
+		$this->errors[$name] = $message;
+		$this->can_fail[] = $name;
+	}
+
 	protected function checkRequired($value) {
 		$v = is_array($value) ? $value : trim($value);
 		if (empty($v) && !is_numeric($v)) {
