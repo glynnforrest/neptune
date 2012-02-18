@@ -69,7 +69,8 @@ class Response {
 		 'html' => 'text/html',
 		 'xml' => 'text/xml',
 		 'json' => 'application/json',
-		 'txt' => 'text/plain'
+		 'txt' => 'text/plain',
+		 'rss' => 'application/rss+xml'
 	);
 
 	public static function getInstance() {
