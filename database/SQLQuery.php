@@ -13,12 +13,10 @@ abstract class SQLQuery {
 
 	protected $query = array();
 	protected $type;
-	protected $types = array
-		('SELECT' => array('DISTINCT', 'FIELDS',
-			'FROM', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET'),
-		 'INSERT' => array('INTO', 'FIELDS'),
-		 'UPDATE' => array('TABLES', 'FIELDS', 'WHERE'),
-		 'DELETE' => array('FROM', 'WHERE'));
+	protected $select_verbs = array('DISTINCT', 'FIELDS', 'FROM', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET');
+	protected $insert_verbs = array('INTO', 'FIELDS');
+	protected $update_verbs = array('TABLES', 'FIELDS', 'WHERE');
+	protected $delete_verbs = array('FROM', 'WHERE');
 	protected $db;
 
 	protected function __construct($type, DatabaseDriver $db) {

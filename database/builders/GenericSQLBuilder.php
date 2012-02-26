@@ -15,9 +15,9 @@ class GenericSQLBuilder extends SQLQuery {
 		if (!isset($this->query['FIELDS'])) {
 			$query .= ' *';
 		}
-		foreach ($this->types['SELECT'] as $action) {
-			if (isset($this->query[$action])) {
-				switch ($action) {
+		foreach ($this->select_verbs as $verb) {
+			if (isset($this->query[$verb])) {
+				switch ($verb) {
 				case 'FROM':
 					$this->addFrom($query);
 					break;
@@ -39,7 +39,7 @@ class GenericSQLBuilder extends SQLQuery {
 					}
 					break;
 				default:
-					$query .= ' ' . $action . ' ' . $this->query[$action];
+					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 					break;
 				}
 			}
@@ -49,14 +49,14 @@ class GenericSQLBuilder extends SQLQuery {
 
 	protected function formatInsertString() {
 		$query = 'INSERT';
-		foreach ($this->types[$this->type] as $action) {
-			if (isset($this->query[$action])) {
-				switch ($action) {
+		foreach ($this->insert_verbs as $verb) {
+			if (isset($this->query[$verb])) {
+				switch ($verb) {
 				case 'FIELDS':
 					$this->addInsertFields($query);
 					break;
 				default:
-					$query .= ' ' . $action . ' ' . $this->query[$action];
+					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 				}
 			}
 		}
@@ -65,9 +65,9 @@ class GenericSQLBuilder extends SQLQuery {
 
 	protected function formatUpdateString() {
 		$query = 'UPDATE';
-		foreach ($this->types[$this->type] as $action) {
-			if (isset($this->query[$action])) {
-				switch ($action) {
+		foreach ($this->update_verbs as $verb) {
+			if (isset($this->query[$verb])) {
+				switch ($verb) {
 				case 'TABLES':
 					$this->addTables($query);
 					break;
@@ -78,7 +78,7 @@ class GenericSQLBuilder extends SQLQuery {
 					$this->addWhere($query);
 					break;
 				default:
-					$query .= ' ' . $action . ' ' . $this->query[$action];
+					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 				}
 			}
 		}
@@ -87,9 +87,9 @@ class GenericSQLBuilder extends SQLQuery {
 
 	protected function formatDeleteString() {
 		$query = 'DELETE';
-		foreach ($this->types['DELETE'] as $action) {
-			if (isset($this->query[$action])) {
-				switch ($action) {
+		foreach ($this->delete_verbs as $verb) {
+			if (isset($this->query[$verb])) {
+				switch ($verb) {
 				case 'FROM':
 					$this->addFrom($query);
 					break;
@@ -97,7 +97,7 @@ class GenericSQLBuilder extends SQLQuery {
 					$this->addWhere($query);
 					break;
 				default:
-					$query .= ' ' . $action . ' ' . $this->query[$action];
+					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 					break;
 				}
 			}
