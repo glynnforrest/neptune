@@ -192,7 +192,15 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 
 	public function testOffset() {
 		$q = SQLQuery::select();
-		$q->from('test')->limit(3)->offset(2);
+		$q->from('test')->offset(2)->limit(3);
+		$this->assertEquals('SELECT * FROM test LIMIT 3 OFFSET 2', $q->__toString());
+	}
+
+	public function testOffsetOnlyWhenLimitIsDefined() {
+		$q = SQLQuery::select();
+		$q->from('test')->offset(2);
+		$this->assertEquals('SELECT * FROM test', $q->__toString());
+		$q->limit(3);
 		$this->assertEquals('SELECT * FROM test LIMIT 3 OFFSET 2', $q->__toString());
 	}
 

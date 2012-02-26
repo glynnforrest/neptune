@@ -33,6 +33,11 @@ class GenericSQLBuilder extends SQLQuery {
 				case 'DISTINCT':
 					$this->addDistinct($query);
 					break;
+				case 'OFFSET':
+					if(isset($this->query['LIMIT'])) {
+						$query .= ' OFFSET ' . $this->query['OFFSET'];
+					}
+					break;
 				default:
 					$query .= ' ' . $action . ' ' . $this->query[$action];
 					break;
