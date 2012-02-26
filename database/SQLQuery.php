@@ -14,7 +14,8 @@ abstract class SQLQuery {
 	protected $query = array();
 	protected $type;
 	protected $types = array
-		 ('SELECT' => array('DISTINCT', 'FIELDS', 'FROM', 'WHERE', 'ORDER BY', 'LIMIT'),
+		('SELECT' => array('DISTINCT', 'FIELDS',
+			'FROM', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET'),
 		 'INSERT' => array('INTO', 'FIELDS'),
 		 'UPDATE' => array('TABLES', 'FIELDS', 'WHERE'),
 		 'DELETE' => array('FROM', 'WHERE'));
@@ -145,8 +146,14 @@ abstract class SQLQuery {
 		return $this;
 	}
 
+	//todo - maybe add second argument that calls offset
 	public function limit($int) {
 		$this->query['LIMIT'] = $int;
+		return $this;
+	}
+
+	public function offset($int) {
+		$this->query['OFFSET'] = $int;
 		return $this;
 	}
 

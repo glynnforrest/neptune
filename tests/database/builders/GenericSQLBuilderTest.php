@@ -190,6 +190,12 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('SELECT * FROM test LIMIT 3', $q->__toString());
 	}
 
+	public function testOffset() {
+		$q = SQLQuery::select();
+		$q->from('test')->limit(3)->offset(2);
+		$this->assertEquals('SELECT * FROM test LIMIT 3 OFFSET 2', $q->__toString());
+	}
+
 	public function testGetTables() {
 		$q = SQLQuery::select();
 		$q->from('test')->from('test2');
