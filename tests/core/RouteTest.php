@@ -40,7 +40,33 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test('..23sd'));
 	}
 
+	public function testControllerMatch() {
+		$r = new Route('/url/:controller');
+		$r->func('index');
+		$this->assertTrue($r->test('/url/foo'));
+		$this->assertEquals(array('foo', 'index', null), $r->getAction());
+	}
 
-	
+	public function testArgsExplicitMatch() {
+		$r = new Route('/url_with_args');
+		$r->controller('foo')->func('index')->args(array(1));
+		$this->assertTrue($r->test('/url_with_args'));
+		$this->assertEquals(array('foo', 'index', array(1)), $r->getAction());
+	}
+
+	public function testGetActionNullBeforeTest() {
+		$r = new Route('/hello', 'controller', 'function');
+		$this->assertNull($r->getAction());
+		$r->test('/fail');
+		$this->assertNull($r->getAction());
+		$r->test('/hello');
+		$this->assertNotNull($r->getAction());
+	}
+
+	public function testNamedArgs() {
+		$r = new Route('/args/:id');
+		$r->controller('controller')->func('function');
+	}
+
 }
 ?>

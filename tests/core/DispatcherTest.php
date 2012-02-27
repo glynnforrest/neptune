@@ -34,83 +34,6 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		Request::getInstance()->resetStoredVars();
 	}
 
-	public function testHomeRoute() {
-		$d = Dispatcher::getInstance();
-		$d->route('/', array(
-			 'controller' => 'test',
-			 'function' => 'foo'
-		));
-		$_SERVER['REQUEST_URI'] = '/';
-		$this->assertTrue($this->compare('test', 'foo', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/hi';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = ' / ';
-		$this->assertFalse($d->getNextAction());
-	}
-
-	public function testCatchAll() {
-		$d = Dispatcher::getInstance();
-		$d->catchAll('test');
-		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '';
-		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '5.*7';
-		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-	}
-
-	public function testExplicitMatch() {
-		$d = Dispatcher::getInstance();
-		$d->route('/hello', array(
-			 'controller' => 'hello',
-			 'function' => 'world'
-		));
-		$_SERVER['REQUEST_URI'] = '/hello';
-		$this->assertTrue($this->compare('hello', 'world', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/hel';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/helloagain';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/h/e/l/l/o';
-		$this->assertFalse($d->getNextAction());
-	}
-
-	public function testControllerMatch() {
-		$d = Dispatcher::getInstance();
-		$d->route('/test/:controller', array(
-			 'function' => 'index'
-		));
-		$d->route('/:controller', array(
-			 'function' => 'index'
-		));
-		$_SERVER['REQUEST_URI'] = '/test/test';
-		$this->assertTrue($this->compare('test', 'index', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/foo';
-		$this->assertTrue($this->compare('foo', 'index', array(), $d->getNextAction()));
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = '/testing/test';
-		$this->assertFalse($d->getNextAction());
-		$this->reset();
-		$_SERVER['REQUEST_URI'] = 'foo';
-		$this->assertFalse($d->getNextAction());
-	}
-
 	public function testGlobalsController() {
 		$d = Dispatcher::getInstance();
 		$d->globals(array(
@@ -128,17 +51,6 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->reset();
 		$_SERVER['REQUEST_URI'] = '/func';
 		$this->assertTrue($this->compare('default', 'testFunction', array(), $d->getNextAction()));
-	}
-
-	public function testArgsExplicitMatch() {
-		$d = Dispatcher::getInstance();
-		$d->route('/explicit', array(
-			 'controller' => 'foo',
-			 'function' => 'test',
-			 'args' => array('id' => 1)
-		));
-		$_SERVER['REQUEST_URI'] = '/explicit';
-		$this->assertTrue($this->compare('foo', 'test', array('id' => 1), $d->getNextAction()));
 	}
 
 	public function testNamedArgs() {
