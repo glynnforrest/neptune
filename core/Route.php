@@ -14,8 +14,8 @@ class Route {
 	const VARIABLE_PATTERN = '(?P<\1>[^/]+)';
 	const ARGS_PATTERN = '(?P<args>.+)';
 
-	protected $regex, $controller, $func, $method;
-	protected $format, $catchAll, $callHidden, $argsFormat, $url;
+	protected $regex, $controller, $method, $http_method;
+	protected $format, $catch_all, $call_hidden, $args_format, $url;
 	protected $args = array();
 	protected $transforms = array();
 	protected $rules = array();
@@ -23,10 +23,10 @@ class Route {
 	protected $request;
 	protected $passed;
 
-	public function __construct($regex, $controller = null, $func = null, $args = null) {
+	public function __construct($regex, $controller = null, $method = null, $args = null) {
 		$this->regex = $this->generateRegex($regex);
 		$this->controller = $controller;
-		$this->func = $func;
+		$this->method = $method;
 		$this->args = $args;
 		$this->request = Request::getInstance();
 	}
@@ -49,8 +49,8 @@ class Route {
 		return $this;
 	}
 
-	public function func($func) {
-		$this->func = $func;
+	public function method($method) {
+		$this->method = $method;
 		return $this;
 	}
 
@@ -59,8 +59,8 @@ class Route {
 		return $this;
 	}
 
-	public function method($method) {
-		$this->method = $method;
+	public function httpMethod($http_method) {
+		$this->http_method = $http_method;
 		return $this;
 	}
 
@@ -80,22 +80,22 @@ class Route {
 	}
 
 	public function defaults($defaults) {
-		$this->defaults = $defaults;
+		$this->defaults = (array) $defaults;
 		return $this;
 	}
 
-	public function catchAll($catchAll) {
-		$this->catchAll = $catchAll;
+	public function catchAll($catch_all) {
+		$this->catch_all = $catch_all;
 		return $this;
 	}
 
-	public function callHidden($callHidden) {
-		$this->callHidden = $callHidden;
+	public function callHidden($call_hidden) {
+		$this->call_hidden = $call_hidden;
 		return $this;
 	}
 
-	public function argsFormat($argsFormat) {
-		$this->argsFormat = $argsFormat;
+	public function argsFormat($args_format) {
+		$this->args_format = $args_format;
 		return $this;
 	}
 
@@ -109,8 +109,8 @@ class Route {
 			return false;
 		}
 		//Check if the request method is supported by this route.
-		if ($this->method) {
-			if (!in_array(strtoupper($this->request->method()), $this->method)) {
+		if ($this->http_method) {
+			if (!in_array(strtoupper($this->request->method()), $this->http_method)) {
 				return false;
 			}
 		}
@@ -130,11 +130,11 @@ class Route {
 		if (!isset($vars['controller'])) {
 			$vars['controller'] = $this->controller;
 		}
-		if (!isset($vars['func'])) {
-			$vars['func'] = $this->func;
+		if (!isset($vars['method'])) {
+			$vars['method'] = $this->method;
 		}
 		//should have a controller and function by now.
-		if (!$vars['controller'] | !$vars['func']) {
+		if (!$vars['controller'] | !$vars['method']) {
 			return false;
 		}
 		//process the transforms.
@@ -146,8 +146,8 @@ class Route {
 
 		$this->controller = $vars['controller'];
 		unset($vars['controller']);
-		$this->func = $vars['func'];
-		unset($vars['func']);
+		$this->method = $vars['method'];
+		unset($vars['method']);
 		//get args
 		$args = array();
 		//gather named variables from regex
@@ -158,7 +158,7 @@ class Route {
 			}
 		}
 		//add default variables if they don't exist.
-		foreach ($args as $name => $value) {
+		foreach ($this->defaults as $name => $value) {
 			if (!isset($args[$name])) {
 				$args[$name] = $value;
 			}
@@ -166,7 +166,7 @@ class Route {
 
 		//Gather numerically indexed args for auto rules
 		if (isset($vars['args'])) {
-			switch ($this->argsFormat) {
+			switch ($this->args_format) {
 			case self::ARGS_EXPLODE:
 				$vars['args'] = explode('/', $vars['args']);
 				foreach ($vars['args'] as $k => $v) {
@@ -186,12 +186,15 @@ class Route {
 			if (!$v->validate())
 				return false;
 		}
+		if(!empty($args)) {
+			$this->args = $args;
+		}
 		$this->passed = true;
 		return true;
 	}
 
 	public function getAction() {
-		return $this->passed ? array($this->controller, $this->func, $this->args) : null;
+		return $this->passed ? array($this->controller, $this->method, $this->args) : null;
 	}
 
 }

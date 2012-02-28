@@ -12,28 +12,6 @@ include dirname(__FILE__) . ('/../test_bootstrap.php');
  */
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
-	protected function compare($controller, $function, $args, $array) {
-		$expected = array('controller' => $controller,
-			 'function' => $function,
-			 'args' => $args);
-		return $expected == $array;
-	}
-
-	public function setUp() {
-		Dispatcher::getInstance()->resetPointer()->clearRoutes();
-		Request::getInstance()->resetStoredVars();
-	}
-
-	public function tearDown() {
-		Dispatcher::getInstance()->resetPointer()->clearRoutes();
-		Request::getInstance()->resetStoredVars();
-	}
-
-	protected function reset() {
-		Dispatcher::getInstance()->resetPointer();
-		Request::getInstance()->resetStoredVars();
-	}
-
 	public function testGlobalsController() {
 		$d = Dispatcher::getInstance();
 		$d->globals(array(
