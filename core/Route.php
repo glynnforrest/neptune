@@ -26,13 +26,12 @@ class Route {
 	protected $request;
 	protected $passed;
 
-	public function __construct($regex, $controller = null, $method = null, $args = null) {
-		$this->regex = $this->generateRegex($regex);
+	public function __construct($url, $controller = null, $method = null, $args = null) {
+		$this->url($url);
 		$this->controller = $controller;
 		$this->method = $method;
 		$this->args = $args;
 		$this->request = Request::getInstance();
-		$this->url = $regex;
 	}
 
 	protected function generateRegex($regex) {
@@ -43,6 +42,11 @@ class Route {
 		return '`^' . $regex . '$`';
 	}
 
+	public function url($url) {
+		$this->regex = $this->generateRegex($url);
+		$this->url = $url;
+		return $this;
+	}
 	public function controller($controller) {
 		$this->controller = $controller;
 		return $this;
