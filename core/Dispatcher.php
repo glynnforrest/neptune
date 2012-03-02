@@ -17,9 +17,6 @@ use neptune\exceptions\ArgumentMissingException;
  */
 class Dispatcher {
 
-	const ARGS_EXPLODE = 0;
-	const ARGS_SINGLE = 1;
-
 	protected static $instance;
 	protected $routes = array();
 	protected $names = array();
@@ -52,7 +49,7 @@ class Dispatcher {
 
 	public function catchAll($controller, $method ='index', $args = null) {
 		$url = '.*';
-		return $this->route($url, $controller, $method, $args);
+		return $this->route($url, $controller, $method, $args)->format('any');
 	}
 
 	public function clearRoutes() {
@@ -73,13 +70,11 @@ class Dispatcher {
 		foreach($this->routes as $k => $v) {
 			if($v->test($source)) {
 				$actions = $v->getAction();
-				$format = $v->getFormat();
-				if($this->runMethod($actions, $format)) {
+				if($this->runMethod($actions, $this->request->format())) {
 					//cache details for action as they were successful.
 					return true;
 				}
 			}
-
 		}
 		return false;
 	}
@@ -93,16 +88,7 @@ class Dispatcher {
 		}
 	}
 
-	protected function getAllowedResponseFormat() {
-		if ($this->routes[$this->pointer - 1]['format']) {
-			if (!$this->routes[$this->pointer - 1]['catchAll']) {
-				return $this->request->format();
-			}
-		}
-		return 'html';
-	}
-
-	protected function runMethod($actions, $format = 'html') {
+	protected function runMethod($actions, $format) {
 		if (Loader::softLoad($actions[0])) {
 			$c = new $actions[0]();
 			try {
@@ -116,16 +102,11 @@ class Dispatcher {
 				$other = ob_get_clean();
 				restore_error_handler();
 				if (!$this->response->getFormat()) {
-					$this->response->format('html');
+					$this->response->format($format);
 				}
 				$this->response->sendHeaders();
-				// if ($this->routes[$this->pointer - 1]['format']) {
-				// 	if(!$this->formatBody($body)) {
-				// 		echo $other;
-				// 	}
-				// } else {
-				// 	echo $other;
-				// }
+				echo $other;
+				$this->formatBody($body, $format);
 				$this->response->body($body);
 				$this->response->send();
 			} catch (MethodNotFoundException $e) {
@@ -141,16 +122,16 @@ class Dispatcher {
 		return false;
 	}
 
-	protected function formatBody(&$body) {
+	protected function formatBody(&$body, $format) {
 		if($body instanceof View) {
-			$view = 'neptune\\view\\' . ucfirst($this->response->getFormat()) . 'View';
+			$view = 'neptune\\view\\' . ucfirst($format) . 'View';
 			if(get_class($body) !== $view) {
 				if (Loader::softLoad($view)) {
 					$body = $view::load(null, $body->getValues());
 				}
 			}
 		} else {
-			$view = 'neptune\\view\\' . ucfirst($this->response->getFormat()) . 'View';
+			$view = 'neptune\\view\\' . ucfirst($format) . 'View';
 			if (Loader::softLoad($view)) {
 				$body = $view::load(null, array($body));
 			} else {

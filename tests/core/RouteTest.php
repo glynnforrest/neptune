@@ -161,6 +161,14 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($r->test('/foo'));
 	}
 
+	public function testHtmlFormatDefault() {
+		Request::getInstance()->setFormat('xml');
+		$r = new Route('/foo', 'test', 'foo');
+		$this->assertFalse($r->test('/foo'));
+		Request::getInstance()->setFormat('html');
+		$this->assertTrue($r->test('/foo'));
+	}
+
 	public function testAnyFormat() {
 		$r = new Route('/format', 'test', 'index');
 		$r->format('any');

@@ -73,10 +73,6 @@ class Route {
 		return $this;
 	}
 
-	public function getFormat() {
-		return $this->format;
-	}
-
 	public function transforms($transforms) {
 		$this->transforms = $transforms;
 		return $this;
@@ -133,7 +129,7 @@ class Route {
 				return false;
 			}
 		}
-		//get controller and function from either matches or supplied defaults.
+		//get controller and method from either matches or supplied defaults.
 		if (!isset($vars['controller'])) {
 			$vars['controller'] = $this->controller;
 		}
@@ -207,5 +203,5 @@ class Route {
 	}
 
 }
-?>
 
+?>
