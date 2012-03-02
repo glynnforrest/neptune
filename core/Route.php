@@ -68,6 +68,10 @@ class Route {
 		return $this;
 	}
 
+	public function getFormat() {
+		return $this->format;
+	}
+
 	public function transforms($transforms) {
 		$this->transforms = $transforms;
 		return $this;
