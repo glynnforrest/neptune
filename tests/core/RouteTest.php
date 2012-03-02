@@ -3,6 +3,7 @@
 namespace neptune\core;
 
 use neptune\core\Route;
+use neptune\http\Request;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -74,6 +75,109 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->defaults(array('place' => 'world'));
 		$r->test('/hello');
 		$this->assertEquals(array('foo', 'method', array('place' => 'world')), $r->getAction());
+		$r->test('/hello/earth');
+		$this->assertEquals(array('foo', 'method', array('place' => 'earth')), $r->getAction());
+	}
+
+	public function testAutoRoute() {
+		$r = new Route('/:controller(/:method(/:args))');
+		$r->method('index');
+		$r->test('/home');
+		$this->assertEquals(array('home', 'index', null), $r->getAction());
+		$r->test('/home/hello');
+		$this->assertEquals(array('home', 'hello', null), $r->getAction());
+		$r->test('/home/hello/world');
+		$this->assertEquals(array('home', 'hello', array('world')), $r->getAction());
+	}
+
+	public function testAutoArgsArray() {
+		$r = new Route('/url(/:args)');
+		$r->controller('test')->method('index');
+		$r->argsFormat(Route::ARGS_EXPLODE);
+		$r->test('/url');
+		$this->assertEquals(array('test', 'index', null), $r->getAction());
+		$r->test('/url/one');
+		$this->assertEquals(array('test', 'index', array('one')), $r->getAction());
+		$r->test('/url/one/2');
+		$this->assertEquals(array('test', 'index', array('one', 2)), $r->getAction());
+		$r->test('/url/one/2/thr££');
+		$this->assertEquals(array('test', 'index', array('one', 2, 'thr££')), $r->getAction());
+	}
+
+	public function testAutoArgsSingle() {
+		$r = new Route('/args(/:args)');
+		$r->controller('test')->method('index');
+		$r->argsFormat(Route::ARGS_SINGLE);
+		$r->test('/args');
+		$this->assertEquals(array('test', 'index', null), $r->getAction());
+		$r->test('/args/args/4/sd/£$/ds/sdv');
+		$this->assertEquals(array('test', 'index', array('args/4/sd/£$/ds/sdv')), $r->getAction());
+	}
+
+	public function testValidateController() {
+		$r = new Route('/:controller');
+		$r->method('index');
+		$r->rules(array('controller' => 'alpha'));
+		$this->assertFalse($r->test('/f00'));
+		$this->assertTrue($r->test('/foo'));
+	}
+
+	public function testValidateMethod() {
+		$r = new Route('/:method');
+		$r->controller('foo');
+		$r->rules(array('method' => 'max:5'));
+		$this->assertFalse($r->test('/too_long'));
+		$this->assertTrue($r->test('/ok'));
+	}
+
+	public function testValidatedArgs() {
+		$r = new Route('/email/:email');
+		$r->controller('email')->method('verify')->rules(array('email' =>  'email'));
+		$this->assertFalse($r->test('/email/me@glynnforrest@com'));
+		$this->assertTrue($r->test('/email/me@glynnforrest.com'));
+		$r = new Route('/add/:first/:second');
+		$r->controller('calculator')->method('add')->rules(array('first' =>
+			'int',
+			'second' => 'num'));
+		$this->assertFalse($r->test('/add/1/a'));
+		$this->assertTrue($r->test('/add/4/4.3'));
+	}
+
+	public function testTransforms() {
+		$r = new Route('/:controller');
+		$r->method('index')->transforms(array('controller' => function($string) {
+		return strtoupper($string);
+		}));
+		$this->assertTrue($r->test('/foo'));
+		$this->assertEquals(array('FOO', 'index', null), $r->getAction());
+	}
+
+	public function testOneFormat() {
+		Request::getInstance()->setFormat('json');
+		$r = new Route('/foo', 'test', 'foo');
+		$r->format('json');
+		$this->assertTrue($r->test('/foo'));
+		Request::getInstance()->setFormat('html');
+		$this->assertFalse($r->test('/foo'));
+	}
+
+	public function testAnyFormat() {
+		$r = new Route('/format', 'test', 'index');
+		$r->format('any');
+		Request::getInstance()->setFormat('json');
+		$this->assertTrue($r->test('/format'));
+		Request::getInstance()->setFormat('html');
+		$this->assertTrue($r->test('/format'));
+		Request::getInstance()->setFormat('xml');
+		$this->assertTrue($r->test('/format'));
+		Request::getInstance()->setFormat('alien_format');
+		$this->assertTrue($r->test('/format'));
+	}
+
+	public function testGetUrl() {
+		$r = new Route('/hiya');
+		$r->controller('controller')->method('index');
+		$this->assertEquals('/hiya', $r->getUrl());
 	}
 
 }

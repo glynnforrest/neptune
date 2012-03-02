@@ -3,6 +3,7 @@
 namespace neptune\core;
 
 use neptune\http\Request;
+use neptune\validate\Validator;
 
 /**
  * Route
@@ -11,8 +12,10 @@ use neptune\http\Request;
 class Route {
 
 	const VARIABLE = '`:([a-zA-Z][a-zA-Z0-9]+)`';
-	const VARIABLE_PATTERN = '(?P<\1>[^/]+)';
-	const ARGS_PATTERN = '(?P<args>.+)';
+	const PATTERN_VARIABLE = '(?P<\1>[^/]+)';
+	const PATTERN_ARGS = '(?P<args>.+)';
+	const ARGS_EXPLODE = 0;
+	const ARGS_SINGLE = 1;
 
 	protected $regex, $controller, $method, $http_method;
 	protected $format, $catch_all, $call_hidden, $args_format, $url;
@@ -29,19 +32,15 @@ class Route {
 		$this->method = $method;
 		$this->args = $args;
 		$this->request = Request::getInstance();
+		$this->url = $regex;
 	}
 
 	protected function generateRegex($regex) {
 		$regex = str_replace('(', '(?:', $regex);
 		$regex = str_replace(')', ')?', $regex);
-		$regex = preg_replace('`:args`', self::ARGS_PATTERN, $regex);
-		$regex = preg_replace(self::VARIABLE, self::VARIABLE_PATTERN, $regex);
+		$regex = preg_replace('`:args`', self::PATTERN_ARGS, $regex);
+		$regex = preg_replace(self::VARIABLE, self::PATTERN_VARIABLE, $regex);
 		return '`^' . $regex . '$`';
-	}
-
-	public function regex($regex) {
-		$this->regex = $this->generateRegex($regex);
-		return $this;
 	}
 
 	public function controller($controller) {
@@ -65,7 +64,7 @@ class Route {
 	}
 
 	public function format($format) {
-		$this->format = $format;
+		$this->format = (array) $format;
 		return $this;
 	}
 
@@ -75,7 +74,7 @@ class Route {
 	}
 
 	public function rules($rules) {
-		$this->rules = $rules;
+		$this->rules = (array) $rules;
 		return $this;
 	}
 
@@ -99,9 +98,8 @@ class Route {
 		return $this;
 	}
 
-	public function url($url) {
-		$this->url = $url;
-		return $this;
+	public function getUrl() {
+		return $this->url;
 	}
 
 	public function test($source) {
@@ -183,6 +181,8 @@ class Route {
 		//test the variables using validator
 		if (!empty($this->rules)) {
 			$v = new Validator($args, $this->rules);
+			$v->controller = $this->controller;
+			$v->method = $this->method;
 			if (!$v->validate())
 				return false;
 		}
@@ -198,8 +198,5 @@ class Route {
 	}
 
 }
-//sample usage
-// $d = Dispatcher::getInstance();
-// $d->route('/url')->controller('foo')->function('index');
 ?>
 
