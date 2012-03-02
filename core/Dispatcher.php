@@ -16,9 +16,6 @@ use neptune\exceptions\ArgumentMissingException;
  * and launches the required controller and action.
  */
 class Dispatcher {
-	const VARIABLE = '`:([a-zA-Z][a-zA-Z0-9]+)`';
-	const VARIABLE_PATTERN = '(?P<\1>[^/]+)';
-	const ARGS_PATTERN = '(?P<args>.+)';
 
 	const ARGS_EXPLODE = 0;
 	const ARGS_SINGLE = 1;
@@ -43,8 +40,8 @@ class Dispatcher {
 	}
 
 	public function route($url, $controller = null, $method = null, $args = null) {
-		$route = $this->globals;
-		$route->controller($controller)->method($method)->args($args);
+		$route = clone $this->globals;
+		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
 		return $this->routes[$url];
 	}
@@ -55,8 +52,7 @@ class Dispatcher {
 
 	public function catchAll($controller, $method ='index', $args = null) {
 		$url = '.*';
-		$this->routes[$url] = new Route($url, $controller, $method, $args);
-		return $this->routes[$url];
+		return $this->route($url, $controller, $method, $args);
 	}
 
 	public function clearRoutes() {
@@ -73,10 +69,10 @@ class Dispatcher {
 		//TODO: Check for a cached response to this exact request.
 		foreach($this->routes as $k => $v) {
 			if($v->test($k)) {
-				//cache details for action
 				$actions = $v->getAction();
 				$format = $v->getFormat();
 				if($this->runMethod($actions, $format)) {
+					//cache details for action as they were successful.
 					return true;
 				}
 			}
