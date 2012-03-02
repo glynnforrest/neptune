@@ -83,6 +83,10 @@ class Request {
 		return 'html';
 	}
 
+	public function setFormat($format) {
+		$this->format = $format;
+	}
+
 	public function get($key = null) {
 		if (!$key) {
 			return $_GET;
