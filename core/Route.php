@@ -194,7 +194,7 @@ class Route {
 	}
 
 	public function getAction() {
-		return $this->passed ? array($this->controller, $this->method, $this->args) : null;
+		return $this->passed ? array($this->controller, $this->method, (array) $this->args) : null;
 	}
 
 }

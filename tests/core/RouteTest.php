@@ -37,7 +37,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r = new Route('/url/:controller');
 		$r->method('index');
 		$this->assertTrue($r->test('/url/foo'));
-		$this->assertEquals(array('foo', 'index', null), $r->getAction());
+		$this->assertEquals(array('foo', 'index', array()), $r->getAction());
 	}
 
 	public function testArgsExplicitMatch() {
@@ -83,9 +83,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r = new Route('/:controller(/:method(/:args))');
 		$r->method('index');
 		$r->test('/home');
-		$this->assertEquals(array('home', 'index', null), $r->getAction());
+		$this->assertEquals(array('home', 'index', array()), $r->getAction());
 		$r->test('/home/hello');
-		$this->assertEquals(array('home', 'hello', null), $r->getAction());
+		$this->assertEquals(array('home', 'hello', array()), $r->getAction());
 		$r->test('/home/hello/world');
 		$this->assertEquals(array('home', 'hello', array('world')), $r->getAction());
 	}
@@ -95,7 +95,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->controller('test')->method('index');
 		$r->argsFormat(Route::ARGS_EXPLODE);
 		$r->test('/url');
-		$this->assertEquals(array('test', 'index', null), $r->getAction());
+		$this->assertEquals(array('test', 'index', array()), $r->getAction());
 		$r->test('/url/one');
 		$this->assertEquals(array('test', 'index', array('one')), $r->getAction());
 		$r->test('/url/one/2');
@@ -109,7 +109,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->controller('test')->method('index');
 		$r->argsFormat(Route::ARGS_SINGLE);
 		$r->test('/args');
-		$this->assertEquals(array('test', 'index', null), $r->getAction());
+		$this->assertEquals(array('test', 'index', array()), $r->getAction());
 		$r->test('/args/args/4/sd/£$/ds/sdv');
 		$this->assertEquals(array('test', 'index', array('args/4/sd/£$/ds/sdv')), $r->getAction());
 	}
@@ -149,7 +149,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		return strtoupper($string);
 		}));
 		$this->assertTrue($r->test('/foo'));
-		$this->assertEquals(array('FOO', 'index', null), $r->getAction());
+		$this->assertEquals(array('FOO', 'index', array()), $r->getAction());
 	}
 
 	public function testOneFormat() {
