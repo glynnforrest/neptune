@@ -65,10 +65,13 @@ class Dispatcher {
 		return $this;
 	}
 
-	public function go() {
+	public function go($source = null) {
+		if(!$source) {
+			$source = $this->request->path();
+		}
 		//TODO: Check for a cached response to this exact request.
 		foreach($this->routes as $k => $v) {
-			if($v->test($k)) {
+			if($v->test($source)) {
 				$actions = $v->getAction();
 				$format = $v->getFormat();
 				if($this->runMethod($actions, $format)) {

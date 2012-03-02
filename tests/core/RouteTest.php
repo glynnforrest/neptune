@@ -172,12 +172,22 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test('/format'));
 		Request::getInstance()->setFormat('alien_format');
 		$this->assertTrue($r->test('/format'));
+		Request::getInstance()->setFormat('html');
 	}
 
 	public function testGetUrl() {
 		$r = new Route('/hiya');
 		$r->controller('controller')->method('index');
 		$this->assertEquals('/hiya', $r->getUrl());
+	}
+
+	public function testChangeUrl() {
+		$r = new Route('.*', 'controller', 'method');
+		$this->assertTrue($r->test('/anything'));
+		$this->assertTrue($r->test('/url'));
+		$r->url('/url');
+		$this->assertFalse($r->test('/anything'));
+		$this->assertTrue($r->test('/url'));
 	}
 
 }

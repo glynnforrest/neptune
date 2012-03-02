@@ -22,7 +22,7 @@ class Route {
 	protected $args = array();
 	protected $transforms = array();
 	protected $rules = array();
-	protected $defaults = array(); //do i need this??
+	protected $defaults = array();
 	protected $request;
 	protected $passed;
 
@@ -47,6 +47,7 @@ class Route {
 		$this->url = $url;
 		return $this;
 	}
+
 	public function controller($controller) {
 		$this->controller = $controller;
 		return $this;
