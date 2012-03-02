@@ -41,6 +41,7 @@ class Validator {
 		 'url' => ':name is not a url.'
 	);
 	protected $parsed = array();
+	protected $rules = array();
 
 	public function __construct($input_array = 'POST', array $rules = array(), array $messages = array()) {
 		if (is_array($input_array)) {
@@ -57,13 +58,10 @@ class Validator {
 					return false;
 			}
 		}
+		$this->rules = $rules;
 		foreach ($messages as $k => $v) {
 			$this->setMessage($k, $v);
 		}
-		foreach ($rules as $k => $v) {
-			$this->check($k, $v);
-		}
-		return true;
 	}
 
 	public function __get($value) {
@@ -93,20 +91,13 @@ class Validator {
 		$this->checked = true;
 		if (!array_key_exists($name, $this->input_array)) {
 			$this->fail($name, 'undefined');
+			$this->rules[$name] = $validator_string;
 			$this->can_fail[] = $name;
 			return false;
 		}
 		$rules = explode('|', $validator_string);
-		if (empty($rules)) {
-			return false;
-		}
 		if(in_array('required', $rules)) {
 			$this->can_fail[] = $name;
-			if(!$this->checkRequired($this->input_array[$name])) {
-				$this->fail($name, 'required');
-				return false;
-			}
-			//TODO: remove required from rules so it isn't run again.
 		} else {
 			if($this->checkRequired($this->input_array[$name] )) {
 				$this->can_fail[] = $name;
@@ -118,6 +109,7 @@ class Validator {
 			$method = 'check' . ucfirst($type);
 			if (!method_exists($this, $method)) {
 				$this->fail($name, 'nomethod');
+				$this->rules[$name] = $validator_string;
 				$this->can_fail[] = $name;
 				return false;
 			}
@@ -129,6 +121,7 @@ class Validator {
 				continue;
 			} else {
 				$this->fail($name, $type);
+				$this->rules[$name] = $validator_string;
 				return false;
 			}
 		}
@@ -136,9 +129,6 @@ class Validator {
 	}
 
 	protected function fail($name, $type) {
-		if (in_array($name, $this->fails)) {
-			return true;
-		}
 		if (!array_key_exists($name, $this->errors)) {
 			$this->fails[] = $name;
 			$msg = $this->getMessage($name, $type);
@@ -313,26 +303,27 @@ class Validator {
 	}
 
 	public function validate() {
+		foreach($this->rules as $k => $v) {
+			$this->check($k, $v);
+		}
 		if ($this->checked) {
-			return $this->checkTests();
+			if (!empty($this->fails)) {
+				foreach ($this->fails as $fail) {
+					if (in_array($fail, $this->can_fail)) {
+						$this->fails = array();
+						return false;
+					}
+				}
+			}
+			$this->fails = array();
+			return true;
 		} else {
 			$this->fail('all', 'untested');
+			$this->fails = array();
 			return false;
 		}
 	}
 
-	protected function checkTests() {
-		if (empty($this->fails)) {
-			return true;
-		} else {
-			foreach ($this->fails as $fail) {
-				if (in_array($fail, $this->can_fail)) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 
 }
 

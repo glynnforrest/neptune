@@ -196,9 +196,26 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($v->validate());
 	}
 
+	public function testDeferredValidation() {
+		$v = new Validator(array('one' => 4), 
+		array('one' => 'int', 'two' => 'alphanum'));
+		$v->two = 'valu3';
+		$this->assertTrue($v->validate());
+	}
+
+	public function testValidateAfterChangeValue() {
+		$v = new Validator(array('one' => 'one'),
+		array('one' => 'int'));
+		$this->assertFalse($v->validate());
+		$v->one = 1;
+		$this->assertTrue($v->check('one', 'int'));
+		$this->assertTrue($v->validate());
+	}
+
 	public function testValidate() {
 		$v = new Validator(array('one' => 1));
 		$v->check('one', 'int|required');
+		$v->validate();
 		$this->assertTrue($v->validate());
 		$v = new Validator(array('one' => 1));
 		$v->check('one', 'required');
