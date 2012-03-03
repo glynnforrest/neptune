@@ -7,6 +7,7 @@ use neptune\view\View;
 use neptune\http\Response;
 use neptune\http\Request;
 use neptune\validate\Validator;
+use neptune\cache\CacheFactory;
 use neptune\exceptions\NeptuneError;
 use neptune\exceptions\MethodNotFoundException;
 use neptune\exceptions\ArgumentMissingException;
@@ -20,13 +21,12 @@ class Dispatcher {
 	protected static $instance;
 	protected $routes = array();
 	protected $names = array();
-	protected $globals = array();
+	protected $globals;
 	protected $request;
 
 	protected function __construct() {
 		$this->request = Request::getInstance();
 		$this->response = Response::getInstance();
-		$this->globals = new Route('.*');
 	}
 
 	public static function getInstance() {
@@ -37,13 +37,16 @@ class Dispatcher {
 	}
 
 	public function route($url, $controller = null, $method = null, $args = null) {
-		$route = clone $this->globals;
+		$route = clone $this->globals();
 		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
 		return $this->routes[$url];
 	}
 
 	public function globals() {
+		if(!$this->globals) {
+			$this->globals = new Route('.*');
+		}
 		return $this->globals;
 	}
 
@@ -57,16 +60,30 @@ class Dispatcher {
 		return $this;
 	}
 
+	public function goCached($source = null) {
+		if(!$source) {
+			$source = $this->request->path();
+		}
+		$key = 'Router' . $source . $this->request->method();
+		$cached = CacheFactory::getCache()->get($key);
+		if($cached) {
+			if($this->runMethod($cached)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public function go($source = null) {
 		if(!$source) {
 			$source = $this->request->path();
 		}
-		//TODO: Check for a cached response to this exact request.
 		foreach($this->routes as $k => $v) {
 			if($v->test($source)) {
 				$actions = $v->getAction();
-				if($this->runMethod($actions, $this->request->format())) {
-					//cache details for action as they were successful.
+				if($this->runMethod($actions)) {
+					$key = 'Router' . $source . $this->request->method();
+					CacheFactory::getCache()->set($key, $actions);
 					return true;
 				}
 			}
@@ -83,7 +100,7 @@ class Dispatcher {
 		}
 	}
 
-	protected function runMethod($actions, $format) {
+	protected function runMethod($actions) {
 		if (Loader::softLoad($actions[0])) {
 			$c = new $actions[0]();
 			try {
@@ -96,6 +113,7 @@ class Dispatcher {
 				//}
 				$other = ob_get_clean();
 				restore_error_handler();
+				$format = $this->request->format();
 				if (!$this->response->getFormat()) {
 					$this->response->format($format);
 				}
