@@ -33,9 +33,9 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testRouteInheritsGlobals() {
 		$d = Dispatcher::getInstance();
-		$d->globals()->transforms(array('controller' => function($controller) {
+		$d->globals()->transforms('controller', function($controller) {
 			return ucfirst($controller) . 'Controller';
-		}));
+		});
 		$r = $d->route('/foo', 'foo', 'index');
 		$r->test('/foo');
 		$this->assertEquals(array('FooController', 'index', array()), $r->getAction());

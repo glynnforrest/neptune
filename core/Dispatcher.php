@@ -106,11 +106,7 @@ class Dispatcher {
 			try {
 				set_error_handler('\neptune\core\Dispatcher::missingArgsHandler');
 				ob_start();
-				// if ($this->routes[$this->pointer - 1]['callHidden']) {
-				// 	$body = $c->callHidden($actions[1], $actions[2]);
-				// } else {
-					$body = call_user_func_array(array($c, $actions[1]), $actions[2]);
-				//}
+				$body = call_user_func_array(array($c, $actions[1]), $actions[2]);
 				$other = ob_get_clean();
 				restore_error_handler();
 				$format = $this->request->format();

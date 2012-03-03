@@ -17,12 +17,13 @@ class Route {
 	const ARGS_EXPLODE = 0;
 	const ARGS_SINGLE = 1;
 
-	protected $regex, $controller, $method, $http_method;
-	protected $format, $catch_all, $call_hidden, $args_format, $url;
+	protected $regex, $controller, $method;
+	protected $format, $catch_all, $args_format, $url;
 	protected $args = array();
 	protected $transforms = array();
 	protected $rules = array();
 	protected $defaults = array();
+	protected $http_methods = array();
 	protected $request;
 	protected $passed;
 
@@ -63,8 +64,11 @@ class Route {
 		return $this;
 	}
 
-	public function httpMethod($http_method) {
-		$this->http_method = $http_method;
+	public function httpMethod($http_methods) {
+		$http_methods = (array) $http_methods;
+		foreach($http_methods as $method) {
+			$this->http_methods[] = strtoupper($method);
+		}
 		return $this;
 	}
 
@@ -73,8 +77,8 @@ class Route {
 		return $this;
 	}
 
-	public function transforms($transforms) {
-		$this->transforms = $transforms;
+	public function transforms($name, $function) {
+		$this->transforms[$name] = $function;
 		return $this;
 	}
 
@@ -90,11 +94,6 @@ class Route {
 
 	public function catchAll($catch_all) {
 		$this->catch_all = $catch_all;
-		return $this;
-	}
-
-	public function callHidden($call_hidden) {
-		$this->call_hidden = $call_hidden;
 		return $this;
 	}
 
@@ -117,8 +116,8 @@ class Route {
 			return false;
 		}
 		//Check if the request method is supported by this route.
-		if ($this->http_method) {
-			if (!in_array(strtoupper($this->request->method()), $this->http_method)) {
+		if ($this->http_methods) {
+			if (!in_array($this->request->method(), $this->http_methods)) {
 				return false;
 			}
 		}

@@ -145,9 +145,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testTransforms() {
 		$r = new Route('/:controller');
-		$r->method('index')->transforms(array('controller' => function($string) {
-		return strtoupper($string);
-		}));
+		$r->method('index')->transforms('controller', function($string) {
+			return strtoupper($string);
+		});
 		$this->assertTrue($r->test('/foo'));
 		$this->assertEquals(array('FOO', 'index', array()), $r->getAction());
 	}
@@ -198,5 +198,24 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test('/url'));
 	}
 
+	public function testOneHttpMethod() {
+		$r = new Route('.*', 'controller', 'method');
+		$r->httpMethod('get');
+		$_SERVER['REQUEST_METHOD'] = 'Get';
+		$this->assertTrue($r->test('/anything'));
+		$_SERVER['REQUEST_METHOD'] = 'post';
+		$this->assertFalse($r->test('/anything'));
+	}
+
+	public function testArrayHttpMethod() {
+		$r = new Route('.*', 'controller', 'method');
+		$r->httpMethod(array('get', 'PoST'));
+		$_SERVER['REQUEST_METHOD'] = 'Get';
+		$this->assertTrue($r->test('/anything'));
+		$_SERVER['REQUEST_METHOD'] = 'post';
+		$this->assertTrue($r->test('/anything'));
+		$_SERVER['REQUEST_METHOD'] = 'PUT';
+		$this->assertFalse($r->test('/anything'));
+	}
 }
 ?>
