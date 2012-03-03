@@ -98,7 +98,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 
 	public function testMethod() {
 		$this->assertNull($this->request->ip());
-		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_METHOD'] = 'post';
 		$this->assertEquals('POST', $this->request->method());
 	}
 }
