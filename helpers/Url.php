@@ -3,7 +3,6 @@
 namespace neptune\helpers;
 
 use neptune\core\Config;
-use neptune\core\Dispatcher;
 
 /**
  * Url
@@ -21,12 +20,5 @@ class Url {
 		return $protocol . '://' . Config::getRequired('root_url') . $url;
 	}
 
-	public static function toRoute($name, $args = array(), $protocol = 'http') {
-		$url = Dispatcher::getInstance()->getRouteUrl($name);
-		foreach($args as $k => $v) {
-			$url = str_replace(':' . $k, $v, $url);
-		}
-		return self::to($url, $protocol);
-	}
 }
 ?>

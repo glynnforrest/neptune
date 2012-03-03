@@ -36,31 +36,6 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('https://google.com', Url::to('https://google.com'));
 		$this->assertEquals('ftp://google.com', Url::to('ftp://google.com'));
 	}
-
-	public function testSimpleRoute() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url')->name('first route');
-		$this->assertEquals('http://myapp.local/url', Url::toRoute('first route'));
-	}
-
-	public function testSimpleFtpRoute() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url')->name('first route');
-		$this->assertEquals('ftp://myapp.local/url', Url::toRoute('first route', array(), 'ftp'));
-	}
-
-	public function testRouteArgs() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/:var/:second')->name('first route');
-		$this->assertEquals('http://myapp.local/url/foo/bar', Url::toRoute('first route', array('var' => 'foo', 'second' => 'bar')));
-	}
-
-	public function testRouteArgsFtp() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/:var/:second')->name('first route');
-		$this->assertEquals('ftp://myapp.local/url/foo/bar', Url::toRoute('first route', array('var' => 'foo', 'second' => 'bar'), 'ftp'));
-	}
-
 	
 }
 ?>
