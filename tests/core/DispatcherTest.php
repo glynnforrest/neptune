@@ -12,6 +12,10 @@ include dirname(__FILE__) . ('/../test_bootstrap.php');
  */
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
+	public function setUp() {
+		Dispatcher::getInstance()->clearRoutes();
+	}
+
 	public function testRouteReturnsRoute() {
 		$r = Dispatcher::getInstance()->route('/url');
 		$this->assertTrue($r instanceof Route);

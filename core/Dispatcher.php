@@ -57,11 +57,6 @@ class Dispatcher {
 		return $this;
 	}
 
-	public function resetPointer() {
-		$this->pointer = 0;
-		return $this;
-	}
-
 	public function go($source = null) {
 		if(!$source) {
 			$source = $this->request->path();
