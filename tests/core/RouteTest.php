@@ -72,7 +72,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testDefaultArgs() {
 		$r = new Route('/hello(/:place)', 'foo', 'method');
-		$r->defaults(array('place' => 'world'));
+		$r->defaultArgs(array('place' => 'world'));
 		$r->test('/hello');
 		$this->assertEquals(array('foo', 'method', array('place' => 'world')), $r->getAction());
 		$r->test('/hello/earth');

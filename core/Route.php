@@ -22,7 +22,7 @@ class Route {
 	protected $args = array();
 	protected $transforms = array();
 	protected $rules = array();
-	protected $defaults = array();
+	protected $default_args = array();
 	protected $http_methods = array();
 	protected $request;
 	protected $passed;
@@ -87,8 +87,8 @@ class Route {
 		return $this;
 	}
 
-	public function defaults($defaults) {
-		$this->defaults = (array) $defaults;
+	public function defaultArgs($default_args) {
+		$this->default_args = (array) $default_args;
 		return $this;
 	}
 
@@ -165,7 +165,7 @@ class Route {
 			}
 		}
 		//add default variables if they don't exist.
-		foreach ($this->defaults as $name => $value) {
+		foreach ($this->default_args as $name => $value) {
 			if (!isset($args[$name])) {
 				$args[$name] = $value;
 			}
