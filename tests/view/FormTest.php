@@ -72,6 +72,8 @@ END;
 		$this->assertEquals(Html::input('text', 'name'), $v->input('name'));
 		$v->var = 'hello';
 		$this->assertNull($v->input('var'));
+		$v->add('var');
+		$this->assertEquals(Html::input('text', 'var'), $v->input('var'));
 	}
 
 	public function testIsset() {
