@@ -106,8 +106,11 @@ class Dispatcher {
 			try {
 				set_error_handler('\neptune\core\Dispatcher::missingArgsHandler');
 				ob_start();
-				$body = call_user_func_array(array($c, $actions[1]), $actions[2]);
+				$body = $c->_runMethod($actions[1], $actions[2]);
 				$other = ob_get_clean();
+				if(!$body && !$other) {
+					return false;
+				}
 				restore_error_handler();
 				$format = $this->request->format();
 				if (!$this->response->getFormat()) {
