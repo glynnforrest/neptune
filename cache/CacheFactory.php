@@ -18,22 +18,22 @@ class CacheFactory {
 	 * @return CacheDriver
 	 * A neptune cache driver.
 	 */
-	public static function getCache($name = null) {
+	public static function getDriver($name = null) {
 		if ($name == null) {
 			if (!empty(self::$caches)) {
 				reset(self::$caches);
 				$name = key(self::$caches);
 			} else {
-				return self::create();
+				return self::createDriver();
 			}
 		}
 		if (!array_key_exists($name, self::$caches)) {
-			self::$caches[$name] = self::create($name);
+			self::$caches[$name] = self::createDriver($name);
 		}
 		return self::$caches[$name];
 	}
 
-	protected static function create($name = null) {
+	protected static function createDriver($name = null) {
 		if(!$name) {
 			$array = Config::getRequired('cache');
 			reset($array);

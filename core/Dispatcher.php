@@ -65,7 +65,7 @@ class Dispatcher {
 			$source = $this->request->path();
 		}
 		$key = 'Router' . $source . $this->request->method();
-		$cached = CacheFactory::getCache()->get($key);
+		$cached = CacheFactory::getDriver()->get($key);
 		if($cached) {
 			if($this->runMethod($cached)) {
 				return true;
@@ -83,7 +83,7 @@ class Dispatcher {
 				$actions = $v->getAction();
 				if($this->runMethod($actions)) {
 					$key = 'Router' . $source . $this->request->method();
-					CacheFactory::getCache()->set($key, $actions);
+					CacheFactory::getDriver()->set($key, $actions);
 					return true;
 				}
 			}
