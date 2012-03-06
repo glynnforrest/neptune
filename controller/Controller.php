@@ -41,7 +41,7 @@ abstract class Controller {
 	}
 
 	protected function _security($name = null) {
-		return SecurityFactory::getSecurity($name);
+		return SecurityFactory::getDriver($name);
 	}
 
 }
