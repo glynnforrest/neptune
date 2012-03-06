@@ -38,25 +38,25 @@ abstract class SQLQuery {
 	}
 
 	public static function select($db = null) {
-		$db = DatabaseFactory::getDatabase($db);
+		$db = DatabaseFactory::getDriver($db);
 		$class = $db->getBuilderName();
 		return new $class('SELECT', $db);
 	}
 
 	public static function insert($db = null) {
-		$db = DatabaseFactory::getDatabase($db);
+		$db = DatabaseFactory::getDriver($db);
 		$class = $db->getBuilderName();
 		return new $class('INSERT', $db);
 	}
 
 	public static function update($db = null) {
-		$db = DatabaseFactory::getDatabase($db);
+		$db = DatabaseFactory::getDriver($db);
 		$class = $db->getBuilderName();
 		return new $class('UPDATE', $db);
 	}
 
 	public static function delete($db = null) {
-		$db = DatabaseFactory::getDatabase($db);
+		$db = DatabaseFactory::getDriver($db);
 		$class = $db->getBuilderName();
 		return new $class('DELETE', $db);
 	}

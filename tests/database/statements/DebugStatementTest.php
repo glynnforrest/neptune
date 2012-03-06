@@ -29,20 +29,20 @@ class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testConstruct() {
-		$db = DatabaseFactory::getDatabase('debug');
+		$db = DatabaseFactory::getDriver('debug');
 		$stmt = $db->prepare('SELECT * FROM test');
 		$this->assertTrue($stmt instanceof DatabaseStatement);
 	}
 
 	public function testQueryIsParsedSimple() {
-		$db = DatabaseFactory::getDatabase('debug');
+		$db = DatabaseFactory::getDriver('debug');
 		$stmt = $db->prepare('SELECT * FROM test WHERE id = ?');
 		$stmt->execute(array(2));
 		$this->assertEquals('SELECT * FROM test WHERE id = 2', $stmt->getExecutedQuery());
 	}
 
 	public function testQueryIsParsedComplex() {
-		$db = DatabaseFactory::getDatabase('debug');
+		$db = DatabaseFactory::getDriver('debug');
 		$stmt = $db->prepare('SELECT * FROM test WHERE id = ? AND count > ? LIMIT ?');
 		$stmt->execute(array(2,10,1));
 		$this->assertEquals('SELECT * FROM test WHERE id = 2 AND count > 10 LIMIT 1', $stmt->getExecutedQuery());

@@ -35,7 +35,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
-		DatabaseFactory::getDatabase('db')->reset();
+		DatabaseFactory::getDriver('db')->reset();
 		Config::unload();	
 	}
 
@@ -97,7 +97,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'value';
 		$d->save();
 		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (1, value)', 
-		DatabaseFactory::getDatabase('db')->getExecutedQuery());
+		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
 	public function testUpdateBuild() {
@@ -107,11 +107,11 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'changed';
 		$d->save();
 		$this->assertEquals('UPDATE table SET `column` = changed WHERE id = 1',
-		DatabaseFactory::getDatabase('db')->getExecutedQuery());
+		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
 	public function testNoUpdate() {
-		$db = DatabaseFactory::getDatabase('db');
+		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
 		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
 		$d->setFields(array('id', 'column'));
@@ -121,7 +121,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testNoInsert() {
-		$db = DatabaseFactory::getDatabase('db');
+		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
 		$d = new DBObject('db', 'table');
 		$d->setFields(array('id', 'column'));
@@ -131,7 +131,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testNoUpdateDifferentFields() {
-		$db = DatabaseFactory::getDatabase('db');
+		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
 		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
 		$d->setFields(array('id', 'column'));
@@ -142,7 +142,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testNoInsertDifferentFields() {
-		$db = DatabaseFactory::getDatabase('db');
+		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
 		$d = new DBObject('db', 'table');
 		$d->setFields(array('id', 'column'));
@@ -160,7 +160,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 2;
 		$d->save();
 		$this->assertEquals('UPDATE table SET `column` = changed, `id` = 2 WHERE id = 1',
-		DatabaseFactory::getDatabase('db')->getExecutedQuery());
+		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
 	public function testPrimaryKeyUpdatedOnInsert() {
@@ -172,7 +172,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'value';
 		$d->save();
 		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (3, value)', 
-		DatabaseFactory::getDatabase('db')->getExecutedQuery());
+		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
 }

@@ -19,23 +19,23 @@ class DatabaseFactory {
 	 * @return DatabaseDriver
 	 * A neptune database driver.
 	 */
-	public static function getDatabase($db = null) {
+	public static function getDriver($db = null) {
 		if ($db == null) {
 			if (!empty(self::$databases)) {
 				reset(self::$databases);
 				$db = key(self::$databases);
 				return self::$databases[$db];
 			} else {
-				return self::create();
+				return self::createDriver();
 			}
 		}
 		if (!array_key_exists($db, self::$databases)) {
-			self::create($db);
+			self::createDriver($db);
 		}
 		return self::$databases[$db];
 	}
 
-	protected static function create($name = null) {
+	protected static function createDriver($name = null) {
 		if (!$name) {
 			$array = Config::getRequired('database');
 			reset($array);

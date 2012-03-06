@@ -37,27 +37,27 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetDatabase() {
-		$this->assertTrue(DatabaseFactory::getDatabase() instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDatabase('unittest') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver() instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('unittest') instanceof DebugDriver);
 	}
 
 	public function testGetDatabaseBadConfig() {
 		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
-		DatabaseFactory::getDatabase('wrong');
+		DatabaseFactory::getDriver('wrong');
 	}
 
 	public function testGetDatabaseUndefinedDriver() {
 		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
-		DatabaseFactory::getDatabase('fake');
+		DatabaseFactory::getDriver('fake');
 	}
 
 	public function testGetBuilder() {
-		$db = DatabaseFactory::getDatabase();
+		$db = DatabaseFactory::getDriver();
 		$this->assertEquals('\\neptune\\database\\builders\\GenericSQLBuilder', $db->getBuilderName());
 	}
 
 	public function testGetBuilderOverride() {
-		$db = DatabaseFactory::getDatabase('unittest2');
+		$db = DatabaseFactory::getDriver('unittest2');
 		$this->assertEquals('debug', $db->getBuilderName());
 	}
 
