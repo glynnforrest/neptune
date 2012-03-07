@@ -1,0 +1,3 @@
+[submodule "neptune_docs"]
+	path = neptune_docs
+	url = git://github.com/glynnforrest/neptune_docs.git
