@@ -64,19 +64,27 @@ class Validator {
 		}
 	}
 
-	public function __get($value) {
-		return isset($this->input_array[$value]) ? $this->input_array[$value] : null;
+	public function get($key) {
+		return isset($this->input_array[$key]) ? $this->input_array[$key] : null;
+	}
+
+	public function __get($key) {
+		return $this->get($key);
+	}
+
+	public function set($key, $value) {
+		$this->input_array[$key] = $value;
 	}
 
 	public function __set($key, $value) {
-		$this->input_array[$key] = $value;
+		return $this->set($key, $value);
 	}
 
 	public function __isset($name) {
 		return isset($this->input_array[$name]);
 	}
 
-	public function addValues(array $values) {
+	public function setValues(array $values) {
 		foreach ($values as $k => $v) {
 			$this->input_array[$k] = $v;
 		}

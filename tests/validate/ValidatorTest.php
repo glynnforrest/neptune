@@ -10,6 +10,24 @@ require_once dirname(__FILE__) . '/../test_bootstrap.php';
  */
 class ValidatorTest extends \PHPUnit_Framework_TestCase {
 
+	public function testSetAndGet() {
+		$v = new Validator();
+		$v->key = 'value';
+		$this->assertEquals('value', $v->key);
+		$v->arr = array();
+		$this->assertEquals(array(), $v->arr);
+		$obj = new \stdClass();
+		$v->obj = $obj;
+		$this->assertEquals($obj, $v->obj);
+	}
+
+	public function testIsset() {
+		$v = new Validator();
+		$v->set('set', 'text');
+		$this->assertTrue(isset($v->set));
+		$this->assertFalse(isset($v->unset));
+	}
+
 	public function testRequired() {
 		$v = new Validator(array('one' => 1, 'two' => array('hi')));
 		$this->assertTrue($v->check('one', 'required'));
