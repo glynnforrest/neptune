@@ -111,19 +111,27 @@ class DBObjectSet implements Iterator, ArrayAccess, Countable {
 		return false;
 	}
 
-	public function __set($key, $value) {
-		$this->values[$key] = $value;
-		if (in_array($key, $this->fields) && !in_array($key, $this->modified)) {
-			$this->modified [] = $key;
-		}
+	public function __get($key) {
+		return $this->get($key);
 	}
 
-	public function __get($key) {
+	public function get($key, $value) {
 		$values = array();
 		foreach ($this->objects as $obj) {
 			$values[] = $obj->$key;
 		}
 		return $values;
+	}
+
+	public function __set($key, $value) {
+		return $this->set($key, $value);
+	}
+
+	public function set($key, $value) {
+		$this->values[$key] = $value;
+		if (in_array($key, $this->fields) && !in_array($key, $this->modified)) {
+			$this->modified [] = $key;
+		}
 	}
 
 	public function setFields(array $fields) {
