@@ -39,19 +39,19 @@ END;
 
 	public function testSetAndGet() {
 		$v = View::load('some/file');
-		$v->key = 'value';
-		$this->assertEquals('value', $v->key);
-		$v->arr = array();
-		$this->assertEquals(array(), $v->arr);
+		$v->set('key', 'value');
+		$this->assertEquals('value', $v->get('key'));
+		$v->set('arr', array());
+		$this->assertEquals(array(), $v->get('arr'));
 		$obj = new \stdClass();
-		$v->obj = $obj;
-		$this->assertEquals($obj, $v->obj);
+		$v->set('obj', $obj);
+		$this->assertEquals($obj, $v->get('obj'));
 	}
 
 	public function testIsset() {
 		$v = View::load('some/file');
-		$v->set = 'value';
-		$this->assertTrue(isset($v->set));
+		$v->var = 'value';
+		$this->assertTrue(isset($v->var));
 		$this->assertFalse(isset($v->unset));
 	}
 

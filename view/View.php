@@ -15,23 +15,41 @@ class View {
 	protected function __construct() {
 	}
 
-	public function __set($name, $value) {
-		$this->vars[$name] = $value;
+	public function __set($key, $value) {
+		return $this->set($key, $value);
 	}
 
-	public function __isset($name) {
-		if (isset($this->vars[$name])) {
+	public function set($key, $value) {
+		$this->vars[$key] = $value;
+	}
+
+	public function __get($key) {
+		return $this->get($key);
+	}
+
+	public function get($key) {
+		return isset($this->vars[$key]) ? $this->vars[$key] : Neptune::get($key);
+	}
+
+	public function __isset($key) {
+		if (isset($this->vars[$key])) {
 			return true;
-		} elseif (Neptune::get($name)) {
+		} elseif (Neptune::get($key)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public function __get($name) {
-		return isset($this->vars[$name]) ? $this->vars[$name] :
-			Neptune::get($name);
+	public function setValues(array $values=array()) {
+		foreach ($values as $k => $v) {
+			$this->vars[$k] = $v;
+		}
+		return $this;
+	}
+
+	public function getValues() {
+		return $this->vars;
 	}
 
 	public function __toString() {
@@ -41,17 +59,6 @@ class View {
 			return $e->getMessage();
 		}
 		return $content;
-	}
-
-	public function set(array $values=array()) {
-		foreach ($values as $k => $v) {
-			$this->vars[$k] = $v;
-		}
-		return $this;
-	}
-
-	public function getValues() {
-		return $this->vars;
 	}
 
 	/**
@@ -66,7 +73,7 @@ class View {
 		$class = get_called_class();
 		$me = new $class();
 		$me->file = $view . self::EXTENSION;
-		$me->set($vars);
+		$me->setValues($vars);
 		return $me;
 	}
 
