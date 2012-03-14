@@ -21,15 +21,14 @@ class Form extends View {
 
 	public static function loadAbsolute($view, $values = array(), $errors = array()) {
 		$me = parent::loadAbsolute($view);
-		$me->set($values, true);
+		$me->setValues($values, true);
 		$me->addErrors($errors);
 		return $me;
 	}
 
-	public static function load($view, $values = array(), $errors = array(),
-		$action = null) {
+	public static function load($view, $values = array(), $errors = array(), $action = null) {
 		$me = parent::load($view);
-		$me->set($values, true);
+		$me->setValues($values, true);
 		$me->addErrors($errors);
 		if($action) {
 			$me->header[0] = $action;
@@ -50,7 +49,7 @@ class Form extends View {
 		return $this->renderForm();
 	}
 
-	public function set(array $values=array(), $create_fields = false) {
+	public function setValues(array $values=array(), $create_fields = false) {
 		foreach ($values as $k => $v) {
 			if ($create_fields || in_array($k, $this->fields)) {
 				$this->vars[$k] = $v;

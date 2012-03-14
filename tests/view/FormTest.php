@@ -56,14 +56,14 @@ END;
 	}
 
 	public function testSetAndGet() {
-		$v = Form::create('some/url');
-		$v->key = 'value';
-		$this->assertEquals('value', $v->key);
-		$v->arr = array();
-		$this->assertEquals(array(), $v->arr);
+		$v = View::load('some/file');
+		$v->set('key', 'value');
+		$this->assertEquals('value', $v->get('key'));
+		$v->set('arr', array());
+		$this->assertEquals(array(), $v->get('arr'));
 		$obj = new \stdClass();
-		$v->obj = $obj;
-		$this->assertEquals($obj, $v->obj);
+		$v->set('obj', $obj);
+		$this->assertEquals($obj, $v->get('obj'));
 	}
 
 	public function testOnlyFieldsRendered() {
@@ -104,7 +104,7 @@ END;
 	public function testCreateFromArray() {
 		$values = array('name' => 'foo', 'age' => 100);
 		$v = Form::create('/url');
-		$v->set($values, true);
+		$v->setValues($values, true);
 		$expected = Html::openTag('form', array('action' => '/url', 'method' => 'post'));
 		$expected .= '<ul><li><label for="name">Name</label>';
 		$expected .= Html::input('text', 'name', 'foo');
