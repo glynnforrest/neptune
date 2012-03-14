@@ -56,7 +56,7 @@ END;
 	}
 
 	public function testSetAndGet() {
-		$v = View::load('some/file');
+		$v = Form::load('some/file');
 		$v->set('key', 'value');
 		$this->assertEquals('value', $v->get('key'));
 		$v->set('arr', array());
