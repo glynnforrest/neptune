@@ -15,7 +15,7 @@ include dirname(__FILE__) . ('/../../test_bootstrap.php');
 class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::bluff('unittest');
+		Config::create('unittest');
 		Config::set('database', array(
 			 'unittest' => array(
 				  'driver' => 'debug',

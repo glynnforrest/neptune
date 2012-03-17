@@ -14,7 +14,7 @@ use neptune\database\drivers\DebugDriver;
 class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::bluff('unittest');
+		Config::create('unittest');
 		Config::set('database', array(
 			 'unittest' => array(
 				  'driver' => 'debug',

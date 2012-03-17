@@ -104,16 +104,18 @@ class Config {
 		}
 	}
 
-	public static function bluff($name) {
+	public static function create($file, $name = null) {
 		$me = self::getInstance();
 		if (array_key_exists($name, $me->values)) {
 			return true;
 		}
-		$me->values[$name] = array();
-		$me->names[$name] = $name;
+		$me->values[$file] = array();
+		if ($name !== null) {
+			$me->names[$name] = $file;
+		}
 	}
 
-	public static function load($file, $name=null) {
+	public static function load($file, $name = null) {
 		$me = self::getInstance();
 		if (array_key_exists($file, $me->values)) {
 			return true;

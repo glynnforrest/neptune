@@ -24,7 +24,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
-		Config::bluff('view');
+		Config::create('view');
 		Config::set('view_dir', '/tmp');
 	}
 

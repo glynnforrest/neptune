@@ -39,7 +39,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testFunctionNotCalledBeforeAccess() {
-		Config::bluff('test');
+		Config::create('test');
 		Config::set('some_key', 'value');	
 		Neptune::set('config_change', function() {
 			Config::set('some_key', 'changed');

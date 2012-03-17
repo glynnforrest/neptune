@@ -15,7 +15,7 @@ require_once dirname(__FILE__) . '/../test_bootstrap.php';
 class UrlTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::bluff('testing');
+		Config::create('testing');
 		Config::set('root_url', 'myapp.local');
 	}
 

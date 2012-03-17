@@ -14,7 +14,7 @@ require_once dirname(__FILE__) . '/../test_bootstrap.php';
 class SecurityFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::bluff('unittest');
+		Config::create('unittest');
 		Config::set('security', array('one' => 'debug', 'two' => 'fake'));
 	}
 

@@ -26,7 +26,7 @@ class UpperCase extends DBObject {
 class DBObjectTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::bluff('testing');
+		Config::create('testing');
 		Config::set('database', array(
 			'db' => array(
 				'driver' => 'debug',

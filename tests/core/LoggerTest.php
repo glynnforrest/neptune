@@ -15,7 +15,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 	const file = '/tmp/logtest';
 
 	public function setUp() {
-		Config::bluff('config');
+		Config::create('config');
 		Config::set('log', array(
 			'type' => array (
 				'fatal' => true,
