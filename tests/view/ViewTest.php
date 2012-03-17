@@ -23,8 +23,10 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
-		Config::bluff('view');
-		Config::set('view_dir', '/tmp');
+		Config::create('view');
+		Config::set('view.prefixes', array(
+			'default' => '/tmp/',
+			'prefix' => 'folder_prefix/'));
 	}
 
 	public function tearDown() {
@@ -35,7 +37,18 @@ END;
 	public function testConstruct() {
 		$v = View::load('some/file');
 		$this->assertTrue($v instanceof View);
-	}	
+	}
+
+	public function testLoad() {
+		$v = View::load('some/file');
+		$this->assertEquals('/tmp/some/file.php', $v->getViewName());
+
+	}
+
+	public function testLoadPrefix() {
+		$v = View::load('prefix#view');
+		$this->assertEquals('folder_prefix/view.php', $v->getViewName());
+	}
 
 	public function testSetAndGet() {
 		$v = View::load('some/file');
@@ -59,7 +72,6 @@ END;
 		$v = View::load('some/file');
 		$this->setExpectedException('neptune\\exceptions\\ViewNotFoundException');
 		$v->render();
-
 	}
 
 	public function testRenderAbsolutePath() {

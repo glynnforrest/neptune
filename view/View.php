@@ -10,7 +10,7 @@ class View {
 	const EXTENSION = '.php';
 
 	protected $vars = array();
-	protected $file;
+	protected $view;
 
 	protected function __construct() {
 	}
@@ -64,33 +64,42 @@ class View {
 	/**
 	 * @return View 
 	 */
-	public static function load($view, $vars = array()) {
-		$view = Config::getRequired('view_dir') . $view;
-		return self::loadAbsolute($view, $vars);
-	}
-
-	public static function loadAbsolute($view, $vars = array()) {
+	public static function load($view, $vars = array(), $absolute = false) {
 		$class = get_called_class();
 		$me = new $class();
-		$me->file = $view . self::EXTENSION;
+		$me->setViewName($view, $absolute);
 		$me->setValues($vars);
 		return $me;
 	}
 
-	public function setView($view, $absolute = false) {
-		$view = $view . self::EXTENSION;
+	public static function loadAbsolute($view, $vars = array()) {
+		return self::load($view, $vars, true);
+	}
+
+	public function setViewName($view, $absolute = false) {
 		if(!$absolute) {
-			$view = Config::getRequired('view_dir') . $view;
+			$pos = strpos($view, '#');
+			if($pos) {
+				$name = substr($view, 0, $pos);
+				$view = Config::getRequired('view.prefixes.' . $name) . substr($view, $pos + 1);
+			} else {
+				$view = Config::getFirstRequired('view.prefixes') . $view;
+			}
 		}
-		$this->file = $view;
+		$view = $view . self::EXTENSION;
+		$this->view = $view;
+	}
+
+	public function getViewName() {
+		return $this->view;
 	}
 
 	public function render() {
-		if (!file_exists($this->file)) {
-			throw new ViewNotFoundException("Could not load view file $this->file");
+		if (!file_exists($this->view)) {
+			throw new ViewNotFoundException("Could not load view $this->view");
 		}
 		ob_start();
-		include $this->file;
+		include $this->view;
 		return ob_get_clean();
 	}
 

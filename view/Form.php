@@ -43,7 +43,7 @@ class Form extends View {
 	}
 
 	public function render() {
-		if(isset($this->file)) {
+		if(isset($this->view)) {
 			return parent::render();
 		}
 		return $this->renderForm();
