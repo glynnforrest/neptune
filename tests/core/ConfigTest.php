@@ -49,6 +49,28 @@ END;
 		$this->assertEquals(1, Config::get('named#one'));
 	}
 
+	public function testGetFirst() {
+		Config::load(self::file);
+		$this->assertEquals(2.1, Config::getFirst('two'));
+	}
+
+	public function testGetFirstDefault() {
+		Config::load(self::file);
+		$this->assertEquals('default', Config::getFirst('fake-key', 'default'));
+	}
+
+	public function testGetRequired() {
+		$this->setExpectedException('neptune\\exceptions\\ConfigKeyException');
+		Config::getRequired('fake');
+		$this->assertEquals(2.1, Config::getRequired('two.one'));
+	}
+
+	public function testGetFirstRequired() {
+		$this->setExpectedException('neptune\\exceptions\\ConfigKeyException');
+		Config::getFirstRequired('fake');
+		$this->assertEquals(2.1, Config::getFirstRequired('two'));
+	}
+
 	public function testSet() {
 		Config::load(self::file);
 		$this->assertTrue(Config::set('three', 3));

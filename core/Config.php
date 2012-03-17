@@ -23,7 +23,7 @@ class Config {
 		return self::$instance;
 	}
 
-	public static function get($key=null, $default = null) {
+	public static function get($key = null, $default = null) {
 		$pos = strpos($key, '#');
 		if($pos) {
 			$name = substr($key, 0, $pos);
@@ -58,8 +58,25 @@ class Config {
 		return $default;
 	}
 
+	public static function getFirst($key = null, $default = null) {
+		$array = self::get($key);
+		if(!$key | !is_array($array)) {
+			return $default;
+		}
+		reset($array);
+		return current($array);
+	}
+
 	public static function getRequired($key) {
 		$value = self::get($key);
+		if ($value) {
+			return $value;
+		}
+		throw new ConfigKeyException("Required value not found: $key");
+	}
+
+	public function getFirstRequired($key) {
+		$value = self::getFirst($key);
 		if ($value) {
 			return $value;
 		}
