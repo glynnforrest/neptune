@@ -73,7 +73,7 @@ END;
 
 	public function testSet() {
 		Config::load(self::file);
-		$this->assertTrue(Config::set('three', 3));
+		Config::set('three', 3);
 		$this->assertEquals(3, Config::get('three'));
 	}
 
@@ -83,6 +83,32 @@ END;
 		$this->assertEquals('data', Config::get('ad-hoc'));
 		Config::set('nested', array('value' => 'foo'));
 		$this->assertEquals('foo', Config::get('nested.value'));
+	}
+
+	public function testSetNested() {
+		Config::bluff('fake');
+		Config::set('parent.child', 'value');
+		$this->assertEquals(array('parent' => array('child' => 'value')), Config::get());
+	}
+
+	public function testGetNested() {
+		Config::bluff('fake');
+		Config::set('parent', array('child' => 'value'));
+		$this->assertEquals('value', Config::get('parent.child'));
+	}
+
+	public function testSetDeepNested() {
+		Config::bluff('fake');
+		Config::set('parent.child.0.1.2.3.4', 'value');
+		$this->assertEquals(array('parent' => array('child' => array(
+			0 => array(1 => array(2 => array(3 => array(4 =>'value'))))))), Config::get());
+	}
+
+	public function testGetDeepNested() {
+		Config::bluff('fake');
+		Config::set('parent',  array('child' => array(
+			0 => array(1 => array(2 => array(3 => array(4 =>'value')))))));
+		$this->assertEquals('value', Config::get('parent.child.0.1.2.3.4'));
 	}
 
 	public function testEmptyGet() {
