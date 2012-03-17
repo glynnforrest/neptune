@@ -75,7 +75,7 @@ class Config {
 		throw new ConfigKeyException("Required value not found: $key");
 	}
 
-	public function getFirstRequired($key) {
+	public static function getFirstRequired($key) {
 		$value = self::getFirst($key);
 		if ($value) {
 			return $value;
