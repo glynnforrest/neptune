@@ -261,6 +261,11 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('DELETE FROM 123 WHERE id = \'12\'', $q->__toString());
 	}
 
+	public function testJoin() {
+		$q = SQLQuery::select()->from('table')->join('table2');
+		$this->assertEquals('SELECT * FROM table JOIN table2', $q->__toString());
+	}
+
 }
 
 ?>

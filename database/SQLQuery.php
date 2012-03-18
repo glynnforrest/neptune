@@ -13,7 +13,8 @@ abstract class SQLQuery {
 
 	protected $query = array();
 	protected $type;
-	protected $select_verbs = array('DISTINCT', 'FIELDS', 'FROM', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET');
+	protected $select_verbs = array('DISTINCT', 'FIELDS', 'FROM', 
+		'JOIN', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET');
 	protected $insert_verbs = array('INTO', 'FIELDS');
 	protected $update_verbs = array('TABLES', 'FIELDS', 'WHERE');
 	protected $delete_verbs = array('FROM', 'WHERE');
@@ -157,6 +158,11 @@ abstract class SQLQuery {
 
 	public function distinct() {
 		$this->query['DISTINCT'] = true;
+		return $this;
+	}
+
+	public function join($table, $type = null) {
+		$this->query['JOIN'] = $table;
 		return $this;
 	}
 
