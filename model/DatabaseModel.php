@@ -6,6 +6,7 @@ use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
 use neptune\database\DBObject;
 use neptune\database\DBObjectSet;
+use neptune\database\RelationsManager;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
 use neptune\exceptions\TypeException;
@@ -21,10 +22,10 @@ class DatabaseModel extends Cacheable {
 	protected $database;
 	protected $table;
 	protected $fields = array();
-	protected $fieldmap = array();
 	protected $primary_key = 'id';
 	protected $rules = array();
 	protected $messages = array();
+	protected $relations = array();
 
 	/**
 	 *
@@ -100,16 +101,21 @@ class DatabaseModel extends Cacheable {
 		return $objectset;
 	}
 
-	protected function applyMappings(&$obj, $use_foreign = false) {
+	protected function applyMappings(&$obj, $relations = array()) {
 		$obj->setFields($this->fields);
 		$obj->setPrimaryKey($this->primary_key);
+		if(!empty($relations)) {
+			RelationsManager::getInstance()->processRelation($obj,
+				$this->has_one[$relations[0]]);
+		}
+		return $obj;
 	}
 
 	/**
 	 * @return DBObject
 	 * Selects a single row from the database where column = value.
 	 */
-	public static function selectOne($column, $value, $database = false) {
+	public static function selectOne($column, $value, $relations = array(), $database = false) {
 		$me = self::getInstance($database);
 		$q = SQLQuery::select($database);
 		$q->from($me->table);
@@ -120,7 +126,7 @@ class DatabaseModel extends Cacheable {
 		$result = $stmt->fetchAssoc();
 		if($result) {
 			$result = new DBObject($database, $me->table, $result);
-			$me->applyMappings($result);
+			$me->applyMappings($result, $relations);
 		}
 		return $result;
 	}

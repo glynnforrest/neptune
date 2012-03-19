@@ -15,10 +15,12 @@ class DBObject {
 	protected $primary_key;
 	protected $current_index;
 	protected $fields = array();
-	protected $fieldmap = array();
 	protected $values = array();
 	protected $modified = array();
 	protected $stored = false;
+	protected $relations = array();
+	protected $relation_keys = array();
+	protected $relation_objects = array();
 
 	public function __construct($database, $table, array $resultset = null) {
 		$this->database = $database;
@@ -40,6 +42,9 @@ class DBObject {
 	}
 
 	public function get($key) {
+		if(array_key_exists($key, $this->relations)) {
+			return $this->getRelationObject($key);
+		}
 		if (isset($this->values[$key])) {
 			return $this->values[$key];
 		}
@@ -55,14 +60,17 @@ class DBObject {
 	}
 
 	public function set($key, $value, $overwrite = true) {
+		if(array_key_exists($key, $this->relations)) {
+			return $this->setRelationObject($key, $value);
+		}
 		if($key === $this->primary_key && isset($this->values[$key])) {
 			$this->current_index = $this->values[$key];		
 		}
 		if($overwrite) {
-			$this->values[$key] = $value;
+			$this->setValue($key, $value);
 		} else {
 			if(!isset($this->values[$key])) {
-				$this->values[$key] = $value;
+				$this->setValue($key, $value);
 			} else {
 				return false;
 			}
@@ -70,6 +78,13 @@ class DBObject {
 		if (in_array($key, $this->fields) && !in_array($key, $this->modified)) {
 			$this->modified [] = $key;
 		}		
+	}
+
+	protected function setValue($key, $value) {
+			$this->values[$key] = $value;
+			if(isset($this->relation_keys[$key])) {
+				$this->updateRelation($this->relation_keys[$key]);
+			}
 	}
 
 	public function setValues($values = array(), $overwrite = true) {
@@ -81,6 +96,42 @@ class DBObject {
 
 	public function __isset($key) {
 		return isset($this->values[$key]);
+	}
+
+	public function setRelation($key, $relation) {
+		$this->relations[$key] = $relation;
+	}
+
+	public function updateRelation($name) {
+		$rm = RelationsManager::getInstance();
+		$related = $this->relation_objects[$name];
+		$rm->updateRelation($this, $related, $this->relations[$name]);
+	}
+
+	public function getRelation($key) {
+		return isset($this->relations[$key]) ?: null;
+	}
+
+	public function setRelationObject($name, &$object) {
+		if(!isset($this->relations[$name])) {
+			return false;
+		}
+		$this->relation_objects[$name] = $object;
+		$key = $this->relations[$name]['key'];
+		$this->relation_keys[$key] = $name;
+		$this->updateRelation($name);
+	}
+
+	public function getRelationObject($key) {
+		//if we've got it, don't query it again
+		if(isset($this->relation_objects[$key])) {
+			return $this->relation_objects[$key];
+		}
+		$rm = RelationsManager::getInstance();
+		if($rm->processRelation($this, $this->relations[$key])) {
+			return $this->relation_objects[$key];
+		}
+		return null;
 	}
 
 	public function getValues() {
@@ -97,6 +148,10 @@ class DBObject {
 
 	public function setPrimaryKey($columnname) {
 		$this->primary_key = $columnname;
+	}
+
+	public function setRelations(array $relations) {
+		$this->relations = $relations;
 	}
 
 	public function save() {
@@ -133,6 +188,7 @@ class DBObject {
 		return false;
 	}
 
+	//TODO: add params to update on other fields.
 	protected function update() {
 		if (!isset($this->primary_key)) {
 			throw new \Exception('Can\'t update with no index key');
