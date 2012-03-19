@@ -25,8 +25,23 @@ class RelationsManager {
 	public function updateRelation(&$object, &$related_object, $relation) {
 		$key = $relation['key'];
 		$foreign_key = $relation['foreign_key'];
-		if(isset($object->$key)) {
-			$related_object->$foreign_key = $object->$key;
+		switch ($relation['type']) {
+			case 'has_one':
+				if(isset($object->$key)) {
+					$related_object->$foreign_key = $object->$key;
+				}
+				break;
+			case 'belongs_to':
+				if(isset($related_object->$foreign_key)) {
+					$object->$key = $related_object->$foreign_key;
+				}
+			case 'has_many':
+				break;
+			case 'has_many_through':
+				break;
+			default:
+				return false;
+				break;
 		}
 	}
 

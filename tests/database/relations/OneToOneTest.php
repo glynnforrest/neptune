@@ -30,6 +30,8 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$this->user->setRelation('details', array('type' => 'has_one', 'key' => 'id',
 			'foreign_key' => 'users_id'));
 		$this->user_details = new UserDetails('db', 'user_details');
+		$this->user_details->setRelation('user', array('type' => 'belongs_to', 'key'
+			=> 'users_id', 'foreign_key' => 'id'));
 		
 	}
 
@@ -37,7 +39,11 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		
 	}
 
-	public function testSetRelationObject() {
+	/**
+	 * Has one functionality
+	 */
+
+	public function testSetRelatedObject() {
 		$u = $this->user;
 		$d = $this->user_details;
 		$d->details = 'User1 details';
@@ -45,7 +51,7 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('User1 details', $u->details->details);
 	}
 
-	public function testForeignKeyIsChangedOnSetRelationObject() {
+	public function testForeignKeyUpdatedOnCreateRelationship() {
 		$u = $this->user;
 		$u->username = 'user1';
 		$u->id = 1;
@@ -56,7 +62,7 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $d->users_id);
 	}
 
-	public function testForeignKeyIsUpdatedOnSetRelationObject() {
+	public function testForeignKeyUpdatedOnKeyChange() {
 		$u = $this->user;
 		$u->id = 1;
 		$d = $this->user_details;
@@ -64,6 +70,44 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $d->users_id);
 		$u->id = 4;
 		$this->assertEquals(4, $d->users_id);
+	}
+
+	public function testKeyNotUpdatedOnForeignKeyChange() {
+		$u = $this->user;
+		$u->id = 1;
+		$u->details = $this->user_details;
+		$this->assertEquals(1, $u->details->users_id);
+		$u->details->users_id = 2;
+		$this->assertEquals(1, $u->id);
+	}
+
+	/**
+	 * Belongs to functionality
+	 */
+
+	public function testSetOwnerObject() {
+		$d = $this->user_details;
+		$u = $this->user;
+		$u->id = 3;
+		$d->user = $u;
+		$this->assertEquals(3, $d->user->id);
+	}
+
+	public function testKeyUpdatedOnCreateRelationship() {
+		$d = $this->user_details;
+		$u = $this->user;
+		$u->id = 3;
+		$d->user = $u;
+		$this->assertEquals(3, $d->users_id);
+	}
+
+	public function testKeyUpdatedOnForeignKeyChange() {
+		$d = $this->user_details;
+		$u = $this->user;
+		$u->id = 3;
+		$d->user = $u;
+		$u->id = 2;
+		$this->assertEquals(2, $d->users_id);
 	}
 	
 }
