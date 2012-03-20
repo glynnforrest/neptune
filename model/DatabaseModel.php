@@ -6,7 +6,6 @@ use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
 use neptune\database\DBObject;
 use neptune\database\DBObjectSet;
-use neptune\database\RelationsManager;
 use neptune\database\Relationship;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
