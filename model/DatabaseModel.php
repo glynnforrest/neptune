@@ -7,6 +7,7 @@ use neptune\database\DatabaseFactory;
 use neptune\database\DBObject;
 use neptune\database\DBObjectSet;
 use neptune\database\RelationsManager;
+use neptune\database\Relationship;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
 use neptune\exceptions\TypeException;
@@ -25,7 +26,7 @@ class DatabaseModel extends Cacheable {
 	protected $primary_key = 'id';
 	protected $rules = array();
 	protected $messages = array();
-	protected $relations = array();
+	protected $relationships = array();
 
 	/**
 	 *
@@ -54,7 +55,7 @@ class DatabaseModel extends Cacheable {
 	public static function createOne($data = array(), $database = false) {
 		$me = self::getInstance($database);
 		$obj = new DBObject($database, $me->table);
-		$me->applyMappings($obj);
+		$me->applySchema($obj);
 		foreach($data as $k => $v) {
 			$obj->$k = $v;
 		}
@@ -66,10 +67,10 @@ class DatabaseModel extends Cacheable {
 		$objectset = new DBObjectSet($database, $me->table);
 		for ($i = 0; $i < $count; $i++) {
 			$obj = new DBObject($database, $me->table);
-			$me->applyMappings($obj);
+			$me->applySchema($obj);
 			$objectset[] = $obj;
 		}
-		return $me->applyMappings($objectset);
+		return $me->applySchema($objectset);
 	}
 
 	public static function select(SQLQuery $query = null, $database = false) {
@@ -94,19 +95,22 @@ class DatabaseModel extends Cacheable {
 			$results[] = new DBObject($database, $me->table, $result);
 		}
 		foreach ($results as $result) {
-			$me->applyMappings($result);
+			$me->applySchema($result);
 		}
 		$objectset = new DBObjectSet($database, $me->table, $results);
-		$me->applyMappings($objectset);
+		$me->applySchema($objectset);
 		return $objectset;
 	}
 
-	protected function applyMappings(&$obj, $relations = array()) {
+	protected function applySchema(&$obj, $relationships = array()) {
 		$obj->setFields($this->fields);
 		$obj->setPrimaryKey($this->primary_key);
-		if(!empty($relations)) {
-			RelationsManager::getInstance()->processRelation($obj,
-				$this->has_one[$relations[0]]);
+		if(!empty($relationships)) {
+			foreach($relationships as $k => $v) {
+				if(isset($this->relationships[$k])) {
+					$obj->addRelationship(new Relationship($v['type'], $v['key'], $v['foreign_key']));
+				}
+			}
 		}
 		return $obj;
 	}
@@ -115,7 +119,7 @@ class DatabaseModel extends Cacheable {
 	 * @return DBObject
 	 * Selects a single row from the database where column = value.
 	 */
-	public static function selectOne($column, $value, $relations = array(), $database = false) {
+	public static function selectOne($column, $value, $relationships = array(), $database = false) {
 		$me = self::getInstance($database);
 		$q = SQLQuery::select($database);
 		$q->from($me->table);
@@ -126,7 +130,7 @@ class DatabaseModel extends Cacheable {
 		$result = $stmt->fetchAssoc();
 		if($result) {
 			$result = new DBObject($database, $me->table, $result);
-			$me->applyMappings($result, $relations);
+			$me->applySchema($result, $relationships);
 		}
 		return $result;
 	}

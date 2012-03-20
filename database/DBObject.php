@@ -3,6 +3,7 @@
 namespace neptune\database;
 
 use neptune\database\SQLQuery;
+use neptune\database\Relationship;
 
 /**
  * DBObject
@@ -18,9 +19,8 @@ class DBObject {
 	protected $values = array();
 	protected $modified = array();
 	protected $stored = false;
-	protected $relations = array();
-	protected $relation_keys = array();
-	protected $relation_objects = array();
+	protected $relationships = array();
+	protected $relationship_keys = array();
 
 	public function __construct($database, $table, array $resultset = null) {
 		$this->database = $database;
@@ -42,8 +42,9 @@ class DBObject {
 	}
 
 	public function get($key) {
-		if(array_key_exists($key, $this->relations)) {
-			return $this->getRelationObject($key);
+		if(isset($this->relationships[$key])) {
+			$name = array_search($key, $this->relationship_keys);
+			return $this->relationships[$key]->getRelatedObject($name);
 		}
 		if (isset($this->values[$key])) {
 			return $this->values[$key];
@@ -60,8 +61,12 @@ class DBObject {
 	}
 
 	public function set($key, $value, $overwrite = true) {
-		if(array_key_exists($key, $this->relations)) {
-			return $this->setRelationObject($key, $value);
+		if(isset($this->relationships[$key])) {
+			$name = array_search($key, $this->relationship_keys);
+			$this->relationships[$key]->setRelatedObject($name, $value);
+			if(isset($this->values[$name])) {
+				$this->relationships[$key]->setKey($name, $this->values[$name]);
+			}
 		}
 		if($key === $this->primary_key && isset($this->values[$key])) {
 			$this->current_index = $this->values[$key];		
@@ -81,10 +86,10 @@ class DBObject {
 	}
 
 	protected function setValue($key, $value) {
-			$this->values[$key] = $value;
-			if(isset($this->relation_keys[$key])) {
-				$this->updateRelation($this->relation_keys[$key]);
-			}
+		$this->values[$key] = $value;
+		if(isset($this->relationship_keys[$key])) {
+			$this->relationships[$this->relationship_keys[$key]]->setKey($key, $value);
+		}
 	}
 
 	public function setValues($values = array(), $overwrite = true) {
@@ -98,40 +103,10 @@ class DBObject {
 		return isset($this->values[$key]);
 	}
 
-	public function setRelation($key, $relation) {
-		$this->relations[$key] = $relation;
-	}
-
-	public function updateRelation($name) {
-		$rm = RelationsManager::getInstance();
-		$related = $this->relation_objects[$name];
-		$rm->updateRelation($this, $related, $this->relations[$name]);
-	}
-
-	public function getRelation($key) {
-		return isset($this->relations[$key]) ?: null;
-	}
-
-	public function setRelationObject($name, &$object) {
-		if(!isset($this->relations[$name])) {
-			return false;
-		}
-		$this->relation_objects[$name] = $object;
-		$key = $this->relations[$name]['key'];
-		$this->relation_keys[$key] = $name;
-		$this->updateRelation($name);
-	}
-
-	public function getRelationObject($key) {
-		//if we've got it, don't query it again
-		if(isset($this->relation_objects[$key])) {
-			return $this->relation_objects[$key];
-		}
-		$rm = RelationsManager::getInstance();
-		if($rm->processRelation($this, $this->relations[$key])) {
-			return $this->relation_objects[$key];
-		}
-		return null;
+	public function addRelationship($name, $key, Relationship &$r) {
+		$this->relationships[$name] = $r;
+		$this->relationship_keys[$key] = $name;
+		$r->setObject($key, $this);
 	}
 
 	public function getValues() {
@@ -148,10 +123,6 @@ class DBObject {
 
 	public function setPrimaryKey($columnname) {
 		$this->primary_key = $columnname;
-	}
-
-	public function setRelations(array $relations) {
-		$this->relations = $relations;
 	}
 
 	public function save() {

@@ -3,6 +3,7 @@
 namespace neptune\database;
 
 use neptune\database\DBObject;
+use neptune\database\Relationship;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -19,24 +20,26 @@ class UserDetails extends DBObject {
 }
 
 /**
- * OneToOneTest
+ * RelationshipOneToOneTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class OneToOneTest extends \PHPUnit_Framework_TestCase {
+class RelationshipOneToOneTest extends \PHPUnit_Framework_TestCase {
+
+	protected $user;
+	protected $user_details;
 
 
 	public function setUp() {
 		$this->user = new User('db', 'users');
-		$this->user->setRelation('details', array('type' => 'has_one', 'key' => 'id',
-			'foreign_key' => 'users_id'));
+		$r = new Relationship(Relationship::TYPE_ONE_TO_ONE, 'id', 'users_id');
+		$this->user->addRelationship('details', 'id', $r);
 		$this->user_details = new UserDetails('db', 'user_details');
-		$this->user_details->setRelation('user', array('type' => 'belongs_to', 'key'
-			=> 'users_id', 'foreign_key' => 'id'));
-		
+		$this->user_details->addRelationship('user', 'users_id', $r);
 	}
 
 	public function tearDown() {
-		
+		unset($this->user);
+		unset($this->user_details);
 	}
 
 	/**
@@ -109,6 +112,14 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$u->id = 2;
 		$this->assertEquals(2, $d->users_id);
 	}
-	
+
+	public function testRelationshipExistsWhenNotChildren() {
+		$d = $this->user_details;
+		$d->users_id = 3;
+		$u = $this->user;
+		$u->id = 2;
+		$this->assertEquals(2, $d->users_id);
+	}	
+
 }
 ?>
