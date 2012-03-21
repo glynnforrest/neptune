@@ -2,10 +2,9 @@
 
 namespace neptune\model;
 
+use neptune\model\ModelGroup;
 use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
-use neptune\database\DBObject;
-use neptune\database\ModelGroup;
 use neptune\database\Relationship;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
@@ -70,14 +69,14 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function set($key, $value, $overwrite = true) {
-		if(isset($this->relationships[$key])) {
-			$name = array_search($key, $this->relationship_keys);
-			$this->relationships[$key]->setRelatedObject($name, $value);
-			if(isset($this->values[$name])) {
-				$this->relationships[$key]->setKey($name, $this->values[$name]);
-			}
-		}
-		if($key === $this->primary_key && isset($this->values[$key])) {
+		// if(isset($this->relationships[$key])) {
+		// 	$name = array_search($key, $this->relationship_keys);
+		// 	$this->relationships[$key]->setRelatedObject($name, $value);
+		// 	if(isset($this->values[$name])) {
+		// 		$this->relationships[$key]->setKey($name, $this->values[$name]);
+		// 	}
+		// }
+		if($key === static::$primary_key && isset($this->values[$key])) {
 			$this->current_index = $this->values[$key];		
 		}
 		if($overwrite) {
@@ -89,7 +88,7 @@ class DatabaseModel extends Cacheable {
 				return false;
 			}
 		}
-		if (in_array($key, $this->fields) && !in_array($key, $this->modified)) {
+		if (in_array($key, static::$fields) && !in_array($key, $this->modified)) {
 			$this->modified [] = $key;
 		}		
 	}
@@ -122,18 +121,6 @@ class DatabaseModel extends Cacheable {
 		return $this->values;
 	}
 
-	public function getTable() {
-		return $this->table;
-	}
-
-	public function setFields(array $fields) {
-		$this->fields = $fields;
-	}
-
-	public function setPrimaryKey($columnname) {
-		$this->primary_key = $columnname;
-	}
-
 	public function save() {
 		if ($this->stored) {
 			if (!empty($this->modified)) {
@@ -147,20 +134,20 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function delete() {
-		if (!isset($this->primary_key)) {
+		if (!isset(static::$primary_key)) {
 			throw new \Exception('Can\'t update with no index key');
 		}
 		$q = SQLQuery::delete($this->database);
 		$q->from($this->table);
-		if (!isset($this->values[$this->primary_key])) {
+		if (!isset($this->values[static::$primary_key])) {
 			throw new \Exception('Can\'t update with no index key');
 		}
-		$q->where("$this->primary_key =", '?');
+		$q->where("static::$primary_key =", '?');
 		$stmt = $q->prepare();
 		if($this->current_index) {
 			$index = $this->current_index;
 		} else {
-			$index = $this->values[$this->primary_key];
+			$index = $this->values[static::$primary_key];
 		}
 		if ($stmt->execute(array($index))) {
 			return true;
@@ -169,19 +156,17 @@ class DatabaseModel extends Cacheable {
 	}
 
 	//TODO: add params to update on other fields.
-	protected function update() {
-		if (!isset($this->primary_key)) {
-			throw new \Exception('Can\'t update with no index key');
-		}
+	public function update() {
 		if (!empty($this->modified)) {
 			$q = SQLQuery::update($this->database);
-			$q->tables($this->table);
+			$q->tables(static::$table);
 			$q->fields($this->modified);
-			if (!isset($this->values[$this->primary_key])) {
+			if (!isset($this->values[static::$primary_key])) {
 				throw new \Exception('Can\'t update with no index key');
 			}
-			$q->where("$this->primary_key =", '?');
+			$q->where(static::$primary_key . " =", '?');
 			$stmt = $q->prepare();
+			echo '<pre>'; print_r($q->prepare()); echo '</pre>';
 			$values = array();
 			foreach ($this->modified as $modified) {
 				$values[] = $this->values[$modified];
@@ -189,7 +174,7 @@ class DatabaseModel extends Cacheable {
 			if($this->current_index) {
 				$index = $this->current_index;
 			} else {
-				$index = $this->values[$this->primary_key];
+				$index = $this->values[static::$primary_key];
 			}
 			$values[] = $index;
 			if ($stmt->execute($values)) {
@@ -200,10 +185,10 @@ class DatabaseModel extends Cacheable {
 		return false;
 	}
 
-	protected function insert() {
+	public function insert() {
 		if (!empty($this->modified)) {
 			$q = SQLQuery::insert($this->database);
-			$q->into($this->table);
+			$q->into(static::$table);
 			$values = array();
 			foreach ($this->modified as $modified) {
 				$values[] = $this->values[$modified];
@@ -307,10 +292,6 @@ class DatabaseModel extends Cacheable {
 
 	public function setDatabase($database) {
 		$this->database = $database;
-	}
-
-	public function getFields() {
-		return $this->fields;
 	}
 
 	public static function bindValidation($names, $input_array = 'POST') {
