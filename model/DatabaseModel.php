@@ -5,7 +5,7 @@ namespace neptune\model;
 use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
 use neptune\database\DBObject;
-use neptune\database\DBObjectSet;
+use neptune\database\ModelGroup;
 use neptune\database\Relationship;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
@@ -18,95 +18,214 @@ use neptune\view\Form;
  */
 class DatabaseModel extends Cacheable {
 
-	protected static $models = array();
+	protected static $table;
+	protected static $fields = array();
+	protected static $primary_key = 'id';
+	protected static $rules = array();
+	protected static $messages = array();
 	protected $database;
-	protected $table;
-	protected $fields = array();
-	protected $primary_key = 'id';
-	protected $rules = array();
-	protected $messages = array();
+	protected $current_index;
+	protected $values = array();
+	protected $modified = array();
+	protected $stored = false;
 	protected $relationships = array();
+	protected $relationship_keys = array();
 
-	/**
-	 *
-	 * @param string $database
-	 * @return DatabaseModel 
-	 */
-	public static function getInstance($database = false) {
-		$class = get_called_class();
-		$model_name = $database ? $class . '.' . $database : $class;
-		if (!isset(self::$models[$model_name])) {
-			self::$models[$model_name] = new $class();
-			self::$models[$model_name]->setDatabase($database);
+	public function __construct($database, array $result = null) {
+		$this->database = $database;
+		if ($result && is_array($result)) {
+			foreach ($result as $key => $value) {
+				$this->values[$key] = $value;
+			}
+			//move to select
+			$this->stored = true;
 		}
-		return self::$models[$model_name];
 	}
 
-	protected function __construct() {
-		
+	public function __get($key) {
+		$method = 'get'.ucfirst($key);
+		if(method_exists($this, $method)) {
+			return $this->$method();
+		}
+		return $this->get($key);
 	}
 
-	/**
-	 * Create a DBObject, apply mapping from this model and return to the user.
-	 * @param string $database
-	 * @return DBObject
-	 */
-	public static function createOne($data = array(), $database = false) {
-		$me = self::getInstance($database);
-		$obj = new DBObject($database, $me->table);
-		$me->applySchema($obj);
-		foreach($data as $k => $v) {
-			$obj->$k = $v;
+	public function get($key) {
+		if(isset($this->relationships[$key])) {
+			$name = array_search($key, $this->relationship_keys);
+			return $this->relationships[$key]->getRelatedObject($name);
 		}
-		return $obj;
+		if (isset($this->values[$key])) {
+			return $this->values[$key];
+		}
+		return null;
 	}
 
-	public static function create($count, $database = false) {
-		$me = self::getInstance($database);
-		$objectset = new DBObjectSet($database, $me->table);
-		for ($i = 0; $i < $count; $i++) {
-			$obj = new DBObject($database, $me->table);
-			$me->applySchema($obj);
-			$objectset[] = $obj;
+	public function __set($key, $value) {
+		$method = 'set'.ucfirst($key);
+		if(method_exists($this, $method)) {
+			return $this->$method($value);
 		}
-		return $me->applySchema($objectset);
+		return $this->set($key, $value);
 	}
 
-	public static function select(SQLQuery $query = null, $database = false) {
-		$me = self::getInstance($database);
-		if (!$query) {
-			$query = SQLQuery::select($database);
-			$query->from($me->table);
+	public function set($key, $value, $overwrite = true) {
+		if(isset($this->relationships[$key])) {
+			$name = array_search($key, $this->relationship_keys);
+			$this->relationships[$key]->setRelatedObject($name, $value);
+			if(isset($this->values[$name])) {
+				$this->relationships[$key]->setKey($name, $this->values[$name]);
+			}
 		}
-		if (!$query->getDatabase()) {
-			$query->setDatabase($database);
+		if($key === $this->primary_key && isset($this->values[$key])) {
+			$this->current_index = $this->values[$key];		
 		}
-		if(!$query->getTables()) {
-			$query->from($me->table);
+		if($overwrite) {
+			$this->setValue($key, $value);
+		} else {
+			if(!isset($this->values[$key])) {
+				$this->setValue($key, $value);
+			} else {
+				return false;
+			}
 		}
-		if ($query->getFields()) {
-			$query->fields($me->primary_key);
-		}
-		$stmt = $query->prepare();
-		$stmt->execute();
-		$results = array();
-		while ($result = $stmt->fetchAssoc()) {
-			$results[] = new DBObject($database, $me->table, $result);
-		}
-		foreach ($results as $result) {
-			$me->applySchema($result);
-		}
-		$objectset = new DBObjectSet($database, $me->table, $results);
-		$me->applySchema($objectset);
-		return $objectset;
+		if (in_array($key, $this->fields) && !in_array($key, $this->modified)) {
+			$this->modified [] = $key;
+		}		
 	}
 
-	protected function applySchema(&$obj, $relationships = array()) {
-		$obj->setFields($this->fields);
-		$obj->setPrimaryKey($this->primary_key);
+	protected function setValue($key, $value) {
+		$this->values[$key] = $value;
+		if(isset($this->relationship_keys[$key])) {
+			$this->relationships[$this->relationship_keys[$key]]->setKey($key, $value);
+		}
+	}
+
+	public function setValues($values = array(), $overwrite = true) {
+		foreach ($values as $k => $v) {
+			$this->set($k, $v, $overwrite);
+		}
+		return $this;
+	}
+
+	public function __isset($key) {
+		return isset($this->values[$key]);
+	}
+
+	public function addRelationship($name, $key, Relationship &$r) {
+		$this->relationships[$name] = $r;
+		$this->relationship_keys[$key] = $name;
+		$r->setObject($key, $this);
+	}
+
+	public function getValues() {
+		return $this->values;
+	}
+
+	public function getTable() {
+		return $this->table;
+	}
+
+	public function setFields(array $fields) {
+		$this->fields = $fields;
+	}
+
+	public function setPrimaryKey($columnname) {
+		$this->primary_key = $columnname;
+	}
+
+	public function save() {
+		if ($this->stored) {
+			if (!empty($this->modified)) {
+				return $this->update();
+			} else {
+				return true;
+			}
+		} else {
+			return $this->insert();
+		}
+	}
+
+	public function delete() {
+		if (!isset($this->primary_key)) {
+			throw new \Exception('Can\'t update with no index key');
+		}
+		$q = SQLQuery::delete($this->database);
+		$q->from($this->table);
+		if (!isset($this->values[$this->primary_key])) {
+			throw new \Exception('Can\'t update with no index key');
+		}
+		$q->where("$this->primary_key =", '?');
+		$stmt = $q->prepare();
+		if($this->current_index) {
+			$index = $this->current_index;
+		} else {
+			$index = $this->values[$this->primary_key];
+		}
+		if ($stmt->execute(array($index))) {
+			return true;
+		}
+		return false;
+	}
+
+	//TODO: add params to update on other fields.
+	protected function update() {
+		if (!isset($this->primary_key)) {
+			throw new \Exception('Can\'t update with no index key');
+		}
+		if (!empty($this->modified)) {
+			$q = SQLQuery::update($this->database);
+			$q->tables($this->table);
+			$q->fields($this->modified);
+			if (!isset($this->values[$this->primary_key])) {
+				throw new \Exception('Can\'t update with no index key');
+			}
+			$q->where("$this->primary_key =", '?');
+			$stmt = $q->prepare();
+			$values = array();
+			foreach ($this->modified as $modified) {
+				$values[] = $this->values[$modified];
+			}
+			if($this->current_index) {
+				$index = $this->current_index;
+			} else {
+				$index = $this->values[$this->primary_key];
+			}
+			$values[] = $index;
+			if ($stmt->execute($values)) {
+				$this->modified = array();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected function insert() {
+		if (!empty($this->modified)) {
+			$q = SQLQuery::insert($this->database);
+			$q->into($this->table);
+			$values = array();
+			foreach ($this->modified as $modified) {
+				$values[] = $this->values[$modified];
+			}
+			$q->fields($this->modified);
+			$stmt = $q->prepare();
+			if ($stmt->execute($values)) {
+				$this->modified = array();
+				$this->stored = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	protected static function applySchema(&$obj, $relationships = array()) {
+		$obj->setFields(static::$fields);
+		$obj->setPrimaryKey(static::$primary_key);
 		if(!empty($relationships)) {
 			foreach($relationships as $k => $v) {
-				if(isset($this->relationships[$k])) {
+				if(isset(static::$relationships[$k])) {
 					$obj->addRelationship(new Relationship($v['type'], $v['key'], $v['foreign_key']));
 				}
 			}
@@ -114,24 +233,56 @@ class DatabaseModel extends Cacheable {
 		return $obj;
 	}
 
-	/**
-	 * @return DBObject
-	 * Selects a single row from the database where column = value.
-	 */
+	public static function createOne($data = array(), $database = false) {
+		return new static($database, $data);
+	}
+
+	public static function create($count, $database = false) {
+		$set = new ModelGroup($database, $me->table);
+		for ($i = 0; $i < $count; $i++) {
+			$set[] = new static($database);
+		}
+		static::applySchema($set);
+		return $set;
+	}
+
 	public static function selectOne($column, $value, $relationships = array(), $database = false) {
-		$me = self::getInstance($database);
 		$q = SQLQuery::select($database);
-		$q->from($me->table);
+		$q->from(static::$table);
 		$q->limit(1);
 		$q->where("$column = '$value'");
 		$stmt = $q->prepare();
 		$stmt->execute();
 		$result = $stmt->fetchAssoc();
 		if($result) {
-			$result = new DBObject($database, $me->table, $result);
-			$me->applySchema($result, $relationships);
+			$result = new static($database, $result);
 		}
 		return $result;
+	}
+
+	public static function select(SQLQuery $query = null, $database = false) {
+		if (!$query) {
+			$query = SQLQuery::select($database);
+			$query->from(static::$table);
+		}
+		if (!$query->getDatabase()) {
+			$query->setDatabase($database);
+		}
+		if(!$query->getTables()) {
+			$query->from(static::$table);
+		}
+		if ($query->getFields()) {
+			$query->fields(static::$primary_key);
+		}
+		$stmt = $query->prepare();
+		$stmt->execute();
+		$results = array();
+		while ($result = $stmt->fetchAssoc()) {
+			$results[] = new static($database, static::$table, $result);
+		}
+		$set = new ModelGroup($database, static::$table, $results);
+		static::applySchema($set);
+		return $set;
 	}
 
 	/**
@@ -140,8 +291,9 @@ class DatabaseModel extends Cacheable {
 	 */
 	public static function deleteOne($column, $value, $database = false) {
 		$q = SQLQuery::delete($database);
-		$q->from(self::getInstance()->table);
+		$q->from(static::$table);
 		$q->where("$column = '$value'");
+		//todo use ?
 		$stmt = $q->prepare();
 		if ($stmt->execute()) {
 			return true;
@@ -165,25 +317,23 @@ class DatabaseModel extends Cacheable {
 		if (!is_array($names)) {
 			$names = array($names);
 		}
-		$me = self::getInstance();
 		$rules = array();
 		foreach ($names as $name) {
-			if (isset($me->rules[$name])) {
-				$rules[$name] = $me->rules[$name];
+			if (isset(static::$rules[$name])) {
+				$rules[$name] = static::$rules[$name];
 			}
 		}
-		$v = new Validator($input_array, $rules, $me->messages);
+		$v = new Validator($input_array, $rules, static::$messages);
 		return $v;
 	}
 
 	public static function buildForm($action, $values = array(), $errors = array(), $method = 'POST') {
-		$me = self::getInstance();
 		$f = Form::create($action, $method);
-		foreach($me->fields as $field) {
+		foreach(static::$fields as $field) {
 			$f->add($field, 'text');
 		}
 		$f->add('submit', 'submit', 'Submit');
-		$f->setType($me->primary_key, 'hidden');
+		$f->setType(static::$primary_key, 'hidden');
 		$f->set($values);
 		$f->addErrors($errors);
 		return $f;
