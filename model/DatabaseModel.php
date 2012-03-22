@@ -5,7 +5,8 @@ namespace neptune\model;
 use neptune\model\ModelGroup;
 use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
-use neptune\database\Relationship;
+use neptune\database\relationships\Relationship;
+use neptune\database\relationships\OneToOne;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
 use neptune\exceptions\TypeException;
@@ -50,10 +51,6 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function get($key) {
-		if(isset($this->relationships[$key])) {
-			$name = array_search($key, $this->relationship_keys);
-			return $this->relationships[$key]->getRelatedObject($name);
-		}
 		if (isset($this->values[$key])) {
 			return $this->values[$key];
 		}
@@ -69,13 +66,6 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function set($key, $value, $overwrite = true) {
-		// if(isset($this->relationships[$key])) {
-		// 	$name = array_search($key, $this->relationship_keys);
-		// 	$this->relationships[$key]->setRelatedObject($name, $value);
-		// 	if(isset($this->values[$name])) {
-		// 		$this->relationships[$key]->setKey($name, $this->values[$name]);
-		// 	}
-		// }
 		if($key === static::$primary_key && isset($this->values[$key])) {
 			$this->current_index = $this->values[$key];		
 		}
@@ -111,12 +101,6 @@ class DatabaseModel extends Cacheable {
 		return isset($this->values[$key]);
 	}
 
-	public function addRelationship($name, $key, Relationship &$r) {
-		$this->relationships[$name] = $r;
-		$this->relationship_keys[$key] = $name;
-		$r->setObject($key, $this);
-	}
-
 	public function getValues() {
 		return $this->values;
 	}
@@ -142,7 +126,7 @@ class DatabaseModel extends Cacheable {
 		if (!isset($this->values[static::$primary_key])) {
 			throw new \Exception('Can\'t update with no index key');
 		}
-		$q->where("static::$primary_key =", '?');
+		$q->where(static::$primary_key. " =", '?');
 		$stmt = $q->prepare();
 		if($this->current_index) {
 			$index = $this->current_index;
@@ -208,14 +192,30 @@ class DatabaseModel extends Cacheable {
 	protected static function applySchema(&$obj, $relationships = array()) {
 		$obj->setFields(static::$fields);
 		$obj->setPrimaryKey(static::$primary_key);
-		if(!empty($relationships)) {
-			foreach($relationships as $k => $v) {
-				if(isset(static::$relationships[$k])) {
-					$obj->addRelationship(new Relationship($v['type'], $v['key'], $v['foreign_key']));
-				}
-			}
-		}
 		return $obj;
+	}
+
+	public function addRelationship($name, $key, Relationship &$r) {
+		$this->relationships[$name] = $r;
+		$this->relationship_keys[$key] = $name;
+		$r->setObject($key, $this);
+		$r->setKey($key, $this->$key);
+	}
+
+	protected function hasOne($name, $key, $other_key, $other_class) {
+		if(isset($this->relationships[$name])) {
+			return $this->relationships[$name]->getRelatedObject($key);
+		} else {
+			$this->addRelationship($name, $key, new OneToOne(
+				$key, get_class($this), $other_key, $other_class));
+			return $this->relationships[$name]->getRelatedObject($key);
+		}
+	}
+
+	protected function setHasOne($name, $key, $other_key, $object) {
+		$r = new OneToOne($key, get_class($this), $other_key, get_class($object));
+		$r->setObject($other_key, $object);
+		$this->addRelationship($name, $key, $r);
 	}
 
 	public static function createOne($data = array(), $database = false) {

@@ -1,28 +1,25 @@
 <?php
 
-namespace neptune\database;
+namespace neptune\database\relationships;
 
 /**
  * Relationship
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class Relationship {
+abstract class Relationship {
 
-	const TYPE_ONE_TO_ONE = 0;
-	const TYPE_ONE_TO_MANY = 1;
-	const TYPE_MANY_TO_MANY = 2;
-
-
-	protected $type;
 	protected $left;
 	protected $right;
 	protected $left_key;
 	protected $right_key;
+	protected $left_class;
+	protected $right_class;
 
-	public function __construct($type, $left_key, $right_key) {
-		$this->type = $type;
+	public function __construct($left_key, $left_class, $right_key, $right_class) {
 		$this->left_key = $left_key;
 		$this->right_key = $right_key;
+		$this->left_class = $left_class;
+		$this->right_class = $right_class;
 	}
 
 	public function setObject($key, &$object) {
@@ -41,13 +38,7 @@ class Relationship {
 		}
 	}
 
-	public function getRelatedObject($key) {
-		if($key === $this->left_key) {
-			return $this->right;
-		} elseif($key === $this->right_key) {
-			return $this->left;
-		}
-	}
+	abstract public function getRelatedObject($key);
 
 	public function getLeftKey() {
 		return $this->left_key;

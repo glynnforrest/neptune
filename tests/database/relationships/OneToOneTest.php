@@ -1,39 +1,50 @@
 <?php
 
-namespace neptune\database;
+namespace neptune\tests;
 
-use neptune\database\DBObject;
-use neptune\database\Relationship;
+use neptune\model\DatabaseModel;
+use neptune\database\relationships\OneToOne;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
-class User extends DBObject {
+class User extends DatabaseModel {
 
-	protected $fields = array('id', 'username');
+	protected static $table = 'users';
+	protected static $fields = array('id', 'username');
+
+	protected function getDetails() {
+		return $this->hasOne('details', 'id', 'users_id', 'neptune\\tests\\UserDetails');
+	}
+
+	protected function setDetails($object) {
+		return $this->setHasOne('details', 'id', 'users_id', $object);
+	}
 
 }
 
-class UserDetails extends DBObject {
+class UserDetails extends DatabaseModel {
 
-	protected $fields = array('id', 'users_id', 'details');
+	protected static $table = 'user_details';
+	protected static $fields = array('id', 'users_id', 'details');
 
 }
 
 /**
- * RelationshipOneToOneTest
+ * OneToOneTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class RelationshipOneToOneTest extends \PHPUnit_Framework_TestCase {
+class OneToOneTest extends \PHPUnit_Framework_TestCase {
 
 	protected $user;
 	protected $user_details;
 
 
 	public function setUp() {
-		$this->user = new User('db', 'users');
-		$r = new Relationship(Relationship::TYPE_ONE_TO_ONE, 'id', 'users_id');
+		$this->user = new User('db');
+		$this->user_details = new UserDetails('db');
+		$r = new OneToOne('id', get_class($this->user), 'users_id',
+			get_class($this->user_details));
 		$this->user->addRelationship('details', 'id', $r);
-		$this->user_details = new UserDetails('db', 'user_details');
 		$this->user_details->addRelationship('user', 'users_id', $r);
 	}
 
@@ -54,7 +65,7 @@ class RelationshipOneToOneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('User1 details', $u->details->details);
 	}
 
-	public function testForeignKeyUpdatedOnCreateRelationship() {
+	public function testForeignKeyUpdatedOnSetRelationship() {
 		$u = $this->user;
 		$u->username = 'user1';
 		$u->id = 1;
