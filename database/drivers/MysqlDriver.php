@@ -38,4 +38,8 @@ class MysqlDriver implements DatabaseDriver {
 	public function setBuilderName($builder) {
 		$this->builder = $builder;
 	}
+
+	public function lastInsertId($column = null) {
+		return $this->pdo->lastInsertId();
+	}
 }

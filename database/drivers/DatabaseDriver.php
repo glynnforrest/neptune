@@ -23,6 +23,8 @@ interface DatabaseDriver {
 	public function getBuilderName();
 
 	public function setBuilderName($builder);
+
+	public function lastInsertId($column = null);
 }
 
 ?>

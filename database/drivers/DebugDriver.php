@@ -49,5 +49,9 @@ class DebugDriver implements DatabaseDriver {
 		return $this->statement ? $this->statement->getExecutedQuery() : null;
 	}
 
+	public function lastInsertId($column = null) {
+		return true;
+	}
+
 }
 ?>
