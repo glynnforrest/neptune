@@ -230,6 +230,24 @@ class DatabaseModel extends Cacheable {
 		return $this->relationships[$name]->getRelatedObject($key);
 	}
 
+	protected function belongsTo($key, $other_key, $other_class) {
+		$name = $this->current_relationship;
+		if(is_object($other_class)) {
+			//setting relationship
+			$r = new OneToOne($other_key, get_class($other_class), $key,
+			   	get_class($this));
+			$r->setObject($other_key, $other_class);
+			$this->addRelationship($name, $key, $r);
+		} else {
+			//getting relationship
+			if(!isset($this->relationships[$name])) {
+				$this->addRelationship($name, $key, new OneToOne($other_key,
+					$other_class, $key, get_class($this)));
+			}
+		}
+		return $this->relationships[$name]->getRelatedObject($key);
+	}
+
 	public static function createOne($data = array(), $database = false) {
 		return new static($database, $data);
 	}
