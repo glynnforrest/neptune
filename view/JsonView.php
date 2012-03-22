@@ -4,8 +4,8 @@ namespace neptune\view;
 
 use neptune\view\View;
 use neptune\format\Json;
-use neptune\database\DBObject;
-use neptune\database\DBObjectSet;
+use neptune\model\DatabaseModel;
+use neptune\model\ModelGroup;
 use neptune\helpers\String;
 
 /**
@@ -17,11 +17,11 @@ class JsonView extends View {
 	public function getPreferredVars() {
 		$vars = array();
 		foreach($this->vars as $k => $v) {
-			if($v instanceof DBObject) {
+			if($v instanceof DatabaseModel) {
 				$v->_type = String::single($v->getTable());
 				$vars[$k] = $v->getValues();
 			}
-			if($v instanceof DBObjectSet) {
+			if($v instanceof ModelGroup) {
 				$vars[$k] = $v->getValues();
 			}
 		}

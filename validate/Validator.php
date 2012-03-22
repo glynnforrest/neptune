@@ -7,7 +7,6 @@
 
 namespace neptune\validate;
 
-use neptune\database\DBObject;
 use neptune\helpers\String;
 use neptune\http\Session;
 

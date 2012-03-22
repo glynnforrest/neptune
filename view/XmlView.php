@@ -4,8 +4,8 @@ namespace neptune\view;
 
 use neptune\view\View;
 use neptune\format\Xml;
-use neptune\database\DBObject;
-use neptune\database\DBObjectSet;
+use neptune\model\DatabaseModel;
+use neptune\model\ModelGroup;
 use neptune\helpers\String;
 
 /**
@@ -18,12 +18,12 @@ class XmlView extends View {
 		$vars = array();
 		$c = 0;
 		foreach($this->vars as $k => $v) {
-			if($v instanceof DBObject) {
+			if($v instanceof DatabaseModel) {
 				$k = String::single($v->getTable()) . '#' . $c;
 				$vars[$k] = $v->getValues();
 				$c++;
 			}
-			if($v instanceof DBObjectSet) {
+			if($v instanceof ModelGroup) {
 				$k = $v->getTable() . '#' . $c;
 				$results = $v->getValues();
 				$data = array();
