@@ -12,12 +12,8 @@ class User extends DatabaseModel {
 	protected static $table = 'users';
 	protected static $fields = array('id', 'username');
 
-	protected function getDetails() {
-		return $this->hasOne('details', 'id', 'users_id', 'neptune\\tests\\UserDetails');
-	}
-
-	protected function setDetails($object) {
-		return $this->setHasOne('details', 'id', 'users_id', $object);
+	protected function details($object =  'neptune\\tests\\UserDetails') {
+		return $this->hasOne('id', 'users_id', $object);
 	}
 
 }
