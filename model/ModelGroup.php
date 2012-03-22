@@ -1,16 +1,17 @@
 <?php
 
-namespace neptune\database;
+namespace neptune\model;
 
 use \Iterator;
 use \ArrayAccess;
 use \Countable;
+use neptune\model\DatabaseModel;
 
 /**
- * DBObjectSet
+ * ModelGroup
  * @author Glynn Forrest me@glynnforrest.com
  * */
-class DBObjectSet implements Iterator, ArrayAccess, Countable {
+class ModelGroup implements Iterator, ArrayAccess, Countable {
 
 	protected $database;
 	protected $table;
@@ -179,10 +180,7 @@ class DBObjectSet implements Iterator, ArrayAccess, Countable {
 	}
 
 	public function offsetSet($offset, $value) {
-		if (!is_object($value)) {
-			return false;
-		}
-		if (!is_a($value, '\\neptune\\database\\DBObject')) {
+		if (!$value instanceof DatabaseModel) {
 			return false;
 		}
 		if (is_null($offset)) {

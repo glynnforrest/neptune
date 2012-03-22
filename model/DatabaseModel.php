@@ -30,6 +30,7 @@ class DatabaseModel extends Cacheable {
 	protected $stored = false;
 	protected $relationships = array();
 	protected $relationship_keys = array();
+	protected $current_relationship;
 
 	public function __construct($database, array $result = null) {
 		$this->database = $database;
@@ -43,6 +44,10 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function __get($key) {
+		if(method_exists($this, $key)) {
+			$this->current_relationship = $key;
+			return $this->$key();
+		}
 		$method = 'get'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method();
@@ -58,6 +63,10 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function __set($key, $value) {
+		if(method_exists($this, $key)) {
+			$this->current_relationship = $key;
+			return $this->$key($value);
+		}
 		$method = 'set'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method($value);
@@ -86,7 +95,7 @@ class DatabaseModel extends Cacheable {
 	protected function setValue($key, $value) {
 		$this->values[$key] = $value;
 		if(isset($this->relationship_keys[$key])) {
-			$this->relationships[$this->relationship_keys[$key]]->setKey($key, $value);
+			$this->relationships[$this->relationship_keys[$key]]->updateKey($key, $value);
 		}
 	}
 
@@ -150,7 +159,6 @@ class DatabaseModel extends Cacheable {
 			}
 			$q->where(static::$primary_key . " =", '?');
 			$stmt = $q->prepare();
-			echo '<pre>'; print_r($q->prepare()); echo '</pre>';
 			$values = array();
 			foreach ($this->modified as $modified) {
 				$values[] = $this->values[$modified];
@@ -182,6 +190,8 @@ class DatabaseModel extends Cacheable {
 			if ($stmt->execute($values)) {
 				$this->modified = array();
 				$this->stored = true;
+				$this->set(static::$primary_key,
+					DatabaseFactory::getDriver($this->database)->lastInsertId());
 				return true;
 			}
 		}
@@ -199,23 +209,25 @@ class DatabaseModel extends Cacheable {
 		$this->relationships[$name] = $r;
 		$this->relationship_keys[$key] = $name;
 		$r->setObject($key, $this);
-		$r->setKey($key, $this->$key);
+		$r->updateKey($key, $this->$key);
 	}
 
-	protected function hasOne($name, $key, $other_key, $other_class) {
-		if(isset($this->relationships[$name])) {
-			return $this->relationships[$name]->getRelatedObject($key);
+	protected function hasOne($key, $other_key, $other_class) {
+		$name = $this->current_relationship;
+		if(is_object($other_class)) {
+			//setting relationship
+			$r = new OneToOne($key, get_class($this), $other_key,
+			   	get_class($other_class));
+			$r->setObject($other_key, $other_class);
+			$this->addRelationship($name, $key, $r);
 		} else {
-			$this->addRelationship($name, $key, new OneToOne(
-				$key, get_class($this), $other_key, $other_class));
-			return $this->relationships[$name]->getRelatedObject($key);
+			//getting relationship
+			if(!isset($this->relationships[$name])) {
+				$this->addRelationship($name, $key, new OneToOne(
+					$key, get_class($this), $other_key, $other_class));
+			}
 		}
-	}
-
-	protected function setHasOne($name, $key, $other_key, $object) {
-		$r = new OneToOne($key, get_class($this), $other_key, get_class($object));
-		$r->setObject($other_key, $object);
-		$this->addRelationship($name, $key, $r);
+		return $this->relationships[$name]->getRelatedObject($key);
 	}
 
 	public static function createOne($data = array(), $database = false) {
@@ -263,7 +275,7 @@ class DatabaseModel extends Cacheable {
 		$stmt->execute();
 		$results = array();
 		while ($result = $stmt->fetchAssoc()) {
-			$results[] = new static($database, static::$table, $result);
+			$results[] = new static($database, $result);
 		}
 		$set = new ModelGroup($database, static::$table, $results);
 		static::applySchema($set);

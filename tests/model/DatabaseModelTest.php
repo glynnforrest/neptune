@@ -1,13 +1,17 @@
 <?php
 namespace neptune\database;
 
-use neptune\database\DBObject;
+use neptune\model\DatabaseModel;
 use neptune\database\DatabaseFactory;
 use neptune\core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
-class UpperCase extends DBObject {
+class UpperCase extends DatabaseModel {
+
+	protected static $fields = array('id', 'column');
+	protected static $primary_key = 'id';
+	protected static $table = 'table';
 
 	public function setName($name) {
 		$this->values['name'] = strtoupper($name);
@@ -20,10 +24,10 @@ class UpperCase extends DBObject {
 }
 
 /**
- * DBObjectTest
+ * DatabaseModelTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class DBObjectTest extends \PHPUnit_Framework_TestCase {
+class DatabaseModelTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		Config::create('testing');
@@ -41,14 +45,14 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function testConstruct() {
-		$d = new DBObject('db', 'table');
-		$this->assertTrue($d instanceof DBObject);
-		$d2 = new DBObject('db', 'table', array());
-		$this->assertTrue($d2 instanceof DBObject);
+		$d = new UpperCase('db');
+		$this->assertTrue($d instanceof DatabaseModel);
+		$d2 = new UpperCase('db', array());
+		$this->assertTrue($d2 instanceof DatabaseModel);
 	}
 
 	public function testGetAndSet() {
-		$d = new DBObject('db', 'table');
+		$d = new UpperCase('db');
 		$d->set('key', 'value');
 		$this->assertEquals('value', $d->get('key'));
 		$d->set('array', array());
@@ -60,7 +64,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function test__GetAnd__Set() {
-		$d = new DBObject('db', 'table');
+		$d = new UpperCase('db');
 		$d->key = 'value';
 		$this->assertEquals('value', $d->key);
 		$d->array = array();
@@ -71,28 +75,26 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFromResultSet() {
-		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
+		$d = new DatabaseModel('db', array('id' => 1, 'column' => 'value'));
 		$this->assertEquals(1, $d->id);
 		$this->assertEquals('value', $d->column);
 	}
 
 	public function testGetOverride() {
-		$u = new UpperCase('db', 'table', array('id' => 2, 'column' => 'value'));
+		$u = new UpperCase('db', array('id' => 2, 'column' => 'value'));
 		$this->assertEquals('value', $u->get('column'));
 		$this->assertEquals('VALUE', $u->column);
 	}
 
 	public function testSetOverride() {
-		$u = new UpperCase('db', 'table');
+		$u = new UpperCase('db');
 		$u->name = ('test');
 		$this->assertEquals('TEST', $u->name);
 		$this->assertEquals('TEST', $u->get('name'));
 	}
 
 	public function testInsertBuild() {
-		$d = new DBObject('db', 'table');
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db');
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
@@ -101,9 +103,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testUpdateBuild() {
-		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->column = 'changed';
 		$d->save();
 		$this->assertEquals('UPDATE table SET `column` = changed WHERE id = 1',
@@ -113,9 +113,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	public function testNoUpdate() {
 		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
-		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
 	}
@@ -123,9 +121,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	public function testNoInsert() {
 		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
-		$d = new DBObject('db', 'table');
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db');
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
 	}
@@ -133,9 +129,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	public function testNoUpdateDifferentFields() {
 		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
-		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->foo = 'bar';
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
@@ -144,18 +138,14 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	public function testNoInsertDifferentFields() {
 		$db = DatabaseFactory::getDriver('db');
 		$db->reset();
-		$d = new DBObject('db', 'table');
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db');
 		$d->foo = 'bar';
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
 	}
 
 	public function testPrimaryKeyIsNotUpdated() {
-		$d = new DBObject('db', 'table', array('id' => 1, 'column' => 'value'));
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->column = 'changed';
 		$d->id = 2;
 		$d->save();
@@ -164,9 +154,7 @@ class DBObjectTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testPrimaryKeyUpdatedOnInsert() {
-		$d = new DBObject('db', 'table');
-		$d->setFields(array('id', 'column'));
-		$d->setPrimaryKey('id');
+		$d = new UpperCase('db');
 		$d->id = 1;
 		$d->id = 3;
 		$d->column = 'value';

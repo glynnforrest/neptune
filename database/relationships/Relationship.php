@@ -38,20 +38,24 @@ abstract class Relationship {
 		}
 	}
 
-	abstract public function getRelatedObject($key);
-
-	public function getLeftKey() {
-		return $this->left_key;
+	public function getRelatedObject($key) {
+		if($key === $this->left_key) {
+			return $this->right();
+		} elseif($key === $this->right_key) {
+			return $this->left();
+		}
 	}
 
-	public function getRightKey() {
-		return $this->right_key;
-	}
+	abstract protected function left();
 
-	public function setKey($key, $value) {
+	abstract protected function right();
+
+	public function updateKey($key, $value) {
 		if($key === $this->left_key) {
 			$name = $this->right_key;
-			$this->right->$name = $value;
+			if($this->right) {
+				$this->right->$name = $value;
+			}
 		} 
 	}
 

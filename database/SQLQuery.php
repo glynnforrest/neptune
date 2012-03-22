@@ -202,6 +202,7 @@ abstract class SQLQuery {
 		} else {
 			$query = $this->formatQueryString();
 		}
+		var_dump($query);
 		return $this->db->prepare($query);
 	}
 
