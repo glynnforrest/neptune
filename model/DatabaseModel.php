@@ -275,7 +275,8 @@ class DatabaseModel extends Cacheable {
 		return $result;
 	}
 
-	public static function select(SQLQuery $query = null, $database = false) {
+	public static function select(SQLQuery $query = null, $relationships =
+		array(), $database = false) {
 		if (!$query) {
 			$query = SQLQuery::select($database);
 			$query->from(static::$table);
@@ -293,7 +294,9 @@ class DatabaseModel extends Cacheable {
 		$stmt->execute();
 		$results = array();
 		while ($result = $stmt->fetchAssoc()) {
-			$results[] = new static($database, $result);
+			$obj = new static($database, $result);
+			//hydrate objects here.
+			$results[] = $obj;
 		}
 		$set = new ModelGroup($database, static::$table, $results);
 		static::applySchema($set);

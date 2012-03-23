@@ -14,9 +14,11 @@ class OneToOne extends Relationship {
 			$right_key = $this->right_key;
 			$this->left = $model::selectOne($this->left_key,
 				$this->right->$right_key);
+			if($this->left) {
+				$this->left->addRelationship($model . $this->left_key,
+					$this->left_key, $this);
+			}
 		}
-		$this->left->addRelationship($model . $this->left_key,
-			$this->left_key, $this);
 		return $this->left;
 	}
 
@@ -26,9 +28,11 @@ class OneToOne extends Relationship {
 			$left_key = $this->left_key;
 			$this->right = $model::selectOne($this->right_key,
 				$this->left->$left_key);
+			if($this->right) {
+				$this->right->addRelationship($model . $this->right_key,
+					$this->right_key, $this);
+			}
 		}
-		$this->right->addRelationship($model . $this->right_key,
-			$this->right_key, $this);
 		return $this->right;
 
 	}
