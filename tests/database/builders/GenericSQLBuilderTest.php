@@ -161,6 +161,27 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('SELECT `test.id`, `test.name`, `test2.id` FROM test, test2 WHERE test.id = test2.id', $q->__toString());
 	}
 
+	public function testWhereIn() {
+		$q = SQLQuery::select()->from('table');
+		$q->whereIn('id', array(1,2,3));
+		$this->assertEquals('SELECT * FROM table WHERE id IN (1,2,3)',
+			$q->__toString());
+	}
+
+	public function testWhereInAnd() {
+		$q = SQLQuery::select()->from('table');
+		$q->where('column =', '?')->andWhereIn('id', array('4,5,6'));
+		$this->assertEquals('SELECT * FROM table WHERE column = ? AND id IN (4,5,6)',
+			$q->__toString());
+	}
+
+	public function testWhereInOr() {
+		$q = SQLQuery::select()->from('table');
+		$q->where('column =', '?')->orWhereIn('id', array('4,5,6'));
+		$this->assertEquals('SELECT * FROM table WHERE column = ? OR id IN (4,5,6)',
+			$q->__toString());
+	}
+
 	public function testSelectMultipleTablesSplit() {
 		$q = SQLQuery::select();
 		$q->from('test');

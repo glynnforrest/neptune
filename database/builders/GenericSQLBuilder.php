@@ -130,7 +130,7 @@ class GenericSQLBuilder extends SQLQuery {
 		for ($i = 1; $i < count($this->query['WHERE']); $i++) {
 			$query .= ' ' . $this->query['WHERE'][$i][2] . ' ';
 			$query .= $this->query['WHERE'][$i][0];
-			if($this->query['WHERE'][0][1]) {
+			if($this->query['WHERE'][$i][1]) {
 				$query .= ' ' . $this->query['WHERE'][$i][1];
 			}
 		}

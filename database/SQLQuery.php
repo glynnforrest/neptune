@@ -111,7 +111,7 @@ abstract class SQLQuery {
 		return $this;
 	}
 
-	public function where($expression, $value = null, $logic='and') {
+	public function where($expression, $value = null, $logic='AND') {
 		if (isset($value)) {
 			if (empty($value)) {
 				return $this;
@@ -134,6 +134,23 @@ abstract class SQLQuery {
 
 	public function orWhere($comparison, $value) {
 		return $this->where($comparison, $value, 'OR');
+	}
+
+	public function whereIn($column, $values, $logic='AND') {
+		$values = (array) $values;
+		foreach($values as $v) {
+			$v = $this->db->quote($v);
+		}
+		$string = $column . ' IN (' . implode(',', $values) . ')';
+		return $this->where($string, null, $logic);
+	}
+
+	public function andWhereIn($column, $values) {
+		return $this->whereIn($column, $values, 'AND');
+	}
+
+	public function orWhereIn($column, $values) {
+		return $this->whereIn($column, $values, 'OR');
 	}
 
 	public function orderBy($expression, $sort = 'ASC') {
