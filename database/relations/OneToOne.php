@@ -1,12 +1,12 @@
 <?php
 
-namespace neptune\database\relationships;
+namespace neptune\database\relations;
 
 /**
  * OneToOne
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class OneToOne extends Relationship {
+class OneToOne extends Relation {
 
 	protected function left() {
 		if(!isset($this->left)) {
@@ -15,7 +15,7 @@ class OneToOne extends Relationship {
 			$this->left = $model::selectOne($this->left_key,
 				$this->right->$right_key);
 			if($this->left) {
-				$this->left->addRelationship($model . $this->left_key,
+				$this->left->addRelation($model . $this->left_key,
 					$this->left_key, $this);
 			}
 		}
@@ -29,7 +29,7 @@ class OneToOne extends Relationship {
 			$this->right = $model::selectOne($this->right_key,
 				$this->left->$left_key);
 			if($this->right) {
-				$this->right->addRelationship($model . $this->right_key,
+				$this->right->addRelation($model . $this->right_key,
 					$this->right_key, $this);
 			}
 		}

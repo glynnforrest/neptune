@@ -1,12 +1,12 @@
 <?php
 
-namespace neptune\database\relationships;
+namespace neptune\database\relations;
 
 /**
- * Relationship
+ * Relation
  * @author Glynn Forrest me@glynnforrest.com
  **/
-abstract class Relationship {
+abstract class Relation {
 
 	protected $left;
 	protected $right;

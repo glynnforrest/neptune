@@ -24,6 +24,7 @@ class MysqlDriver implements DatabaseDriver {
 	}
 
 	public function prepare($query, $options = array()) {
+		var_dump($query);
 		return new GenericStatement($this->pdo->prepare($query, $options));
 	}
 

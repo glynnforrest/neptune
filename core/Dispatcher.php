@@ -108,9 +108,9 @@ class Dispatcher {
 				ob_start();
 				$body = $c->_runMethod($actions[1], $actions[2]);
 				$other = ob_get_clean();
-				if(!$body && !$other) {
-					return false;
-				}
+				// if(!$body && !$other) {
+				// 	return false;
+				// }
 				restore_error_handler();
 				$format = $this->request->format();
 				if (!$this->response->getFormat()) {

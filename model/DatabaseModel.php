@@ -5,8 +5,8 @@ namespace neptune\model;
 use neptune\model\ModelGroup;
 use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
-use neptune\database\relationships\Relationship;
-use neptune\database\relationships\OneToOne;
+use neptune\database\relations\Relation;
+use neptune\database\relations\OneToOne;
 use neptune\validate\Validator;
 use neptune\cache\Cacheable;
 use neptune\exceptions\TypeException;
@@ -21,6 +21,7 @@ class DatabaseModel extends Cacheable {
 	protected static $table;
 	protected static $fields = array();
 	protected static $primary_key = 'id';
+	protected static $relations = array();
 	protected static $rules = array();
 	protected static $messages = array();
 	protected $database;
@@ -28,9 +29,9 @@ class DatabaseModel extends Cacheable {
 	protected $values = array();
 	protected $modified = array();
 	protected $stored = false;
-	protected $relationships = array();
-	protected $relationship_keys = array();
-	protected $current_relationship;
+	protected $stored_relations = array();
+	protected $relation_keys = array();
+	protected $eager;
 
 	public function __construct($database, array $result = null) {
 		$this->database = $database;
@@ -44,10 +45,6 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function __get($key) {
-		if(method_exists($this, $key)) {
-			$this->current_relationship = $key;
-			return $this->$key();
-		}
 		$method = 'get'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method();
@@ -56,17 +53,24 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function get($key) {
+		if (isset(static::$relations[$key])) {
+			return $this->getRelation($key);
+		}
 		if (isset($this->values[$key])) {
 			return $this->values[$key];
 		}
 		return null;
 	}
 
+	protected function getRelation($name) {
+		//switch type, run appropriate function
+	}
+
+	protected function setRelation($name, &$value) {
+		//switch type, run appropriate function
+	}
+
 	public function __set($key, $value) {
-		if(method_exists($this, $key)) {
-			$this->current_relationship = $key;
-			return $this->$key($value);
-		}
 		$method = 'set'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method($value);
@@ -75,6 +79,9 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public function set($key, $value, $overwrite = true) {
+		if (isset(static::$relations[$key])) {
+			return $this->setRelation($key, $value);
+		}
 		if($key === static::$primary_key && isset($this->values[$key])) {
 			$this->current_index = $this->values[$key];		
 		}
@@ -94,8 +101,8 @@ class DatabaseModel extends Cacheable {
 
 	protected function setValue($key, $value) {
 		$this->values[$key] = $value;
-		if(isset($this->relationship_keys[$key])) {
-			$this->relationships[$this->relationship_keys[$key]]->updateKey($key, $value);
+		if(isset($this->relation_keys[$key])) {
+			$this->stored_relations[$this->relation_keys[$key]]->updateKey($key, $value);
 		}
 	}
 
@@ -199,15 +206,15 @@ class DatabaseModel extends Cacheable {
 	}
 
 
-	protected static function applySchema(&$obj, $relationships = array()) {
+	protected static function applySchema(&$obj, $relations = array()) {
 		$obj->setFields(static::$fields);
 		$obj->setPrimaryKey(static::$primary_key);
 		return $obj;
 	}
 
-	public function addRelationship($name, $key, Relationship &$r) {
-		$this->relationships[$name] = $r;
-		$this->relationship_keys[$key] = $name;
+	public function addRelation($name, $key, Relation &$r) {
+		$this->stored_relations[$name] = $r;
+		$this->relation_keys[$key] = $name;
 		$r->setObject($key, $this);
 		$r->updateKey($key, $this->$key);
 	}
@@ -219,15 +226,18 @@ class DatabaseModel extends Cacheable {
 			$r = new OneToOne($key, get_class($this), $other_key,
 			   	get_class($other_class));
 			$r->setObject($other_key, $other_class);
-			$this->addRelationship($name, $key, $r);
+			$this->addRelation($name, $key, $r);
 		} else {
 			//getting relationship
-			if(!isset($this->relationships[$name])) {
-				$this->addRelationship($name, $key, new OneToOne(
+			if(!isset($this->stored_relations[$name])) {
+				$this->addRelation($name, $key, new OneToOne(
 					$key, get_class($this), $other_key, $other_class));
 			}
 		}
-		return $this->relationships[$name]->getRelatedObject($key);
+		if($this->eager) {
+			return $this->stored_relations[$name];
+		}
+		return $this->stored_relations[$name]->getRelatedObject($key);
 	}
 
 	protected function belongsTo($key, $other_key, $other_class) {
@@ -237,15 +247,15 @@ class DatabaseModel extends Cacheable {
 			$r = new OneToOne($other_key, get_class($other_class), $key,
 			   	get_class($this));
 			$r->setObject($other_key, $other_class);
-			$this->addRelationship($name, $key, $r);
+			$this->addRelation($name, $key, $r);
 		} else {
 			//getting relationship
-			if(!isset($this->relationships[$name])) {
-				$this->addRelationship($name, $key, new OneToOne($other_key,
+			if(!isset($this->stored_relations[$name])) {
+				$this->addRelation($name, $key, new OneToOne($other_key,
 					$other_class, $key, get_class($this)));
 			}
 		}
-		return $this->relationships[$name]->getRelatedObject($key);
+		return $this->stored_relations[$name]->getRelatedObject($key);
 	}
 
 	public static function createOne($data = array(), $database = false) {
@@ -261,7 +271,7 @@ class DatabaseModel extends Cacheable {
 		return $set;
 	}
 
-	public static function selectOne($column, $value, $relationships = array(), $database = false) {
+	public static function selectOne($column, $value, $relations = array(), $database = false) {
 		$q = SQLQuery::select($database);
 		$q->from(static::$table);
 		$q->limit(1);
@@ -275,8 +285,8 @@ class DatabaseModel extends Cacheable {
 		return $result;
 	}
 
-	public static function select(SQLQuery $query = null, $relationships =
-		array(), $database = false) {
+	public static function select(SQLQuery $query = null,
+		$relations = array(), $database = false) {
 		if (!$query) {
 			$query = SQLQuery::select($database);
 			$query->from(static::$table);
@@ -295,12 +305,38 @@ class DatabaseModel extends Cacheable {
 		$results = array();
 		while ($result = $stmt->fetchAssoc()) {
 			$obj = new static($database, $result);
-			//hydrate objects here.
 			$results[] = $obj;
 		}
 		$set = new ModelGroup($database, static::$table, $results);
 		static::applySchema($set);
+		//hydrate objects
+		$rm = RelationsManager::getInstance();
+		$relations = (array) $relations;
+		foreach ($relations as $r) {
+			if(isset(static::$relations[$r])) {
+				$rm->eagerLoad($set, static::$relations[$r]);
+			}
+		}
+		// if(empty($set)) {
+		// 	return $set;
+		// }
+		// $set[0]->enableEager();
+		// foreach($relations as $r) {
+		// 	$rel = $set[0]->$r;
+		// 	if($rel) {
+		// 		$related_set = $rel->eager($set);
+		// 		var_dump($related_set);
+		// 	}
+		// }
 		return $set;
+	}
+
+	public function disableEager() {
+		$this->eager = false;
+	}
+
+	public function enableEager() {
+		$this->eager = true;
 	}
 
 	/**
