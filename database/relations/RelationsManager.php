@@ -30,7 +30,7 @@ class RelationsManager {
 				return $this->hasOne($obj, $name, $key, $other_key, $other_class);
 				break;
 			case 'belongs_to':
-				return $this->belongs_to($obj, $name, $key, $other_key, $other_class);
+				return $this->belongsTo($obj, $name, $key, $other_key, $other_class);
 				break;
 			default:
 				break;
@@ -46,10 +46,8 @@ class RelationsManager {
 			$obj->addRelation($name, $key, $r);
 		} else {
 			//getting related object
-			if(!isset($obj->relation_objects[$name])) {
-				$obj->addRelation($name, $key, new OneToOne(
-					$key, get_class($obj), $other_key, $other_class));
-			}
+			$obj->addRelation($name, $key, new OneToOne(
+				$key, get_class($obj), $other_key, $other_class));
 		}
 	}
 
@@ -57,15 +55,13 @@ class RelationsManager {
 		if(is_object($other_class)) {
 			//setting related object
 			$r = new OneToOne($other_key, get_class($other_class), $key,
-			   	get_class($obj));
+				get_class($obj));
 			$r->setObject($other_key, $other_class);
 			$obj->addRelation($name, $key, $r);
 		} else {
 			//getting related object
-			if(!isset($obj->relation_objects[$name])) {
-				$obj->addRelation($name, $key, new OneToOne($other_key,
-					$other_class, $key, get_class($obj)));
-			}
+			$obj->addRelation($name, $key, new OneToOne($other_key,
+				$other_class, $key, get_class($obj)));
 		}
 	}
 }
