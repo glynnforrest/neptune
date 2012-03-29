@@ -22,6 +22,7 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 	protected $modified = array();
 	protected $stored = false;
 	protected $position = 0;
+	protected $child_class;
 
 	public function __construct($database, $table, array $dbobjects = null) {
 		$this->database = $database;
@@ -143,6 +144,14 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 		$this->primary_key = $columnname;
 	}
 
+	public function setChildClass($class) {
+		$this->child_class = $class;
+	}
+
+	public function getChildClass() {
+		return $this->child_class;
+	}
+
 	public function getValues() {
 		$values = array();
 		foreach ($this->objects as $obj) {
@@ -183,7 +192,11 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 		if (!$value instanceof DatabaseModel) {
 			return false;
 		}
-		$this->objects[$offset] = $value;
+		if (is_null($offset)) {
+			$this->objects[] = $value;
+		} else {
+			$this->objects[$offset] = $value;
+		}
 	}
 
 	public function offsetExists($offset) {
