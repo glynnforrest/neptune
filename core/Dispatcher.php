@@ -128,7 +128,7 @@ class Dispatcher {
 			} catch (ArgumentMissingException $e) {
 				echo $e;
 				restore_error_handler();
-				return false;
+				return true;
 			}
 			restore_error_handler();
 			return true;

@@ -32,7 +32,7 @@ class DatabaseModel extends Cacheable {
 	protected $stored = false;
 	protected $relation_objects = array();
 	protected $relation_keys = array();
-	protected $eager;
+	protected $no_friends = array();
 
 	public function __construct($database, array $result = null) {
 		$this->database = $database;
@@ -40,7 +40,6 @@ class DatabaseModel extends Cacheable {
 			foreach ($result as $key => $value) {
 				$this->values[$key] = $value;
 			}
-			//move to select
 			$this->stored = true;
 		}
 	}
@@ -64,6 +63,9 @@ class DatabaseModel extends Cacheable {
 	}
 
 	protected function getRelation($name) {
+		if(isset($this->no_friends[$name])) {
+			return null;
+		}
 		if(!isset($this->relation_objects[$name])) {
 			RelationsManager::getInstance()->createRelation($this, $name,
 			static::$relations[$name]);
@@ -78,7 +80,9 @@ class DatabaseModel extends Cacheable {
 			static::$relations[$name], $value);
 		}
 		$key = static::$relations[$name]['key'];
-		return $this->relation_objects[$name]->setRelatedObject($key, $value);
+		$this->no_friends[$name] = null;
+		$this->relation_objects[$name]->setRelatedObject($key, $value)
+				  ->updateKey($key, $this->get($key));
 	}
 
 	public function __set($key, $value) {
@@ -122,6 +126,10 @@ class DatabaseModel extends Cacheable {
 			$this->set($k, $v, $overwrite);
 		}
 		return $this;
+	}
+
+	public function noRelation($relation) {
+		$this->no_friends[$relation] = true;
 	}
 
 	public function __isset($key) {
@@ -230,6 +238,10 @@ class DatabaseModel extends Cacheable {
 		$r->updateKey($key, $this->$key);
 	}
 
+	public static function getTable() {
+		return static::$table;
+	}
+
 	public static function createOne($data = array(), $database = false) {
 		return new static($database, $data);
 	}
@@ -282,24 +294,13 @@ class DatabaseModel extends Cacheable {
 		$set = new ModelGroup($database, static::$table, $results);
 		static::applySchema($set);
 		//hydrate objects
-		// $rm = RelationsManager::getInstance();
-		// $relations = (array) $relations;
-		// foreach ($relations as $r) {
-		// 	if(isset(static::$relations[$r]) && $this->checkRelation(static::$relations[$r])) {
-		// 		$rm->eagerLoad($set, static::$relations[$r]);
-		// 	}
-		// }
-		// if(empty($set)) {
-		// 	return $set;
-		// }
-		// $set[0]->enableEager();
-		// foreach($relations as $r) {
-		// 	$rel = $set[0]->$r;
-		// 	if($rel) {
-		// 		$related_set = $rel->eager($set);
-		// 		var_dump($related_set);
-		// 	}
-		// }
+		$rm = RelationsManager::getInstance();
+		$relations = (array) $relations;
+		foreach ($relations as $r) {
+			if(isset(static::$relations[$r])) {
+				$rm->eagerLoad($set, $r, static::$relations[$r], $database);
+			}
+		}
 		return $set;
 	}
 

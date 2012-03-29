@@ -36,6 +36,7 @@ abstract class Relation {
 		} elseif($key === $this->right_key) {
 			$this->left = $related_object;
 		}
+		return $this;
 	}
 
 	public function getRelatedObject($key) {

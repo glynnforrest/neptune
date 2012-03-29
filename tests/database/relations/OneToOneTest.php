@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\tests;
+namespace neptune\database\relations;
 
 use neptune\model\DatabaseModel;
 use neptune\database\relations\OneToOne;
@@ -11,10 +11,14 @@ class User extends DatabaseModel {
 
 	protected static $table = 'users';
 	protected static $fields = array('id', 'username');
-
-	protected function details($object =  'neptune\\tests\\UserDetails') {
-		return $this->hasOne('id', 'users_id', $object);
-	}
+	protected static $relations = array(
+		 'details' => array(
+			  'type' => 'has_one',
+			  'key' => 'id',
+			  'other_key' => 'users_id',
+			  'other_class' => 'neptune\\database\\relations\\UserDetails'
+		 )
+	);
 
 }
 

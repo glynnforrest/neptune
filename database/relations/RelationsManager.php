@@ -2,6 +2,8 @@
 
 namespace neptune\database\relations;
 
+use neptune\database\SQLQuery;
+
 /**
  * RelationsManager
  * @author Glynn Forrest me@glynnforrest.com
@@ -20,7 +22,29 @@ class RelationsManager {
 		return self::$instance;
 	}
 
-	public function createRelation($obj, $name, array $relation, $related_object = null) {
+	public function eagerLoad(&$collection, $name, $relation, $database = false) {
+		$key = $relation['key'];
+		$other_key = $relation['other_key'];
+		$other_class = $relation['other_class'];
+		$q = SQLQuery::select($database)->from($other_class::getTable())
+			->whereIn($other_key, $collection->$key);
+		$stmt = $q->prepare();
+		$stmt->execute();
+		$results = array();
+		while($res = $stmt->fetchAssoc()) {
+			$results[$res[$other_key]] = $res;
+		}
+		foreach($collection as $obj) {
+			if(isset($results[$obj->$key])) {
+				$related = new $other_class($database, $results[$obj->$key]);
+				$this->createRelation($obj, $name, $relation, $related);
+			} else {
+				$obj->noRelation($name);
+			}
+		}
+	}
+
+	public function createRelation(&$obj, $name, array $relation, $related_object = null) {
 		$type = $relation['type'];
 		$key = $relation['key'];
 		$other_key = $relation['other_key'];
@@ -37,7 +61,7 @@ class RelationsManager {
 		}
 	}
 
-	protected function hasOne($obj, $name, $key, $other_key, $other_class) {
+	protected function hasOne(&$obj, $name, $key, $other_key, $other_class) {
 		if(is_object($other_class)) {
 			//setting related object
 			$r = new OneToOne($key, get_class($obj), $other_key,
@@ -51,7 +75,7 @@ class RelationsManager {
 		}
 	}
 
-	protected function belongsTo($obj, $name, $key, $other_key, $other_class) {
+	protected function belongsTo(&$obj, $name, $key, $other_key, $other_class) {
 		if(is_object($other_class)) {
 			//setting related object
 			$r = new OneToOne($other_key, get_class($other_class), $key,
