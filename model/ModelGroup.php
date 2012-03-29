@@ -116,7 +116,7 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 		return $this->get($key);
 	}
 
-	public function get($key, $value) {
+	public function get($key) {
 		$values = array();
 		foreach ($this->objects as $obj) {
 			$values[] = $obj->$key;
@@ -183,11 +183,7 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 		if (!$value instanceof DatabaseModel) {
 			return false;
 		}
-		if (is_null($offset)) {
-			$this->objects[] = $value;
-		} else {
-			$this->objects[$offset] = $value;
-		}
+		$this->objects[$offset] = $value;
 	}
 
 	public function offsetExists($offset) {
