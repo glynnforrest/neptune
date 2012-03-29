@@ -228,7 +228,7 @@ class DatabaseModel extends Cacheable {
 	protected static function applySchema(&$obj, $relations = array()) {
 		$obj->setFields(static::$fields);
 		$obj->setPrimaryKey(static::$primary_key);
-		$obj->setChildClass(get_class($this));
+		$obj->setChildClass(get_called_class());
 		return $obj;
 	}
 
