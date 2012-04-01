@@ -7,7 +7,6 @@ use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
 use neptune\database\relations\Relation;
 use neptune\database\relations\RelationsManager;
-use neptune\database\relations\OneToOne;
 use neptune\validate\Validator;
 use neptune\view\Form;
 
@@ -253,7 +252,7 @@ class Thing {
 		return $set;
 	}
 
-	public static function selectOne($column, $value, $relations = array(), $database = false) {
+	public static function selectOne($column, $value, $database = false) {
 		$q = SQLQuery::select($database);
 		$q->from(static::$table);
 		$q->limit(1);
@@ -265,6 +264,10 @@ class Thing {
 			$result = new static($database, $result);
 		}
 		return $result;
+	}
+
+	public static function selectPK($value, $database = false) {
+		return self::selectOne(static::$primary_key, $value, $database);
 	}
 
 	public static function select(SQLQuery $query = null,
