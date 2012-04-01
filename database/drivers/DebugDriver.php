@@ -4,6 +4,7 @@ namespace neptune\database\drivers;
 
 use neptune\database\drivers\DatabaseDriver;
 use neptune\database\statements\DebugStatement;
+use neptune\core\Events;
 
 /**
  * DebugDriver
@@ -19,6 +20,7 @@ class DebugDriver implements DatabaseDriver {
 	}
 
 	public function prepare($query) {
+		Events::getInstance()->send('neptune.query', $query);
 		$this->query = $query;
 		$this->statement = new DebugStatement($query);
 		return $this->statement;

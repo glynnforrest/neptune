@@ -4,6 +4,7 @@ namespace neptune\database\drivers;
 
 use \PDO;
 use neptune\database\statements\GenericStatement;
+use neptune\core\Events;
 
 /**
  * MysqlDriver
@@ -24,6 +25,7 @@ class MysqlDriver implements DatabaseDriver {
 	}
 
 	public function prepare($query, $options = array()) {
+		Events::getInstance()->send('neptune.query', $query);
 		return new GenericStatement($this->pdo->prepare($query, $options));
 	}
 
