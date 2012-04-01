@@ -9,15 +9,13 @@ use neptune\database\relations\Relation;
 use neptune\database\relations\RelationsManager;
 use neptune\database\relations\OneToOne;
 use neptune\validate\Validator;
-use neptune\cache\Cacheable;
-use neptune\exceptions\TypeException;
 use neptune\view\Form;
 
 /**
  * Thing
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Thing extends Cacheable {
+class Thing {
 
 	protected static $table;
 	protected static $fields = array();
