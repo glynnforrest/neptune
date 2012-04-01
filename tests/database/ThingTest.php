@@ -1,13 +1,13 @@
 <?php
 namespace neptune\database;
 
-use neptune\model\DatabaseModel;
+use neptune\database\Thing;
 use neptune\database\DatabaseFactory;
 use neptune\core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
-class UpperCase extends DatabaseModel {
+class UpperCase extends Thing {
 
 	protected static $fields = array('id', 'column');
 	protected static $primary_key = 'id';
@@ -24,10 +24,10 @@ class UpperCase extends DatabaseModel {
 }
 
 /**
- * DatabaseModelTest
+ * ThingTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class DatabaseModelTest extends \PHPUnit_Framework_TestCase {
+class ThingTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		Config::create('testing');
@@ -46,9 +46,9 @@ class DatabaseModelTest extends \PHPUnit_Framework_TestCase {
 
 	public function testConstruct() {
 		$d = new UpperCase('db');
-		$this->assertTrue($d instanceof DatabaseModel);
+		$this->assertTrue($d instanceof Thing);
 		$d2 = new UpperCase('db', array());
-		$this->assertTrue($d2 instanceof DatabaseModel);
+		$this->assertTrue($d2 instanceof Thing);
 	}
 
 	public function testGetAndSet() {
@@ -75,7 +75,7 @@ class DatabaseModelTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFromResultSet() {
-		$d = new DatabaseModel('db', array('id' => 1, 'column' => 'value'));
+		$d = new Thing('db', array('id' => 1, 'column' => 'value'));
 		$this->assertEquals(1, $d->id);
 		$this->assertEquals('value', $d->column);
 	}

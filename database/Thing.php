@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\model;
+namespace neptune\database;
 
-use neptune\model\ModelGroup;
+use neptune\database\ThingCollection;
 use neptune\database\SQLQuery;
 use neptune\database\DatabaseFactory;
 use neptune\database\relations\Relation;
@@ -14,10 +14,10 @@ use neptune\exceptions\TypeException;
 use neptune\view\Form;
 
 /**
- * DatabaseModel
+ * Thing
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class DatabaseModel extends Cacheable {
+class Thing extends Cacheable {
 
 	protected static $table;
 	protected static $fields = array();
@@ -224,7 +224,6 @@ class DatabaseModel extends Cacheable {
 		return false;
 	}
 
-
 	protected static function applySchema(&$obj, $relations = array()) {
 		$obj->setFields(static::$fields);
 		$obj->setPrimaryKey(static::$primary_key);
@@ -248,7 +247,7 @@ class DatabaseModel extends Cacheable {
 	}
 
 	public static function create($count, $database = false) {
-		$set = new ModelGroup($database, $me->table);
+		$set = new ThingCollection($database, $me->table);
 		for ($i = 0; $i < $count; $i++) {
 			$set[] = new static($database);
 		}
@@ -292,7 +291,7 @@ class DatabaseModel extends Cacheable {
 			$obj = new static($database, $result);
 			$results[] = $obj;
 		}
-		$set = new ModelGroup($database, static::$table, $results);
+		$set = new ThingCollection($database, static::$table, $results);
 		static::applySchema($set);
 		//hydrate objects
 		$rm = RelationsManager::getInstance();

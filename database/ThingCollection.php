@@ -1,17 +1,17 @@
 <?php
 
-namespace neptune\model;
+namespace neptune\database;
 
 use \Iterator;
 use \ArrayAccess;
 use \Countable;
-use neptune\model\DatabaseModel;
+use neptune\database\Thing;
 
 /**
- * ModelGroup
+ * ThingCollection
  * @author Glynn Forrest me@glynnforrest.com
  * */
-class ModelGroup implements Iterator, ArrayAccess, Countable {
+class ThingCollection implements Iterator, ArrayAccess, Countable {
 
 	protected $database;
 	protected $table;
@@ -189,7 +189,7 @@ class ModelGroup implements Iterator, ArrayAccess, Countable {
 	}
 
 	public function offsetSet($offset, $value) {
-		if (!$value instanceof DatabaseModel) {
+		if (!$value instanceof Thing) {
 			return false;
 		}
 		if (is_null($offset)) {

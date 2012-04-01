@@ -2,13 +2,13 @@
 
 namespace neptune\database\relations;
 
-use neptune\model\DatabaseModel;
+use neptune\database\Thing;
 use neptune\database\relations\OneToMany;
-use neptune\model\ModelGroup;
+use neptune\database\ThingCollection;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
-class Author extends DatabaseModel {
+class Author extends Thing {
 
 	protected static $table = 'authors';
 	protected static $fields = array('id', 'name');
@@ -23,7 +23,7 @@ class Author extends DatabaseModel {
 
 }
 
-class Book extends DatabaseModel {
+class Book extends Thing {
 
 	protected static $table = 'books';
 	protected static $fields = array('id', 'authors_id', 'title');
@@ -42,7 +42,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->author = new Author('db');
-		$books = new ModelGroup('db', 'books');
+		$books = new ThingCollection('db', 'books');
 		$books->setFields(array('id', 'authors_id', 'title'));
 		$books->setPrimaryKey('id');
 		$books->setChildClass('neptune\\database\\relations\\Book');

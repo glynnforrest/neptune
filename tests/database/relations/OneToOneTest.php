@@ -2,12 +2,12 @@
 
 namespace neptune\database\relations;
 
-use neptune\model\DatabaseModel;
+use neptune\database\Thing;
 use neptune\database\relations\OneToOne;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
-class User extends DatabaseModel {
+class User extends Thing {
 
 	protected static $table = 'users';
 	protected static $fields = array('id', 'username');
@@ -22,7 +22,7 @@ class User extends DatabaseModel {
 
 }
 
-class UserDetails extends DatabaseModel {
+class UserDetails extends Thing {
 
 	protected static $table = 'user_details';
 	protected static $fields = array('id', 'users_id', 'details');
