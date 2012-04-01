@@ -33,9 +33,7 @@ class Url {
 			}
 			$url = str_replace('(', '', $url);
 			$url = str_replace(')', '', $url);
-			if(substr($url, -1) === '/') {
-				$url = substr($url, 0, -1);
-			}
+			$url = rtrim($url, '/');
 		}
 		return self::to($url, $protocol);
 	}

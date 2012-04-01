@@ -68,5 +68,11 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('http://myapp.local/url/foo',
 			Url::toRoute('opt_args', array('var' => 'foo')));
 	}
+
+	public function testNoOptionalArgs() {
+		$d = Dispatcher::getInstance()->clearRoutes();
+		$d->route('/url/(:var(/:second))', 'controller')->name('no_opt_args');
+		$this->assertEquals('http://myapp.local/url', Url::toRoute('no_opt_args'));
+	}
 }
 ?>
