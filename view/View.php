@@ -81,9 +81,9 @@ class View {
 			$pos = strpos($view, '#');
 			if($pos) {
 				$name = substr($view, 0, $pos);
-				$view = Config::getRequired('view.prefixes.' . $name) . substr($view, $pos + 1);
+				$view = Config::getRequired($name . '#view.dir') . substr($view, $pos + 1);
 			} else {
-				$view = Config::getFirstRequired('view.prefixes') . $view;
+				$view = Config::getRequired('view.dir') . $view;
 			}
 		}
 		$view = $view . self::EXTENSION;
