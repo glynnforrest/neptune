@@ -3,6 +3,7 @@
 namespace neptune\helpers;
 
 use neptune\helpers\Html;
+use neptune\core\Config;
 
 /**
  * Assets
@@ -11,8 +12,8 @@ use neptune\helpers\Html;
 class Assets {
 
 	protected static $instance;
-	protected static $js = array();	
-	protected static $css = array();
+	protected $js = array();	
+	protected $css = array();
 
 	public static function getInstance() {
 		if(!self::$instance) {
@@ -21,38 +22,54 @@ class Assets {
 		return self::$instance;
 	}
 
-	public static function addJs($name, $src, $dependencies = array(), $options = array()) {
-		self::$js[$name] = array('src' => $src,
+	protected function __construct() {
+	}
+
+	public function addJs($name, $src, $dependencies = array(), $options = array()) {
+		$this->js[$name] = array('src' => $src,
 			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
 	}
 
 	public static function js() {
 		$content ='';
-		foreach(self::getInstance()->sort(self::$js) as $k => $v) {
-			$content .= Html::js($v, self::$js[$k]['opts']);
+		$me = self::getInstance();
+		foreach(self::getInstance()->sort($me->js) as $k => $v) {
+			$content .= Html::js($v, $me->js[$k]['opts']);
 		}
 		return $content;
 	}
 
-	public static function addCss($name, $src, $dependencies = array(), $options = array()) {
-		self::$css[$name] = array('src' => $src,
+	public function addCss($name, $src, $dependencies = array(), $options = array()) {
+		$this->css[$name] = array('src' => $src,
 			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
 	}
 
+	protected function buildFileName($src) {
+		$pos = strpos($src, '#');
+		if($pos) {
+			$name = substr($src, 0, $pos);
+			$src = Config::getRequired($name . '#assets.dir') . substr($src, $pos + 1);
+		} else {
+			$src = Config::getRequired('assets.dir') . $src;
+		}
+		return $src;
+	}
+
 	public static function css() {
 		$content = '';
-		foreach(self::getInstance()->sort(self::$css) as $k => $v) {
-			$content .= Html::css($v, self::$css[$k]['opts']);
+		$me = self::getInstance();
+		foreach(self::getInstance()->sort($me->css) as $k => $v) {
+			$content .= Html::css($v, $me->css[$k]['opts']);
 		}
 		return $content;
 
 	}
 
-	public static function clear() {
-		self::$js = array();
-		self::$css = array();
+	public function clear() {
+		$this->js = array();
+		$this->css = array();
 	}
 
 	protected function sort($assets) {
@@ -83,5 +100,6 @@ class Assets {
 		$sorted[$key] = $value;
 		unset($assets[$key]);
 	}
+
 }
 ?>

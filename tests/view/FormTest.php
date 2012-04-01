@@ -25,9 +25,9 @@ END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
 		Config::create('view');
-		Config::set('view.prefixes', array(
-			'default' => '/tmp/',
-			'prefix' => 'folder_prefix/'));
+		Config::set('view.dir', '/tmp/');
+		Config::create('prefix');
+		Config::set('prefix#view.dir', 'folder_prefix/');
 	}
 
 	public function tearDown() {
