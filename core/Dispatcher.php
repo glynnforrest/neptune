@@ -84,6 +84,7 @@ class Dispatcher {
 				if($this->runMethod($actions)) {
 					$key = 'Router' . $source . $this->request->method();
 					CacheFactory::getDriver()->set($key, $actions);
+					CacheFactory::getDriver()->set('Router.names', $this->names);
 					return true;
 				}
 			}
@@ -160,6 +161,9 @@ class Dispatcher {
 	}
 
 	public function getRouteUrl($name) {
+		if(empty($this->names)) {
+			$this->names = CacheFactory::getDriver()->get('Router.names');
+		}
 		return isset($this->names[$name]) ? $this->names[$name] : null;
 	}
 
