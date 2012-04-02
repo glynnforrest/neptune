@@ -6,6 +6,7 @@ use neptune\exceptions\MethodNotFoundException;
 use neptune\security\SecurityFactory;
 use neptune\http\Request;
 use neptune\http\Response;
+use neptune\assets\AssetsManager;
 
 /**
  * Base Controller
@@ -42,6 +43,10 @@ abstract class Controller {
 
 	protected function _security($name = null) {
 		return SecurityFactory::getDriver($name);
+	}
+
+	protected function _assets() {
+		return AssetsManager::getInstance();
 	}
 
 }
