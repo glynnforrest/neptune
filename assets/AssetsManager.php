@@ -77,7 +77,6 @@ class AssetsManager {
 			$content .= Html::css($v, $me->options['css' . $k]);
 		}
 		return $content;
-
 	}
 
 	public function clear() {

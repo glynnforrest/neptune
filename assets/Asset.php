@@ -13,6 +13,8 @@ class Asset {
 	protected $content;
 	protected $source;
 	protected $target;
+	protected $prefix;
+	protected $file_name;
 	protected $web_target;
 	protected $dependencies = array();
 	protected $filters = array();
@@ -43,20 +45,32 @@ class Asset {
 		return $this->content;
 	}
 
+	public function addFilter($name) {
+		if(!in_array($name, $this->filters)) {
+			$this->filters[] = $name;
+		}
+	}
+
 	public function getSource() {
 		return $this->source;
 	}
 
-	public function setSource($source) {
+	protected function parseSource($source) {
 		$pos = strpos($source, '#');
 		if($pos) {
-			$prefix = substr($source, 0, $pos);
-			$this->source = Config::get($prefix . '#assets.dir') . substr($source, $pos + 1);
+			$this->prefix = substr($source, 0, $pos);
+			$this->file_name = substr($source, $pos + 1);
 		} else {
-			$this->source = Config::get('assets.dir') . $source;
+			$this->prefix = '';
+			$this->file_name = $source;
 		}
 	}
-	
+
+	public function setSource($source) {
+		$this->parseSource($source);
+		$this->source = Config::get($this->prefix . '#assets.source') . $this->file_name;
+	}
+
 	public function getTarget() {
 		return $this->target;
 	}
@@ -78,10 +92,14 @@ class Asset {
 	}
 
 	public function prepare() {
+		$am = AssetsManager::getInstance();
 		foreach($this->filters as $filter) {
-			AssetsManager::getInstance()->applyFilter($this, $filter);
+			$am->applyFilter($this, $filter);
 		}
-		$this->web_target = $this->source;
+		$this->target = Config::get('assets.target') . $this->file_name;
+		file_put_contents($this->target, $this->getContent()); 
+		$this->web_target = Config::get('assets.url') . $this->file_name;
+		// $this->web_target = $this->source;
 		return true;
 	}
 
