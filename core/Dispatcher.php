@@ -82,9 +82,13 @@ class Dispatcher {
 			if($v->test($source)) {
 				$actions = $v->getAction();
 				if($this->runMethod($actions)) {
-					$key = 'Router' . $source . $this->request->method();
-					CacheFactory::getDriver()->set($key, $actions);
-					CacheFactory::getDriver()->set('Router.names', $this->names);
+					try {
+						$cm = CacheFactory::getDriver();
+						$key = 'Router' . $source . $this->request->method();
+						$cm->set($key, $actions);
+						$cm->set('Router.names', $this->names);
+					} catch	(\Exception $e) {
+					}
 					return true;
 				}
 			}
