@@ -93,6 +93,12 @@ class Response {
 		$this->headers[$name] = $value;
 	}
 
+	public function setStatusCode($code = 200) {
+		if(array_key_exists($code, $this->status_codes)) {
+			$this->status_code = $code;
+		}
+	}
+
 	public function setFormat($format) {
 		$this->format = $format;
 	}
