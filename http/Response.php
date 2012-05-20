@@ -93,7 +93,7 @@ class Response {
 		$this->headers[$name] = $value;
 	}
 
-	public function format($format) {
+	public function setFormat($format) {
 		$this->format = $format;
 	}
 

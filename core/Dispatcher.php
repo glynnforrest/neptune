@@ -119,7 +119,7 @@ class Dispatcher {
 				restore_error_handler();
 				$format = $this->request->format();
 				if (!$this->response->getFormat()) {
-					$this->response->format($format);
+					$this->response->setFormat($format);
 				}
 				$this->response->sendHeaders();
 				echo $other;
