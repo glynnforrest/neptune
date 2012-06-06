@@ -10,5 +10,6 @@ use neptune\assets\Asset;
 interface Filter {
 
 	public function filterAsset(Asset &$a);
+
 }
 ?>
