@@ -17,6 +17,7 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		Config::create('testing');
+		//TODO- change this to assets.url or equivalent
 		Config::set('root_url', 'myapp.local');
 		$this->assets = Assets::getInstance();
 		$this->assets->clear();

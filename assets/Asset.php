@@ -16,11 +16,15 @@ class Asset {
 
 	public function __construct($file = null) {
 		if($file) {
-		   if(is_readable($file)) {
+			$this->loadFile($file);
+		}
+	}
+
+	public function loadFile($file) {
+		if(is_readable($file)) {
 			$this->content = file_get_contents($file);
-		   } else {
-			   throw new FileException('Asset file not found: ' . $file);
-		   }
+		} else {
+			throw new FileException('Asset file not found: ' . $file);
 		}
 	}
 

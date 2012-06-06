@@ -40,7 +40,17 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test_filter', 'another_filter'), $a->getFilters());
 	}
 
-	public function testAssetLoadFromFile() {
+	public function testAssetFromFile() {
+		$file = '/tmp/test_asset';
+		file_put_contents($file, 'content');
+		$a = new Asset();
+		$this->assertNull($a->getContent());
+		$a->loadFile($file);
+		$this->assertEquals('content', $a->getContent());
+		@unlink($file);
+	}
+
+	public function testAssetFromFileConstruct() {
 		$file = '/tmp/test_asset';
 		file_put_contents($file, 'content');
 		$a = new Asset($file);
