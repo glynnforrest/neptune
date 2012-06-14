@@ -13,7 +13,6 @@ class Assets {
 	protected static $instance;
 	protected $js = array();	
 	protected $css = array();
-	protected $filters = array();
 
 	public static function getInstance() {
 		if(!self::$instance) {
@@ -89,19 +88,5 @@ class Assets {
 		$sorted[$key] = $value;
 		unset($assets[$key]);
 	}
-
-	public function registerFilter($name, $class_name) {
-		$this->filters[$name] = $class_name;
-	}
-
-	public function applyFilter(&$asset, $filter) {
-		if(!isset($this->filters[$filter])) {
-			return false;
-		}
-		$filter = new $this->filters[$filter];
-		$filter->filterAsset($asset);
-		return true;
-	}
-
 }
 ?>

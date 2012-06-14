@@ -36,14 +36,6 @@ class Asset {
 		return $this->content;
 	}
 
-	public function filterContent() {
-		$a = Assets::getInstance();
-		foreach($this->filters as $filter) {
-			$a->applyFilter($this, $filter);
-		}
-		return true;
-	}
-
 	public function addFilter($name) {
 		if(!in_array($name, $this->filters)) {
 			$this->filters[] = $name;
