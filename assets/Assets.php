@@ -70,7 +70,11 @@ class Assets {
 					}
 				}
 			}
-			$sorted[$k] = Config::get('assets.url') . $v['src'];
+			if(strpos($v['src'], '://')) {
+				$sorted[$k] = $v['src'];
+			} else {
+				$sorted[$k] = Config::get('assets.url') . $v['src'];
+			}
 		}
 		return $sorted;
 	}
