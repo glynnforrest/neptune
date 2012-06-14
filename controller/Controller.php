@@ -6,7 +6,7 @@ use neptune\exceptions\MethodNotFoundException;
 use neptune\security\SecurityFactory;
 use neptune\http\Request;
 use neptune\http\Response;
-use neptune\assets\AssetsManager;
+use neptune\assets\Assets;
 
 /**
  * Base Controller
@@ -46,7 +46,7 @@ abstract class Controller {
 	}
 
 	protected function _assets() {
-		return AssetsManager::getInstance();
+		return Assets::getInstance();
 	}
 
 }

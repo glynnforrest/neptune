@@ -3,6 +3,7 @@
 namespace neptune\assets;
 
 use neptune\helpers\Html;
+use neptune\core\Config;
 
 /**
  * Assets
@@ -25,7 +26,7 @@ class Assets {
 	}
 
 	public function addJs($name, $src, $dependencies = array(), $options = array()) {
-		$this->js[$name] = array('src' => $src,
+		$this->js[$name] = array('src' => str_replace('#', '%23', $src),
 			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
 	}
@@ -40,7 +41,7 @@ class Assets {
 	}
 
 	public function addCss($name, $src, $dependencies = array(), $options = array()) {
-		$this->css[$name] = array('src' => $src,
+		$this->css[$name] = array('src' => str_replace('#', '%23', $src),
 			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
 	}
@@ -52,7 +53,6 @@ class Assets {
 			$content .= Html::css($v, $me->css[$k]['opts']);
 		}
 		return $content;
-
 	}
 
 	public function clear() {
@@ -70,7 +70,7 @@ class Assets {
 					}
 				}
 			}
-			$sorted[$k] = $v['src'];
+			$sorted[$k] = Config::get('assets.url') . $v['src'];
 		}
 		return $sorted;
 	}

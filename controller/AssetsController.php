@@ -43,10 +43,9 @@ class AssetsController extends Controller {
 			// foreach($this->getAssetFilters($asset) as $f) {
 			// 	$f->filterAsset($a);
 			// }
-			$this->response->setFormat('css');
+			$this->response->setFormat($this->request->format());
 			return $a->getContent();
 		} catch (FileException $e) {
-			echo $e;
 			$this->response->setStatusCode('404');
 			return false;
 		}
