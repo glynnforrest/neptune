@@ -4,17 +4,9 @@ namespace neptune\assets;
 
 use neptune\assets\Asset;
 use neptune\assets\Filter;
+use neptune\tests\assets\UpperCaseFilter;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
-
-class UpperCaseFilter implements Filter {
-
-	public function filterAsset(Asset &$a) {
-		$a->setContent(strtoupper($a->getContent()));
-	}
-
-	
-}
 
 /**
  * FilterTest
