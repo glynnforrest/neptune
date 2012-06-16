@@ -5,6 +5,7 @@ namespace neptune\controller;
 use neptune\controller\Controller;
 use neptune\core\Config;
 use neptune\http\Request;
+use neptune\tests\assets\UpperCaseFilter;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -29,10 +30,26 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($c instanceof Controller);
 	}
 
-	public function testGetAssetFileName() {
+	public function testGetAssetPath() {
 		$c = new AssetsController();
-		$this->assertEquals('/tmp/asset.css', $c->getAssetFileName('temp#asset.css'));
-		$this->assertEquals('/tmp/asset.css', $c->getAssetFileName('asset.css'));
+		$this->assertEquals('/tmp/asset.css', $c->getAssetPath('asset.css'));
+	}
+
+	public function testGetAssetFiltersSingle() {
+		Config::set('assets.filters', array('`.*foo.*`' => 'foo_filter'));
+		$c = new AssetsController();
+		$this->assertEquals(array('foo_filter'), $c->getAssetFilters('asset_with_foo_in'));
+		$this->assertEquals(array(), $c->getAssetFilters('asset_without_f00_in'));
+	}
+
+	public function testGetAssetFiltersMany() {
+		Config::set('assets.filters', array('`.*\.js`' => 'js_filter',
+			'`.*\.css`' => 'css_filter'));
+		$c = new AssetsController();
+		$this->assertEquals(array('js_filter'), $c->getAssetFilters('javascript.js'));
+		$this->assertEquals(array(), $c->getAssetFilters('blahjs'));
+		$this->assertEquals(array('css_filter'), $c->getAssetFilters('style.css'));
+		$this->assertEquals(array('js_filter', 'css_filter'), $c->getAssetFilters('test.js.css'));
 	}
 
 	public function testServeAsset() {
@@ -40,8 +57,8 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$file = '/tmp/asset.css';
 		file_put_contents($file, 'css_content');
 		Request::getInstance()->setFormat('css');
-		$this->assertEquals('css_content', $c->serveAsset('asset'));
 		$this->assertEquals('css_content', $c->serveAsset('temp#asset'));
+		$this->assertEquals('css_content', $c->serveAsset('asset'));
 		@unlink($file);
 		Request::getInstance()->resetStoredVars();
 	}

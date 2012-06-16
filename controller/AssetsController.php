@@ -38,8 +38,9 @@ class AssetsController extends Controller {
 
 	public function serveAsset($asset) {
 		$asset = urldecode($asset) . '.' . $this->request->format();
+		$asset = $this->processPrefix($asset);
 		try {
-			$a = new Asset($this->getAssetFileName($asset));
+			$a = new Asset($this->getAssetPath($asset));
 			// foreach($this->getAssetFilters($asset) as $f) {
 			// 	$f->filterAsset($a);
 			// }
@@ -51,7 +52,7 @@ class AssetsController extends Controller {
 		}
 	}
 
-	public function getAssetFileName($name) {
+	protected function processPrefix($name) {
 		$pos = strpos($name, '#');
 		if($pos) {
 			$this->current_prefix = substr($name, 0, $pos) . '#';
@@ -59,13 +60,24 @@ class AssetsController extends Controller {
 		} else {
 			$this->current_prefix = '';
 		}
-		return Config::get($this->current_prefix . 'assets.dir') . $name;
+		return $name;
 	}
 
-	protected function getAssetFilters($name) {
-		//return an array of filters to apply to the requested asset.
-		//run name through prefix#assets.filters array, check if they match a 
-		//regex, if so include those filters.
+	public function getAssetPath($filename) {
+		return Config::get($this->current_prefix . 'assets.dir') . $filename;
+	}
+
+	public function getAssetFilters($filename) {
+		$filters = Config::get($this->current_prefix . 'assets.filters');
+		if(is_array($filters) && !empty($filters)) {
+			$matched = array();
+			foreach ($filters as $k => $v) {
+				if(preg_match($k, $filename)){
+					$matched[] = $v;
+				}
+			}
+			return $matched;
+		}
 	}
 
 }
