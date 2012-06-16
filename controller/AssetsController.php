@@ -27,10 +27,10 @@ class AssetsController extends Controller {
 	}
 
 	protected function applyFilter(&$asset, $filter) {
-		if(!isset($this->filters[$filter])) {
-			return false;
+		if(!isset(self::$filters[$filter])) {
+			throw new Exception("Asset filter $filter has not been registered with AssetsController.");
 		}
-		$filter = new $this->filters[$filter];
+		$filter = new self::$filters[$filter];
 		$filter->filterAsset($asset);
 		return true;
 	}
@@ -41,9 +41,9 @@ class AssetsController extends Controller {
 		$asset = $this->processPrefix($asset);
 		try {
 			$a = new Asset($this->getAssetPath($asset));
-			// foreach($this->getAssetFilters($asset) as $f) {
-			// 	$f->filterAsset($a);
-			// }
+			foreach($this->getAssetFilters($asset) as $f) {
+				$this->applyFilter($a, $f);
+			}
 			$this->response->setFormat($this->request->format());
 			return $a->getContent();
 		} catch (FileException $e) {
@@ -69,15 +69,15 @@ class AssetsController extends Controller {
 
 	public function getAssetFilters($filename) {
 		$filters = Config::get($this->current_prefix . 'assets.filters');
+		$matched = array();
 		if(is_array($filters) && !empty($filters)) {
-			$matched = array();
 			foreach ($filters as $k => $v) {
 				if(preg_match($k, $filename)){
 					$matched[] = $v;
 				}
 			}
-			return $matched;
 		}
+		return $matched;
 	}
 
 }

@@ -63,6 +63,18 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		Request::getInstance()->resetStoredVars();
 	}
 
+	public function testServeFilteredAsset() {
+		$c = new AssetsController();
+		$file = '/tmp/filtered.js';
+		file_put_contents($file, 'js_content');
+		Config::set('temp#assets.filters', array('`.*\.js$`' => 'upper'));
+		AssetsController::registerFilter('upper', '\\neptune\\tests\\assets\\UpperCaseFilter');
+		Request::getInstance()->setFormat('js');
+		$this->assertEquals('JS_CONTENT', $c->serveAsset('temp#filtered'));
+		$this->assertEquals('JS_CONTENT', $c->serveAsset('filtered'));
+		@unlink($file);
+		Request::getInstance()->resetStoredVars();
+	}
 	
 }
 ?>
