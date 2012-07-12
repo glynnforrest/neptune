@@ -9,6 +9,7 @@ namespace neptune\console;
 class Console {
 
   protected static $instance;
+  protected $readline;
   protected $fg_colour;
   protected $bg_colour;
   protected $error_fg_colour;
@@ -38,23 +39,11 @@ class Console {
   }
 
   public function read($prompt = null) {
-    return readline($prompt);
-  }
-
-  public function animate($string, array $frames, $delay = 100) {
-    $i = 0;
-    while (true) {
-      $out = str_replace('{frame}', $frames[$i], $string);
-      $this->writeLn($out);
-      //$this->printLn($string);
-      if($i === count($frames) - 1) {
-      $i = 0;
-      } else {
-      $i++;
-      }
-      sleep($delay / 1000);
+    if ($this->readline) {
+      return readline($prompt);
     }
-
+    $this->write($prefix, false);
+    return fgets(STDIN);
   }
 
 }
