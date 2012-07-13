@@ -12,12 +12,12 @@ class User extends Thing {
 	protected static $table = 'users';
 	protected static $fields = array('id', 'username');
 	protected static $relations = array(
-		 'details' => array(
-			  'type' => 'has_one',
-			  'key' => 'id',
-			  'other_key' => 'users_id',
-			  'other_class' => 'neptune\\database\\relations\\UserDetails'
-		 )
+		'details' => array(
+			'type' => 'has_one',
+			'key' => 'id',
+			'other_key' => 'users_id',
+			'other_class' => 'neptune\\database\\relations\\UserDetails'
+		)
 	);
 
 }

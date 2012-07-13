@@ -13,12 +13,12 @@ class Author extends Thing {
 	protected static $table = 'authors';
 	protected static $fields = array('id', 'name');
 	protected static $relations = array(
-		 'books' => array(
-			  'type' => 'has_many',
-			  'key' => 'id',
-			  'other_key' => 'authors_id',
-			  'other_class' => 'neptune\\database\\relations\\Book'
-		 )
+		'books' => array(
+			'type' => 'has_many',
+			'key' => 'id',
+			'other_key' => 'authors_id',
+			'other_class' => 'neptune\\database\\relations\\Book'
+		)
 	);
 
 }

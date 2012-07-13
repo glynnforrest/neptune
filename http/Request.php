@@ -20,7 +20,7 @@ class Request {
 		return self::$instance;
 	}
 
-	protected function __construct() { 
+	protected function __construct() {
 	}
 
 	public function resetStoredVars() {
@@ -63,7 +63,7 @@ class Request {
 	}
 
 	public function method() {
-		return isset($_SERVER['REQUEST_METHOD']) ?  strtoupper($_SERVER['REQUEST_METHOD']) : null;
+		return isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : null;
 	}
 
 	public function format() {

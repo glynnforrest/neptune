@@ -16,19 +16,19 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		Config::create('unittest');
 		Config::set('database', array(
-			 'unittest' => array(
-				  'driver' => 'debug',
-				  'database' => 'unittest'
-			 ),
-			 'unittest2' => array(
-				  'driver' => 'debug',
-				  'database' => 'unittest',
-				  'builder' => 'debug'
-			 ),
-			 'fake' => array(
-				  'driver' => 'fake',
-				  'database' => 'database'
-			 )
+			'unittest' => array(
+				'driver' => 'debug',
+				'database' => 'unittest'
+			),
+			'unittest2' => array(
+				'driver' => 'debug',
+				'database' => 'unittest',
+				'builder' => 'debug'
+			),
+			'fake' => array(
+				'driver' => 'fake',
+				'database' => 'database'
+			)
 		));
 	}
 

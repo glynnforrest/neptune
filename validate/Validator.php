@@ -142,7 +142,7 @@ class Validator {
 			if ($msg) {
 				$msg = str_replace(':name', String::spaces($name), $msg);
 				$msg = isset($this->input_array[$name]) && !empty($this->input_array[$name]) ?
-						  str_replace(':value', $this->input_array[$name], $msg) : $msg;
+					str_replace(':value', $this->input_array[$name], $msg) : $msg;
 			}
 			$this->errors[$name] = ucfirst($msg);
 		}

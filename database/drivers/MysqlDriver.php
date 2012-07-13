@@ -16,8 +16,7 @@ class MysqlDriver implements DatabaseDriver {
 	protected $pdo;
 
 	public function __construct($host, $port, $user, $pass, $db) {
-		$dsn = "mysql:host=$host;port=$port;
-                dbname=$db";
+		$dsn = "mysql:host=$host;port=$port;dbname=$db";
 		$options = array(
 			 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 		);

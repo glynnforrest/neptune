@@ -66,7 +66,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		Logger::setFormat('[:type] :date :ip :message');
 		Logger::debug('test log');
 		$this->assertEquals(array('[debug] ' . date('d/m/y') . ' 127.0.0.1 test log'),
-		   Logger::getLogs());
+							Logger::getLogs());
 	}
 
 	public function testSave() {

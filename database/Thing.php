@@ -79,7 +79,7 @@ class Thing {
 		$key = static::$relations[$name]['key'];
 		$this->no_friends[$name] = null;
 		$this->relation_objects[$name]->setRelatedObject($key, $value)
-				  ->updateKey($key, $this->get($key));
+			->updateKey($key, $this->get($key));
 	}
 
 	public function __set($key, $value) {
@@ -95,7 +95,7 @@ class Thing {
 			return $this->setRelation($key, $value);
 		}
 		if($key === static::$primary_key && isset($this->values[$key])) {
-			$this->current_index = $this->values[$key];		
+			$this->current_index = $this->values[$key];
 		}
 		if($overwrite) {
 			$this->setValue($key, $value);
@@ -108,7 +108,7 @@ class Thing {
 		}
 		if (in_array($key, static::$fields) && !in_array($key, $this->modified)) {
 			$this->modified [] = $key;
-		}		
+		}
 	}
 
 	protected function setValue($key, $value) {

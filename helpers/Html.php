@@ -66,7 +66,7 @@ class Html {
 			} else {
 				$text .= self::openTag('option', array('value' => $v));
 			}
-			$text .= $k .  self::closeTag('option');
+			$text .= $k . self::closeTag('option');
 		}
 		$text .= self::closeTag('select');
 		return $text;

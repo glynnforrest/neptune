@@ -106,7 +106,7 @@ END;
 
 	public function testGetDeepNested() {
 		Config::create('fake');
-		Config::set('parent',  array('child' => array(
+		Config::set('parent', array('child' => array(
 			0 => array(1 => array(2 => array(3 => array(4 =>'value')))))));
 		$this->assertEquals('value', Config::get('parent.child.0.1.2.3.4'));
 	}
@@ -114,19 +114,19 @@ END;
 	public function testEmptyGet() {
 		Config::load(self::file);
 		$this->assertEquals(array(
-			 'one' => 1,
-			 'two' => array(
-				  'one' => 2.1,
-				  'two' => 2.2
-			 )
-				  ), Config::get());
+			'one' => 1,
+			'two' => array(
+				'one' => 2.1,
+				'two' => 2.2
+			)
+		), Config::get());
 		$this->assertEquals(array(
-			 'one' => 1,
-			 'two' => array(
-				  'one' => 2.1,
-				  'two' => 2.2
-			 )
-				  ), Config::get(null, self::file));
+			'one' => 1,
+			'two' => array(
+				'one' => 2.1,
+				'two' => 2.2
+			)
+		), Config::get(null, self::file));
 	}
 
 	public function testUnload() {

@@ -12,7 +12,6 @@ class Events {
 	protected $handlers = array();
 
 	protected function __construct() {
-	
 	}
 
 	public static function getInstance() {

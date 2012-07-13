@@ -8,47 +8,47 @@ namespace neptune\console;
  **/
 class Console {
 
-  protected static $instance;
-  protected $readline;
-  protected $fg_colour;
-  protected $bg_colour;
-  protected $error_fg_colour;
-  protected $error_bg_colour;
+	protected static $instance;
+	protected $readline;
+	protected $fg_colour;
+	protected $bg_colour;
+	protected $error_fg_colour;
+	protected $error_bg_colour;
 
-  protected function __construct() {
-    $this->readline = extension_loaded('readline');
-  }
+	protected function __construct() {
+		$this->readline = extension_loaded('readline');
+	}
 
-  public static function getInstance() {
-    if(!self::$instance) {
-      self::$instance = new self();
-    }
-    return self::$instance;
-  }
+	public static function getInstance() {
+		if(!self::$instance) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
-  public function write($string, $new_line = true) {
-    if ($new_line) {
-      echo $string . PHP_EOL;
-    } else {
-      echo $string;
-    }
-  }
+	public function write($string, $new_line = true) {
+		if ($new_line) {
+			echo $string . PHP_EOL;
+		} else {
+			echo $string;
+		}
+	}
 
-  public function error($string, $new_line = true) {
-    if ($new_line) {
-      echo 'Error: ' . $string . PHP_EOL;
-    } else {
-      echo 'Error: ' . $string;
-    }
-  }
+	public function error($string, $new_line = true) {
+		if ($new_line) {
+			echo 'Error: ' . $string . PHP_EOL;
+		} else {
+			echo 'Error: ' . $string;
+		}
+	}
 
-  public function read($prompt = null) {
-    if ($this->readline) {
-      return readline($prompt);
-    }
-    $this->write($prefix, false);
-    return fgets(STDIN);
-  }
+	public function read($prompt = null) {
+		if ($this->readline) {
+			return readline($prompt);
+		}
+		$this->write($prefix, false);
+		return fgets(STDIN);
+	}
 
 }
 ?>

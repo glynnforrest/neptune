@@ -132,7 +132,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testValidatedArgs() {
 		$r = new Route('/email/:email');
-		$r->controller('email')->method('verify')->rules(array('email' =>  'email'));
+		$r->controller('email')->method('verify')->rules(array('email' => 'email'));
 		$this->assertFalse($r->test('/email/me@glynnforrest@com'));
 		$this->assertTrue($r->test('/email/me@glynnforrest.com'));
 		$r = new Route('/add/:first/:second');

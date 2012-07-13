@@ -17,10 +17,10 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		Config::create('unittest');
 		Config::set('database', array(
-			 'unittest' => array(
-				  'driver' => 'debug',
-				  'database' => 'unittest'
-			 )
+			'unittest' => array(
+				'driver' => 'debug',
+				'database' => 'unittest'
+			)
 		));
 	}
 
