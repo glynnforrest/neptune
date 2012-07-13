@@ -1,7 +1,11 @@
 <?php
-namespace neptune\exceptions;
-class LogFileException extends \Exception {
-public $not_loggable = true;
 
+namespace neptune\exceptions;
+
+/**
+ * LogFileException
+ * @author Glynn Forrest me@glynnforrest.com
+ **/
+class LogFileException extends \Exception {
 }
 ?>
