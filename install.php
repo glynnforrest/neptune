@@ -2,8 +2,15 @@
 
 use neptune\console\Console;
 use neptune\console\Generator;
+use neptune\core\Neptune;
+use neptune\core\Events;
 
 include('bootstrap.php');
+
+Neptune::handleErrors();
+Events::getInstance()->addHandler('\Exception', function($e) {
+    Console::getInstance()->error($e->getMessage());
+  });
 
 $c = Console::getInstance();
 $c->write('Welcome to the Neptune installer.');

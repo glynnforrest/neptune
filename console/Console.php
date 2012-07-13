@@ -34,8 +34,12 @@ class Console {
     }
   }
 
-  public function error($string) {
-    echo $string;
+  public function error($string, $new_line = true) {
+    if ($new_line) {
+      echo 'Error: ' . $string . PHP_EOL;
+    } else {
+      echo 'Error: ' . $string;
+    }
   }
 
   public function read($prompt = null) {

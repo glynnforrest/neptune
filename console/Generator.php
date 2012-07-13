@@ -23,6 +23,12 @@ class Generator {
     'storage/logs',
     'config'
   );
+  protected $blank_files = array(
+    'storage/logs/.gitignore'
+  );
+  protected $skeleton_files = array(
+    'public/index.php' => 'lib/neptune/skeletons/index.php',
+  );
 
   protected function __construct() {
     $this->console = console::getInstance();
@@ -43,12 +49,14 @@ class Generator {
     if(substr($root, -1) != '/') {
       $root .= '/';
     }
+    //create directory structure
     foreach($this->dirs as $dir) {
       if(!file_exists($root . $dir)) {
         mkdir($root . $dir, 0755, true);
         $this->console->write('Creating directory ' . $root.$dir);
       }
     }
+    //create writable directories
     //todo::move the chmod stuff to an install script that can be run when put on a server
     foreach($this->writable_dirs as $dir) {
       if(!file_exists($root . $dir)) {
@@ -63,9 +71,32 @@ class Generator {
     if(!file_exists('.git')) {
       $this->console->write(exec('git init'));
     }
+    //checkout neptune as a submodule
     if(!file_exists('lib/neptune')) {
       $this->console->write('Cloning neptune...');
       $this->console->write(exec('git submodule add https://github.com/glynnforrest/neptune.git lib/neptune'));
+    }
+    //create blank files
+    foreach ($this->blank_files as $file) {
+      if(!file_exists($file)) {
+        try {
+          touch($file);
+          $this->console->write('Creating '. $file);
+        } catch (\Exception $e){
+          $this->console->error("Unable to create $file");
+        }
+      }
+    }
+    //copy skeleton files
+    foreach ($this->skeleton_files as $target => $source) {
+      if(!file_exists($target)) {
+        try {
+          copy($source, $target);
+          $this->console->write("Copying skeleton file $source to $target");
+        } catch (\Exception $e){
+          $this->console->error("Unable to copy skeleton file $source to $target");
+        }
+      }
     }
 
   }
