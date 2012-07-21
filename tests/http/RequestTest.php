@@ -43,6 +43,9 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REQUEST_URI'] = 'test';
 		$this->assertEquals('html', $this->request->format());
 		$this->reset();
+		$_SERVER['REQUEST_URI'] = 'test.';
+		$this->assertEquals('html', $this->request->format());
+		$this->reset();
 		$_SERVER['REQUEST_URI'] = 'test.json';
 		$this->assertEquals('json', $this->request->format());
 		$this->reset();

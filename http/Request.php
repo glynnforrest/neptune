@@ -73,7 +73,7 @@ class Request {
 		$format = self::uri();
 		if ($format) {
 			$dot = strrpos($format, '.');
-			if ($dot) {
+			if ($dot && $dot != strlen($format) - 1) {
 				$format = substr($format, $dot + 1);
 				$this->format = $format;
 				return $format;
