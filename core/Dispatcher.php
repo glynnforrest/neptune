@@ -127,13 +127,11 @@ class Dispatcher {
 				$this->response->body($body);
 				$this->response->send();
 			} catch (MethodNotFoundException $e) {
-				echo $e;
 				restore_error_handler();
 				return false;
 			} catch (ArgumentMissingException $e) {
-				echo $e;
 				restore_error_handler();
-				return true;
+				return false;
 			}
 			restore_error_handler();
 			return true;
