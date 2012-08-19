@@ -11,6 +11,7 @@ use neptune\cache\Cacheable;
 class Model extends Cacheable {
 
 	protected static $models = array();
+	protected $database;
 
 	protected function __construct() { 
 	}
@@ -24,6 +25,11 @@ class Model extends Cacheable {
 		}
 		return self::$models[$model_name];
 	}
+
+	public function setDatabase($database) {
+		$this->database = $database;
+	}
+
 
 }
 ?>
