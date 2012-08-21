@@ -244,7 +244,7 @@ class Thing {
 	}
 
 	public static function create($count, $database = false) {
-		$set = new ThingCollection($database, $me->table);
+		$set = new ThingCollection($database, self::$table);
 		for ($i = 0; $i < $count; $i++) {
 			$set[] = new static($database);
 		}
