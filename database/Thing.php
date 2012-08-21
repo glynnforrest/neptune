@@ -346,7 +346,7 @@ class Thing {
 		}
 		$f->add('submit', 'submit', 'Submit');
 		$f->setType(static::$primary_key, 'hidden');
-		$f->set($values);
+		$f->setValues($values);
 		$f->addErrors($errors);
 		return $f;
 	}
