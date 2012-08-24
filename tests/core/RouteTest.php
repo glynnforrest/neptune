@@ -217,5 +217,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'PUT';
 		$this->assertFalse($r->test('/anything'));
 	}
+
+	public function testTrailingSlashesStripped() {
+		$r = new Route('/page', 'controller', 'method');
+		$this->assertTrue($r->test('/page/'));
+		$this->assertTrue($r->test('/page//'));
+		$this->assertTrue($r->test('/page////'));
+	}
+
 }
 ?>

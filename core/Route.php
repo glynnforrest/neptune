@@ -111,7 +111,13 @@ class Route {
 		return $this->url;
 	}
 
+	//$source should begin with a forward slash
 	public function test($source) {
+		//Strip any trailing slashes from the source,
+		//only if it's longer than 1 character (a single slash)
+		if(strlen($source) > 1) {
+			$source = rtrim($source, '/');
+		}
 		if (!preg_match($this->regex, $source, $vars)) {
 			return false;
 		}
