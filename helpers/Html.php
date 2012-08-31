@@ -47,6 +47,10 @@ class Html {
 	}
 
 	public static function input($type, $name, $value = null, $options = array()) {
+		if($type === 'textarea') {
+			return '<textarea name="' . $name . '"' .
+				self::options($options) . '">' . $value . '</textarea>';
+		}
 		if($type === 'password') {
 			$value = null;
 		}
