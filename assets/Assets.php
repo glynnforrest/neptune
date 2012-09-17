@@ -12,7 +12,7 @@ use neptune\core\Config;
 class Assets {
 
 	protected static $instance;
-	protected $js = array();	
+	protected $js = array();
 	protected $css = array();
 
 	public static function getInstance() {
@@ -31,6 +31,10 @@ class Assets {
 			'opts' => (array) $options);
 	}
 
+	public function removeJs($name) {
+		unset($this->js[$name]);
+	}
+
 	public static function js() {
 		$content ='';
 		$me = self::getInstance();
@@ -44,6 +48,10 @@ class Assets {
 		$this->css[$name] = array('src' => str_replace('#', '%23', $src),
 			'deps' => (array) $dependencies,
 			'opts' => (array) $options);
+	}
+
+	public function removeCss($name) {
+		unset($this->css[$name]);
 	}
 
 	public static function css() {

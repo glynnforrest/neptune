@@ -32,6 +32,14 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/assets/css/style.css" />' . PHP_EOL, Assets::css());
 	}
 
+	public function testRemoveCss() {
+		$this->assets->addCss('style', 'css/style.css');
+		$this->assets->removeCss('style');
+		$this->assertEquals('', Assets::css());
+		$this->assets->removeCss('not_there');
+		$this->assertEquals('', Assets::css());
+	}
+
 	public function testCssOptions() {
 		$this->assets->addCss('style', 'css/style.css', null, array('id' => 'my_style', 'class' => 'style'));
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/assets/css/style.css" id="my_style" class="style" />' . PHP_EOL, Assets::css());
@@ -49,6 +57,14 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assets->addJs('main', 'js/main.js');
 		$expected = '<script type="text/javascript" src="http://myapp.local/assets/js/main.js"></script>' . PHP_EOL;
 		$this->assertEquals($expected, Assets::js());
+	}
+
+	public function testRemoveJs() {
+		$this->assets->addJs('main', 'js/main.js');
+		$this->assets->removeJs('main');
+		$this->assertEquals('', Assets::js());
+		$this->assets->removeJs('not_there');
+		$this->assertEquals('', Assets::js());
 	}
 
 	public function testJsOptions() {
@@ -105,6 +121,6 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assets->addCss('lib', 'lib.css');
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://cdn.site.com/assets/lib.css" />' . PHP_EOL, Assets::css());
 	}
-	
+
 }
 ?>
