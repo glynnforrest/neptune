@@ -91,6 +91,12 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals("SELECT * FROM test", $q->__toString());
 	}
 
+	public function testWhereZeroValue() {
+		$q = SQLQuery::select();
+		$q->from('test')->where('column1 =', 0);
+		$this->assertEquals("SELECT * FROM test WHERE column1 = '0'", $q->__toString());
+	}
+
 	public function testWhereSelect() {
 		$q = SQLQuery::select();
 		$q->from('test')->where('id =', 5);

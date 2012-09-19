@@ -113,7 +113,7 @@ abstract class SQLQuery {
 
 	public function where($expression, $value = null, $logic='AND') {
 		if (isset($value)) {
-			if (empty($value)) {
+			if (empty($value) && $value !== 0) {
 				return $this;
 			}
 			if ($value !== '?') {
