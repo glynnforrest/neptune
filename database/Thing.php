@@ -294,12 +294,14 @@ class Thing {
 		}
 		$set = new ThingCollection($database, static::$table, $results);
 		static::applySchema($set);
-		//hydrate objects
-		$rm = RelationsManager::getInstance();
-		$relations = (array) $relations;
-		foreach ($relations as $r) {
-			if(isset(static::$relations[$r])) {
-				$rm->eagerLoad($set, $r, static::$relations[$r], $database);
+		//hydrate objects if we have a result set
+		if(count($set)) {
+			$rm = RelationsManager::getInstance();
+			$relations = (array) $relations;
+			foreach ($relations as $r) {
+				if(isset(static::$relations[$r])) {
+					$rm->eagerLoad($set, $r, static::$relations[$r], $database);
+				}
 			}
 		}
 		return $set;
