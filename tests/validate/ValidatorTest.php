@@ -148,18 +148,18 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($v->check('three', 'length'));
 	}
 
-	public function testMin() {
+	public function testMinLength() {
 		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
-		$this->assertTrue($v->check('foo', 'min:3'));
-		$this->assertFalse($v->check('two', 'min:4'));
+		$this->assertTrue($v->check('foo', 'minlength:3'));
+		$this->assertFalse($v->check('two', 'minlength:4'));
 	}
 
-	public function testMax() {
+	public function testMaxLength() {
 		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
-		$this->assertFalse($v->check('foo', 'max:2'));
-		$this->assertTrue($v->check('two', 'max:1'));
-		$this->assertTrue($v->check('two', 'max:467'));
-		$this->assertFalse($v->check('three', 'max'));
+		$this->assertFalse($v->check('foo', 'maxlength:2'));
+		$this->assertTrue($v->check('two', 'maxlength:1'));
+		$this->assertTrue($v->check('two', 'maxlength:467'));
+		$this->assertFalse($v->check('three', 'maxlength'));
 	}
 
 	public function testBetween() {
@@ -215,7 +215,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testDeferredValidation() {
-		$v = new Validator(array('one' => 4), 
+		$v = new Validator(array('one' => 4),
 		array('one' => 'int', 'two' => 'alphanum'));
 		$v->two = 'valu3';
 		$this->assertTrue($v->validate());

@@ -257,7 +257,7 @@ class Validator {
 		}
 	}
 
-	protected function checkMin($value, $min) {
+	protected function checkMinlength($value, $min) {
 		if (strlen($value) >= $min) {
 			return true;
 		} else {
@@ -266,7 +266,7 @@ class Validator {
 		}
 	}
 
-	protected function checkMax($value, $max) {
+	protected function checkMaxlength($value, $max) {
 		if (strlen($value) <= $max) {
 			return true;
 		} else {
