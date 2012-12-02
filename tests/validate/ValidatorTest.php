@@ -141,25 +141,30 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($v->check('seven', 'alphadashspace'));
 	}
 
-	public function testLength() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
-		$this->assertTrue($v->check('foo', 'length:3'));
-		$this->assertFalse($v->check('two', 'length:0'));
-		$this->assertFalse($v->check('three', 'length'));
+	public function testSize() {
+		$v = new Validator(array('foo' => 'bar', 'two' => '7', 'three' => 'hi', 'zero' => 0));
+		//checking for string length
+		$this->assertTrue($v->check('foo', 'size:3'));
+		$this->assertFalse($v->check('two', 'size:0'));
+		$this->assertFalse($v->check('three', 'size'));
+		//checking for numeric value
+		$this->assertTrue($v->check('two', 'size:7'));
+		$this->assertTrue($v->check('zero', 'size:0'));
+		$this->assertFalse($v->check('two', 'size:-1'));
 	}
 
-	public function testMinLength() {
+	public function testMin() {
 		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
-		$this->assertTrue($v->check('foo', 'minlength:3'));
-		$this->assertFalse($v->check('two', 'minlength:4'));
+		$this->assertTrue($v->check('foo', 'min:3'));
+		$this->assertFalse($v->check('two', 'min:4'));
 	}
 
-	public function testMaxLength() {
+	public function testMax() {
 		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
-		$this->assertFalse($v->check('foo', 'maxlength:2'));
-		$this->assertTrue($v->check('two', 'maxlength:1'));
-		$this->assertTrue($v->check('two', 'maxlength:467'));
-		$this->assertFalse($v->check('three', 'maxlength'));
+		$this->assertFalse($v->check('foo', 'max:2'));
+		$this->assertTrue($v->check('two', 'max:1'));
+		$this->assertTrue($v->check('two', 'max:467'));
+		$this->assertFalse($v->check('three', 'max'));
 	}
 
 	public function testBetween() {

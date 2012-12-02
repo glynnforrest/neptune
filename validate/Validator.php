@@ -26,14 +26,18 @@ class Validator {
 		 'alphadash' => ':name contains disallowed characters.',
 		 'alphaspace' => ':name contains disallowed characters.',
 		 'alphadashspace' => ':name contains disallowed characters.',
-		 'between' => ':name is not between :min and :max characters in length.',
+		 'between_str' => ':name is not between :min and :max characters in length.',
+		 'between_num' => ':name is not between :min and :max.',
 		 'email' => ':value is not a valid email address.',
 		 'hex' => ':name is not hexadecimal.',
 		 'int' => ':name is not an integer.',
-		 'length' => ':name is not :length characters long.',
+		 'size_str' => ':name is not :size characters long.',
+         'size_num' => ':name must be :size.',
 		 'matches' => ':name does not match :match.',
-		 'max' => ':name must be less than :max characters.',
-		 'min' => ':name must have at least :min characters.',
+		 'max_str' => ':name must have less than :max characters.',
+		 'max_num' => ':name must be less than :max.',
+		 'min_str' => ':name must have more than :min characters.',
+		 'min_num' => ':name must be greater than :min.',
 		 'num' => ':name is not a number.',
 		 'required' => ':name is required.',
 		 'token' => 'Your session has expired.',
@@ -248,16 +252,24 @@ class Validator {
 		return ctype_alnum($value);
 	}
 
-	protected function checkLength($value, $length) {
-		if (strlen($value) == $length) {
+	protected function checkSize($value, $size) {
+		if(is_numeric($value)) {
+			if($value == $size) {
+				return true;
+			} else {
+				$this->parse('size', array(':size' => $size));
+                return false;
+			}
+		}
+		if (strlen($value) == $size) {
 			return true;
 		} else {
-			$this->parse('length', array(':length' => $length));
+			$this->parse('size', array(':size' => $size));
 			return false;
 		}
 	}
 
-	protected function checkMinlength($value, $min) {
+	protected function checkMin($value, $min) {
 		if (strlen($value) >= $min) {
 			return true;
 		} else {
@@ -266,7 +278,7 @@ class Validator {
 		}
 	}
 
-	protected function checkMaxlength($value, $max) {
+	protected function checkMax($value, $max) {
 		if (strlen($value) <= $max) {
 			return true;
 		} else {
