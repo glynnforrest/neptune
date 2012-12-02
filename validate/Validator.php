@@ -257,41 +257,65 @@ class Validator {
 			if($value == $size) {
 				return true;
 			} else {
-				$this->parse('size', array(':size' => $size));
+				$this->parse('size_num', array(':size' => $size));
                 return false;
 			}
 		}
 		if (strlen($value) == $size) {
 			return true;
 		} else {
-			$this->parse('size', array(':size' => $size));
+			$this->parse('size_str', array(':size' => $size));
 			return false;
 		}
 	}
 
-	protected function checkMin($value, $min) {
-		if (strlen($value) >= $min) {
+	protected function checkMin($value, $size) {
+        if(is_numeric($value)) {
+			if($value >= $size) {
+				return true;
+			} else {
+				$this->parse('min_num', array(':min' => $size));
+                return false;
+			}
+		}
+		if (strlen($value) >= $size) {
 			return true;
 		} else {
-			$this->parse('min', array(':min' => $min));
+			$this->parse('min_str', array(':min' => $size));
 			return false;
 		}
 	}
 
-	protected function checkMax($value, $max) {
-		if (strlen($value) <= $max) {
+	protected function checkMax($value, $size) {
+        if(is_numeric($value)) {
+			if($value <= $size) {
+				return true;
+			} else {
+				$this->parse('min_num', array(':min' => $size));
+                return false;
+			}
+		}
+		if (strlen($value) <= $size) {
 			return true;
 		} else {
-			$this->parse('max', array(':max' => $max));
+			$this->parse('max_num', array(':max' => $size));
 			return false;
 		}
 	}
 
 	protected function checkBetween($value, $min, $max) {
+        if(is_numeric($value)) {
+		if ($value >= $min && $value <= $max) {
+				return true;
+			} else {
+			$this->parse('between_num', array(':min' => $min, ':max' => $max));
+                return false;
+			}
+		}
 		if (strlen($value) >= $min && strlen($value) <= $max) {
 			return true;
 		} else {
-			$this->parse('between', array(':min' => $min, ':max' => $max));
+			$this->parse('between_str', array(':min' => $min, ':max' => $max));
 			return false;
 		}
 	}

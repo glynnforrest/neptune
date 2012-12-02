@@ -154,27 +154,43 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testMin() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
+		$v = new Validator(array('foo' => 'bar', 'one' => 12, 'two' => '1', 'three' => '-2'));
+		//checking for string length
 		$this->assertTrue($v->check('foo', 'min:3'));
 		$this->assertFalse($v->check('two', 'min:4'));
+		//checking for numeric value
+		$this->assertTrue($v->check('one', 'min:11'));
+		$this->assertTrue($v->check('two', 'min:1'));
+		$this->assertTrue($v->check('three', 'min:-3'));
+		$this->assertFalse($v->check('three', 'min:1'));
 	}
 
 	public function testMax() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hi'));
+		$v = new Validator(array('foo' => 'bar', 'one' => 12, 'two' => '1', 'three' => '-2'));
+		//checking for string length
 		$this->assertFalse($v->check('foo', 'max:2'));
 		$this->assertTrue($v->check('two', 'max:1'));
 		$this->assertTrue($v->check('two', 'max:467'));
+		//checking for numeric length
+		$this->assertTrue($v->check('one', 'max:13'));
+		$this->assertTrue($v->check('two', 'max:1'));
+		$this->assertTrue($v->check('three', 'max:-1'));
+		$this->assertFalse($v->check('three', 'max:-3'));
 		$this->assertFalse($v->check('three', 'max'));
 	}
 
 	public function testBetween() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hello'));
+		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hello', 'four' => 100));
+		//checking for string length
 		$this->assertTrue($v->check('foo', 'required|between:1,4'));
 		$this->assertTrue($v->check('foo', 'between:3,4'));
 		$this->assertFalse($v->check('two', 'between:3,6'));
 		$this->assertFalse($v->check('three', 'between:0,4'));
 		$this->assertFalse($v->check('foo', 'required|between,2'));
 		$this->assertFalse($v->check('two', 'between:2'));
+		//checking for numeric lenght
+		$this->assertTrue($v->check('two', 'between:0,2'));
+		$this->assertTrue($v->check('four', 'required|between:90,110'));
 		$this->assertFalse($v->check('three', 'between'));
 	}
 
