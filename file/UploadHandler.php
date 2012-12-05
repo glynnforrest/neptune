@@ -3,6 +3,7 @@
 namespace neptune\file;
 
 use neptune\exceptions\FileException;
+use neptune\helpers\String;
 
 /**
  * UploadHandler
@@ -14,12 +15,11 @@ class UploadHandler {
 	protected $filename;
 	protected $extension;
 	protected $location;
-	protected $scramble_length = 16;
-	protected $scramble_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	protected $overwrite = false;
-	protected $keep_extension = true;
+	protected $scramble_chars = String::ALPHANUM;
+	protected $scramble_length = 16;
 
-	function __construct($name) {
+	public function __construct($name) {
 		if (isset($_FILES[$name])) {
 			$this->name = $name;
 			$this->filename = $_FILES[$name]['name'];
@@ -51,19 +51,17 @@ class UploadHandler {
 	}
 
 	public function setFilename($filename) {
-		if ($this->keep_extension) {
-			$this->filename = $filename . $this->extension;
-		} else {
-			$this->filename = $filename;
-		}
+		$this->filename = $filename;
 	}
 
-	public function keepExtension() {
-		$this->keep_extension = true;
+	public function scrambleFilename() {
+		$this->filename = String::random($this->scramble_length,
+										 $this->scramble_chars) . $this->extension;
 	}
 
-	public function loseExtension() {
-		$this->keep_extension = false;
+	public function setScrambleOptions($length, $characters = String::ALPHANUM) {
+		$this->scramble_length = $length;
+		$this->scramble_chars = $characters;
 	}
 
 	public function getExtension() {
@@ -72,20 +70,6 @@ class UploadHandler {
 
 	public function setExtension($ext) {
 		$this->extension = $ext;
-	}
-
-	protected function scrambleFilename() {
-		$max = strlen($this->scramble_chars) - 1;
-		$name = '';
-		for ($i = 0; $i < $this->scramble_length; $i++) {
-			$index = rand(0, $max);
-			$name .= $this->scramble_chars[$index];
-		}
-		if ($this->keep_extension) {
-			$this->filename = $name . $this->extension;
-		} else {
-			$this->filename = $name;
-		}
 	}
 
 	public function getTempFilename() {
@@ -117,11 +101,6 @@ class UploadHandler {
 
 	public function allowOverwrite() {
 		$this->overwrite = true;
-	}
-
-	public function setScrambleOptions($chars, $len) {
-		$this->scramble_chars = $chars;
-		$this->scramble_length = $len;
 	}
 
 	public function moveToAndRename($directory, $filename) {
