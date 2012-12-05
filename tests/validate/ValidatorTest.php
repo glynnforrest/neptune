@@ -142,19 +142,28 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSize() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '7', 'three' => 'hi', 'zero' => 0));
+		$v = new Validator(array('foo' => 'bar',
+								 'two' => '7',
+								 'three' => 'hi',
+								 'float' => 5.4,
+								 'zero' => 0));
 		//checking for string length
 		$this->assertTrue($v->check('foo', 'size:3'));
 		$this->assertFalse($v->check('two', 'size:0'));
 		$this->assertFalse($v->check('three', 'size'));
 		//checking for numeric value
 		$this->assertTrue($v->check('two', 'size:7'));
+		$this->assertTrue($v->check('float', 'size:5.4'));
 		$this->assertTrue($v->check('zero', 'size:0'));
 		$this->assertFalse($v->check('two', 'size:-1'));
 	}
 
 	public function testMin() {
-		$v = new Validator(array('foo' => 'bar', 'one' => 12, 'two' => '1', 'three' => '-2'));
+		$v = new Validator(array('foo' => 'bar',
+								 'one' => 12,
+								 'two' => '1',
+								 'float' => 5.4,
+								 'three' => '-2'));
 		//checking for string length
 		$this->assertTrue($v->check('foo', 'min:3'));
 		$this->assertFalse($v->check('two', 'min:4'));
@@ -162,11 +171,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($v->check('one', 'min:11'));
 		$this->assertTrue($v->check('two', 'min:1'));
 		$this->assertTrue($v->check('three', 'min:-3'));
+		$this->assertTrue($v->check('float', 'min:5.4'));
 		$this->assertFalse($v->check('three', 'min:1'));
 	}
 
 	public function testMax() {
-		$v = new Validator(array('foo' => 'bar', 'one' => 12, 'two' => '1', 'three' => '-2'));
+		$v = new Validator(array('foo' => 'bar',
+								 'one' => 12,
+								 'two' => '1',
+								 'three' => '-2',
+								 'float' => 5.4));
 		//checking for string length
 		$this->assertFalse($v->check('foo', 'max:2'));
 		$this->assertTrue($v->check('two', 'max:1'));
@@ -175,12 +189,17 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($v->check('one', 'max:13'));
 		$this->assertTrue($v->check('two', 'max:1'));
 		$this->assertTrue($v->check('three', 'max:-1'));
+		$this->assertTrue($v->check('float', 'max:5.5'));
 		$this->assertFalse($v->check('three', 'max:-3'));
 		$this->assertFalse($v->check('three', 'max'));
 	}
 
 	public function testBetween() {
-		$v = new Validator(array('foo' => 'bar', 'two' => '1', 'three' => 'hello', 'four' => 100));
+		$v = new Validator(array('foo' => 'bar',
+								 'two' => '1',
+								 'three' => 'hello',
+								 'four' => 100,
+								 'float' => 5.4));
 		//checking for string length
 		$this->assertTrue($v->check('foo', 'required|between:1,4'));
 		$this->assertTrue($v->check('foo', 'between:3,4'));
@@ -188,9 +207,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($v->check('three', 'between:0,4'));
 		$this->assertFalse($v->check('foo', 'required|between,2'));
 		$this->assertFalse($v->check('two', 'between:2'));
-		//checking for numeric lenght
+		//checking for numeric length
 		$this->assertTrue($v->check('two', 'between:0,2'));
 		$this->assertTrue($v->check('four', 'required|between:90,110'));
+		$this->assertTrue($v->check('float', 'required|between:5,6'));
 		$this->assertFalse($v->check('three', 'between'));
 	}
 
