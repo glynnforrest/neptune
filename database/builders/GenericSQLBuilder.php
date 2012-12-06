@@ -137,8 +137,12 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addOrderBy(&$query) {
-		$query .= ' ORDER BY ' . $this->query['ORDER BY'][0];
-		$query .= ' ' . $this->query['ORDER BY'][1];
+		$query .= ' ORDER BY ' . $this->query['ORDER BY'][0][0];
+		$query .= ' ' . $this->query['ORDER BY'][0][1];
+		for ($i = 1; $i < count($this->query['ORDER BY']); $i++) {
+			$query .= ', ' . $this->query['ORDER BY'][$i][0];
+			$query .= ' ' . $this->query['ORDER BY'][$i][1];
+		}
 	}
 
 	protected function addInsertFields(&$query) {

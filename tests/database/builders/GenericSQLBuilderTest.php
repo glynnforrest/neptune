@@ -200,15 +200,16 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSelectOrderBy() {
-		$q = SQLQuery::select();
-		$q->from('test')->orderBy('RAND()');
+		$q = SQLQuery::select()->from('test')->orderBy('RAND()');
 		$this->assertEquals('SELECT * FROM test ORDER BY RAND() ASC', $q->__toString());
-		$q->orderBy('id', 'desc');
+		$q = SQLQuery::select()->from('test')->orderBy('id', 'desc');
 		$this->assertEquals('SELECT * FROM test ORDER BY id DESC', $q->__toString());
-		$q->orderBy('id', 'asc');
+		$q = SQLQuery::select()->from('test')->orderBy('id', 'asc');
 		$this->assertEquals('SELECT * FROM test ORDER BY id ASC', $q->__toString());
-		$q->orderBy('id', 'foo');
+		$q = SQLQuery::select()->from('test')->orderBy('id', 'foo');
 		$this->assertEquals('SELECT * FROM test ORDER BY id ASC', $q->__toString());
+		$q = SQLQuery::select()->from('test')->orderBy('name')->orderBy('id', 'desc');
+		$this->assertEquals('SELECT * FROM test ORDER BY name ASC, id DESC', $q->__toString());
 	}
 
 	public function testLimit() {

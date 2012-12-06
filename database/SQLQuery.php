@@ -121,7 +121,7 @@ abstract class SQLQuery {
 			}
 		}
 		$logic = strtoupper($logic);
-		if (!isset($this->query['WHERE']) || !is_array($this->query['WHERE'])) {
+		if (!isset($this->query['WHERE'])) {
 			$this->query['WHERE'] = array();
 		}
 		$this->query['WHERE'][] = array($expression, $value, $logic);
@@ -158,7 +158,10 @@ abstract class SQLQuery {
 		if ($sort !== 'DESC') {
 			$sort = 'ASC';
 		}
-		$this->query['ORDER BY'] = array($expression, $sort);
+		if (!isset($this->query['ORDER BY'])) {
+			$this->query['ORDER BY'] = array();
+		}
+		$this->query['ORDER BY'][] = array($expression, $sort);
 		return $this;
 	}
 
