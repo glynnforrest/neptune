@@ -24,6 +24,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r = new Route('/hello', 'controller', 'method');
 		$this->assertTrue($r->test('/hello'));
 		$this->assertFalse($r->test('/not_hello'));
+		$this->assertFalse($r->test('/hello/world'));
 	}
 
 	public function testCatchAllMatch() {
