@@ -25,6 +25,9 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 				'database' => 'unittest',
 				'builder' => 'debug'
 			),
+			'incomplete' => array(
+				'driver' => 'debug',
+			),
 			'fake' => array(
 				'driver' => 'fake',
 				'database' => 'database'
@@ -36,17 +39,19 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 		Config::unload();
 	}
 
-	public function testGetDatabase() {
+	public function testGetDriver() {
 		$this->assertTrue(DatabaseFactory::getDriver() instanceof DebugDriver);
 		$this->assertTrue(DatabaseFactory::getDriver('unittest') instanceof DebugDriver);
 	}
 
-	public function testGetDatabaseBadConfig() {
+	public function testGetDriverBadConfig() {
 		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
 		DatabaseFactory::getDriver('wrong');
+		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		DatabaseFactory::getDriver('incomplete');
 	}
 
-	public function testGetDatabaseUndefinedDriver() {
+	public function testGetDriverUndefinedDriver() {
 		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
 		DatabaseFactory::getDriver('fake');
 	}
