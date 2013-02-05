@@ -45,6 +45,16 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test log'), Logger::getLogs());
 	}
 
+	public function testCreateLogFormatsArrays() {
+		Logger::info(array('one', 'two', 'three', 'four'));
+		$expected = "array (" . PHP_EOL .
+		"  0 => 'one'," . PHP_EOL .
+		"  1 => 'two'," . PHP_EOL .
+		"  2 => 'three'," . PHP_EOL .
+		"  3 => 'four'," . PHP_EOL . ")";
+		$this->assertEquals($expected, Logger::getLogs()[0]);
+	}
+
 	public function testCreateLogDisabled() {
 		Logger::disable();
 		Logger::fatal('this won\'t be logged');

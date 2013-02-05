@@ -56,16 +56,19 @@ class Logger {
 	}
 
 	protected function createLog($type, $message) {
-		if (self::$enabled) {
-			if ($this->isLogTypeEnabled($type)) {
-				$this->logs[] = $this->parseLog($type, $message);
-				return true;
-			}
+		if (!self::$enabled) {
+			return false;
 		}
-		return false;
+		if ($this->isLogTypeEnabled($type)) {
+			$this->logs[] = $this->parseLog($type, $message);
+			return true;
+		}
 	}
 
 	protected function parseLog($type, $message) {
+		if(is_array($message)){
+			$message = var_export($message, true);
+		}
 		$log = $this->format;
 		$log = str_replace(':message', $message, $log);
 		$log = str_replace(':date', date('d/m/y'), $log);
