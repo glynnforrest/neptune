@@ -20,7 +20,13 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 			'debug' => array(
 				'driver' => 'debug',
 				'prefix' => 'DEBUG__',
-				)
+			),
+			'incomplete' => array(
+				'driver' => 'debug'
+			),
+			'fake' => array(
+				'driver' => 'fake',
+			)
 			));
 	}
 
@@ -29,8 +35,15 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 		Config::unload();
 	}
 
-	public function testConstruct() {
+	public function testGetDriver() {
 		$this->assertTrue(CacheFactory::getDriver('debug') instanceof DebugDriver);
+	}
+
+	public function testGetDriverBadConfig() {
+		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		CacheFactory::getDriver('wrong');
+		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		CacheFactory::getDriver('incomplete');
 	}
 
 	public function testAddGetAndSet() {
@@ -39,6 +52,11 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('bar', $cache->get('foo'));
 		$cache->set('foo', 'blah');
 		$this->assertEquals('blah', $cache->get('foo'));
+	}
+
+	public function testGetDriverUndefinedDriver() {
+		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
+		CacheFactory::getDriver('fake');
 	}
 
 	public function testDelete() {
