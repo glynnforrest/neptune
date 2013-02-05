@@ -40,10 +40,9 @@ class CacheFactory {
 			$name = key($array);
 		}
 		$driver = 'neptune\cache\drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
-		$port = Config::getRequired("cache.$name.port");
-		$host = Config::getRequired("cache.$name.host");
+		$config = Config::getRequired("cache.$name");
 		if (Loader::softLoad($driver)) {
-			self::$caches[$name] = new $driver($host, $port);
+			self::$caches[$name] = new $driver($config);
 			return self::$caches[$name];
 		} else {
 			throw new DriverNotFoundException("Cache driver not found: $driver");

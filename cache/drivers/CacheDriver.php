@@ -8,17 +8,15 @@ namespace neptune\cache\drivers;
  */
 interface CacheDriver {
 
-	public function __construct($host, $port);
+	public function __construct(array $config);
 
-	public function add($key, $value, $time = null);
+	public function add($key, $value, $time = null, $use_prefix = true);
 
-	public function set($key, $value, $time = null);
+	public function set($key, $value, $time = null, $use_prefix = true);
 
-	public function get($key);
+	public function get($key, $use_prefix = true);
 
-	public function delete($key, $time = null);
+	public function delete($key, $time = null, $use_prefix = true);
 
-	public function flush($time = null);
+	public function flush($time = null, $use_prefix = true);
 }
-
-?>
