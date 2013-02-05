@@ -70,7 +70,18 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 		$cache = CacheFactory::getDriver('debug');
 		$cache->add('foo', 'baz');
 		$this->assertEquals(array('DEBUG__foo' => 'baz'), $cache->dump());
+		$cache->set('foo', 'bah');
+		$this->assertEquals(array('DEBUG__foo' => 'bah'), $cache->dump());
 	}
+
+	public function testPrefixIsNotAdded() {
+		$cache = CacheFactory::getDriver('debug');
+		$cache->add('foo', 'baz', null, false);
+		$this->assertEquals(array('foo' => 'baz'), $cache->dump());
+		$cache->set('foo', 'bah', null, false);
+		$this->assertEquals(array('foo' => 'bah'), $cache->dump());
+	}
+
 
 	public function testFlush() {
 		$cache = CacheFactory::getDriver('debug');
