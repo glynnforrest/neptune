@@ -341,7 +341,10 @@ class Thing {
 		return $v;
 	}
 
-	public static function buildForm($action, $values = array(), $errors = array(), $method = 'POST') {
+	public static function buildForm($action = null, $values = array(), $errors = array(), $method = 'POST') {
+		if(!$action) {
+			$action = Request::getInstance()->uri();
+		}
 		$f = Form::create($action, $method);
 		foreach(static::$fields as $field) {
 			$f->add($field, 'text');
@@ -354,5 +357,3 @@ class Thing {
 	}
 
 }
-
-?>
