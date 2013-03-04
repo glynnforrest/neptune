@@ -82,7 +82,7 @@ class Response {
 		return self::$instance;
 	}
 
-	protected function __construct() { 
+	protected function __construct() {
 	}
 
 	public function body($body) {
@@ -126,8 +126,12 @@ class Response {
 		echo $this->body;
 	}
 
-	public function redirect($url, $protocol = 'http') {
-		$url = Url::to($url, $protocol);
+	public function redirect($url = null, $protocol = 'http') {
+		if($url) {
+			$url = Url::to($url, $protocol);
+		} else {
+			$url = Request::getInstance()->uri();
+		}
 		$this->status_code = 302;
 		$this->header('Location', $url);
 		$this->sendHeaders();
@@ -135,5 +139,3 @@ class Response {
 	}
 
 }
-
-?>
