@@ -52,7 +52,6 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, Assets::css());
 	}
 
-
 	public function testJs() {
 		$this->assets->addJs('main', 'js/main.js');
 		$expected = '<script type="text/javascript" src="http://myapp.local/assets/js/main.js"></script>' . PHP_EOL;
@@ -83,6 +82,13 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	public function testJsDepends() {
 		$this->assets->addJs('page', 'js/page.js', 'lib');
 		$this->assets->addJs('lib', 'http://site.com/js/lib.js');
+		$expected = '<script type="text/javascript" src="http://site.com/js/lib.js"></script>' . PHP_EOL . '<script type="text/javascript" src="http://myapp.local/assets/js/page.js"></script>' . PHP_EOL;
+		$this->assertEquals($expected, Assets::js());
+	}
+
+	public function testJsDependsDepFirst() {
+		$this->assets->addJs('lib', 'http://site.com/js/lib.js');
+		$this->assets->addJs('page', 'js/page.js', 'lib');
 		$expected = '<script type="text/javascript" src="http://site.com/js/lib.js"></script>' . PHP_EOL . '<script type="text/javascript" src="http://myapp.local/assets/js/page.js"></script>' . PHP_EOL;
 		$this->assertEquals($expected, Assets::js());
 	}
@@ -123,4 +129,3 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	}
 
 }
-?>

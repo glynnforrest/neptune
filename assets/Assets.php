@@ -97,8 +97,7 @@ class Assets {
 				}
 			}
 		}
-		$sorted[$key] = $value;
+		$sorted[$key] = $value['src'];
 		unset($assets[$key]);
 	}
 }
-?>
