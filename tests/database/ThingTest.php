@@ -4,6 +4,7 @@ namespace neptune\database;
 use neptune\database\Thing;
 use neptune\database\DatabaseFactory;
 use neptune\core\Config;
+use neptune\view\Form;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -20,7 +21,7 @@ class UpperCase extends Thing {
 	public function getColumn() {
 		return strtoupper($this->values['column']);
 	}
-	
+
 }
 
 /**
@@ -35,12 +36,12 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 			'db' => array(
 				'driver' => 'debug',
 				'database' => 'debug')
-			));	
+			));
 	}
 
 	public function tearDown() {
 		DatabaseFactory::getDriver('db')->reset();
-		Config::unload();	
+		Config::unload();
 	}
 
 
@@ -98,7 +99,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (1, value)', 
+		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (1, value)',
 		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
@@ -159,9 +160,12 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 3;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (3, value)', 
+		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (3, value)',
 		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
+	public function testBuildForm() {
+		$this->assertTrue(UpperCase::buildForm() instanceof Form);
+	}
+
 }
-?>

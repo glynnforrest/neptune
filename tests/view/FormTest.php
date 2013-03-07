@@ -13,6 +13,7 @@ require_once dirname(__FILE__) . '/../test_bootstrap.php';
  * @author Glynn Forrest me@glynnforrest.com
  **/
 class FormTest extends \PHPUnit_Framework_TestCase {
+
 	const file = '/tmp/formtest.php';
 	const view = '/tmp/formtest';
 
@@ -38,7 +39,7 @@ END;
 	public function testCreate() {
 		$v = Form::create('url');
 		$this->assertTrue($v instanceof Form);
-	}	
+	}
 
 	public function testRowHiddenField() {
 		$v = Form::create('url');
@@ -132,5 +133,14 @@ END;
 		$this->assertEquals(Html::input('text', 'name', 'value'), $v->input('name'));
 	}
 
+	public function testDefaultAction() {
+		$_SERVER['REQUEST_URI'] = '/default';
+		$v = Form::create();
+		$expected = Html::openTag('form', array('action' => '/default', 'method' => 'post'));
+		$expected .= '<ul></ul>';
+		$expected .= '</form>';
+		$this->assertEquals($expected, $v->render());
+	}
+
+
 }
-?>

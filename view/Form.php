@@ -3,6 +3,7 @@
 namespace neptune\view;
 
 use neptune\helpers\Html;
+use neptune\http\Request;
 
 /**
  * Form
@@ -36,7 +37,10 @@ class Form extends View {
 		return $me;
 	}
 
-	public static function create($action, $method = 'post', $options = array()) {
+	public static function create($action = null, $method = 'post', $options = array()) {
+		if(!$action) {
+			$action = Request::getInstance()->uri();
+		}
 		$form = new self();
 		$form->setHeader($action, $method, $options);
 		return $form;
@@ -82,11 +86,11 @@ class Form extends View {
 	}
 
 	public function add($name, $type = 'text', $value = null, $options = array()) {
-		$this->types[$name] = $type; 
+		$this->types[$name] = $type;
 		$this->vars[$name] = $value;
 		$this->fields[] = $name;
 		if($options) {
-			$this->options[$name] = $options; 
+			$this->options[$name] = $options;
 		}
 		return $this;
 	}
