@@ -110,7 +110,7 @@ class Console {
 
 	public function addDefaultToPrompt($prompt, $default = null) {
 		$default = $this->getDefaultOption($prompt, $default);
-		if($default !== null) {
+		if(!is_null($default) && $default !== '') {
 			$prompt .= ' (Default: '. $default . ')';
 		}
 		return $prompt;
