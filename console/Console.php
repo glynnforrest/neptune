@@ -86,7 +86,6 @@ class Console {
 		$this->default_options[md5($prompt)] = $option;
 	}
 
-
 	/** Append a default to the end of a prompt.
 	 * If default is a string, use that string as a default.
 	 * If default is true, the last used answer for this prompt
@@ -96,21 +95,22 @@ class Console {
 	 */
 	protected function getDefaultOption($prompt, $default = null) {
 		if($default === true) {
-			if(isset($this->default_options[md5($prompt)])) {
-				return $this->default_options[md5($prompt)];
+			$key = md5($prompt);
+			if(isset($this->default_options[$key])) {
+				return $this->default_options[$key];
 			} else {
 				return null;
 			}
-		} elseif($default) {
-			return $default;
-		} else {
-			return null;
 		}
+		if($default !== null) {
+			return $default;
+		}
+		return null;
 	}
 
 	public function addDefaultToPrompt($prompt, $default = null) {
 		$default = $this->getDefaultOption($prompt, $default);
-		if($default) {
+		if($default !== null) {
 			$prompt .= ' (Default: '. $default . ')';
 		}
 		return $prompt;

@@ -38,6 +38,11 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Pick a colour (Default: white)', $c->addDefaultToPrompt('Pick a colour', 'white'));
 	}
 
+	public function testDefaultWorksWithZero() {
+		$c = Console::getInstance();
+		$this->assertEquals('Enter a number (Default: 0)', $c->addDefaultToPrompt('Enter a number', 0));
+	}
+
 	public function testLastDefault() {
 		$c = Console::getInstance();
 		$c->setDefaultOption('Pick a colour', 'black');
