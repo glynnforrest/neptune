@@ -59,9 +59,22 @@ class Console {
 		return $input;
 	}
 
+	/**
+	 * Read input, choosing from an array of options.
+	 * The function will only return if the given input is in the options array,
+	 * either a number index or the option itself.
+	 *
+	 * @return string The selected option.
+	 */
 	public function readOptions(array $options, $prompt = null, $default = null) {
-		return $this->read($this->options($options, $prompt, $default));
-		//todo:check if supplied input matches options.
+		while (true) {
+			$value = $this->read($this->options($options, $prompt, $default));
+			if(in_array($value, $options)) {
+				return $value;
+			} elseif ((int) $value < count($options)) {
+				return $options[$value];
+			}
+		}
 	}
 
 	public function setPromptSuffix($string) {
@@ -69,7 +82,8 @@ class Console {
 	}
 
 
-	/** Create a string combining a prompt and an array of options.
+	/** Create a string combining a prompt and an array of
+	 * options, indexed with numbers for easy selection.
 	 */
 	public function options(array $options, $prompt = null) {
 		$prompt .= ' [';
