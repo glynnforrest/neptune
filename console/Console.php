@@ -72,7 +72,14 @@ class Console {
 	/** Create a string combining a prompt and an array of options.
 	 */
 	public function options(array $options, $prompt = null) {
-		$prompt = $prompt . ' [' . implode($options, ', ') . ']';
+		$prompt .= ' [';
+		$count = count($options) - 1;
+		for ($i = 0; $i < $count; $i++) {
+			$prompt .= $i . ':' . $options[$i] . ', ';
+		};
+		$prompt .= $count . ':' . $options[$count];
+		$prompt .= '] ';
+		return $prompt;
 	}
 
 	public function setDefaultOption($prompt, $option) {
@@ -112,4 +119,3 @@ class Console {
 
 
 }
-?>

@@ -46,9 +46,13 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 
 	public function testOptions() {
 		$c = Console::getInstance();
-		$this->assertEquals('Pick a colour [0:black, 1:white]: ',
-							$c->options(array('black', 'white'), 'Pick a colour', null));
+		$expected = 'Pick a colour [0:black, 1:white] ';
+		$actual = $c->options(array('black', 'white'), 'Pick a colour', null);
+		$this->assertEquals($expected, $actual);
+		$expected ='Pick a colour [0:black, 1:white, 2:red, 3:yellow, 4:green] ';
+		$actual = $c->options(array('black', 'white', 'red', 'yellow', 'green'),
+							  'Pick a colour', null);
+		$this->assertEquals($expected, $actual);
 	}
 
 }
-?>
