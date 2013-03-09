@@ -50,11 +50,14 @@ class Console {
 			$this->prompt_suffix;
 		if ($this->readline) {
 			$input = readline($text);
-			$this->setDefaultOption($prompt, $input);
-			return $input;
+		} else {
+			$this->write($text, false);
+			$input = fgets(STDIN);
 		}
-		$this->write($text, false);
-		$input = fgets(STDIN);
+		//if input is blank use the default
+		if($input == '') {
+			$input = $this->getDefaultOption($prompt, $default);
+		}
 		$this->setDefaultOption($prompt, $input);
 		return $input;
 	}
@@ -67,12 +70,16 @@ class Console {
 	 * @return string The selected option.
 	 */
 	public function readOptions(array $options, $prompt = null, $default = null) {
+		$prompt = $this->options($options, $prompt);
 		while (true) {
-			$value = $this->read($this->options($options, $prompt, $default));
+			$value = $this->read($prompt, $default);
 			if(in_array($value, $options)) {
 				return $value;
-			} elseif ((int) $value < count($options)) {
-				return $options[$value];
+			} else {
+				if (is_numeric($value) && $value < count($options)) {
+					$this->setDefaultOption($prompt, $options[$value]);
+					return $options[$value];
+				}
 			}
 		}
 	}
@@ -82,7 +89,8 @@ class Console {
 	}
 
 
-	/** Create a string combining a prompt and an array of
+	/**
+	 * Create a string combining a prompt and an array of
 	 * options, indexed with numbers for easy selection.
 	 */
 	public function options(array $options, $prompt = null) {
@@ -100,13 +108,6 @@ class Console {
 		$this->default_options[md5($prompt)] = $option;
 	}
 
-	/** Append a default to the end of a prompt.
-	 * If default is a string, use that string as a default.
-	 * If default is true, the last used answer for this prompt
-	 * will be used as a default.
-	 * If default is null, don't print a default.
-	 *
-	 */
 	protected function getDefaultOption($prompt, $default = null) {
 		if($default === true) {
 			$key = md5($prompt);
@@ -122,6 +123,14 @@ class Console {
 		return null;
 	}
 
+	/**
+	 * Append a default to the end of a prompt.
+	 * If default is a string, use that string as a default.
+	 * If default is true, the last used answer for this prompt
+	 * will be used as a default.
+	 * If default is null, don't print a default.
+	 *
+	 */
 	public function addDefaultToPrompt($prompt, $default = null) {
 		$default = $this->getDefaultOption($prompt, $default);
 		if(!is_null($default) && $default !== '') {
