@@ -49,6 +49,19 @@ class String {
 		return str_replace(array('_', '-'), ' ', $string);
 	}
 
+	/**
+	 * Convert a list of values to a string, seperating each value
+	 * with a delimeter.
+	 */
+	public static function joinList($array, $delimeter = ', ') {
+		$count = count($array) - 1;
+		$string = '';
+		for ($i = 0; $i < $count; $i++) {
+			$string .= $array[$i] . $delimeter;
+		};
+		return $string . $array[$count];
+	}
+
 	public static function slugify($string) {
 		$string = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string));
 		return str_replace(' ', '-', trim($string));
