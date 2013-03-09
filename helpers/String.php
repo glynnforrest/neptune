@@ -49,6 +49,19 @@ class String {
 		return str_replace(array('_', '-'), ' ', $string);
 	}
 
+	public static function camelCase($string, $ucfirst = true) {
+		$string = self::slugify($string);
+		$pieces = explode('-', $string);
+		$return = '';
+		foreach($pieces as $piece) {
+			$return .= ucfirst($piece);
+		}
+		if(!$ucfirst) {
+			return lcfirst($return);
+		}
+		return $return;
+	}
+
 	/**
 	 * Convert a list of values to a string, seperating each value
 	 * with a delimeter. If supplied, prefix and suffix will be added
@@ -102,5 +115,3 @@ class String {
 	}
 
 }
-
-?>

@@ -99,8 +99,7 @@ class Console {
 		for ($i = 0; $i < $count; $i++) {
 			$prompt .= $i . ':' . $options[$i] . ', ';
 		};
-		$prompt .= $count . ':' . $options[$count];
-		$prompt .= '] ';
+		$prompt .= $count . ':' . $options[$count] . '] ';
 		return $prompt;
 	}
 

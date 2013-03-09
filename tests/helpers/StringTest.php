@@ -19,6 +19,13 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('url-with-characters-removed', String::slugify('Url with??> characters_removed;;\';;'));
 	}
 
+	public function testCamelCase() {
+		$this->assertEquals('ClassName', String::camelCase('class name'));
+		$this->assertEquals('ClassName', String::camelCase('class-name'));
+		$this->assertEquals('ClassName', String::camelCase('class_name'));
+		$this->assertEquals('functionThatDoesStuff', String::camelCase('function that does%^ stuff', false));
+	}
+
 	public function testRandomLength() {
 		$this->assertEquals(8, strlen(String::random(8)));
 		$this->assertEquals(0, strlen(String::random(0)));
