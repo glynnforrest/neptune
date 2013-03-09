@@ -51,15 +51,15 @@ class String {
 
 	/**
 	 * Convert a list of values to a string, seperating each value
-	 * with a delimeter.
+	 * with a delimeter. If supplied, prefix and suffix will be added
+	 * to each value.
 	 */
-	public static function joinList($array, $delimeter = ', ') {
-		$count = count($array) - 1;
+	public static function joinList($array, $delimeter = ', ', $prefix = '', $suffix = '') {
 		$string = '';
-		for ($i = 0; $i < $count; $i++) {
-			$string .= $array[$i] . $delimeter;
-		};
-		return $string . $array[$count];
+		foreach($array as $value) {
+			$string .= $prefix . $value . $suffix . $delimeter;
+		}
+		return rtrim($string, $delimeter);
 	}
 
 	public static function slugify($string) {

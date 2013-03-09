@@ -3,6 +3,7 @@
 namespace neptune\database\builders;
 
 use neptune\database\SQLQuery;
+use neptune\helpers\String;
 
 /**
  * GenericSQLBuilder
@@ -106,19 +107,11 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addFrom(&$query) {
-		$query .= ' FROM ';
-		for ($i = 0; $i < count($this->query['FROM']) - 1; $i++) {
-			$query .= $this->query['FROM'][$i] . ', ';
-		}
-		$query .= $this->query['FROM'][$i];
+		$query .= ' FROM ' . String::joinList($this->query['FROM']);
 	}
 
 	protected function addFields(&$query) {
-		$query .= ' ';
-		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= '`'. $this->query['FIELDS'][$i] . '`, ';
-		}
-		$query .= '`' . $this->query['FIELDS'][$i] . '`';
+		$query .= ' ' . String::joinList($this->query['FIELDS'], ', ', '`', '`');
 	}
 
 	protected function addWhere(&$query) {
@@ -146,11 +139,7 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addInsertFields(&$query) {
-		$query .= ' (';
-		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= '`' . $this->query['FIELDS'][$i] . '`, ';
-		}
-		$query .= '`' . $this->query['FIELDS'][$i] . '`';
+		$query .= ' (' . String::joinList($this->query['FIELDS'], ', ', '`', '`');
 		$query .= ') VALUES (';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
 			$query .= '?, ';
@@ -159,19 +148,11 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addUpdateFields(&$query) {
-		$query .= ' SET ';
-		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
-			$query .= '`' . $this->query['FIELDS'][$i] . '` = ?, ';
-		}
-		$query .= '`' . $this->query['FIELDS'][$i] . '` = ?';
+		$query .= ' SET '. String::joinList($this->query['FIELDS'], ', ', '`', '` = ?');
 	}
 
 	protected function addTables(&$query) {
-		$query .= ' ';
-		for ($i = 0; $i < count($this->query['TABLES']) - 1; $i++) {
-			$query .= $this->query['TABLES'][$i] . ', ';
-		}
-		$query .= $this->query['TABLES'][$i];
+		$query .= ' ' . String::joinList($this->query['TABLES'], ', ');
 	}
 
 	protected function addDistinct(&$query) {

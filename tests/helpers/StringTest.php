@@ -107,6 +107,10 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 							String::joinList(array('one')));
 		$this->assertEquals('one | two | three | four',
 							String::joinList(array('one', 'two', 'three', 'four'), ' | '));
+		$this->assertEquals('number one, number two',
+							String::joinList(array('one', 'two'), ', ', 'number '));
+		$this->assertEquals('`one`, `two`',
+							String::joinList(array('one', 'two'), ', ', '`', '`'));
 	}
 
 
