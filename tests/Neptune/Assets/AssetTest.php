@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\assets\Asset;
+use Neptune\Assets\Asset;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -14,11 +14,11 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function setUp() {
-		
+
 	}
 
 	public function tearDown() {
-		
+
 	}
 
 	public function testConstruct() {
@@ -59,7 +59,7 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testExceptionThrownWhenFileNotFound() {
-		$this->setExpectedException('\\neptune\\exceptions\\FileException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\FileException');
 		$a = new Asset('not_a_file');
 	}
 

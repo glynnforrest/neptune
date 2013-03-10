@@ -5,10 +5,10 @@
  * @author Glynn Forrest <me@glynnforrest.com>
  */
 
-namespace neptune\validate;
+namespace Neptune\Validate;
 
-use neptune\helpers\String;
-use neptune\http\Session;
+use Neptune\Helpers\String;
+use Neptune\Http\Session;
 
 class Validator {
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace neptune\view;
+namespace Neptune\View;
 
-use neptune\view\View;
-use neptune\format\Xml;
-use neptune\database\Thing;
-use neptune\database\ThingCollection;
-use neptune\helpers\String;
+use Neptune\View\View;
+use Neptune\Format\Xml;
+use Neptune\Database\Thing;
+use Neptune\Database\ThingCollection;
+use Neptune\Helpers\String;
 
 /**
  * XmlView

@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

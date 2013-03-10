@@ -1,10 +1,10 @@
 <?php
-namespace neptune\database;
+namespace Neptune\Database;
 
-use neptune\database\Thing;
-use neptune\database\DatabaseFactory;
-use neptune\core\Config;
-use neptune\view\Form;
+use Neptune\Database\Thing;
+use Neptune\Database\DatabaseFactory;
+use Neptune\Core\Config;
+use Neptune\View\Form;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

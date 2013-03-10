@@ -1,11 +1,11 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
-use neptune\core\Config;
-use neptune\database\drivers\DebugDriver;
+use Neptune\Core\Config;
+use Neptune\Database\Drivers\DebugDriver;
 
 /**
  * DatabaseFactoryTest
@@ -45,20 +45,20 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetDriverBadConfig() {
-		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		DatabaseFactory::getDriver('wrong');
-		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		DatabaseFactory::getDriver('incomplete');
 	}
 
 	public function testGetDriverUndefinedDriver() {
-		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
 		DatabaseFactory::getDriver('fake');
 	}
 
 	public function testGetBuilder() {
 		$db = DatabaseFactory::getDriver();
-		$this->assertEquals('\\neptune\\database\\builders\\GenericSQLBuilder', $db->getBuilderName());
+		$this->assertEquals('\\Neptune\\Database\\Builders\\GenericSQLBuilder', $db->getBuilderName());
 	}
 
 	public function testGetBuilderOverride() {

@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\exceptions\ConfigKeyException;
-use neptune\exceptions\ConfigFileException;
+use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Exceptions\ConfigFileException;
 
 class Config {
 

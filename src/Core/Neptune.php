@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\exceptions\NeptuneError;
-use neptune\core\Events;
+use Neptune\Exceptions\NeptuneError;
+use Neptune\Core\Events;
 
 class Neptune {
 
@@ -36,8 +36,8 @@ class Neptune {
 	}
 
 	public static function handleErrors() {
-		set_error_handler('\neptune\core\Neptune::dealWithError');
-		set_exception_handler('\neptune\core\Neptune::dealWithException');
+		set_error_handler('\Neptune\Core\Neptune::dealWithError');
+		set_exception_handler('\Neptune\Core\Neptune::dealWithException');
 	}
 
 	public static function dealWithError($errno, $errstr, $errfile, $errline, $errcontext) {

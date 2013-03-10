@@ -1,11 +1,11 @@
 <?php
-namespace neptune\controller;
+namespace Neptune\Controller;
 
-use neptune\controller\Controller;
-use neptune\assets\Asset;
-use neptune\assets\Assets;
-use neptune\exceptions\FileException;
-use neptune\core\Config;
+use Neptune\Controller\Controller;
+use Neptune\Assets\Asset;
+use Neptune\Assets\Assets;
+use Neptune\Exceptions\FileException;
+use Neptune\Core\Config;
 
 /**
  * AssetsController
@@ -18,7 +18,7 @@ class AssetsController extends Controller {
 
 	protected function _before() {
 		//register all of neptune's built in filters here.
-		// self::registerFilter('filter', 'neptune\\filter_name');
+		// self::registerFilter('filter', 'Neptune\\FilterName');
 		return true;
 	}
 

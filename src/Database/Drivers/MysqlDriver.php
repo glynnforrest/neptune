@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database\drivers;
+namespace Neptune\Database\Drivers;
 
 use \PDO;
-use neptune\database\statements\GenericStatement;
-use neptune\core\Events;
+use Neptune\Database\Statements\GenericStatement;
+use Neptune\Core\Events;
 
 /**
  * MysqlDriver
@@ -12,7 +12,7 @@ use neptune\core\Events;
  **/
 class MysqlDriver implements DatabaseDriver {
 
-	protected $builder = '\\neptune\\database\\builders\\GenericSQLBuilder';
+	protected $builder = '\\Neptune\\Database\\Builders\\GenericSQLBuilder';
 	protected $pdo;
 
 	public function __construct($host, $port, $user, $pass, $db) {

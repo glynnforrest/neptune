@@ -1,5 +1,5 @@
 <?php
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
 class Bitmask {
 

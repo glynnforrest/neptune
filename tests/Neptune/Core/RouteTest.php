@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Route;
-use neptune\http\Request;
+use Neptune\Core\Route;
+use Neptune\Http\Request;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

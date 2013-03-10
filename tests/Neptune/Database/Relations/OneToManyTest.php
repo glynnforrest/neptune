@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database\relations;
+namespace Neptune\Database\Relations;
 
-use neptune\database\Thing;
-use neptune\database\relations\OneToMany;
-use neptune\database\ThingCollection;
+use Neptune\Database\Thing;
+use Neptune\Database\Relations\OneToMany;
+use Neptune\Database\ThingCollection;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -17,7 +17,7 @@ class Author extends Thing {
 			'type' => 'has_many',
 			'key' => 'id',
 			'other_key' => 'authors_id',
-			'other_class' => 'neptune\\database\\relations\\Book'
+			'other_class' => 'Neptune\\Database\\Relations\\Book'
 		)
 	);
 
@@ -45,7 +45,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 		$books = new ThingCollection('db', 'books');
 		$books->setFields(array('id', 'authors_id', 'title'));
 		$books->setPrimaryKey('id');
-		$books->setChildClass('neptune\\database\\relations\\Book');
+		$books->setChildClass('Neptune\\Database\\Relations\\Book');
 		$books[] = new Book('db', array('title' => 'Book 1'));
 		$books[] = new Book('db', array('title' => 'Book 2'));
 		$this->books = $books;
@@ -70,7 +70,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 		$a->books = $b;
 		$this->assertEquals('Book 1', $a->books[0]->title);
 	}
-// 
+//
 // 	public function testForeignKeyUpdatedOnSetRelation() {
 // 		$a = $this->author;
 // 		$a->authorname = 'author1';
@@ -81,7 +81,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$this->assertEquals(1, $a->books->authors_id);
 // 		$this->assertEquals(1, $b->authors_id);
 // 	}
-// 
+//
 // 	public function testForeignKeyUpdatedOnKeyChange() {
 // 		$a = $this->author;
 // 		$a->id = 1;
@@ -91,7 +91,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$a->id = 4;
 // 		$this->assertEquals(4, $b->authors_id);
 // 	}
-// 
+//
 // 	public function testKeyNotUpdatedOnForeignKeyChange() {
 // 		$a = $this->author;
 // 		$a->id = 1;
@@ -100,11 +100,11 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$a->books->authors_id = 2;
 // 		$this->assertEquals(1, $a->id);
 // 	}
-// 
+//
 // 	/**
 // 	 * Belongs to functionality
 // 	 */
-// 
+//
 // 	public function testSetOwnerObject() {
 // 		$b = $this->books;
 // 		$a = $this->author;
@@ -112,7 +112,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$b->author = $a;
 // 		$this->assertEquals(3, $b->author->id);
 // 	}
-// 
+//
 // 	public function testKeyUpdatedOnCreateRelation() {
 // 		$b = $this->books;
 // 		$a = $this->author;
@@ -120,7 +120,7 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$b->author = $a;
 // 		$this->assertEquals(3, $b->authors_id);
 // 	}
-// 
+//
 // 	public function testKeyUpdatedOnForeignKeyChange() {
 // 		$b = $this->books;
 // 		$a = $this->author;
@@ -129,14 +129,14 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase {
 // 		$a->id = 2;
 // 		$this->assertEquals(2, $b->authors_id);
 // 	}
-// 
+//
 // 	public function testRelationExistsWhenNotChildren() {
 // 		$b = $this->books;
 // 		$b->authors_id = 3;
 // 		$a = $this->author;
 // 		$a->id = 2;
 // 		$this->assertEquals(2, $b->authors_id);
-// 	}	
-// 
+// 	}
+//
 }
 ?>

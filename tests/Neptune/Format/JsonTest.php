@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\format;
+namespace Neptune\Format;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
-use neptune\validate\Validator;
+use Neptune\Validate\Validator;
 
 class StringTest extends \PHPUnit_Framework_TestCase {
 

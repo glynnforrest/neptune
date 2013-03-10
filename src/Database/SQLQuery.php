@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
-use neptune\database\DatabaseFactory;
-use neptune\database\drivers\DatabaseDriver;
+use Neptune\Database\DatabaseFactory;
+use Neptune\Database\Drivers\DatabaseDriver;
 
 /**
  * SQLQuery

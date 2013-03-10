@@ -1,8 +1,8 @@
 
-namespace <?=$this->namespace;?>\controller;
+namespace <?=$this->namespace;?>\Controller;
 
-use neptune\controller\Controller;
-use neptune\view\View;
+use Neptune\Controller\Controller;
+use Neptune\View\View;
 
 class <?=$this->controller_name;?>Controller extends Controller {
 

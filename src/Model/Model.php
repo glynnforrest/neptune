@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\model;
+namespace Neptune\Model;
 
-use neptune\cache\Cacheable;
+use Neptune\Cache\Cacheable;
 
 /**
  * Model
@@ -13,7 +13,7 @@ class Model extends Cacheable {
 	protected static $models = array();
 	protected $database;
 
-	protected function __construct() { 
+	protected function __construct() {
 	}
 
 	public static function getInstance($database = false) {

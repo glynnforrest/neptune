@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
-use neptune\core\Config;
-use neptune\exceptions\DriverNotFoundException;
-use neptune\core\Loader;
+use Neptune\Core\Config;
+use Neptune\Exceptions\DriverNotFoundException;
+use Neptune\Core\Loader;
 
 /**
  * DatabaseFactory
@@ -41,7 +41,7 @@ class DatabaseFactory {
 			reset($array);
 			$name = key($array);
 		}
-		$driver = 'neptune\database\drivers\\' . ucfirst(Config::getRequired("database.$name.driver")) . 'Driver';
+		$driver = 'Neptune\Database\Drivers\\' . ucfirst(Config::getRequired("database.$name.driver")) . 'Driver';
 		$database = Config::getRequired("database.$name.database");
 		$host = Config::get("database.$name.host");
 		$port = Config::get("database.$name.port");

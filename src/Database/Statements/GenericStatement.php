@@ -1,5 +1,5 @@
 <?php
-namespace neptune\database\statements;
+namespace Neptune\Database\Statements;
 use \PDOStatement;
 
 /**
@@ -29,7 +29,7 @@ class GenericStatement implements DatabaseStatement{
 	public function rowCount() {
 		return $this->stmt->rowCount();
 	}
-	
+
 }
 
 ?>

@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\security;
+namespace Neptune\Security;
 
-use neptune\core\Config;
-use neptune\security\drivers\DebugDriver;
+use Neptune\Core\Config;
+use Neptune\Security\Drivers\DebugDriver;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -28,15 +28,15 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetBadConfig() {
-		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		Config::set('security', array());
 		SecurityFactory::getDriver('wrong');
 	}
 
 	public function testGetUndefinedDriver() {
-		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
 		SecurityFactory::getDriver('two');
 	}
-	
+
 }
 ?>

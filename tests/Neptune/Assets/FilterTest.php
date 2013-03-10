@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\assets\Asset;
-use neptune\assets\Filter;
-use neptune\tests\assets\UpperCaseFilter;
+use Neptune\Assets\Asset;
+use Neptune\Assets\Filter;
+use Neptune\Tests\Assets\UpperCaseFilter;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

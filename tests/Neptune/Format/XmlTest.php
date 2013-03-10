@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\format;
+namespace Neptune\Format;
 
-use neptune\format\Xml;
+use Neptune\Format\Xml;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

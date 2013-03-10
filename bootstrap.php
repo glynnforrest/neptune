@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune;
+namespace Neptune;
 
-use neptune\core\Loader;
+use Neptune\Core\Loader;
 
 require(__DIR__ . '/core/Loader.php');
-spl_autoload_register(__NAMESPACE__ . '\core\Loader::load');
+spl_autoload_register(__NAMESPACE__ . '\Core\Loader::load');
 Loader::addNamespace('neptune', __DIR__ . '/');
 ?>

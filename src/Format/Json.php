@@ -1,5 +1,5 @@
 <?php
-namespace neptune\format;
+namespace Neptune\Format;
 
 /**
  * Json

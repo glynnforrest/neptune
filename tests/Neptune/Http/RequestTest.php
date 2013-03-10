@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\http;
+namespace Neptune\Http;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

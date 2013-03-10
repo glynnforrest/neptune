@@ -1,11 +1,11 @@
 <?php
 
-namespace neptune\controller;
+namespace Neptune\Controller;
 
-use neptune\controller\Controller;
-use neptune\core\Config;
-use neptune\http\Request;
-use neptune\tests\assets\UpperCaseFilter;
+use Neptune\Controller\Controller;
+use Neptune\Core\Config;
+use Neptune\Http\Request;
+use Neptune\Tests\Assets\UpperCaseFilter;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -68,13 +68,13 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$file = '/tmp/filtered.js';
 		file_put_contents($file, 'js_content');
 		Config::set('temp#assets.filters', array('`.*\.js$`' => 'upper'));
-		AssetsController::registerFilter('upper', '\\neptune\\tests\\assets\\UpperCaseFilter');
+		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
 		Request::getInstance()->setFormat('js');
 		$this->assertEquals('JS_CONTENT', $c->serveAsset('temp#filtered'));
 		$this->assertEquals('JS_CONTENT', $c->serveAsset('filtered'));
 		@unlink($file);
 		Request::getInstance()->resetStoredVars();
 	}
-	
+
 }
 ?>

@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\view;
+namespace Neptune\View;
 
-use neptune\exceptions\ViewNotFoundException;
-use neptune\core\Config;
-use neptune\core\Neptune;
+use Neptune\Exceptions\ViewNotFoundException;
+use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 
 class View {
 	const EXTENSION = '.php';
@@ -62,7 +62,7 @@ class View {
 	}
 
 	/**
-	 * @return View 
+	 * @return View
 	 */
 	public static function load($view, $vars = array(), $absolute = false) {
 		$class = get_called_class();

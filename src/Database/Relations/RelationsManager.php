@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\database\relations;
+namespace Neptune\Database\Relations;
 
-use neptune\database\SQLQuery;
+use Neptune\Database\SQLQuery;
 
 /**
  * RelationsManager

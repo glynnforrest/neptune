@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database\drivers;
+namespace Neptune\Database\Drivers;
 
-use neptune\database\drivers\DebugDriver;
-use neptune\database\DatabaseFactory;
-use neptune\core\Config;
+use Neptune\Database\Drivers\DebugDriver;
+use Neptune\Database\DatabaseFactory;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -20,12 +20,12 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 			'debug' => array(
 				'driver' => 'debug',
 				'database' => 'debug')
-			));	
+			));
 	}
 
 	public function tearDown() {
 		DatabaseFactory::getDriver('debug')->reset();
-		Config::unload();	
+		Config::unload();
 	}
 
 	public function testConstruct() {

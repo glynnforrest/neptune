@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\exceptions;
+namespace Neptune\Exceptions;
 
 /**
  * FileException

@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\console;
+namespace Neptune\Console;
 
 /**
  * Console

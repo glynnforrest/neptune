@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
 /**
  * Events

@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Events;
+use Neptune\Core\Events;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -36,6 +36,6 @@ class EventsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('1 is foo, 2 is bar', $e->send('test', array('foo', 'bar')));
 	}
 
-	
+
 }
 ?>

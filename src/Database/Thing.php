@@ -1,14 +1,14 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
-use neptune\database\ThingCollection;
-use neptune\database\SQLQuery;
-use neptune\database\DatabaseFactory;
-use neptune\database\relations\Relation;
-use neptune\database\relations\RelationsManager;
-use neptune\validate\Validator;
-use neptune\view\Form;
+use Neptune\Database\ThingCollection;
+use Neptune\Database\SQLQuery;
+use Neptune\Database\DatabaseFactory;
+use Neptune\Database\Relations\Relation;
+use Neptune\Database\Relations\RelationsManager;
+use Neptune\Validate\Validator;
+use Neptune\View\Form;
 
 /**
  * Thing

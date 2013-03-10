@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\core\Config;
-use neptune\exceptions\FileException;
+use Neptune\Core\Config;
+use Neptune\Exceptions\FileException;
 
 /**
  * Asset

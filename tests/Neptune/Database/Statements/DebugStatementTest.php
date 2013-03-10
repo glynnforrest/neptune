@@ -1,11 +1,11 @@
 <?php
 
-namespace neptune\database\statements;
+namespace Neptune\Database\Statements;
 
-use neptune\database\statements\DatabaseStatement;
-use neptune\database\statements\DebugStatement;
-use neptune\database\DatabaseFactory;
-use neptune\core\Config;
+use Neptune\Database\Statements\DatabaseStatement;
+use Neptune\Database\Statements\DebugStatement;
+use Neptune\Database\DatabaseFactory;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -21,11 +21,11 @@ class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 			'debug' => array(
 				'driver' => 'debug',
 				'database' => 'debug')
-			));	
+			));
 	}
 
 	public function tearDown() {
-		Config::unload();	
+		Config::unload();
 	}
 
 	public function testConstruct() {
@@ -48,6 +48,6 @@ class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('SELECT * FROM test WHERE id = 2 AND count > 10 LIMIT 1', $stmt->getExecutedQuery());
 	}
 
-	
+
 }
 ?>

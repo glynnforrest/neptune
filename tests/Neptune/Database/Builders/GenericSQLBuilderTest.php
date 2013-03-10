@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
-use neptune\core\Config;
-use neptune\database\SQLQuery;
-use neptune\database\builders\GenericSQLBuilder;
+use Neptune\Core\Config;
+use Neptune\Database\SQLQuery;
+use Neptune\Database\Builders\GenericSQLBuilder;
 
 include dirname(__FILE__) . ('/../../test_bootstrap.php');
 

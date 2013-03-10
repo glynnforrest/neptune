@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Config;
-use neptune\http\Request;
+use Neptune\Core\Config;
+use Neptune\Http\Request;
 use \SplFileObject;
 
 /**

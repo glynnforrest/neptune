@@ -1,7 +1,7 @@
 <?php
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\assets\Asset;
+use Neptune\Assets\Asset;
 
 /**
  * Filter

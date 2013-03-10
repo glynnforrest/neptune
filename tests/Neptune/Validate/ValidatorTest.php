@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\validate;
+namespace Neptune\Validate;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

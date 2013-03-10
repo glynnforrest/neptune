@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
-use neptune\http\Session;
-use neptune\helpers\Url;
+use Neptune\Http\Session;
+use Neptune\Helpers\Url;
 
 /**
  * Html

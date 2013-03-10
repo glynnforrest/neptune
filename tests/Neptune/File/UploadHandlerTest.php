@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\file;
+namespace Neptune\File;
 
-use neptune\file\UploadHandler;
-use neptune\helpers\String;
+use Neptune\File\UploadHandler;
+use Neptune\Helpers\String;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

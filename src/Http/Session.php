@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\http;
+namespace Neptune\Http;
 
 /**
  * Session

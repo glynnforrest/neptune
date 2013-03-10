@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\cache\drivers;
+namespace Neptune\Cache\Drivers;
 
-use neptune\exceptions\ConfigKeyException;
+use Neptune\Exceptions\ConfigKeyException;
 use Memcached;
 
 /**

@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Logger;
-use neptune\core\Config;
+use Neptune\Core\Logger;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

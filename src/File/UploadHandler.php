@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\file;
+namespace Neptune\File;
 
-use neptune\exceptions\FileException;
-use neptune\helpers\String;
+use Neptune\Exceptions\FileException;
+use Neptune\Helpers\String;
 
 /**
  * UploadHandler
@@ -114,7 +114,7 @@ class UploadHandler {
 			try {
 				$this->moveTo($directory);
 				return true;
-			} catch (\neptune\exceptions\FileException $e) {
+			} catch (\Neptune\Exceptions\FileException $e) {
 				if ($i + 1 === $attempts) {
 					throw $e;
 				} else {

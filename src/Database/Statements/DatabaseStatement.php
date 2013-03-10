@@ -1,5 +1,5 @@
 <?php
-namespace neptune\database\statements;
+namespace Neptune\Database\Statements;
 /**
  * DatabaseStatement
  * //TODO: Add all PDOStatement functions.

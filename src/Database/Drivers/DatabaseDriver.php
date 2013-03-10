@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\database\drivers;
+namespace Neptune\Database\Drivers;
 
 /**
  * DatabaseDriver

@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\core\Config;
-use neptune\assets\Assets;
+use Neptune\Core\Config;
+use Neptune\Assets\Assets;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

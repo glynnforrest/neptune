@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\cache\drivers;
+namespace Neptune\Cache\Drivers;
 
 /**
  * CacheDriver

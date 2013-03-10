@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\controller;
+namespace Neptune\Controller;
 
-use neptune\controller\Controller;
+use Neptune\Controller\Controller;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -72,9 +72,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testUnknownMethodThrowsException() {
 		$c = new SampleController();
-		$this->setExpectedException('\\neptune\\exceptions\\MethodNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
 		$c->unknown();
-		$this->setExpectedException('\\neptune\\exceptions\\MethodNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
 		$c->_runMethod('unknown');
 	}
 
@@ -95,9 +95,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
 	public function testBeforeNotFoundExceptionCaught() {
 		$c = new AnotherController();
 		$this->assertTrue($c->_runMethod('go'));
-		$this->setExpectedException('\\neptune\\exceptions\\MethodNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
 		$c->_before();
 	}
-	
+
 }
 ?>

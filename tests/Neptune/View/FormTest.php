@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\view;
+namespace Neptune\View;
 
-use neptune\view\Form;
-use neptune\core\Config;
-use neptune\helpers\Html;
+use Neptune\View\Form;
+use Neptune\Core\Config;
+use Neptune\Helpers\Html;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -88,7 +88,7 @@ END;
 
 	public function testRenderException() {
 		$v = Form::load('some/file');
-		$this->setExpectedException('neptune\\exceptions\\ViewNotFoundException');
+		$this->setExpectedException('Neptune\\Exceptions\\ViewNotFoundException');
 		$v->render();
 	}
 

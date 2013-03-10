@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\database\builders;
+namespace Neptune\Database\Builders;
 
-use neptune\database\SQLQuery;
-use neptune\helpers\String;
+use Neptune\Database\SQLQuery;
+use Neptune\Helpers\String;
 
 /**
  * GenericSQLBuilder

@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\console;
+namespace Neptune\Console;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

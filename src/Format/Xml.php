@@ -1,5 +1,5 @@
 <?php
-namespace neptune\format;
+namespace Neptune\Format;
 
 use \XmlWriter;
 
@@ -26,7 +26,7 @@ class Xml extends Format {
 				$xml->writeElement($key, $content);
 			} else {
 				$this->array_to_xml($content, $xml);
-			} 
+			}
 		} else {
 			$this->array_to_xml($this->content, $xml);
 		}
@@ -35,7 +35,7 @@ class Xml extends Format {
 	}
 
 	public function read($content) {
-	
+
 	}
 
 	protected function array_to_xml($content, &$xml) {

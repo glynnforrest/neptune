@@ -1,11 +1,11 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\exceptions\NamespaceException;
-use neptune\exceptions\ClassNotFoundException;
-use neptune\exceptions\FileException;
-use neptune\core\Neptune;
+use Neptune\Exceptions\NamespaceException;
+use Neptune\Exceptions\ClassNotFoundException;
+use Neptune\Exceptions\FileException;
+use Neptune\Core\Neptune;
 
 class Loader {
 

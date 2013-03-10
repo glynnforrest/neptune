@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Route;
+use Neptune\Core\Route;
 
 include dirname(__FILE__) . ('/../test_bootstrap.php');
 

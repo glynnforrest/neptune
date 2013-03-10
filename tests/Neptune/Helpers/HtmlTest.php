@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
-use neptune\core\Config;
-use neptune\helpers\Html;
+use Neptune\Core\Config;
+use Neptune\Helpers\Html;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -57,6 +57,6 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('<input type="hidden" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
 	}
 
-	
+
 }
 ?>

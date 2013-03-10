@@ -1,12 +1,12 @@
 <?php
 
-namespace neptune\controller;
+namespace Neptune\Controller;
 
-use neptune\exceptions\MethodNotFoundException;
-use neptune\security\SecurityFactory;
-use neptune\http\Request;
-use neptune\http\Response;
-use neptune\assets\Assets;
+use Neptune\Exceptions\MethodNotFoundException;
+use Neptune\Security\SecurityFactory;
+use Neptune\Http\Request;
+use Neptune\Http\Response;
+use Neptune\Assets\Assets;
 
 /**
  * Base Controller

@@ -1,9 +1,9 @@
 <?php
 
-use neptune\console\Console;
-use neptune\console\Generator;
-use neptune\core\Neptune;
-use neptune\core\Events;
+use Neptune\Console\Console;
+use Neptune\Console\Generator;
+use Neptune\Core\Neptune;
+use Neptune\Core\Events;
 
 include('bootstrap.php');
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\cache;
+namespace Neptune\Cache;
 
-use neptune\exceptions\MethodNotFoundException;
-use neptune\cache\CacheFactory;
+use Neptune\Exceptions\MethodNotFoundException;
+use Neptune\Cache\CacheFactory;
 
 /**
  * Cacheable

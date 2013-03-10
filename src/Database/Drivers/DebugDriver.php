@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\database\drivers;
+namespace Neptune\Database\Drivers;
 
-use neptune\database\drivers\DatabaseDriver;
-use neptune\database\statements\DebugStatement;
-use neptune\core\Events;
+use Neptune\Database\Drivers\DatabaseDriver;
+use Neptune\Database\Statements\DebugStatement;
+use Neptune\Core\Events;
 
 /**
  * DebugDriver
@@ -12,7 +12,7 @@ use neptune\core\Events;
  */
 class DebugDriver implements DatabaseDriver {
 
-	protected $builder = '\\neptune\\database\\builders\\GenericSQLBuilder';
+	protected $builder = '\\Neptune\\Database\\Builders\\GenericSQLBuilder';
 	protected $query;
 	protected $statement;
 

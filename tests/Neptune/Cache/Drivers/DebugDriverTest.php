@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\cache\drivers;
+namespace Neptune\Cache\Drivers;
 
-use neptune\cache\drivers\DebugDriver;
-use neptune\cache\CacheFactory;
-use neptune\core\Config;
+use Neptune\Cache\Drivers\DebugDriver;
+use Neptune\Cache\CacheFactory;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -40,9 +40,9 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetDriverBadConfig() {
-		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		CacheFactory::getDriver('wrong');
-		$this->setExpectedException('\\neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		CacheFactory::getDriver('incomplete');
 	}
 
@@ -55,7 +55,7 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetDriverUndefinedDriver() {
-		$this->setExpectedException('\\neptune\\exceptions\\DriverNotFoundException');
+		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
 		CacheFactory::getDriver('fake');
 	}
 

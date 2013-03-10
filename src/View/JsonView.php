@@ -1,12 +1,12 @@
 <?php
 
-namespace neptune\view;
+namespace Neptune\View;
 
-use neptune\view\View;
-use neptune\format\Json;
-use neptune\database\Thing;
-use neptune\database\ThingCollection;
-use neptune\helpers\String;
+use Neptune\View\View;
+use Neptune\Format\Json;
+use Neptune\Database\Thing;
+use Neptune\Database\ThingCollection;
+use Neptune\Helpers\String;
 
 /**
  * JsonView

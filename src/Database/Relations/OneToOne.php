@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\database\relations;
+namespace Neptune\Database\Relations;
 
 /**
  * OneToOne

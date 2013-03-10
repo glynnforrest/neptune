@@ -1,8 +1,8 @@
 <?php
 
-namespace neptune\http;
+namespace Neptune\Http;
 
-use neptune\helpers\Url;
+use Neptune\Helpers\Url;
 
 /**
  * Response

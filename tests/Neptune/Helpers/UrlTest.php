@@ -1,10 +1,10 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
-use neptune\helpers\Url;
-use neptune\core\Dispatcher;
-use neptune\core\Config;
+use Neptune\Helpers\Url;
+use Neptune\Core\Dispatcher;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

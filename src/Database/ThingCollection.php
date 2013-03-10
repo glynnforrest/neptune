@@ -1,11 +1,11 @@
 <?php
 
-namespace neptune\database;
+namespace Neptune\Database;
 
 use \Iterator;
 use \ArrayAccess;
 use \Countable;
-use neptune\database\Thing;
+use Neptune\Database\Thing;
 
 /**
  * ThingCollection

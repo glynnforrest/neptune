@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\database\relations;
+namespace Neptune\Database\Relations;
 
-use neptune\database\Thing;
-use neptune\database\relations\OneToOne;
+use Neptune\Database\Thing;
+use Neptune\Database\Relations\OneToOne;
 
 require_once dirname(__FILE__) . '/../../test_bootstrap.php';
 
@@ -16,7 +16,7 @@ class User extends Thing {
 			'type' => 'has_one',
 			'key' => 'id',
 			'other_key' => 'users_id',
-			'other_class' => 'neptune\\database\\relations\\UserDetails'
+			'other_class' => 'Neptune\\Database\\Relations\\UserDetails'
 		)
 	);
 
@@ -130,7 +130,7 @@ class OneToOneTest extends \PHPUnit_Framework_TestCase {
 		$u = $this->user;
 		$u->id = 2;
 		$this->assertEquals(2, $d->users_id);
-	}	
+	}
 
 }
 ?>

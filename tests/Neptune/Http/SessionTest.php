@@ -1,7 +1,7 @@
 <?php
-namespace neptune\http;
+namespace Neptune\Http;
 
-use neptune\http\Session;
+use Neptune\Http\Session;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 

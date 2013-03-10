@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\assets;
+namespace Neptune\Assets;
 
-use neptune\helpers\Html;
-use neptune\core\Config;
+use Neptune\Helpers\Html;
+use Neptune\Core\Config;
 
 /**
  * Assets

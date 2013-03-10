@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -60,13 +60,13 @@ END;
 	}
 
 	public function testGetRequired() {
-		$this->setExpectedException('neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		Config::getRequired('fake');
 		$this->assertEquals(2.1, Config::getRequired('two.one'));
 	}
 
 	public function testGetFirstRequired() {
-		$this->setExpectedException('neptune\\exceptions\\ConfigKeyException');
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		Config::getFirstRequired('fake');
 		$this->assertEquals(2.1, Config::getFirstRequired('two'));
 	}

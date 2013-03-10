@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\database\relations;
+namespace Neptune\Database\Relations;
 
 /**
  * Relation
@@ -57,7 +57,7 @@ abstract class Relation {
 			if($this->right) {
 				$this->right->$name = $value;
 			}
-		} 
+		}
 	}
 
 }

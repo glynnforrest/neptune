@@ -1,5 +1,5 @@
 <?php
-namespace neptune\format;
+namespace Neptune\Format;
 
 /**
  * Format
@@ -10,7 +10,7 @@ abstract class Format {
 	protected $content = array();
 
 	protected function __construct() {
-	
+
 	}
 
 	public static function create($content = null, $key = null) {

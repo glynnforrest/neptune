@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\helpers;
+namespace Neptune\Helpers;
 
-use neptune\core\Config;
-use neptune\core\Dispatcher;
+use Neptune\Core\Config;
+use Neptune\Core\Dispatcher;
 
 /**
  * Url

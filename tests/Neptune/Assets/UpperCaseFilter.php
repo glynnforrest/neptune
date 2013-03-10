@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\tests\assets;
+namespace Neptune\Tests\Assets;
 
-use neptune\assets\Asset;
-use neptune\assets\Filter;
+use Neptune\Assets\Asset;
+use Neptune\Assets\Filter;
 
 class UpperCaseFilter implements Filter {
 

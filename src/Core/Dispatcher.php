@@ -1,16 +1,16 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Loader;
-use neptune\view\View;
-use neptune\http\Response;
-use neptune\http\Request;
-use neptune\validate\Validator;
-use neptune\cache\CacheFactory;
-use neptune\exceptions\NeptuneError;
-use neptune\exceptions\MethodNotFoundException;
-use neptune\exceptions\ArgumentMissingException;
+use Neptune\Core\Loader;
+use Neptune\View\View;
+use Neptune\Http\Response;
+use Neptune\Http\Request;
+use Neptune\Validate\Validator;
+use Neptune\Cache\CacheFactory;
+use Neptune\Exceptions\NeptuneError;
+use Neptune\Exceptions\MethodNotFoundException;
+use Neptune\Exceptions\ArgumentMissingException;
 
 /**
  * Handles an application request
@@ -109,7 +109,7 @@ class Dispatcher {
 		if (Loader::softLoad($actions[0])) {
 			$c = new $actions[0]();
 			try {
-				set_error_handler('\neptune\core\Dispatcher::missingArgsHandler');
+				set_error_handler('\Neptune\Core\Dispatcher::missingArgsHandler');
 				ob_start();
 				$body = $c->_runMethod($actions[1], $actions[2]);
 				$other = ob_get_clean();
@@ -141,14 +141,14 @@ class Dispatcher {
 
 	protected function formatBody(&$body, $format) {
 		if($body instanceof View) {
-			$view = 'neptune\\view\\' . ucfirst($format) . 'View';
+			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
 			if(get_class($body) !== $view) {
 				if (Loader::softLoad($view)) {
 					$body = $view::load(null, $body->getValues());
 				}
 			}
 		} else {
-			$view = 'neptune\\view\\' . ucfirst($format) . 'View';
+			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
 			if (Loader::softLoad($view)) {
 				$body = $view::load(null, array($body));
 			} else {

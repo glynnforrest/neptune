@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\core\Neptune;
-use neptune\core\Config;
+use Neptune\Core\Neptune;
+use Neptune\Core\Config;
 
 require_once dirname(__FILE__) . '/../test_bootstrap.php';
 
@@ -19,7 +19,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSimpleClass() {
-		$class = new \StdClass();
+		$class = new \stdClass();
 		$class->foo = 'hello';
 		Neptune::set('test', $class);
 		$this->assertEquals($class, Neptune::get('test'));
@@ -31,7 +31,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	public function testFunctionIsCalled() {
 		Neptune::set('class', function() {
-			$class = new \StdClass();
+			$class = new \stdClass();
 			$class->key = 'value';
 			return $class;
 		});
@@ -40,7 +40,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	public function testFunctionNotCalledBeforeAccess() {
 		Config::create('test');
-		Config::set('some_key', 'value');	
+		Config::set('some_key', 'value');
 		Neptune::set('config_change', function() {
 			Config::set('some_key', 'changed');
 			return 1;

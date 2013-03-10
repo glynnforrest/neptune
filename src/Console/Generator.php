@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\console;
+namespace Neptune\Console;
 
-use neptune\console\Console;
-use neptune\core\Neptune;
+use Neptune\Console\Console;
+use Neptune\Core\Neptune;
 
 /**
  * Generator

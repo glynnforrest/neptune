@@ -1,9 +1,9 @@
 <?php
 
-namespace neptune\core;
+namespace Neptune\Core;
 
-use neptune\http\Request;
-use neptune\validate\Validator;
+use Neptune\Http\Request;
+use Neptune\Validate\Validator;
 
 /**
  * Route

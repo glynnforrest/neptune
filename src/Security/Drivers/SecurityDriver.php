@@ -1,6 +1,6 @@
 <?php
 
-namespace neptune\security\drivers;
+namespace Neptune\Security\Drivers;
 
 /**
  * SecurityDriver
