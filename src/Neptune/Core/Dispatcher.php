@@ -2,7 +2,6 @@
 
 namespace Neptune\Core;
 
-use Neptune\Core\Loader;
 use Neptune\View\View;
 use Neptune\Http\Response;
 use Neptune\Http\Request;
@@ -106,7 +105,7 @@ class Dispatcher {
 	}
 
 	protected function runMethod($actions) {
-		if (Loader::softLoad($actions[0])) {
+		if (class_exists($actions[0])) {
 			$c = new $actions[0]();
 			try {
 				set_error_handler('\Neptune\Core\Dispatcher::missingArgsHandler');
@@ -143,13 +142,13 @@ class Dispatcher {
 		if($body instanceof View) {
 			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
 			if(get_class($body) !== $view) {
-				if (Loader::softLoad($view)) {
+				if (class_exists($view)) {
 					$body = $view::load(null, $body->getValues());
 				}
 			}
 		} else {
 			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
-			if (Loader::softLoad($view)) {
+			if (class_exists($view)) {
 				$body = $view::load(null, array($body));
 			} else {
 				return false;
