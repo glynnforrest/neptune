@@ -21,11 +21,17 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('url-with-characters-removed', String::slugify('Url with??> characters_removed;;\';;'));
 	}
 
+	public function testSlugifyWithCapitals() {
+		$this->assertEquals('oNe-TwO-THREE-four', String::slugify('oNe TwO THREE+four', false));
+	}
+
+
 	public function testCamelCase() {
 		$this->assertEquals('ClassName', String::camelCase('class name'));
 		$this->assertEquals('ClassName', String::camelCase('class-name'));
 		$this->assertEquals('ClassName', String::camelCase('class_name'));
 		$this->assertEquals('functionThatDoesStuff', String::camelCase('function that does%^ stuff', false));
+		$this->assertEquals('functionThatDoesStuff', String::camelCase('function thatDoes%^ stuff', false));
 	}
 
 	public function testRandomLength() {

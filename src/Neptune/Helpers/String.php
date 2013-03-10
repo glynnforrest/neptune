@@ -50,7 +50,7 @@ class String {
 	}
 
 	public static function camelCase($string, $ucfirst = true) {
-		$string = self::slugify($string);
+		$string = self::slugify($string, false);
 		$pieces = explode('-', $string);
 		$return = '';
 		foreach($pieces as $piece) {
@@ -75,8 +75,12 @@ class String {
 		return rtrim($string, $delimeter);
 	}
 
-	public static function slugify($string) {
-		$string = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string));
+	public static function slugify($string, $squash_uppercase = true) {
+		if($squash_uppercase) {
+			$string = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string));
+		} else {
+			$string = preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string);
+		}
 		return str_replace(' ', '-', trim($string));
 	}
 
