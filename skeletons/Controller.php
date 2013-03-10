@@ -1,16 +1,13 @@
-<?php
 
-namespace {namespace}\controller;
+namespace <?=$this->namespace;?>\controller;
 
 use neptune\controller\Controller;
 use neptune\view\View;
-use neptune\assets\Assets;
 
-class HomeController extends Controller {
+class <?=$this->controller_name;?>Controller extends Controller {
 
 	public function index() {
 		return View::load('index');
 	}
 
 }
-?>
