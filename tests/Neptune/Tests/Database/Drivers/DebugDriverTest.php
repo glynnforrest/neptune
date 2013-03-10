@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\Database\Drivers;
+namespace Neptune\Tests\Database\Drivers;
 
 use Neptune\Database\Drivers\DebugDriver;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
 
-require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../../bootstrap.php';
 
 /**
  * DebugDriverTest

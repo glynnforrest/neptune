@@ -1,9 +1,10 @@
 <?php
 
-namespace Neptune\Database;
+namespace Neptune\Tests\Database;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
+use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
 use Neptune\Database\Drivers\DebugDriver;
 

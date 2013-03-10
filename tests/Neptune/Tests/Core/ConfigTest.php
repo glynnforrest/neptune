@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Tests\Core;
 
-require_once __DIR__ . '/../../bootstrap.php';
+use Neptune\Core\Config;
+
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * ConfigTest

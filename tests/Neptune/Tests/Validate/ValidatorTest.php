@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Validate;
+namespace Neptune\Tests\Validate;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+
+use Neptune\Validate\Validator;
 
 /**
  * ValidatorTest

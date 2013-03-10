@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\Helpers;
+namespace Neptune\Tests\Helpers;
 
 use Neptune\Helpers\Url;
 use Neptune\Core\Dispatcher;
 use Neptune\Core\Config;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * UrlTest

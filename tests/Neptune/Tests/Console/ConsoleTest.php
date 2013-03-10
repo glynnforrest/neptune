@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Console;
+namespace Neptune\Tests\Console;
 
-require_once __DIR__ . '/../../bootstrap.php';
+use Neptune\Console\Console;
+
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * ConsoleTest

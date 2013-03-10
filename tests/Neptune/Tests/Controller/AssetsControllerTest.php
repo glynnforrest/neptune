@@ -1,13 +1,14 @@
 <?php
 
-namespace Neptune\Controller;
+namespace Neptune\Tests\Controller;
 
 use Neptune\Controller\Controller;
+use Neptune\Controller\AssetsController;
 use Neptune\Core\Config;
 use Neptune\Http\Request;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * AssetsControllerTest

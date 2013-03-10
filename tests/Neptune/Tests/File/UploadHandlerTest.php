@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\File;
+namespace Neptune\Tests\File;
 
 use Neptune\File\UploadHandler;
 use Neptune\Helpers\String;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * UploadHandlerTest

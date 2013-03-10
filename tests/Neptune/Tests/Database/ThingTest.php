@@ -1,12 +1,12 @@
 <?php
-namespace Neptune\Database;
+namespace Neptune\Tests\Database;
 
 use Neptune\Database\Thing;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
 use Neptune\View\Form;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 class UpperCase extends Thing {
 

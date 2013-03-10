@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\View;
+namespace Neptune\Tests\View;
 
 use Neptune\View\View;
 use Neptune\Core\Config;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * ViewTest

@@ -1,10 +1,10 @@
 <?php
 
-namespace Neptune\Format;
+namespace Neptune\Tests\Format;
 
 use Neptune\Format\Xml;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * XmlTest

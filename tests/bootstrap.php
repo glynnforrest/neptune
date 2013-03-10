@@ -5,4 +5,4 @@ if (!$loader = @include __DIR__ . '/../vendor/autoload.php') {
         'Please run `composer install`.'.PHP_EOL);
 }
 
-$loader->add('Assetic\Test', __DIR__);
+$loader->add('Neptune\Test', __DIR__);

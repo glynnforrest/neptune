@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Format;
+namespace Neptune\Tests\Format;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+
+use Neptune\Format\Json;
 
 /**
  * JsonTest

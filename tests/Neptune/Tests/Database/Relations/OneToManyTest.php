@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\Database\Relations;
+namespace Neptune\Tests\Database\Relations;
 
 use Neptune\Database\Thing;
 use Neptune\Database\Relations\OneToMany;
 use Neptune\Database\ThingCollection;
 
-require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../../bootstrap.php';
 
 class Author extends Thing {
 

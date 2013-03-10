@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\Database\Relations;
+namespace Neptune\Tests\Database\Relations;
 
 use Neptune\Database\Thing;
 use Neptune\Database\Relations\OneToOne;
 
-require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../../bootstrap.php';
 
 class User extends Thing {
 

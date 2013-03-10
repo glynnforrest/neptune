@@ -1,10 +1,10 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Tests\Core;
 
 use Neptune\Core\Events;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * EventsTest

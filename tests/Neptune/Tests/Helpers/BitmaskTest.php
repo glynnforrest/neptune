@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Helpers;
+namespace Neptune\Tests\Helpers;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+
+use Neptune\Helpers\Bitmask;
 
 class BitmaskTest extends \PHPUnit_Framework_TestCase {
 

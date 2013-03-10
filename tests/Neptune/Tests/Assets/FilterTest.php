@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\Assets;
+namespace Neptune\Tests\Assets;
 
 use Neptune\Assets\Asset;
 use Neptune\Assets\Filter;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * FilterTest
@@ -27,4 +27,3 @@ class FilterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('CONTENT', $a->getContent());
 	}
 }
-?>

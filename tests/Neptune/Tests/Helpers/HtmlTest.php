@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\Helpers;
+namespace Neptune\Tests\Helpers;
 
 use Neptune\Core\Config;
 use Neptune\Helpers\Html;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * HtmlTest

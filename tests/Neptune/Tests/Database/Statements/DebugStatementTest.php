@@ -1,13 +1,13 @@
 <?php
 
-namespace Neptune\Database\Statements;
+namespace Neptune\Tests\Database\Statements;
 
 use Neptune\Database\Statements\DatabaseStatement;
 use Neptune\Database\Statements\DebugStatement;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
 
-require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../../bootstrap.php';
 
 /**
  * DebugStatementTest

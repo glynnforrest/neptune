@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\Database;
+namespace Neptune\Tests\Database;
 
 use Neptune\Core\Config;
 use Neptune\Database\SQLQuery;
 use Neptune\Database\Builders\GenericSQLBuilder;
 
-include __DIR__ . ('/../../../bootstrap.php');
+include __DIR__ . ('/../../../../bootstrap.php');
 
 /**
  * GenericSQLBuilderTest

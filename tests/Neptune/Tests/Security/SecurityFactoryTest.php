@@ -1,11 +1,12 @@
 <?php
 
-namespace Neptune\Security;
+namespace Neptune\Tests\Security;
 
+use Neptune\Security\SecurityFactory;
 use Neptune\Core\Config;
 use Neptune\Security\Drivers\DebugDriver;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * SecurityFactoryTest

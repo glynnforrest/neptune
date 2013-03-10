@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Tests\Core;
 
 use Neptune\Core\Route;
 use Neptune\Http\Request;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * RouteTest

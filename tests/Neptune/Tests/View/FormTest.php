@@ -1,12 +1,12 @@
 <?php
 
-namespace Neptune\View;
+namespace Neptune\Tests\View;
 
 use Neptune\View\Form;
 use Neptune\Core\Config;
 use Neptune\Helpers\Html;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * FormTest

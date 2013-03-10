@@ -1,10 +1,10 @@
 <?php
 
-namespace Neptune\Controller;
+namespace Neptune\Tests\Controller;
 
 use Neptune\Controller\Controller;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 class SampleController extends Controller {
 

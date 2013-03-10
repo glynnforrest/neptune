@@ -1,9 +1,9 @@
 <?php
-namespace Neptune\Http;
+namespace Neptune\Tests\Http;
 
 use Neptune\Http\Session;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * SessionTest

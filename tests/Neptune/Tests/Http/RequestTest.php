@@ -1,8 +1,10 @@
 <?php
 
-namespace Neptune\Http;
+namespace Neptune\Tests\Http;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+
+use Neptune\Http\Request;
 
 /**
  * RequestTest

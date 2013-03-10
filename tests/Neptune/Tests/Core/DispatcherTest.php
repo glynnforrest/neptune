@@ -1,10 +1,12 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Tests\Core;
 
+
+use Neptune\Core\Dispatcher;
 use Neptune\Core\Route;
 
-include __DIR__ . ('/../../bootstrap.php');
+include __DIR__ . ('/../../../bootstrap.php');
 
 /**
  * DispatcherTest

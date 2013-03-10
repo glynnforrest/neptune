@@ -1,10 +1,10 @@
 <?php
 
-namespace Neptune\Assets;
+namespace Neptune\Tests\Assets;
 
 use Neptune\Assets\Asset;
 
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * AssetTest
