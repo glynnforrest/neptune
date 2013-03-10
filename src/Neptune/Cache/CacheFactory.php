@@ -3,7 +3,6 @@
 namespace Neptune\Cache;
 
 use Neptune\Core\Config;
-use Neptune\Core\Loader;
 use Neptune\Exceptions\DriverNotFoundException;
 
 /**
@@ -41,7 +40,7 @@ class CacheFactory {
 		}
 		$driver = 'Neptune\Cache\Drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
 		$config = Config::getRequired("cache.$name");
-		if (Loader::softLoad($driver)) {
+		if (class_exists($driver)) {
 			self::$caches[$name] = new $driver($config);
 			return self::$caches[$name];
 		} else {

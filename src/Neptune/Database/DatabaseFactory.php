@@ -4,7 +4,6 @@ namespace Neptune\Database;
 
 use Neptune\Core\Config;
 use Neptune\Exceptions\DriverNotFoundException;
-use Neptune\Core\Loader;
 
 /**
  * DatabaseFactory
@@ -49,7 +48,7 @@ class DatabaseFactory {
 		$pass = Config::get("database.$name.pass");
 		$builder = Config::get("database.$name.builder");
 
-		if (Loader::softLoad($driver)) {
+		if (class_exists($driver)) {
 			self::$databases[$name] = new $driver
 				($host, $port, $user, $pass, $database);
 			if($builder) {

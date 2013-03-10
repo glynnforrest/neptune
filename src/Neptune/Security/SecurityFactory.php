@@ -3,7 +3,6 @@
 namespace Neptune\Security;
 
 use Neptune\Core\Config;
-use Neptune\Core\Loader;
 use Neptune\Exceptions\DriverNotFoundException;
 
 /**
@@ -45,7 +44,7 @@ class SecurityFactory {
 		$driver = array_key_exists($driver, self::$registered) ?
 			self::$registered[$driver] : '\\Neptune\\Security\\Drivers\\' .
 			ucfirst($driver) . 'Driver';
-		if (Loader::softLoad($driver)) {
+		if (class_exists($driver)) {
 			self::$drivers[$name] = new $driver();
 			return self::$drivers[$name];
 		} else {
