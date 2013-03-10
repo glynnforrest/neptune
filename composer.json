@@ -1,5 +1,5 @@
 {
-    "name": "neptune/neptune",
+    "name": "glynnforrest/neptune",
     "description": "A nifty PHP 5.3 application library.",
 	"require": {
         "php": ">=5.3.0"
