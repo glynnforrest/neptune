@@ -1,0 +1,15 @@
+#!/usr/bin/php
+<?php
+
+//this script needs to be in the root directory of your app to work properly.
+//Make sure that you have run `composer install` if the autoloader isn't working.
+include('vendor/autoload.php');
+
+use Neptune\Tasks\TaskRunner;
+
+//prepare the command string
+unset($_SERVER['argv'][0]);
+$cmd = implode($_SERVER['argv'], ' ');
+
+//off we go
+TaskRunner::getInstance()->run($cmd);
