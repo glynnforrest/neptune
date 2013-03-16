@@ -53,9 +53,37 @@ class TaskRunnerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $t->parse('setup one two'));
 	}
 
+	public function testParseWithFlags() {
+		$t = TaskRunner::getInstance();
+		$expected = array(
+			'task' => 'BuildTask',
+			'method' => 'run',
+			'args' => array(),
+			'flags' => array('--verbose'),
+		);
+		$this->assertEquals($expected, $t->parse('build --verbose'));
+	}
 
+	public function testParseWithMethodAndFlags() {
+		$t = TaskRunner::getInstance();
+		$expected = array(
+			'task' => 'BuildTask',
+			'method' => 'setup',
+			'args' => array(),
+			'flags' => array('--verbose'),
+		);
+		$this->assertEquals($expected, $t->parse('build:setup --verbose'));
+	}
 
-
-
+	public function testParseWithMethodArgsAndFlags() {
+		$t = TaskRunner::getInstance();
+		$expected = array(
+			'task' => 'CreateTask',
+			'method' => 'model',
+			'args' => array('foo', 'bar', 'baz'),
+			'flags' => array('-v'),
+		);
+		$this->assertEquals($expected, $t->parse('create:model foo bar baz -v'));
+	}
 
 }
