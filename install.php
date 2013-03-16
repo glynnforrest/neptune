@@ -45,8 +45,13 @@ try {
 
 
 passthru('composer install');
-
 write('Neptune successfully downloaded.');
+
+$neptune_loc = __DIR__ . '/neptune';
+copy($neptune_loc, 'neptune');
+chmod('neptune', 0775);
+write('Installed neptune executable.');
+
 write('Now change directory to ' . $project_dir . ' and run `php neptune setup`.');
 
 exit(0);
