@@ -1,31 +1,18 @@
 <?php
 
-//really simple console functions before we get everything installed
 function write($text) {
 	echo $text . PHP_EOL;
 }
 
-function read($prompt) {
-	if(extension_loaded('readline')) {
-		return readline($prompt);
-	}
-	write($prompt);
-	return fgets(STDIN);
+write('Installing neptune...');
+
+$project_dir = getcwd();
+
+if(!is_writable($project_dir)) {
+	write('Unable write to ' . $project_dir);
+	write('Make sure the path is writeable and permissions are set correctly.');
+	exit(1);
 }
-
-write('Welcome to the Neptune installer.');
-
-$project_dir = read('Create a Neptune project in the following directory: ');
-
-if(!file_exists($project_dir)) {
-	if(!@mkdir($project_dir)) {
-		write('Unable to create new directory ' . $project_dir);
-		write('Make sure the path is writeable and permissions are set correctly.');
-		exit(1);
-	}
-}
-
-chdir($project_dir);
 
 $json = '{
 	"require": {
@@ -47,11 +34,11 @@ try {
 passthru('composer install');
 write('Neptune successfully downloaded.');
 
-$neptune_loc = __DIR__ . '/neptune';
+$neptune_loc = $project_dir . '/vendor/glynnforrest/neptune/neptune';
 copy($neptune_loc, 'neptune');
 chmod('neptune', 0775);
 write('Installed neptune executable.');
 
-write('Now change directory to ' . $project_dir . ' and run `php neptune setup`.');
+write('Now run `php neptune setup`.');
 
 exit(0);
