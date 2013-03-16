@@ -1,31 +1,52 @@
 <?php
 
-use Neptune\Console\Console;
-use Neptune\Console\Generator;
-use Neptune\Core\Neptune;
-use Neptune\Core\Events;
+//really simple console functions before we get everything installed
+function write($text) {
+	echo $text . PHP_EOL;
+}
 
-include('bootstrap.php');
+function read($prompt) {
+	if(extension_loaded('readline')) {
+		return readline($prompt);
+	}
+	write($prompt);
+	return fgets(STDIN);
+}
 
-Neptune::handleErrors();
-Events::getInstance()->addHandler('\Exception', function($e) {
-	Console::getInstance()->error($e->getMessage());
-	});
+write('Welcome to the Neptune installer.');
 
-$c = Console::getInstance();
-$c->write('Welcome to the Neptune installer.');
-
-$project_dir = $c->read('Create a Neptune project in: ');
-Neptune::set('root_namespace', $c->read('Root namespace of application: '));
+$project_dir = read('Create a Neptune project in the following directory: ');
 
 if(!file_exists($project_dir)) {
 	if(!@mkdir($project_dir)) {
-	$c->write('Unable to create new directory ' . $project_dir);
-	exit(1);
+		write('Unable to create new directory ' . $project_dir);
+		write('Make sure the path is writeable and permissions are set correctly.');
+		exit(1);
 	}
 }
 
-$g = Generator::getInstance();
-$g->populateAppDirectory($project_dir);
-$c->write('Created blank application in ' . $project_dir);
-?>
+chdir($project_dir);
+
+$json = '{
+	"require": {
+		"glynnforrest/neptune":"dev-master"
+	}
+}
+';
+
+try {
+	$file = new \SplFileObject('composer.json', 'w');
+	$file->fwrite($json);
+} catch (\Exception $e) {
+	write($e->getMessage());
+	exit(1);
+}
+
+
+
+passthru('composer install');
+
+write('Neptune successfully downloaded.');
+write('Now change directory to ' . $project_dir . ' and run `php neptune setup`.');
+
+exit(0);
