@@ -68,6 +68,7 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testPlural() {
+		$this->assertEquals('cats', String::plural('cats'));
 		$this->assertEquals('cats', String::plural('cat'));
 		$this->assertEquals('mice', String::plural('mouse'));
 		$this->assertEquals('lice', String::plural('louse'));
@@ -92,6 +93,7 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSingle() {
+		$this->assertEquals('cat', String::single('cat'));
 		$this->assertEquals('cat', String::single('cats'));
 		$this->assertEquals('mouse', String::single('mice'));
 		$this->assertEquals('louse', String::single('lice'));

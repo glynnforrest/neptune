@@ -103,7 +103,6 @@ class String {
 				return preg_replace($pattern, $plural, $string);
 			}
 		}
-		return $string;
 	}
 
 	public static function single($string) {
