@@ -84,6 +84,27 @@ class Console {
 		}
 	}
 
+	/**
+	 * Read the answer to a yes/no question.
+	 * The function will only return if yes or no is given, although
+	 * it ignores case and will match on any word that begins with
+	 * either 'y' or 'n'.
+	 *
+	 * @return bool True on 'yes', False on 'no'.
+	 */
+	public function readYesNo($prompt = null) {
+		$prompt .= ' [Y]es, [N]o :';
+		while (true) {
+			$value = $this->read($prompt);
+			if(strtolower(substr($value, 0, 1)) === 'y') {
+				return true;
+			}
+			if(strtolower(substr($value, 0, 1)) === 'n') {
+				return false;
+			}
+		}
+	}
+
 	public function setPromptSuffix($string) {
 		$this->prompt_suffix = $string;
 	}
