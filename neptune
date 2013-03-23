@@ -6,6 +6,18 @@
 include('vendor/autoload.php');
 
 use Neptune\Tasks\TaskRunner;
+use Neptune\Core\Config;
+
+//load neptune cli config
+$config = 'config/neptune.php';
+if(file_exists($config)) {
+	Config::load($config, 'neptune');
+} else {
+	Config::create($config, 'neptune');
+	Config::set('neptune#dir.root', __DIR__);
+	Config::set('neptune#dir.app', __DIR__ . '/app');
+	Config::save('neptune');
+}
 
 //prepare the command string
 unset($_SERVER['argv'][0]);
