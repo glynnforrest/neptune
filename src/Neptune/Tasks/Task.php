@@ -27,6 +27,10 @@ abstract class Task {
 	protected function getTaskMethods() {
 		$methods = get_class_methods($this);
 		foreach ($methods as $k => $method) {
+			if(substr($method, 0, 1) === '_') {
+				unset($methods[$k]);
+				continue;
+			}
 			$r = new ReflectionMethod($this, $method);
 			if(!$r->isPublic()) {
 				unset($methods[$k]);
