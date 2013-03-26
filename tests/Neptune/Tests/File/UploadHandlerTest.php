@@ -54,23 +54,23 @@ class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 		//assert the random string is 16 characters long by default (.txt = 20).
 		$this->assertTrue(strlen($this->object->getFilename()) === 20);
 		//assert the random string is alphanumeric by default.
-		$this->assertTrue(preg_match('`^\w+\.txt$`', $this->object->getFilename()) === 1);
-		$this->assertTrue(preg_match('`[^\w]+`', $this->object->getFilename()) === 0);
+		$this->assertRegexp('`^\w+\.txt$`', $this->object->getFilename());
+		$this->assertTrue(preg_match('`^\W+`', $this->object->getFilename()) === 0);
 	}
 
 	public function testScrambleOptionsLength() {
 		$this->object->setScrambleOptions(8);
 		$this->object->scrambleFilename();
 		$this->assertNotEquals('file.txt', $this->object->getFilename());
-		$this->assertTrue(strlen($this->object->getFilename()) === 8);
+		$this->assertTrue(strlen($this->object->getFilename()) === 12);
 	}
 
 	public function testScrambleOptions() {
 		$this->object->setScrambleOptions(6, String::HEX);
 		$this->object->scrambleFilename();
 		$this->assertNotEquals('file.txt', $this->object->getFilename());
-		$this->assertTrue(strlen($this->object->getFilename()) === 6);
-		$this->assertTrue(preg_match('`^[0-9A-F]+$`', $this->object->getFilename()) === 1);
+		$this->assertTrue(strlen($this->object->getFilename()) === 10);
+		$this->assertRegexp('`^[0-9A-F]+\.txt$`', $this->object->getFilename());
 		$this->assertTrue(preg_match('`[G-Z]+`', $this->object->getFilename()) === 0);
 	}
 
