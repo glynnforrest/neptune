@@ -21,25 +21,35 @@ class CacheFactory {
 		if ($name == null) {
 			if (!empty(self::$caches)) {
 				reset(self::$caches);
-				$name = key(self::$caches);
+				return current(self::$caches);
 			} else {
 				return self::createDriver();
 			}
 		}
 		if (!array_key_exists($name, self::$caches)) {
-			self::$caches[$name] = self::createDriver($name);
+			return self::createDriver($name);
 		}
 		return self::$caches[$name];
 	}
 
 	protected static function createDriver($name = null) {
-		if(!$name) {
-			$array = Config::getRequired('cache');
-			reset($array);
-			$name = key($array);
+		$pos = strpos($name, '#');
+		if($pos) {
+			$prefix = substr($name, 0, $pos);
+			$key = substr($name, $pos + 1);
+			$c = Config::load($prefix);
+		} else {
+			$key = $name;
+			$c = Config::load();
 		}
-		$driver = 'Neptune\Cache\Drivers\\' . ucfirst(Config::getRequired("cache.$name.driver")) . 'Driver';
-		$config = Config::getRequired("cache.$name");
+		if (!$key) {
+			$array = $c->getRequired("cache");
+			reset($array);
+			$key = key($array);
+			$name = isset($prefix)? $prefix . '#' . $key: $key;
+		}
+		$driver = 'Neptune\Cache\Drivers\\' . ucfirst($c->getRequired("cache.$key.driver")) . 'Driver';
+		$config = $c->getRequired("cache.$key");
 		if (class_exists($driver)) {
 			self::$caches[$name] = new $driver($config);
 			return self::$caches[$name];
@@ -49,5 +59,3 @@ class CacheFactory {
 	}
 
 }
-
-?>

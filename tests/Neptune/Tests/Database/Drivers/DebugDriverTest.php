@@ -28,11 +28,11 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 		Config::unload();
 	}
 
-	public function testConstruct() {
+	public function testGetDriver() {
 		$this->assertTrue(DatabaseFactory::getDriver('debug') instanceof DebugDriver);
 	}
 
-	public function testConstructPrefix() {
+	public function testGetDriverPrefix() {
 		$c = Config::create('prefix');
 		$c->set('database', array(
 			'debug' => array(

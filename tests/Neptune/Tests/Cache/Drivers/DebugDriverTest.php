@@ -15,8 +15,8 @@ require_once __DIR__ . '/../../../../bootstrap.php';
 class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('cache', array(
+		$c = Config::create('testing');
+		$c->set('cache', array(
 			'debug' => array(
 				'driver' => 'debug',
 				'prefix' => 'DEBUG__',
@@ -37,6 +37,24 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetDriver() {
 		$this->assertTrue(CacheFactory::getDriver('debug') instanceof DebugDriver);
+	}
+
+	public function testGetDriverPrefix() {
+		$c = Config::create('prefix');
+		$c->set('cache', array(
+			'debug' => array(
+				'driver' => 'debug',
+				'prefix' => 'unittest-'
+			),
+			'second' => array(
+				'driver' => 'debug',
+				'prefix' => 'unittest-'
+			),
+		));
+		$this->assertTrue(CacheFactory::getDriver('prefix#') instanceof DebugDriver);
+		$this->assertTrue(CacheFactory::getDriver('prefix#debug') instanceof DebugDriver);
+		$this->assertTrue(CacheFactory::getDriver('prefix#second') instanceof DebugDriver);
+		$this->assertTrue(CacheFactory::getDriver('prefix#') === CacheFactory::getDriver('prefix#debug'));
 	}
 
 	public function testGetDriverBadConfig() {
