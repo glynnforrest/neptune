@@ -19,8 +19,9 @@ class Logger {
 	protected $format = ':date :time [:type] :message';
 
 	protected function __construct() {
-		if(Config::get('log.format')) {
-			$this->format = Config::get('log.format');
+		$c = Config::load();
+		if($c->get('log.format')) {
+			$this->format = $c->get('log.format');
 		}
 	}
 
@@ -49,7 +50,7 @@ class Logger {
 
 	protected function isLogTypeEnabled($type) {
 		$key = 'log.type.' . $type;
-		if (Config::get($key)) {
+		if (Config::load()->get($key)) {
 			return true;
 		}
 		return false;
@@ -81,7 +82,7 @@ class Logger {
 	public static function save() {
 		$me = self::getInstance();
 		if (!$me->temp && !empty($me->logs)) {
-			$file = new SplFileObject(Config::getRequired('log.file'), 'a');
+			$file = new SplFileObject(Config::load()->getRequired('log.file'), 'a');
 			$content = '';
 			foreach ($me->logs as $log) {
 				$content .= $log . PHP_EOL;

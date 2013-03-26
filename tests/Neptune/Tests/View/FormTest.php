@@ -25,15 +25,25 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
-		Config::create('view');
-		Config::set('view.dir', '/tmp/');
-		Config::create('prefix');
-		Config::set('prefix#view.dir', 'folder_prefix/');
+		$c = Config::create('view');
+		$c->set('view.dir', '/tmp/');
+		$d = Config::create('prefix');
+		$d->set('view.dir', 'folder_prefix/');
 	}
 
 	public function tearDown() {
 		unlink(self::file);
 		Config::unload();
+	}
+
+	public function testLoad() {
+		$v = Form::load('some/file');
+		$this->assertEquals('/tmp/some/file.php', $v->getViewName());
+	}
+
+	public function testLoadPrefix() {
+		$v = Form::load('prefix#view');
+		$this->assertEquals('folder_prefix/view.php', $v->getViewName());
 	}
 
 	public function testCreate() {

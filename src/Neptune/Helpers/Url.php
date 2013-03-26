@@ -18,7 +18,7 @@ class Url {
 		if(substr($url, 0, 1) !== '/') {
 			$url = '/' . $url;
 		}
-		return $protocol . '://' . Config::getRequired('root_url') . $url;
+		return $protocol . '://' . Config::load()->getRequired('root_url') . $url;
 	}
 
 	public static function toRoute($name, $args = array(), $protocol = 'http') {

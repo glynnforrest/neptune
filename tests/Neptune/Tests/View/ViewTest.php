@@ -42,7 +42,6 @@ END;
 	public function testLoad() {
 		$v = View::load('some/file');
 		$this->assertEquals('/tmp/some/file.php', $v->getViewName());
-
 	}
 
 	public function testLoadPrefix() {
