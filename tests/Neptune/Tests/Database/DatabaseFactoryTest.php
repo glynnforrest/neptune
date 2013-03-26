@@ -60,8 +60,8 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 			),
 		));
 		$this->assertTrue(DatabaseFactory::getDriver('prefix#default') instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver('prefix#') instanceof DebugDriver);
 		$this->assertTrue(DatabaseFactory::getDriver('prefix#second') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#') instanceof DebugDriver);
 		$this->assertTrue(DatabaseFactory::getDriver('prefix#') === DatabaseFactory::getDriver('prefix#default'));
 	}
 

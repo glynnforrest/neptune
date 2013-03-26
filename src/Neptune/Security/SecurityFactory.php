@@ -22,25 +22,34 @@ class SecurityFactory {
 		if ($name == null) {
 			if (!empty(self::$drivers)) {
 				reset(self::$drivers);
-				$name = key(self::$drivers);
+				return current(self::$drivers);
 			} else {
 				return self::createDriver();
 			}
 		}
 		if (!array_key_exists($name, self::$drivers)) {
-			self::$drivers[$name] = self::createDriver($name);
+			return self::createDriver($name);
 		}
 		return self::$drivers[$name];
 	}
 
 	public static function createDriver($name = null) {
-		if($name) {
-			$driver = Config::getRequired("security.$name");
+		$pos = strpos($name, '#');
+		if($pos) {
+			$prefix = substr($name, 0, $pos);
+			$key = substr($name, $pos + 1);
+			$c = Config::load($prefix);
 		} else {
-			$array = Config::getRequired("security");
-			reset($array);
-			$driver = $array[key($array)];
+			$key = $name;
+			$c = Config::load();
 		}
+		if (!$key) {
+			$array = $c->getRequired("security");
+			reset($array);
+			$key = key($array);
+			$name = isset($prefix)? $prefix . '#' . $key: $key;
+		}
+		$driver = $c->getRequired("security.$key");
 		$driver = array_key_exists($driver, self::$registered) ?
 			self::$registered[$driver] : '\\Neptune\\Security\\Drivers\\' .
 			ucfirst($driver) . 'Driver';
@@ -57,5 +66,3 @@ class SecurityFactory {
 	}
 
 }
-
-?>

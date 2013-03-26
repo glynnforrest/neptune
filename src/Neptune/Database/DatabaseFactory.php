@@ -22,8 +22,7 @@ class DatabaseFactory {
 		if (!$db) {
 			if (!empty(self::$databases)) {
 				reset(self::$databases);
-				$db = key(self::$databases);
-				return self::$databases[$db];
+				return current(self::$databases);
 			} else {
 				return self::createDriver();
 			}
