@@ -23,10 +23,10 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
-		Config::create('view');
-		Config::set('view.dir', '/tmp/');
-		Config::create('prefix');
-		Config::set('prefix#view.dir', 'folder_prefix/');
+		$c = Config::create('view');
+		$c->set('view.dir', '/tmp/');
+		$d = Config::create('prefix');
+		$d->set('view.dir', 'folder_prefix/');
 	}
 
 	public function tearDown() {
@@ -87,4 +87,3 @@ END;
 	}
 
 }
-?>
