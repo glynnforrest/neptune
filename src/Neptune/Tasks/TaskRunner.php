@@ -92,14 +92,15 @@ class TaskRunner {
 	 * - From every entry in the `task_paths` Config setting.
 	 **/
 	public function getTaskClass($task) {
+		$c = Config::load();
 		$task =	String::CamelCase($task) . 'Task';
 		$candidates = array(
-			Config::get('namespace') . '\\Tasks\\'. $task,
+			$c->get('namespace') . '\\Tasks\\'. $task,
 			'Neptune\\Tasks\\' . $task,
 		);
 		$more = array_map(function($namespace) use ($task) {
 				return $namespace . '\\' . $task;
-			}, Config::get('task.namespaces', array()));
+			}, $c->get('task.namespaces', array()));
 		$candidates = array_merge($candidates, $more);
 		foreach ($candidates as $class) {
 				if(class_exists($class)) {

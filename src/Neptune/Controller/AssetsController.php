@@ -64,11 +64,11 @@ class AssetsController extends Controller {
 	}
 
 	public function getAssetPath($filename) {
-		return Config::get($this->current_prefix . 'assets.dir') . $filename;
+		return Config::load()->get($this->current_prefix . 'assets.dir') . $filename;
 	}
 
 	public function getAssetFilters($filename) {
-		$filters = Config::get($this->current_prefix . 'assets.filters');
+		$filters = Config::load()->get($this->current_prefix . 'assets.filters');
 		$matched = array();
 		if(is_array($filters) && !empty($filters)) {
 			foreach ($filters as $k => $v) {

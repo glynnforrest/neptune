@@ -18,8 +18,8 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 
 	public function setUp() {
-		Config::create('temp');
-		Config::set('assets.dir', '/tmp/');
+		$c = Config::create('temp');
+		$c->set('assets.dir', '/tmp/');
 	}
 
 	public function tearDown() {
@@ -37,14 +37,16 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAssetFiltersSingle() {
-		Config::set('assets.filters', array('`.*foo.*`' => 'foo_filter'));
+		$conf = Config::load();
+		$conf->set('assets.filters', array('`.*foo.*`' => 'foo_filter'));
 		$c = new AssetsController();
 		$this->assertEquals(array('foo_filter'), $c->getAssetFilters('asset_with_foo_in'));
 		$this->assertEquals(array(), $c->getAssetFilters('asset_without_f00_in'));
 	}
 
 	public function testGetAssetFiltersMany() {
-		Config::set('assets.filters', array('`.*\.js`' => 'js_filter',
+		$conf = Config::load();
+		$conf->set('assets.filters', array('`.*\.js`' => 'js_filter',
 			'`.*\.css`' => 'css_filter'));
 		$c = new AssetsController();
 		$this->assertEquals(array('js_filter'), $c->getAssetFilters('javascript.js'));
@@ -58,7 +60,6 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$file = '/tmp/asset.css';
 		file_put_contents($file, 'css_content');
 		Request::getInstance()->setFormat('css');
-		$this->assertEquals('css_content', $c->serveAsset('temp#asset'));
 		$this->assertEquals('css_content', $c->serveAsset('asset'));
 		@unlink($file);
 		Request::getInstance()->resetStoredVars();
@@ -68,14 +69,13 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$c = new AssetsController();
 		$file = '/tmp/filtered.js';
 		file_put_contents($file, 'js_content');
-		Config::set('temp#assets.filters', array('`.*\.js$`' => 'upper'));
+		$conf = Config::load();
+		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
 		Request::getInstance()->setFormat('js');
-		$this->assertEquals('JS_CONTENT', $c->serveAsset('temp#filtered'));
 		$this->assertEquals('JS_CONTENT', $c->serveAsset('filtered'));
 		@unlink($file);
 		Request::getInstance()->resetStoredVars();
 	}
 
 }
-?>

@@ -14,8 +14,8 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class HtmlTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('root_url', 'myapp.local');
+		$c = Config::create('testing');
+		$c->set('root_url', 'myapp.local');
 	}
 
 	public function tearDown() {

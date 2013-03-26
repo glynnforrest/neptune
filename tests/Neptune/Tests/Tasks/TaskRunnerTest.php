@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class TaskRunnerTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
+		$c = Config::create('testing');
 	}
 
 	public function tearDown() {
@@ -149,17 +149,18 @@ class TaskRunnerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Neptune\\Tasks\\SetupTask', $t->getTaskClass('setup'));
 		//pretend the Neptune\Tests namespace is our application and
 		//check it loads the DummyTask
-		Config::set('namespace', 'Neptune\\Tests');
+		$c = Config::load('testing');
+		$c->set('namespace', 'Neptune\\Tests');
 		$this->assertEquals('Neptune\\Tests\\Tasks\\DummyTask', $t->getTaskClass('dummy'));
 		//it should fail if a task namespace isn't set
-		Config::set('namespace', null);
+		$c->set('namespace', null);
 		$this->setExpectedException('Neptune\\Exceptions\\ClassNotFoundException');
 		$t->getTaskClass('dummy');
 		//now do the same with defining other task namespaces
-		Config::set('task.namespaces', array('Neptune\Tests\Tasks'));
+		$c->set('task.namespaces', array('Neptune\Tests\Tasks'));
 		$this->assertEquals('Neptune\\Tests\\Tasks\\DummyTask', $t->getTaskClass('dummy'));
 		//it should fail if a task namespace isn't set
-		Config::set('task.namespaces', null);
+		$c->set('task.namespaces', null);
 		$this->setExpectedException('Neptune\\Exceptions\\ClassNotFoundException');
 		$t->getTaskClass('dummy');
 	}

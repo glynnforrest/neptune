@@ -15,8 +15,8 @@ include __DIR__ . ('/../../../../bootstrap.php');
 class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('unittest');
-		Config::set('database', array(
+		$c = Config::create('unittest');
+		$c->set('database', array(
 			'unittest' => array(
 				'driver' => 'debug',
 				'database' => 'unittest'
@@ -28,22 +28,39 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		Config::unload();
 	}
 
-
-	public function testSelectConstuct() {
+	public function testConstruct() {
 		$this->assertTrue(SQLQuery::select() instanceof GenericSQLBuilder);
-	}
-
-	public function testInsertConstuct() {
+		$this->assertTrue(SQLQuery::select('unittest') instanceof GenericSQLBuilder);
 		$this->assertTrue(SQLQuery::insert() instanceof GenericSQLBuilder);
-	}
-
-	public function testUpdateConstuct() {
+		$this->assertTrue(SQLQuery::insert('unittest') instanceof GenericSQLBuilder);
 		$this->assertTrue(SQLQuery::update() instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::update('unittest') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::delete() instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::delete('unittest') instanceof GenericSQLBuilder);
 	}
 
-	public function testDeleteConstuct() {
-		$this->assertTrue(SQLQuery::delete() instanceof GenericSQLBuilder);
+	public function testConstructPrefix() {
+		$c = Config::create('prefix');
+		$c->set('database', array(
+			'default' => array(
+				'driver' => 'debug',
+				'database' => 'default'
+			),
+			'second' => array(
+				'driver' => 'debug',
+				'database' => 'second'
+			),
+		));
+		$this->assertTrue(SQLQuery::select('prefix#') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::select('prefix#default') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::insert('prefix#') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::insert('prefix#default') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::update('prefix#') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::update('prefix#second') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::delete('prefix#') instanceof GenericSQLBuilder);
+		$this->assertTrue(SQLQuery::delete('prefix#second') instanceof GenericSQLBuilder);
 	}
+
 
 	public function testSimpleSelect() {
 		$q = SQLQuery::select();

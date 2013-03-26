@@ -15,8 +15,8 @@ use Neptune\Database\Drivers\DebugDriver;
 class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('unittest');
-		Config::set('database', array(
+		$c = Config::create('unittest');
+		$c->set('database', array(
 			'unittest' => array(
 				'driver' => 'debug',
 				'database' => 'unittest'
@@ -43,7 +43,28 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function testGetDriver() {
 		$this->assertTrue(DatabaseFactory::getDriver() instanceof DebugDriver);
 		$this->assertTrue(DatabaseFactory::getDriver('unittest') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver() === DatabaseFactory::getDriver('unittest'));
+		$this->assertFalse(DatabaseFactory::getDriver('unittest') === DatabaseFactory::getDriver('unittest2'));
 	}
+
+	public function testGetDriverPrefix() {
+		$c = Config::create('prefix');
+		$c->set('database', array(
+			'default' => array(
+				'driver' => 'debug',
+				'database' => 'default'
+			),
+			'second' => array(
+				'driver' => 'debug',
+				'database' => 'second'
+			),
+		));
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#default') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#second') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#') === DatabaseFactory::getDriver('prefix#default'));
+	}
+
 
 	public function testGetDriverBadConfig() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');

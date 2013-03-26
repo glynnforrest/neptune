@@ -43,7 +43,7 @@ class MemcachedDriver implements CacheDriver {
 		}
 	}
 
-	public function get($key, $use_prefix = null) {
+	public function get($key, $use_prefix = true) {
 		if($use_prefix) {
 			return $this->memcached->get($this->prefix . $key);
 		} else {

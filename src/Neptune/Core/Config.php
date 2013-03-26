@@ -5,62 +5,83 @@ namespace Neptune\Core;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\ConfigFileException;
 
+/**
+ * Config
+ * @author Glynn Forrest <me@glynnforrest.com>
+ */
 class Config {
 
+	protected static $instances = array();
 	protected $values = array();
-	protected $names = array();
+	protected $name;
+	protected $filename;
 	protected $modified = false;
-	protected static $instance;
 
-	protected function __construct() {
+	protected function __construct($name, $filename = null) {
+		if($filename) {
+			if(!file_exists($filename)) {
+				throw new ConfigFileException(
+					'Configuration file ' . $filename . ' not found');
+			}
+			$this->values = include $filename;
+			if (!is_array($this->values)) {
+				throw new ConfigFileException(
+					'Configuration file ' . $filename . ' does not return a php array');
+			}
+			$this->filename = $filename;
+		}
+		$this->name = $name;
+		return true;
 	}
 
-	protected static function getInstance() {
-		if (!self::$instance) {
-			self::$instance = new self();
+	/**
+	 * Get a configuration value that matches $key.
+	 * $key uses the dot array syntax: parent.child.child
+	 * If the key matches an array the whole array will be returned.
+	 * If no key is specified the entire configuration array will be
+	 * returned.
+	 * $default will be returned (null unless specified) if the key is
+	 * not found.
+	 */
+	public function get($key = null, $default = null) {
+		if(!$key) {
+			return $this->values;
 		}
-		return self::$instance;
-	}
-
-	public static function get($key = null, $default = null) {
-		$pos = strpos($key, '#');
-		if($pos) {
-			$name = substr($key, 0, $pos);
-			$key = substr($key, $pos + 1);
-		} else {
-			$name = null;
+		$parts = explode('.', $key);
+		$scope = &$this->values;
+		for ($i = 0; $i < count($parts) - 1; $i++) {
+			if(!isset($scope[$parts[$i]])) {
+				return $default;
+			}
+			$scope = &$scope[$parts[$i]];
 		}
-		$me = self::getInstance();
-		$name = $me->getFileIndex($name);
-		if ($name) {
-			if(!$key) {
-				return $me->values[$name];
-			}
-			$parts = explode('.', $key);
-			$scope = &$me->values[$name];
-			for ($i = 0; $i < count($parts) - 1; $i++) {
-				if(!isset($scope[$parts[$i]])) {
-					return $default;
-				}
-				$scope = &$scope[$parts[$i]];
-			}
-			if(isset($scope[$parts[$i]])) {
-				return $scope[$parts[$i]];
-			}
+		if(isset($scope[$parts[$i]])) {
+			return $scope[$parts[$i]];
 		}
 		return $default;
 	}
 
-	public static function getFirst($key = null, $default = null) {
+	/**
+	 * Get the first value from an array of configuration values that
+	 * matches $key.
+	 * $default will be returned (null unless specified) if the key is
+	 * not found or does not contain an array.
+	 */
+	public function getFirst($key = null, $default = null) {
 		$array = self::get($key);
-		if(!$key | !is_array($array)) {
+		if(!is_array($array)) {
 			return $default;
 		}
 		reset($array);
 		return current($array);
 	}
 
-	public static function getRequired($key) {
+	/**
+	 * Get a configuration value that matches $key in the same way as
+	 * get(), but a ConfigKeyException will be thrown if
+	 * the key is not found.
+	 */
+	public function getRequired($key) {
 		$value = self::get($key);
 		if ($value) {
 			return $value;
@@ -68,7 +89,12 @@ class Config {
 		throw new ConfigKeyException("Required value not found: $key");
 	}
 
-	public static function getFirstRequired($key) {
+	/**
+	 * Get the first value from an array of configuration values that
+	 * matches $key in the same way as getFirst(), but a
+	 * ConfigKeyException will be thrown if the key is not found.
+	 */
+	public function getFirstRequired($key) {
 		$value = self::getFirst($key);
 		if ($value) {
 			return $value;
@@ -76,132 +102,148 @@ class Config {
 		throw new ConfigKeyException("Required value not found: $key");
 	}
 
-	public static function set($key, $value) {
-		$pos = strpos($key, '#');
-		if($pos) {
-			$name = substr($key, 0, $pos);
-			$key = substr($key, $pos + 1);
-		} else {
-			$name = null;
-		}
-		$me = self::getInstance();
-		$name = $me->getFileIndex($name);
-		if ($name) {
-			$parts = explode('.', $key);
-			//loop through each part, create it if not present.
-			$scope = &$me->values[$name];
-			$count = count($parts) - 1;
-			for ($i = 0; $i < $count; $i++) {
-				if(!isset($scope[$parts[$i]])) {
-					$scope[$parts[$i]] = array();
-				}
-				$scope = &$scope[$parts[$i]];
+	/**
+	 * Set a configuration value with $key.
+	 * $key uses the dot array syntax: parent.child.child.
+	 * If $value is an array this will also be accessible using the
+	 * dot array syntax.
+	 */
+	public function set($key, $value) {
+		$parts = explode('.', $key);
+		//loop through each part, create it if not present.
+		$scope = &$this->values;
+		$count = count($parts) - 1;
+		for ($i = 0; $i < $count; $i++) {
+			if(!isset($scope[$parts[$i]])) {
+				$scope[$parts[$i]] = array();
 			}
-			$scope[$parts[$i]] = $value;
-			$me->modified = true;
-		} else {
-			return false;
+			$scope = &$scope[$parts[$i]];
 		}
-	}
-
-	public static function create($file, $name = null) {
-		$me = self::getInstance();
-		if (array_key_exists($name, $me->values)) {
-			return true;
-		}
-		$me->values[$file] = array();
-		if ($name !== null) {
-			$me->names[$name] = $file;
-		}
-	}
-
-	public static function load($file, $name = null) {
-		$me = self::getInstance();
-		if (array_key_exists($file, $me->values)) {
-			return true;
-		}
-		$content = include $file;
-		if (!is_array($content)) {
-			throw new ConfigFileException(
-				'Configuration file ' . $file . ' does not return a php array');
-		}
-		$me->values[$file] = $content;
-		if ($name !== null) {
-			$me->names[$name] = $file;
-		}
-		return true;
-	}
-
-	//TODO: Finish this function!
-	public static function unload($name=null) {
-		$me = self::getInstance();
-		if ($name === null) {
-			$me->values = array();
-			$me->names = array();
-		} else {
-
-		}
-	}
-
-	public static function getAll() {
-		return self::getInstance()->values;
-	}
-
-	public static function getNames() {
-		return self::getInstance()->names;
+		$scope[$parts[$i]] = $value;
+		$this->modified = true;
 	}
 
 	/**
-	 * @param string $name a filename or name of the file.
-	 * @return string a key to the $values array.
+	 * Create config settings with $name.
+	 * $filename must be specified (or set with setFilename) if the
+	 * settings are intended to be saved.
+	 * Giving a $name that already exists will overwrite the settings
+	 * with that name.
 	 */
-	protected function getFileIndex($name) {
-		if ($name === null) {
-			reset($this->values);
-			$name = key($this->values);
+	public static function create($name, $filename = null) {
+		if (array_key_exists($name, self::$instances)) {
+			return self::$instances[$name];
 		}
-		if (!empty($this->values)) {
-			if (array_key_exists($name, $this->names)) {
-				return $this->names[$name];
-			} elseif (array_key_exists($name, $this->values)) {
-				return $name;
-			} else {
+		self::$instances[$name] = new self($name);
+		self::$instances[$name]->setFilename($filename);
+		return self::$instances[$name];
+	}
+
+	/**
+	 * Load config settings with $name from $filename.
+	 * If $name is loaded, the same Config instance will be
+	 * returned if $filename is not specified.
+	 * If $name is loaded and $filename does not match with $name
+	 * the instance with that name will be overwritten.
+	 * If $name is not specified, the first loaded config file will be
+	 * returned, or an exception thrown if no Config instances are
+	 * set.
+	 */
+	public static function load($name = null, $filename = null) {
+		if (array_key_exists($name, self::$instances)){
+			$instance = self::$instances[$name];
+			if(!$filename || $instance->getFileName() === $filename) {
+				return $instance;
+			}
+		}
+		if(!$name) {
+			if(empty(self::$instances)) {
 				throw new ConfigFileException(
-					"Invalid config file name '$name' given");
+					'No configuration file loaded, unable to get default');
 			}
+			reset(self::$instances);
+			return self::$instances[key(self::$instances)];
+		}
+		if(!$filename) {
+			throw new ConfigFileException(
+				"No filename specified for configuration file $name"
+			);
+		}
+		self::$instances[$name] = new self($name, $filename);
+		return self::$instances[$name];
+	}
+
+	/**
+	 * Unload configuration settings with $name, requiring them to be
+	 * reloaded if they are to be used again.
+	 * If $name is not specified, all configuration files will be
+	 * unloaded.
+	 */
+	public static function unload($name=null) {
+		if ($name) {
+			unset(self::$instances[$name]);
 		} else {
-			return null;
+			self::$instances = array();
 		}
 	}
 
-	public static function save($name = null) {
-		$me = self::getInstance();
-		if ($me->modified) {
-			if ($name === null) {
-				if (!empty($me->values)) {
-					foreach ($me->values as $k => $v) {
-						$me->saveConfig($k, $v);
-					}
-					return true;
-				} else {
-					throw new ConfigFileException('No configuration file loaded');
+	/**
+	 * Save the current configuration instance.
+	 * A ConfigFileException will be thrown if filename is not set or
+	 * if php can't write to the file.
+	 */
+	public function save() {
+		if ($this->modified) {
+			if (!empty($this->values)) {
+				if(!$this->filename) {
+					throw new ConfigFileException(
+						"Unable to save configuration file '$this->name', \$filename is not set"
+					);
 				}
-			} else {
-				$name = $me->getFileIndex($name);
-				if ($name) {
-					return $me->saveConfig($name, $me->values[$name]);
+				if(!file_exists($this->filename) && !@touch($this->filename)){
+					throw new ConfigFileException(
+						"Unable to create configuration file
+						$this->filename. Check paths and permissions
+						are correct."
+					);
+				};
+				if(!is_writable($this->filename)) {
+					throw new ConfigFileException(
+						"Unable to write to configuration file
+						$this->filename. Check paths and permissions
+						are correct."
+					);
 				}
+				$content = '<?php return ' . var_export($this->values, true) . '?>';
+				file_put_contents($this->filename, $content);
+				return true;
 			}
 		}
-		return false;
-	}
-
-	protected function saveConfig($file, $values) {
-		$content = '<?php return ' . var_export($values, true) . '?>';
-		file_put_contents($file, $content);
 		return true;
 	}
 
-}
+	/**
+	 * Call save() on all configuration instances.
+	 */
+	public static function saveAll() {
+		foreach(self::$instances as $instance) {
+			$instance->save();
+		}
+		return true;
+	}
 
-?>
+	/**
+	 * Set the filename for the current configuration instance.
+	 */
+	public function setFileName($filename) {
+		$this->filename = $filename;
+	}
+
+	/**
+	 * Get the filename of the current configuration instance.
+	 */
+	public function getFileName() {
+		return $this->filename;
+	}
+
+}
