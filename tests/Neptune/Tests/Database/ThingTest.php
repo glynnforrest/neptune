@@ -31,8 +31,8 @@ class UpperCase extends Thing {
 class ThingTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('database', array(
+		$c = Config::create('testing');
+		$c->set('database', array(
 			'db' => array(
 				'driver' => 'debug',
 				'database' => 'debug')

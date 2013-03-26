@@ -16,8 +16,8 @@ require_once __DIR__ . '/../../../../bootstrap.php';
 class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('database', array(
+		$c = Config::create('testing');
+		$c->set('database', array(
 			'debug' => array(
 				'driver' => 'debug',
 				'database' => 'debug')
@@ -30,6 +30,29 @@ class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 
 	public function testConstruct() {
 		$db = DatabaseFactory::getDriver('debug');
+		$stmt = $db->prepare('SELECT * FROM test');
+		$this->assertTrue($stmt instanceof DatabaseStatement);
+	}
+
+	public function testConstructPrefix() {
+		$c = Config::create('prefix');
+		$c->set('database', array(
+			'debug' => array(
+				'driver' => 'debug',
+				'database' => 'default'
+			),
+			'second' => array(
+				'driver' => 'debug',
+				'database' => 'second'
+			),
+		));
+		$db = DatabaseFactory::getDriver('prefix#');
+		$stmt = $db->prepare('SELECT * FROM test');
+		$this->assertTrue($stmt instanceof DatabaseStatement);
+		$db = DatabaseFactory::getDriver('prefix#debug');
+		$stmt = $db->prepare('SELECT * FROM test');
+		$this->assertTrue($stmt instanceof DatabaseStatement);
+		$db = DatabaseFactory::getDriver('prefix#second');
 		$stmt = $db->prepare('SELECT * FROM test');
 		$this->assertTrue($stmt instanceof DatabaseStatement);
 	}

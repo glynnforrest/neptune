@@ -15,8 +15,8 @@ require_once __DIR__ . '/../../../../bootstrap.php';
 class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('database', array(
+		$c = Config::create('testing');
+		$c->set('database', array(
 			'debug' => array(
 				'driver' => 'debug',
 				'database' => 'debug')
@@ -30,6 +30,24 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function testConstruct() {
 		$this->assertTrue(DatabaseFactory::getDriver('debug') instanceof DebugDriver);
+	}
+
+	public function testConstructPrefix() {
+		$c = Config::create('prefix');
+		$c->set('database', array(
+			'debug' => array(
+				'driver' => 'debug',
+				'database' => 'default'
+			),
+			'second' => array(
+				'driver' => 'debug',
+				'database' => 'second'
+			),
+		));
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#debug') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#second') instanceof DebugDriver);
+		$this->assertTrue(DatabaseFactory::getDriver('prefix#') === DatabaseFactory::getDriver('prefix#debug'));
 	}
 
 	public function testGetPreparedQuery() {
