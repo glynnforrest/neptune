@@ -81,7 +81,7 @@ class Assets {
 			if(strpos($v['src'], '://')) {
 				$sorted[$k] = $v['src'];
 			} else {
-				$sorted[$k] = Config::get('assets.url') . $v['src'];
+				$sorted[$k] = Config::load()->get('assets.url') . $v['src'];
 			}
 		}
 		return $sorted;

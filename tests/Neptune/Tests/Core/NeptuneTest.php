@@ -13,6 +13,10 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
+	public function tearDown() {
+		Config::unload();
+	}
+
 	public function testSetAndGet() {
 		Neptune::set('key', 'value');
 		$this->assertEquals('value', Neptune::get('key'));
@@ -39,15 +43,14 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testFunctionNotCalledBeforeAccess() {
-		Config::create('test');
-		Config::set('some_key', 'value');
-		Neptune::set('config_change', function() {
-			Config::set('some_key', 'changed');
+		$c = Config::create('test');
+		$c->set('some_key', 'value');
+		Neptune::set('config_change', function() use ($c) {
+			$c->set('some_key', 'changed');
 			return 1;
 		});
-		$this->assertEquals('value', Config::get('some_key'));
+		$this->assertEquals('value', $c->get('some_key'));
 		$res = Neptune::get('config_change');
-		$this->assertEquals('changed', Config::get('some_key'));
+		$this->assertEquals('changed', $c->get('some_key'));
 	}
 }
-?>

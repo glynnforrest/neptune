@@ -16,9 +16,9 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	protected $assets;
 
 	public function setUp() {
-		Config::create('testing');
-		Config::set('root_url', 'myapp.local');
-		Config::set('assets.url', 'assets/');
+		$c = Config::create('testing');
+		$c->set('root_url', 'myapp.local');
+		$c->set('assets.url', 'assets/');
 		$this->assets = Assets::getInstance();
 		$this->assets->clear();
 	}
@@ -123,7 +123,7 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testExternalAssetUrl() {
-		Config::set('assets.url', 'http://cdn.site.com/assets/');
+		Config::load()->set('assets.url', 'http://cdn.site.com/assets/');
 		$this->assets->addCss('lib', 'lib.css');
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://cdn.site.com/assets/lib.css" />' . PHP_EOL, Assets::css());
 	}
