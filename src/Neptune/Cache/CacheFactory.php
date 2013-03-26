@@ -58,4 +58,12 @@ class CacheFactory {
 		}
 	}
 
+	public static function remove($name = null) {
+		if($name) {
+			unset(self::$caches[$name]);
+		} else {
+			self::$caches = array();
+		}
+	}
+
 }

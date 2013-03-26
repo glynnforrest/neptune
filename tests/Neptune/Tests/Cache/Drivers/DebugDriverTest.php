@@ -32,6 +32,7 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		CacheFactory::getDriver('debug')->flush();
+		CacheFactory::remove();
 		Config::unload();
 	}
 
