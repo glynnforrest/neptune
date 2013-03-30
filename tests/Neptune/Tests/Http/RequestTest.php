@@ -106,6 +106,23 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'post';
 		$this->assertEquals('POST', $this->request->method());
 	}
-}
 
-?>
+    public function testIsPost() {
+        $_SERVER['REQUEST_METHOD'] = 'post';
+        $this->assertTrue($this->request->isPost());
+        $_SERVER['REQUEST_METHOD'] = 'get';
+        $this->assertFalse($this->request->isPost());
+        $_SERVER['REQUEST_METHOD'] =null;
+        $this->assertFalse($this->request->isPost());
+    }
+
+    public function testIsGet() {
+        $_SERVER['REQUEST_METHOD'] = 'get';
+        $this->assertTrue($this->request->isGet());
+        $_SERVER['REQUEST_METHOD'] = 'post';
+        $this->assertFalse($this->request->isGet());
+        $_SERVER['REQUEST_METHOD'] =null;
+        $this->assertFalse($this->request->isGet());
+    }
+
+}

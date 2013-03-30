@@ -74,6 +74,4 @@ class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue(preg_match('`[G-Z]+`', $this->object->getFilename()) === 0);
 	}
 
-
 }
-?>

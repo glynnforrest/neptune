@@ -66,6 +66,20 @@ class Request {
 		return isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : null;
 	}
 
+	/**
+	 * Returns true if the current request method is POST.
+	 */
+	public function isPost() {
+		return $this->method() === 'POST';
+	}
+
+	/**
+	 * Returns true if the current request method is GET.
+	 */
+	public function isGet() {
+		return $this->method() === 'GET';
+	}
+
 	public function format() {
 		if($this->format) {
 			return $this->format;
@@ -95,5 +109,3 @@ class Request {
 	}
 
 }
-
-?>
