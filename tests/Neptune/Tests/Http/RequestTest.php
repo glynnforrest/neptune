@@ -93,6 +93,17 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		$this->assertNull($this->request->get('empty'));
 		unset($_GET['f00']);
 		$this->assertNull($this->request->get('f00'));
+        $this->assertEquals('fallback', $this->request->get('f00', 'fallback'));
+	}
+
+	public function testPost() {
+		$_POST['f00'] = 'ok';
+		$this->assertEquals(array('f00' => 'ok'), $this->request->post());
+		$this->assertEquals('ok', $this->request->post('f00'));
+		$this->assertNull($this->request->post('empty'));
+		unset($_POST['f00']);
+		$this->assertNull($this->request->post('f00'));
+        $this->assertEquals('fallback', $this->request->post('f00', 'fallback'));
 	}
 
 	public function testIp() {
