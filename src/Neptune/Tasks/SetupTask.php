@@ -4,6 +4,7 @@ namespace Neptune\Tasks;
 
 use Neptune\Core\Config;
 use Neptune\Helpers\String;
+use Neptune\Tasks\Task;
 
 /**
  * SetupTask
@@ -26,19 +27,8 @@ class SetupTask extends Task {
 		'app/:namespace/View' => 0775,
 	);
 
-	protected $neptune_settings = array(
-		'namespace' => '',
-		/* 'dir.root' => '', */
-		/* 'dir.app' => '' */
-	);
-
-	protected $config_settings = array(
-		'view.dir' => 'app/:namespace/View',
-		'root_url' => ''
-	);
-
 	protected function getRootDir() {
-		$root = Config::getRequired('neptune#dir.root');
+		$root = Config::load('neptune')->getRequired('dir.root');
 		//make sure root has a trailing slash
 		if(substr($root, -1) !== '/') {
 			$root .= '/';
@@ -46,25 +36,31 @@ class SetupTask extends Task {
 		return $root;
 	}
 
+    /**
+     * Check if config, public and storage directories have been
+     * created.
+     */
+    public function _directoriesCreated() {
+        foreach ($this->dirs as $dir => $perms) {
+            if(!file_exists($dir)) {
+                $this->console->error('Not found: ' . $dir);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected function neptuneConfigSetup() {
+        $t = new ConfigTask();
+        return $t->_neptuneConfigSetup();
+    }
+
 	public function run($args = array()) {
 		$this->structure();
-		$this->config();
+        $t = new ConfigTask;
+        $t->run();
 		$this->scaffold();
 		$this->versionControl();
-	}
-
-	/**
-	 * Returns true if configuration files have been made for this application.
-	 */
-	protected function configSetup() {
-		$root = $this->getRootDir();
-		foreach (array('/config/neptune.php', '/config/devconfig.php') as $file) {
-			if(!file_exists($root . $file)) {
-				return false;
-			}
-		}
-		//check to see if config settings required for neptune have been set
-		return true;
 	}
 
 	/**
@@ -77,7 +73,7 @@ class SetupTask extends Task {
 
 	protected function createDirs(array $dirs, $namespace = false) {
 		if($namespace) {
-			$namespace = Config::getRequired('neptune#namespace');
+			$namespace = Config::load('neptune')->getRequired('namespace');
 		} else {
 			$namespace = ':namespace';
 		}
@@ -92,38 +88,9 @@ class SetupTask extends Task {
 		}
 	}
 
-	/**
-	 * Set up configuration for your application.
-	 */
-	public function config() {
-		if($this->configSetup()) {
-			if(!$this->console->readYesNo('Configuration exists. Create new?')) {
-				return true;
-			}
-		}
-		$this->console->write('Creating configuration file.');
-		$pieces = explode('/', trim($this->getRootDir(), '/'));
-		$this->neptune_settings['namespace'] = String::camelCase(array_pop($pieces), true);
-		$file = 'config/neptune.php';
-		Config::load($file);
-		foreach ($this->neptune_settings as $setting => $default) {
-			Config::set('neptune#' . $setting, $this->console->read("$setting:", $default));
-		}
-		Config::save($file);
-		$file = 'config/devconfig.php';
-		Config::create($file, 'devconfig');
-		$namespace = Config::getRequired('neptune#namespace');
-		foreach ($this->config_settings as $setting => $default) {
-			$default = str_replace(':namespace', $namespace, $default);
-			Config::set('devconfig#' . $setting, $this->console->read("$setting:", $default));
-		}
-		Config::save($file);
-		$this->console->write("Saved file $file.");
-	}
-
 	public function scaffold() {
-		if(!$this->configSetup()) {
-			$this->console->error('No configuration found. Please create configuration first.');
+		if(!$this->neptuneConfigSetup()) {
+			$this->console->error('No configuration found. Please run `./neptune config`.');
 			return false;
 		}
 		$this->createDirs($this->scaffold_dirs, true);
