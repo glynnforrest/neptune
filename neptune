@@ -11,12 +11,13 @@ use Neptune\Core\Config;
 //load neptune cli config
 $config = 'config/neptune.php';
 if(file_exists($config)) {
-	Config::load($config, 'neptune');
+	$c = Config::load('neptune', $config);
 } else {
-	Config::create($config, 'neptune');
-	Config::set('neptune#dir.root', __DIR__);
-	Config::set('neptune#dir.app', __DIR__ . '/app');
-	Config::save('neptune');
+    echo 'creating';
+	$c = Config::create('neptune', $config);
+	$c->set('dir.root', __DIR__);
+	$c->set('dir.app', __DIR__ . '/app');
+	$c->save();
 }
 
 //prepare the command string
