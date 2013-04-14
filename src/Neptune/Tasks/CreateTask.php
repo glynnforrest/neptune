@@ -18,6 +18,20 @@ class CreateTask extends Task {
         //interactively choose function to run
     }
 
+    protected function saveSkeletonToFile(Skeleton $skeleton, $file) {
+        try {
+            $skeleton->saveSkeleton($file);
+            $this->console->write("Creating $file");
+        } catch (FileException $e){
+            //ask to overwrite the file
+            if($this->console->readYesNo("$file exists. Overwrite?")) {
+                $skeleton->saveSkeleton($file, true);
+                $this->console->write("Creating $file");
+            }
+        }
+    }
+
+
     public function controller($name = null) {
         if(!$name) {
             $name = $this->console->read('Controller name', 'Home');
@@ -28,16 +42,20 @@ class CreateTask extends Task {
         $skeleton_path = $c->getRequired('dir.neptune') . '/src/Neptune/Skeletons/Controller';
         $skeleton = Skeleton::loadAbsolute($skeleton_path);
         $skeleton->controller_name = $name;
-        try {
-            $skeleton->saveSkeleton($new_file);
-            $this->console->write("Creating $new_file");
-        } catch (FileException $e){
-            //ask to overwrite the file
-            if($this->console->readYesNo("$new_file exists. Overwrite?")) {
-                $skeleton->saveSkeleton($new_file, true);
-                $this->console->write("Creating $new_file");
-            }
+        $this->saveSkeletonToFile($skeleton, $new_file);
+    }
+
+    public function model($name = null) {
+        if(!$name) {
+            $name = $this->console->read('Model name');
         }
+        $name = String::camelCase($name, true) . 'Model';
+        $new_file = $this->getAppDirectory() . 'Model/' . $name . '.php';
+        $c = Config::load('neptune');
+        $skeleton_path = $c->getRequired('dir.neptune') . '/src/Neptune/Skeletons/Model';
+        $skeleton = Skeleton::loadAbsolute($skeleton_path);
+        $skeleton->model_name = $name;
+        $this->saveSkeletonToFile($skeleton, $new_file);
     }
 
 }
