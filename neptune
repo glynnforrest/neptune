@@ -16,6 +16,8 @@ if(file_exists($config)) {
     echo 'creating';
 	$c = Config::create('neptune', $config);
 	$c->set('dir.root', __DIR__);
+	$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune');
+	$c->set('dir.skeletons', __DIR__ . '/vendor/glynnforrest/neptune/src/Neptune/Skeletons');
 	$c->set('dir.app', __DIR__ . '/app');
 	$c->save();
 }

@@ -27,7 +27,7 @@ class Skeleton extends View {
      * $overwrite is true.
      */
     public function saveSkeleton($file, $overwrite = false) {
-        if(!$overwrite && is_file($file)) {
+        if(!$overwrite && file_exists($file)) {
             throw new FileException("File exists: $file");
         }
         $f = new \SplFileObject($file, 'w');

@@ -4,6 +4,7 @@ namespace Neptune\Tasks;
 
 use \ReflectionMethod;
 use Neptune\Console\Console;
+use Neptune\Core\Config;
 
 /**
  * Task
@@ -43,5 +44,10 @@ abstract class Task {
 	public function help() {
 		//print out all methods and their docblocks
 	}
+
+    protected function getAppDirectory() {
+        $c = Config::load('neptune');
+        return $c->getRequired('dir.app') . '/' . $c->getRequired('namespace') . '/';
+    }
 
 }
