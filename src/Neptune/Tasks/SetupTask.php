@@ -25,6 +25,7 @@ class SetupTask extends Task {
 		'app/:namespace/Controller' => 0775,
 		'app/:namespace/Model' => 0775,
 		'app/:namespace/View' => 0775,
+		'app/:namespace/Thing' => 0775,
 	);
 
 	protected function getRootDir() {
