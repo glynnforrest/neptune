@@ -75,13 +75,13 @@ class String {
 		return rtrim($string, $delimeter);
 	}
 
-	public static function slugify($string, $squash_uppercase = true) {
+	public static function slugify($string, $squash_uppercase = true, $separator = '-') {
 		if($squash_uppercase) {
 			$string = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string));
 		} else {
 			$string = preg_replace('/[^a-zA-Z0-9-]+/', ' ', $string);
 		}
-		return str_replace(' ', '-', trim($string));
+		return str_replace(' ', $separator, trim($string));
 	}
 
 	public static function random($length, $type = self::ALPHA) {

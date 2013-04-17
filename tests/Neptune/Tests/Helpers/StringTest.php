@@ -25,6 +25,10 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('oNe-TwO-THREE-four', String::slugify('oNe TwO THREE+four', false));
 	}
 
+public function testSlugifyWithDifferentSeparator() {
+    $this->assertEquals('url_with_characters_removed', String::slugify('Url with??> characters_removed;;\';;', true, '_'));
+		$this->assertEquals('oNe_TwO_THREE_four', String::slugify('oNe TwO THREE+four', false, '_'));
+}
 
 	public function testCamelCase() {
 		$this->assertEquals('ClassName', String::camelCase('class name'));
