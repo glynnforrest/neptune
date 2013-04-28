@@ -41,7 +41,7 @@ class Request {
 		if($this->path) {
 			return $this->path;
 		}
-		$path = self::uri();
+		$path = $this->uri();
 		$dot = strrpos($path, '.');
 		if ($dot) {
 			$path = substr($path, 0, $dot);
@@ -109,7 +109,7 @@ class Request {
 		if($this->format) {
 			return $this->format;
 		}
-		$format = self::uri();
+		$format = $this->uri();
 		if ($format) {
 			$dot = strrpos($format, '.');
 			if ($dot && $dot != strlen($format) - 1) {
