@@ -87,6 +87,10 @@ class Validator {
 		return isset($this->input_array[$name]);
 	}
 
+	public function __unset($name) {
+		unset($this->input_array[$name]);
+	}
+
 	public function setValues(array $values) {
 		foreach ($values as $k => $v) {
 			$this->input_array[$k] = $v;

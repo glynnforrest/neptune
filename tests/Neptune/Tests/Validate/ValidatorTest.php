@@ -14,7 +14,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSetAndGet() {
 		$v = new Validator();
-		$v->key = 'value';
+		$v->set('key', 'value');
 		$this->assertEquals('value', $v->key);
 		$v->arr = array();
 		$this->assertEquals(array(), $v->arr);
@@ -27,7 +27,15 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$v = new Validator();
 		$v->set('set', 'text');
 		$this->assertTrue(isset($v->set));
-		$this->assertFalse(isset($v->unset));
+		$this->assertFalse(isset($v->notset));
+	}
+
+	public function testUnset() {
+		$v = new Validator();
+		$v->set('key', 'text');
+		unset($v->key);
+		$this->assertNull($v->key);
+		$this->assertEquals(array(), $v->getValues());
 	}
 
 	public function testRequired() {
