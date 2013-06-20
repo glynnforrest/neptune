@@ -13,33 +13,41 @@ use \SplFileObject;
  **/
 class Skeleton extends View {
 
-    /**
-     * Automatically get the namespace of the application and apply it
-     * to the view.
-     */
-    protected function __construct() {
-        $this->namespace = Config::load('neptune')->getRequired('namespace');
-    }
+	protected $namespace;
 
-    /**
-     * Save the currrently loaded skeleton to $file.
-     * A FileException will be thrown if the target file exists unless
-     * $overwrite is true.
-     */
-    public function saveSkeleton($file, $overwrite = false) {
-        if(!$overwrite && file_exists($file)) {
-            throw new FileException("File exists: $file");
-        }
-        $f = new \SplFileObject($file, 'w');
-        $f->fwrite('<?php' . PHP_EOL);
-        $f->fwrite($this->__toString());
-    }
+	/**
+	 * Automatically get the namespace of the application for use in
+	 * the saveSkeleton method.
+	 */
+	protected function __construct() {
+		$this->namespace = Config::load('neptune')->getRequired('namespace');
+	}
 
-    public static function load($skeleton) {
-        /* $me = parent::loadAbsolute($skeleton);
-         return $me; */
-        //TODO
-    }
+	/**
+	 * Save the currrently loaded skeleton to $file.
+	 * A FileException will be thrown if the target file exists unless
+	 * $overwrite is true.
+	 */
+	public function saveSkeleton($file, $overwrite = false) {
+		if(!$overwrite && file_exists($file)) {
+			throw new FileException("File exists: $file");
+		}
+		$f = new \SplFileObject($file, 'w');
+		$f->fwrite('<?php' . PHP_EOL);
+		$f->fwrite($this->__toString());
+	}
 
+	/**
+	 * Set the view used for this skeleton.
+	 * This overrides setViewName in View to look in the neptune
+	 * skeleton directory.
+	 */
+	public function setViewName($view, $absolute = false) {
+		if(!$absolute) {
+			$view = Config::load('neptune')
+				->getRequired('dir.neptune') . 'skeletons/' . $view;
+		}
+		$this->view = $view . self::EXTENSION;
+	}
 
 }
