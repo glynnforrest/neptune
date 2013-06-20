@@ -18,30 +18,30 @@ class Validator {
 	protected $checked = false;
 	protected $can_fail = array();
 	protected $messages = array(
-		 'untested' => 'No validation rules specified.',
-		 'nomethod' => ':name was checked with an unknown method.',
-		 'undefined' => ':name is not in input.',
-		 'alpha' => ':name is not alphabetical.',
-		 'alphanum' => ':name is not alphanumeric.',
-		 'alphadash' => ':name contains disallowed characters.',
-		 'alphaspace' => ':name contains disallowed characters.',
-		 'alphadashspace' => ':name contains disallowed characters.',
-		 'between_str' => ':name is not between :min and :max characters in length.',
-		 'between_num' => ':name is not between :min and :max.',
-		 'email' => ':value is not a valid email address.',
-		 'hex' => ':name is not hexadecimal.',
-		 'int' => ':name is not an integer.',
-		 'size_str' => ':name is not :size characters long.',
-         'size_num' => ':name must be :size.',
-		 'matches' => ':name does not match :match.',
-		 'max_str' => ':name must have less than :max characters.',
-		 'max_num' => ':name must be less than :max.',
-		 'min_str' => ':name must have more than :min characters.',
-		 'min_num' => ':name must be greater than :min.',
-		 'num' => ':name is not a number.',
-		 'required' => ':name is required.',
-		 'token' => 'Your session has expired.',
-		 'url' => ':name is not a url.'
+		'untested' => 'No validation rules specified.',
+		'nomethod' => ':name was checked with an unknown method.',
+		'undefined' => ':name is not in input.',
+		'alpha' => ':name is not alphabetical.',
+		'alphanum' => ':name is not alphanumeric.',
+		'alphadash' => ':name contains disallowed characters.',
+		'alphaspace' => ':name contains disallowed characters.',
+		'alphadashspace' => ':name contains disallowed characters.',
+		'between_str' => ':name is not between :min and :max characters in length.',
+		'between_num' => ':name is not between :min and :max.',
+		'email' => ':value is not a valid email address.',
+		'hex' => ':name is not hexadecimal.',
+		'int' => ':name is not an integer.',
+		'size_str' => ':name is not :size characters long.',
+		'size_num' => ':name must be :size.',
+		'matches' => ':name does not match :match.',
+		'max_str' => ':name must have less than :max characters.',
+		'max_num' => ':name must be less than :max.',
+		'min_str' => ':name must have more than :min characters.',
+		'min_num' => ':name must be greater than :min.',
+		'num' => ':name is not a number.',
+		'required' => ':name is required.',
+		'token' => 'Your session has expired.',
+		'url' => ':name is not a url.'
 	);
 	protected $parsed = array();
 	protected $rules = array();
@@ -51,14 +51,14 @@ class Validator {
 			$this->input_array = $input_array;
 		} else {
 			switch (strtoupper($input_array)) {
-				case 'POST':
-					$this->input_array = $_POST;
-					break;
-				case 'GET':
-					$this->input_array = $_GET;
-					break;
-				default:
-					return false;
+			case 'POST':
+				$this->input_array = $_POST;
+				break;
+			case 'GET':
+				$this->input_array = $_GET;
+				break;
+			default:
+				return false;
 			}
 		}
 		$this->rules = $rules;
@@ -262,7 +262,7 @@ class Validator {
 				return true;
 			} else {
 				$this->parse('size_num', array(':size' => $size));
-                return false;
+				return false;
 			}
 		}
 		if (strlen($value) == $size) {
@@ -274,12 +274,12 @@ class Validator {
 	}
 
 	protected function checkMin($value, $size) {
-        if(is_numeric($value)) {
+		if(is_numeric($value)) {
 			if($value >= $size) {
 				return true;
 			} else {
 				$this->parse('min_num', array(':min' => $size));
-                return false;
+				return false;
 			}
 		}
 		if (strlen($value) >= $size) {
@@ -291,12 +291,12 @@ class Validator {
 	}
 
 	protected function checkMax($value, $size) {
-        if(is_numeric($value)) {
+		if(is_numeric($value)) {
 			if($value <= $size) {
 				return true;
 			} else {
 				$this->parse('min_num', array(':min' => $size));
-                return false;
+				return false;
 			}
 		}
 		if (strlen($value) <= $size) {
@@ -308,12 +308,12 @@ class Validator {
 	}
 
 	protected function checkBetween($value, $min, $max) {
-        if(is_numeric($value)) {
-		if ($value >= $min && $value <= $max) {
+		if(is_numeric($value)) {
+			if ($value >= $min && $value <= $max) {
 				return true;
 			} else {
-			$this->parse('between_num', array(':min' => $min, ':max' => $max));
-                return false;
+				$this->parse('between_num', array(':min' => $min, ':max' => $max));
+				return false;
 			}
 		}
 		if (strlen($value) >= $min && strlen($value) <= $max) {
@@ -371,7 +371,4 @@ class Validator {
 		}
 	}
 
-
 }
-
-?>
