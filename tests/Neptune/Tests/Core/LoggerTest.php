@@ -52,7 +52,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		"  1 => 'two'," . PHP_EOL .
 		"  2 => 'three'," . PHP_EOL .
 		"  3 => 'four'," . PHP_EOL . ")";
-		$this->assertEquals($expected, Logger::getLogs()[0]);
+		$logs = Logger::getLogs();
+		$this->assertEquals($expected, $logs[0]);
 	}
 
 	public function testCreateLogDisabled() {
