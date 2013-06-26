@@ -226,5 +226,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test('/page////'));
 	}
 
+	public function testArgWithDot() {
+		$r = new Route('/route/:arg/suffix/just/because');
+		$r->controller('Foo')->method('bar');
+		$this->assertTrue($r->test('/route/test.css/suffix/just/because'));
+		$this->assertEquals(array('Foo', 'bar', array('arg' => 'test.css')),
+							$r->getAction());
+
+	}
+
 }
-?>
