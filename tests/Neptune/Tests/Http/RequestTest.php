@@ -66,6 +66,9 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REQUEST_URI'] = 'test.htm?foo=b.ar';
 		$this->assertEquals('htm', $this->request->format());
 		$this->reset();
+		$_SERVER['REQUEST_URI'] = 'test.again/and/again?f00=ok';
+		$this->assertEquals('html', $this->request->format());
+		$this->reset();
 	}
 
 	public function testPath() {

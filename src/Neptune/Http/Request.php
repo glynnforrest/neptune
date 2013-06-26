@@ -103,17 +103,29 @@ class Request {
 	}
 
 	/**
-	 * Returns the file format of the current request as a string.
+	 * Get the file format of the current request as a string. If no
+	 * format is found in current uri, 'html' is returned.
 	 */
 	public function format() {
 		if($this->format) {
 			return $this->format;
 		}
-		$format = $this->uri();
-		if ($format) {
-			$dot = strrpos($format, '.');
-			if ($dot && $dot != strlen($format) - 1) {
-				$format = substr($format, $dot + 1);
+		$uri = $this->uri();
+		if ($uri) {
+			//get the position of the last dot in the uri
+			$dot = strrpos($uri, '.');
+			//check there is no / after the dot
+			if(strpos($uri, '/', $dot)) {
+				//there is a / after the dot, so it can't be treated
+				//as the start of a format. bail out with html as the
+				//default.
+				return 'html';
+			}
+			//if there is a dot and it's not at the end of the string,
+			//get everything to the right of it and return it as the
+			//format.
+			if ($dot && $dot != strlen($uri) - 1) {
+				$format = substr($uri, $dot + 1);
 				$this->format = $format;
 				return $format;
 			}
