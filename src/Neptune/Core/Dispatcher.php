@@ -5,7 +5,6 @@ namespace Neptune\Core;
 use Neptune\View\View;
 use Neptune\Http\Response;
 use Neptune\Http\Request;
-use Neptune\Validate\Validator;
 use Neptune\Cache\CacheFactory;
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Exceptions\MethodNotFoundException;
@@ -35,7 +34,14 @@ class Dispatcher {
 		return self::$instance;
 	}
 
+	/**
+	 * Create a new Route for the Dispatcher to handle with $url.
+	 */
 	public function route($url, $controller = null, $method = null, $args = null) {
+		//add a slash if the given url doesn't start with one
+		if(substr($url, 0, 1) !== '/' && $url !== '.*') {
+			$url = '/' . $url;
+		}
 		$route = clone $this->globals();
 		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
@@ -47,6 +53,29 @@ class Dispatcher {
 			$this->globals = new Route('.*');
 		}
 		return $this->globals;
+	}
+
+	/**
+	 * Tell Dispatcher to route assets for the given url to
+	 * Neptune\Controller\AssetController.
+	 * Do not add a :placeholder for the asset, it will be appended
+	 * automatically.
+	 */
+	public function routeAssets($url) {
+		//add a slash if the given url doesn't start or end with one
+		if(substr($url, 0, 1) !== '/') {
+			$url = '/' . $url;
+		}
+		if(substr($url, -1, 1) !== '/') {
+			$url .= '/';
+		}
+		$url = $url . ':asset';
+		$route = new Route($url);
+		$route->controller('Neptune\\Controller\\AssetsController')
+			  ->method('serveAsset')
+			  ->format('any');
+		$this->routes[$url] = $route;
+		return $this->routes[$url];
 	}
 
 	public function catchAll($controller, $method ='index', $args = null) {
