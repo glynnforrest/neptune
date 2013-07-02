@@ -53,13 +53,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	public function testRouteAssets() {
 		$d = Dispatcher::getInstance();
 		$r = $d->routeAssets('/assets/');
-		$this->assertEquals('/assets/:asset', $r->getUrl());
-		$this->assertTrue($r->test('/assets/test'));
+		$this->assertEquals('/assets/:args', $r->getUrl());
+		$this->assertTrue($r->test('/assets/css/test'));
 		$this->assertEquals(
 			array(
 				'Neptune\Controller\AssetsController',
 				'serveAsset',
-				array('asset' => 'test')
+				array('css/test')
 			),
 			$r->getAction());
 	}
@@ -67,13 +67,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	public function testRouteAssetsMissingSlashes() {
 		$d = Dispatcher::getInstance();
 		$r = $d->routeAssets('assets');
-		$this->assertEquals('/assets/:asset', $r->getUrl());
-		$this->assertTrue($r->test('/assets/test'));
+		$this->assertEquals('/assets/:args', $r->getUrl());
+		$this->assertTrue($r->test('/assets/lib/js/test'));
 		$this->assertEquals(
 			array(
 				'Neptune\Controller\AssetsController',
 				'serveAsset',
-				array('asset' => 'test')
+				array('lib/js/test')
 			),
 			$r->getAction());
 	}

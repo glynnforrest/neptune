@@ -56,7 +56,7 @@ class Dispatcher {
 	}
 
 	/**
-	 * Tell Dispatcher to route assets for the given url to
+	 * Tell Dispatcher to route assets for $url to
 	 * Neptune\Controller\AssetController.
 	 * Do not add a :placeholder for the asset, it will be appended
 	 * automatically.
@@ -69,11 +69,12 @@ class Dispatcher {
 		if(substr($url, -1, 1) !== '/') {
 			$url .= '/';
 		}
-		$url = $url . ':asset';
+		$url = $url . ':args';
 		$route = new Route($url);
 		$route->controller('Neptune\\Controller\\AssetsController')
 			  ->method('serveAsset')
-			  ->format('any');
+			  ->format('any')
+			  ->argsFormat(Route::ARGS_SINGLE);
 		$this->routes[$url] = $route;
 		return $this->routes[$url];
 	}
