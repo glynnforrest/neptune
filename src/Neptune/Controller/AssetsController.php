@@ -101,7 +101,7 @@ class AssetsController extends Controller {
 					//$filename matches, but $filter_string can
 					//contain more than one filter, separated by
 					//|. Split $filter_string into seperate filters
-					//|and add to the matched list.
+					//and add to the matched list.
 					foreach (explode('|', $filter_string) as $filter) {
 						$matched[] = $filter;
 					}

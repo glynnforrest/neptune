@@ -47,12 +47,12 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 	public function testGetAssetFiltersMany() {
 		$conf = Config::load();
 		$conf->set('assets.filters', array('`.*\.js`' => 'js_filter',
-			'`.*\.css`' => 'css_filter'));
+			'`.*\.css`' => 'css_filter|upper'));
 		$c = new AssetsController();
 		$this->assertEquals(array('js_filter'), $c->getAssetFilters('javascript.js'));
 		$this->assertEquals(array(), $c->getAssetFilters('blahjs'));
-		$this->assertEquals(array('css_filter'), $c->getAssetFilters('style.css'));
-		$this->assertEquals(array('js_filter', 'css_filter'), $c->getAssetFilters('test.js.css'));
+		$this->assertEquals(array('css_filter', 'upper'), $c->getAssetFilters('style.css'));
+		$this->assertEquals(array('js_filter', 'css_filter', 'upper'), $c->getAssetFilters('test.js.css'));
 	}
 
 	public function testServeAsset() {
