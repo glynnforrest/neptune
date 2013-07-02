@@ -14,6 +14,8 @@ use Neptune\Core\Config;
 class AssetsController extends Controller {
 
 	protected static $filters = array();
+	//array of options that are passed to a filter on instantiation.
+	protected static $filter_options = array();
 	protected $current_prefix;
 
 	protected function _before() {
@@ -24,18 +26,27 @@ class AssetsController extends Controller {
 
 	/**
 	 * Make an asset filter available to AssetsController.
+	 *
 	 * $name is the name of the filter when used in configuration files.
+	 *
 	 * $class_name is the fully qualified name to the filter class.
+	 *
+	 * $options is an array of options to pass to the filter on
+	 * instantiation, such as the path to a binary.
 	 */
-	public static function registerFilter($name, $class_name) {
+	public static function registerFilter($name, $class_name,
+										  array $options = array()) {
 		self::$filters[$name] = $class_name;
+		self::$filter_options[$name] = $options;
 	}
 
 	protected function applyFilter(&$asset, $filter) {
 		if(!isset(self::$filters[$filter])) {
 			throw new \Exception("Asset filter $filter has not been registered with AssetsController.");
 		}
-		$filter = new self::$filters[$filter];
+		$filter_class = self::$filters[$filter];
+		$filter_options = self::$filter_options[$filter];
+		$filter = new $filter_class($filter_options);
 		$filter->filterAsset($asset);
 		return true;
 	}

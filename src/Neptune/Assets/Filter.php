@@ -9,7 +9,8 @@ use Neptune\Assets\Asset;
  **/
 interface Filter {
 
+	public function __construct(array $options = array());
+
 	public function filterAsset(Asset &$a);
 
 }
-?>
