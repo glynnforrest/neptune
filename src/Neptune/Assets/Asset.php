@@ -12,7 +12,6 @@ use Neptune\Exceptions\FileException;
 class Asset {
 
 	protected $content;
-	protected $filters = array();
 
 	public function __construct($file = null) {
 		if($file) {
@@ -20,30 +19,37 @@ class Asset {
 		}
 	}
 
+	/**
+	 * Set the content of this asset to the contents of $file.
+	 */
 	public function loadFile($file) {
 		if(is_readable($file)) {
 			$this->content = file_get_contents($file);
+			$this->filename = $file;
 		} else {
 			throw new FileException('Asset file not found: ' . $file);
 		}
 	}
 
+	/**
+	 * Get the filename of the currently loaded asset.
+	 */
+	public function getFileName() {
+		return $this->filename;
+	}
+
+	/**
+	 * Set the content of this asset to $content.
+	 */
 	public function setContent($content) {
 		$this->content = $content;
 	}
 
+	/**
+	 * Get the content of this asset.
+	 */
 	public function getContent() {
 		return $this->content;
 	}
 
-	public function addFilter($name) {
-		if(!in_array($name, $this->filters)) {
-			$this->filters[] = $name;
-		}
-	}
-
-	public function getFilters() {
-		return $this->filters;
-	}
 }
-?>
