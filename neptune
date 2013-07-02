@@ -17,10 +17,10 @@ if(file_exists($config)) {
 	Console::getInstance()->write('Creating neptune config file...');
 	$c = Config::create('neptune', $config);
 }
-$c->set('dir.root', __DIR__);
-$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune');
-$c->set('dir.skeletons', __DIR__ . '/vendor/glynnforrest/neptune/skeletons');
-$c->set('dir.app', __DIR__ . '/app');
+$c->set('dir.root', __DIR__ . '/');
+$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune/');
+$c->set('dir.skeletons', __DIR__ . '/vendor/glynnforrest/neptune/skeletons/');
+$c->set('dir.app', __DIR__ . '/app/');
 
 //prepare the command string
 unset($_SERVER['argv'][0]);
