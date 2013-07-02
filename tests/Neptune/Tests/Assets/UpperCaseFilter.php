@@ -7,6 +7,9 @@ use Neptune\Assets\Filter;
 
 class UpperCaseFilter implements Filter {
 
+	public function __construct(array $options = array()) {
+	}
+
 	public function filterAsset(Asset &$a) {
 		$a->setContent(strtoupper($a->getContent()));
 	}
