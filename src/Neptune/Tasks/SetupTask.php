@@ -3,7 +3,6 @@
 namespace Neptune\Tasks;
 
 use Neptune\Core\Config;
-use Neptune\Helpers\String;
 use Neptune\Tasks\Task;
 
 /**
@@ -14,10 +13,10 @@ class SetupTask extends Task {
 
 	//directories created by the structure function
 	protected $dirs = array(
-		'public' => 0775,
+		'app' => 0775,
 		'config' => 0777,
-		'storage/logs' => 0777,
-		'app' => 0775
+		'public' => 0775,
+		'storage/logs' => 0777
 	);
 
 	//directories created by the scaffold function
@@ -28,37 +27,9 @@ class SetupTask extends Task {
 		'app/:namespace/Thing' => 0775,
 	);
 
-	protected function getRootDir() {
-		$root = Config::load('neptune')->getRequired('dir.root');
-		//make sure root has a trailing slash
-		if(substr($root, -1) !== '/') {
-			$root .= '/';
-		}
-		return $root;
-	}
-
-    /**
-     * Check if config, public and storage directories have been
-     * created.
-     */
-    public function _directoriesCreated() {
-        foreach ($this->dirs as $dir => $perms) {
-            if(!file_exists($dir)) {
-                $this->console->error('Not found: ' . $dir);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected function neptuneConfigSetup() {
-        $t = new ConfigTask();
-        return $t->_neptuneConfigSetup();
-    }
-
 	public function run($args = array()) {
 		$this->structure();
-        $t = new ConfigTask;
+        $t = new ConfigTask();
         $t->run();
 		$this->scaffold();
 		$this->versionControl();
@@ -78,7 +49,7 @@ class SetupTask extends Task {
 		} else {
 			$namespace = ':namespace';
 		}
-		$root = $this->getRootDir();
+		$root = $this->getRootDirectory();
 		foreach($dirs as $dir => $perms) {
 			$dir = str_replace(':namespace', $namespace, $dir);
 			if(!file_exists($root . $dir)) {

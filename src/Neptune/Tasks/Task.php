@@ -45,9 +45,52 @@ abstract class Task {
 		//print out all methods and their docblocks
 	}
 
-    protected function getAppDirectory() {
-        $c = Config::load('neptune');
-        return $c->getRequired('dir.app') . '/' . $c->getRequired('namespace') . '/';
+
+
+	//Helper functions for Tasks
+	protected function getAppDirectory() {
+		$c = Config::load('neptune');
+		return $c->getRequired('dir.app') . '/' . $c->getRequired('namespace') . '/';
+	}
+
+	protected function getRootDirectory() {
+		$root = Config::load('neptune')->getRequired('dir.root');
+		//make sure root has a trailing slash
+		if(substr($root, -1) !== '/') {
+			$root .= '/';
+		}
+		return $root;
+	}
+
+	/**
+	 * Check if any configuration profiles have been setup.
+	 *
+	 * An array of profiles wil be returned if any exist.
+	 * Return false if the neptune cli config hasn't been setup.
+	 */
+	protected function neptuneConfigSetup() {
+		$root = $this->getRootDirectory();
+		if(!file_exists($root . 'config/neptune.php')) {
+			return false;
+		}
+		$c = Config::load();
+		//check to see if config settings required for neptune have been set
+		return $c->get('namespace', false);
+	}
+
+    /**
+     * Check if app, config, public and storage directories have been
+     * created.
+     */
+    protected function directoriesCreated() {
+		$dirs = array('app', 'config', 'public', 'storage/logs');
+        foreach ($dirs as $dir) {
+            if(!file_exists($dir)) {
+                $this->console->error('Not found: ' . $dir);
+                return false;
+            }
+        }
+        return true;
     }
 
 }
