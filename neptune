@@ -5,22 +5,22 @@
 //Make sure that you have run `composer install` if the autoloader isn't working.
 include('vendor/autoload.php');
 
-use Neptune\Tasks\TaskRunner;
+use Neptune\Console\Console;
 use Neptune\Core\Config;
+use Neptune\Tasks\TaskRunner;
 
 //load neptune cli config
 $config = 'config/neptune.php';
 if(file_exists($config)) {
 	$c = Config::load('neptune', $config);
 } else {
-    echo 'creating';
+	Console::getInstance()->write('Creating neptune config file...');
 	$c = Config::create('neptune', $config);
-	$c->set('dir.root', __DIR__);
-	$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune');
-	$c->set('dir.skeletons', __DIR__ . '/vendor/glynnforrest/neptune/skeletons');
-	$c->set('dir.app', __DIR__ . '/app');
-	$c->save();
 }
+$c->set('dir.root', __DIR__);
+$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune');
+$c->set('dir.skeletons', __DIR__ . '/vendor/glynnforrest/neptune/skeletons');
+$c->set('dir.app', __DIR__ . '/app');
 
 //prepare the command string
 unset($_SERVER['argv'][0]);
