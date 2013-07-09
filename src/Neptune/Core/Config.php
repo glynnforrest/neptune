@@ -148,8 +148,11 @@ class Config {
 	 * If $name is not specified, the first loaded config file will be
 	 * returned, or an exception thrown if no Config instances are
 	 * set.
+	 * If $override_name is specified and matches the name of a loaded
+	 * config file, the values will be overwritten with the values of
+	 * the new file.
 	 */
-	public static function load($name = null, $filename = null) {
+	public static function load($name = null, $filename = null, $override_name = null) {
 		if (array_key_exists($name, self::$instances)){
 			$instance = self::$instances[$name];
 			if(!$filename || $instance->getFileName() === $filename) {
@@ -170,7 +173,19 @@ class Config {
 			);
 		}
 		self::$instances[$name] = new self($name, $filename);
+		if($override_name && isset(self::$instances[$override_name])) {
+			Config::load($override_name)->override(
+				self::$instances[$name]->get());
+		}
 		return self::$instances[$name];
+	}
+
+	/**
+	 * Override values in this Config instance with values from
+	 * $array.
+	 */
+	public function override(array $array) {
+		$this->values = array_replace_recursive($this->values, $array);
 	}
 
 	/**
@@ -203,14 +218,14 @@ class Config {
 				if(!file_exists($this->filename) && !@touch($this->filename)){
 					throw new ConfigFileException(
 						"Unable to create configuration file
-						$this->filename. Check paths and permissions
+						$this->filename. Check file paths and permissions
 						are correct."
 					);
 				};
 				if(!is_writable($this->filename)) {
 					throw new ConfigFileException(
 						"Unable to write to configuration file
-						$this->filename. Check paths and permissions
+						$this->filename. Check file paths and permissions
 						are correct."
 					);
 				}

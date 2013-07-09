@@ -15,10 +15,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 
 	const file = '/tmp/configtest.php';
 	const file2 = '/tmp/configtest2.php';
+	const file_override = '/tmp/configoverride.php';
 
 	public function setUp() {
 		touch(self::file);
 		touch(self::file2);
+		touch(self::file_override);
 		$content = '<?php';
 		$content .= <<<END
 		return array(
@@ -32,11 +34,24 @@ END;
 		$content .= '?>';
 		file_put_contents(self::file, $content);
 		file_put_contents(self::file2, $content);
+		$content = '<?php';
+		$content .= <<<END
+		return array(
+			'one' => 'override',
+			'two' => array(
+				'two' => 'override_again'
+			),
+		)
+END;
+		$content .= '?>';
+		file_put_contents(self::file_override, $content);
 		Config::unload();
 	}
 
 	public function tearDown() {
 		@unlink(self::file);
+		@unlink(self::file2);
+		@unlink(self::file_override);
 		Config::unload();
 	}
 
@@ -151,7 +166,13 @@ END;
 		$c = Config::load('testing', self::file);
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$c->getFirstRequired('fake');
-		$this->assertEquals(2.1, $c->getFirstRequired('two'));
+		/* $this->assertEquals(2.1, $c->getFirstRequired('two')); */
+		//also throw an exception if the first value is an array
+		//why doesn't the second setExpectedException work?
+		$c->set('3.1', 'value');
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
+		/* $this->assertEquals(4, 3); */
+		/* $c->getFirstRequired('4.1'); */
 	}
 
 	public function testSet() {
@@ -350,6 +371,23 @@ END;
 		$c = Config::load('testing', self::file);
 		$d = Config::load('testing');
 		$this->assertEquals(self::file, $d->getFileName());
+	}
+
+	public function testOverride() {
+		$c = Config::load('testing', self::file);
+		$this->assertEquals(1, $c->get('one'));
+		$c->override(array('one' => 'override'));
+		$this->assertEquals('override', $c->get('one'));
+	}
+
+	public function testLoadCallsOverride() {
+		$default = Config::load('default', self::file);
+		$this->assertEquals(1, $default->get('one'));
+		$this->assertEquals(2.1, $default->get('two.one'));
+		Config::load('override', self::file_override, 'default');
+		$this->assertEquals('override', $default->get('one'));
+		$this->assertEquals('override_again', $default->get('two.two'));
+		$this->assertEquals('2.1', $default->get('two.one'));
 	}
 
 }
