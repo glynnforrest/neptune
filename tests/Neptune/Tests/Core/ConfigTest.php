@@ -13,11 +13,12 @@ require_once __DIR__ . '/../../../bootstrap.php';
  */
 class ConfigTest extends \PHPUnit_Framework_TestCase {
 
-	const file = '/tmp/configtest.php';
-	const file2 = '/tmp/configtest2.php';
-	const file_override = '/tmp/configoverride.php';
+	const file = '/tmp/neptune-config-test/config.php';
+	const file2 = '/tmp/neptune-config-test/config2.php';
+	const file_override = '/tmp/neptune-config-test/configoverride.php';
 
 	public function setUp() {
+		@mkdir('/tmp/neptune-config-test', 0775, true);
 		touch(self::file);
 		touch(self::file2);
 		touch(self::file_override);
@@ -52,6 +53,7 @@ END;
 		@unlink(self::file);
 		@unlink(self::file2);
 		@unlink(self::file_override);
+		@rmdir('/tmp/neptune-config-test');
 		Config::unload();
 	}
 
@@ -105,11 +107,11 @@ END;
 	}
 
 	public function testCreateCanSaveNewFiles() {
-		$c = Config::create('new', '/tmp/new-config.php');
+		$c = Config::create('new', '/tmp/neptune-config-test/new-config.php');
 		$c->set('key', 'value');
 		$c->save();
-		$this->assertTrue(file_exists('/tmp/new-config.php'));
-		@unlink('/tmp/new-config.php');
+		$this->assertTrue(file_exists('/tmp/neptune-config-test/new-config.php'));
+		@unlink('/tmp/neptune-config-test/new-config.php');
 	}
 
 	public function testCreateDoesntLoadFileThatExists() {
@@ -291,7 +293,7 @@ END;
 	}
 
 	public function testSaveDoesNotWriteIfNotModified() {
-		$file = '/tmp/do-not-write.php';
+		$file = '/tmp/neptune-config-test/do-not-write.php';
 		@unlink($file);
 		$c = Config::create('new', $file);
 		$c->save();
@@ -388,6 +390,41 @@ END;
 		$this->assertEquals('override', $default->get('one'));
 		$this->assertEquals('override_again', $default->get('two.two'));
 		$this->assertEquals('2.1', $default->get('two.one'));
+	}
+
+	public function testLoadModuleThrowsExceptionForNoNeptune() {
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
+		$module = Config::loadModule('test_module');
+	}
+
+	public function testLoadModule() {
+		//neptune will look for modules defined in config/neptune.php
+		$neptune = Config::create('neptune');
+		//any file named config.php will be loaded in the config
+		//directory. Let's pretend the test config file is for a
+		//module.
+		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('modules', array('test_module' => '/tmp/neptune-config-test/'));
+		$module = Config::loadModule('test_module');
+		$this->assertEquals(2.1, $module->get('two.one'));
+	}
+
+	public function testLoadModuleAlsoLoadsOverride() {
+		//neptune will look in for config/modules/<modulename>.php and
+		//override any values in the module config.
+		//it will use dir.root in the neptune config to get the path,
+		//so let's mock the config directory here.
+		@mkdir('/tmp/neptune-config-test/config/modules', 0755, true);
+		copy(self::file_override, '/tmp/neptune-config-test/config/modules/test_module.php');
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('modules', array('test_module' => '/tmp/neptune-config-test/'));
+		$module = Config::loadModule('test_module');
+		$this->assertEquals('override_again', $module->get('two.two'));
+		//TODO: this directory handling is total sludge... fix needed.
+		unlink('/tmp/neptune-config-test/config/modules/test_module.php');
+		rmdir('/tmp/neptune-config-test/config/modules');
+		rmdir('/tmp/neptune-config-test/config');
 	}
 
 }

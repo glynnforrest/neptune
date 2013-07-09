@@ -189,6 +189,37 @@ class Config {
 	}
 
 	/**
+	 * Load the configuration for a module with $name.
+	 * This will load the configuration file for the module and also
+	 * override that configuration with anything found in
+	 * config/modules/$name.php
+	 */
+	public static function loadModule($name) {
+		try {
+			$neptune = self::load('neptune');
+		} catch (ConfigFileException $e){
+			//neptune config not loaded
+			//rethrow a ConfigFileException with a more useful message
+			throw new ConfigFileException(
+				'Neptune config not loaded, unable to load modules.');
+		}
+		//fetch the module path and load the config file
+		$module_config_file = $neptune->getRequired('modules.' . $name) . 'config.php';
+		$module_instance = self::load($name, $module_config_file);
+		//check for a local config to override the module. It should
+		//have the path config/modules/<modulename>.php
+		$local_config_file = $neptune->getRequired('dir.root') .
+			'config/modules/' . $name . '.php';
+		try {
+			//prepend _ to give it a unique name so it can be used individually.
+			self::load('_' . $name, $local_config_file, $name);
+		} catch (ConfigFileException $e) {
+			//do nothing if there is no config file defined.
+		}
+		return $module_instance;
+	}
+
+	/**
 	 * Unload configuration settings with $name, requiring them to be
 	 * reloaded if they are to be used again.
 	 * If $name is not specified, all configuration files will be
