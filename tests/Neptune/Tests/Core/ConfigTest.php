@@ -409,6 +409,13 @@ END;
 		$this->assertEquals(2.1, $module->get('two.one'));
 	}
 
+	public function testLoadModuleThrowsExceptionForUnknownModule() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
+		$module = Config::loadModule('unknown');
+	}
+
 	public function testLoadModuleAlsoLoadsOverride() {
 		//neptune will look in for config/modules/<modulename>.php and
 		//override any values in the module config.
@@ -425,6 +432,25 @@ END;
 		unlink('/tmp/neptune-config-test/config/modules/test_module.php');
 		rmdir('/tmp/neptune-config-test/config/modules');
 		rmdir('/tmp/neptune-config-test/config');
+	}
+
+	public function testLoadCallsLoadModule() {
+		@mkdir('/tmp/neptune-config-test/config/modules', 0755, true);
+		copy(self::file_override, '/tmp/neptune-config-test/config/modules/test_module.php');
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('modules', array('test_module' => '/tmp/neptune-config-test/'));
+		$module = Config::load('test_module');
+		$this->assertEquals('override_again', $module->get('two.two'));
+		unlink('/tmp/neptune-config-test/config/modules/test_module.php');
+		rmdir('/tmp/neptune-config-test/config/modules');
+		rmdir('/tmp/neptune-config-test/config');
+
+	}
+
+	public function testLoadingNeptuneAsAModuleDoesNotBreakEverything() {
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
+		Config::loadModule('neptune');
 	}
 
 }

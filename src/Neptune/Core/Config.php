@@ -168,6 +168,12 @@ class Config {
 			return self::$instances[key(self::$instances)];
 		}
 		if(!$filename) {
+			//attempt to load the file as a module, but only if the
+			//neptune config has been loaded
+			if(isset(self::$instances['neptune']) && self::loadModule($name)) {
+				return self::$instances[$name];
+			}
+			//if it isn't a module, we can't do anything without a file
 			throw new ConfigFileException(
 				"No filename specified for configuration file $name"
 			);
