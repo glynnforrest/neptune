@@ -392,11 +392,6 @@ END;
 		$this->assertEquals('2.1', $default->get('two.one'));
 	}
 
-	public function testLoadModuleThrowsExceptionForNoNeptune() {
-		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
-		$module = Config::loadModule('test_module');
-	}
-
 	public function testLoadModule() {
 		//neptune will look for modules defined in config/neptune.php
 		$neptune = Config::create('neptune');
@@ -409,11 +404,24 @@ END;
 		$this->assertEquals(2.1, $module->get('two.one'));
 	}
 
+	public function testLoadModuleThrowsExceptionForNoNeptune() {
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
+		$module = Config::loadModule('test_module');
+	}
+
 	public function testLoadModuleThrowsExceptionForUnknownModule() {
 		$neptune = Config::create('neptune');
 		$neptune->set('dir.root', '/tmp/neptune-config-test/');
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$module = Config::loadModule('unknown');
+	}
+
+	public function testLoadModuleThrowsExceptionForConfigFileNotFound() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('modules', array('no-file' => '/path/to/no/file.php'));
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
+		$module = Config::loadModule('no-file');
 	}
 
 	public function testLoadModuleAlsoLoadsOverride() {
