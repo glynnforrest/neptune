@@ -26,9 +26,9 @@ class Assets {
 	}
 
 	public function addJs($name, $src, $dependencies = array(), $options = array()) {
-		$this->js[$name] = array('src' => str_replace('#', '%23', $src),
-			'deps' => (array) $dependencies,
-			'opts' => (array) $options);
+		$this->js[$name] = array('src' => str_replace('#', '/', $src),
+								 'deps' => (array) $dependencies,
+								 'opts' => (array) $options);
 	}
 
 	public function removeJs($name) {
@@ -45,9 +45,9 @@ class Assets {
 	}
 
 	public function addCss($name, $src, $dependencies = array(), $options = array()) {
-		$this->css[$name] = array('src' => str_replace('#', '%23', $src),
-			'deps' => (array) $dependencies,
-			'opts' => (array) $options);
+		$this->css[$name] = array('src' => str_replace('#', '/', $src),
+								  'deps' => (array) $dependencies,
+								  'opts' => (array) $options);
 	}
 
 	public function removeCss($name) {
@@ -97,7 +97,7 @@ class Assets {
 				}
 			}
 		}
-		$sorted[$key] = $value['src'];
+		$sorted[$key] = Config::load()->get('assets.url') . $value['src'];
 		unset($assets[$key]);
 	}
 }
