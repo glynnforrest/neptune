@@ -38,21 +38,21 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetAssetFiltersSingle() {
 		$conf = Config::load();
-		$conf->set('assets.filters', array('`.*foo.*`' => 'foo_filter'));
+		$filters = array('`.*foo.*`' => 'foo_filter');
 		$c = new AssetsController();
-		$this->assertEquals(array('foo_filter'), $c->getAssetFilters('asset_with_foo_in'));
-		$this->assertEquals(array(), $c->getAssetFilters('asset_without_f00_in'));
+		$this->assertEquals(array('foo_filter'), $c->getAssetFilters('asset_with_foo_in', $filters));
+		$this->assertEquals(array(), $c->getAssetFilters('asset_without_f00_in', $filters));
 	}
 
 	public function testGetAssetFiltersMany() {
 		$conf = Config::load();
-		$conf->set('assets.filters', array('`.*\.js`' => 'js_filter',
-			'`.*\.css`' => 'css_filter|upper'));
+		$filters = array('`.*\.js`' => 'js_filter',
+			'`.*\.css`' => 'css_filter|upper');
 		$c = new AssetsController();
-		$this->assertEquals(array('js_filter'), $c->getAssetFilters('javascript.js'));
-		$this->assertEquals(array(), $c->getAssetFilters('blahjs'));
-		$this->assertEquals(array('css_filter', 'upper'), $c->getAssetFilters('style.css'));
-		$this->assertEquals(array('js_filter', 'css_filter', 'upper'), $c->getAssetFilters('test.js.css'));
+		$this->assertEquals(array('js_filter'), $c->getAssetFilters('javascript.js', $filters));
+		$this->assertEquals(array(), $c->getAssetFilters('blahjs', $filters));
+		$this->assertEquals(array('css_filter', 'upper'), $c->getAssetFilters('style.css', $filters));
+		$this->assertEquals(array('js_filter', 'css_filter', 'upper'), $c->getAssetFilters('test.js.css', $filters));
 	}
 
 	public function testServeAsset() {
