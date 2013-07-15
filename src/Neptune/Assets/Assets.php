@@ -78,11 +78,7 @@ class Assets {
 					}
 				}
 			}
-			if(strpos($v['src'], '://')) {
-				$sorted[$k] = $v['src'];
-			} else {
-				$sorted[$k] = Config::load()->get('assets.url') . $v['src'];
-			}
+			$sorted[$k] = $this->createUrl($v['src']);
 		}
 		return $sorted;
 	}
@@ -97,7 +93,16 @@ class Assets {
 				}
 			}
 		}
-		$sorted[$key] = Config::load()->get('assets.url') . $value['src'];
+		$sorted[$key] = $this->createUrl($value['src']);
 		unset($assets[$key]);
 	}
+
+	protected function createUrl($src) {
+		if(strpos($src, '://')) {
+			return $src;
+		} else {
+			return Config::load()->get('assets.url') . $src;
+		}
+	}
+
 }
