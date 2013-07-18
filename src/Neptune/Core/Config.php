@@ -210,7 +210,7 @@ class Config {
 				'Neptune config not loaded, unable to load modules.');
 		}
 		//fetch the module path and load the config file
-		$module_config_file = $neptune->getRequired('modules.' . $name) . 'config.php';
+		$module_config_file = $neptune->get('dir.root') . $neptune->getRequired('modules.' . $name) . 'config.php';
 		$module_instance = self::load($name, $module_config_file);
 		//check for a local config to override the module. It should
 		//have the path config/modules/<modulename>.php
