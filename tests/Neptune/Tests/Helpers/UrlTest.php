@@ -16,7 +16,7 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$c = Config::create('testing');
-		$c->set('root_url', 'myapp.local');
+		$c->set('root_url', 'myapp.local/');
 	}
 
 	public function tearDown() {
