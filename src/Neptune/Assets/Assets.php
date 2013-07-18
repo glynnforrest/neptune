@@ -98,7 +98,7 @@ class Assets {
 	}
 
 	protected function createUrl($src) {
-		if(strpos($src, '://')) {
+		if(substr($src, 0, 1) === '/' || strpos($src, '://')) {
 			return $src;
 		} else {
 			return Config::load()->get('assets.url') . $src;

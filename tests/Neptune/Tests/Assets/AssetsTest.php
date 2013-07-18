@@ -128,4 +128,12 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://cdn.site.com/assets/lib.css" />' . PHP_EOL, Assets::css());
 	}
 
+	public function testAssetAbsoluteUrl() {
+		$this->assets->addCss('lib', '/css/lib.css');
+		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/lib.css" />' . PHP_EOL, Assets::css());
+		$this->assets->addJs('main', '/js/main.js');
+		$expected = '<script type="text/javascript" src="http://myapp.local/js/main.js"></script>' . PHP_EOL;
+		$this->assertEquals($expected, Assets::js());
+	}
+
 }
