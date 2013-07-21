@@ -5,6 +5,8 @@ namespace Neptune\Tests\Core;
 use Neptune\Core\Logger;
 use Neptune\Core\Config;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -12,9 +14,11 @@ require_once __DIR__ . '/../../../bootstrap.php';
  * @author Glynn Forrest me@glynnforrest.com
  **/
 class LoggerTest extends \PHPUnit_Framework_TestCase {
-	const file = '/tmp/logtest';
+
+	protected $file = 'logtest.log';
 
 	public function setUp() {
+		$file = Temping::getInstance()->getDirectory() . $this->file;
 		$c = Config::create('config');
 		$c->set('log', array(
 			'type' => array (
@@ -23,7 +27,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 				'debug' => true,
 				'info' => true
 			),
-			'file' => self::file,
+			'file' => $file,
 			'format' => ':message'
 		));
 		Logger::enable();
@@ -33,7 +37,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		Config::unload();
-		@unlink(self::file);
+		Temping::getInstance()->reset();
 	}
 
 	public function testConstruct() {
@@ -48,10 +52,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 	public function testCreateLogFormatsArrays() {
 		Logger::info(array('one', 'two', 'three', 'four'));
 		$expected = "array (" . PHP_EOL .
-		"  0 => 'one'," . PHP_EOL .
-		"  1 => 'two'," . PHP_EOL .
-		"  2 => 'three'," . PHP_EOL .
-		"  3 => 'four'," . PHP_EOL . ")";
+			"  0 => 'one'," . PHP_EOL .
+			"  1 => 'two'," . PHP_EOL .
+			"  2 => 'three'," . PHP_EOL .
+			"  3 => 'four'," . PHP_EOL . ")";
 		$logs = Logger::getLogs();
 		$this->assertEquals($expected, $logs[0]);
 	}
@@ -76,8 +80,9 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 		Logger::setFormat('[:type] :date :ip :message');
 		Logger::debug('test log');
-		$this->assertEquals(array('[debug] ' . date('d/m/y') . ' 127.0.0.1 test log'),
-							Logger::getLogs());
+		$this->assertEquals(
+			array('[debug] ' . date('d/m/y') . ' 127.0.0.1 test log'),
+			Logger::getLogs());
 	}
 
 	public function testSave() {
@@ -85,8 +90,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		Logger::setFormat(':message');
 		Logger::debug('saved to file');
 		Logger::save();
-		$this->assertEquals('saved to file' . PHP_EOL, file_get_contents(self::file));
+		$expected = 'saved to file' . PHP_EOL;
+		$filename = Temping::getInstance()->getDirectory() . $this->file;
+		$actual = file_get_contents($filename);
+		$this->assertEquals($expected, $actual);
 	}
 
 }
-?>
