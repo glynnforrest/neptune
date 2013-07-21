@@ -6,6 +6,8 @@ use Neptune\View\Form;
 use Neptune\Core\Config;
 use Neptune\Helpers\Html;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -14,31 +16,32 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class FormTest extends \PHPUnit_Framework_TestCase {
 
-	const file = '/tmp/formtest.php';
-	const view = '/tmp/formtest';
+	protected $file = 'formtest.php';
+	protected $view = 'formtest';
 
 	public function setUp() {
-		touch(self::file);
 		$content = '<?php';
 		$content .= <<<END
 		echo 'testing';
 END;
 		$content .= '?>';
-		file_put_contents(self::file, $content);
+		$temp = Temping::getInstance();
+		$temp->create($this->file, $content);
 		$c = Config::create('view');
-		$c->set('view.dir', '/tmp/');
+		$c->set('view.dir', $temp->getDirectory());
 		$d = Config::create('prefix');
 		$d->set('view.dir', 'folder_prefix/');
 	}
 
 	public function tearDown() {
-		unlink(self::file);
+		Temping::getInstance()->reset();
 		Config::unload();
 	}
 
 	public function testLoad() {
 		$v = Form::load('some/file');
-		$this->assertEquals('/tmp/some/file.php', $v->getViewName());
+		$expected = Temping::getInstance()->getDirectory() . 'some/file.php';
+		$this->assertEquals($expected, $v->getViewName());
 	}
 
 	public function testLoadPrefix() {
@@ -103,12 +106,14 @@ END;
 	}
 
 	public function testRenderAbsolutePath() {
-		$v = Form::loadAbsolute(self::view);
+		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$v = Form::loadAbsolute($view);
 		$this->assertEquals('testing', $v->render());
 	}
 
 	public function testFormVarIsNotOverridden() {
-		$v = Form::loadAbsolute(self::view);
+		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$v = Form::loadAbsolute($view);
 		$v->add('file', 'text', 'foo');
 		$this->assertEquals('foo', $v->file);
 		$this->assertEquals('testing', $v->render());

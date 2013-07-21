@@ -5,6 +5,8 @@ namespace Neptune\Tests\View;
 use Neptune\View\View;
 use Neptune\Core\Config;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -12,25 +14,26 @@ require_once __DIR__ . '/../../../bootstrap.php';
  * @author Glynn Forrest me@glynnforrest.com
  **/
 class ViewTest extends \PHPUnit_Framework_TestCase {
-	const file = '/tmp/viewtest.php';
-	const view = '/tmp/viewtest';
+
+	protected $file = 'viewtest.php';
+	protected $view = 'viewtest';
 
 	public function setUp() {
-		touch(self::file);
 		$content = '<?php';
 		$content .= <<<END
 		echo 'testing';
 END;
 		$content .= '?>';
-		file_put_contents(self::file, $content);
+		$temp = Temping::getInstance();
+		$temp->create($this->file, $content);
 		$c = Config::create('view');
-		$c->set('view.dir', '/tmp/');
+		$c->set('view.dir', $temp->getDirectory());
 		$d = Config::create('prefix');
 		$d->set('view.dir', 'folder_prefix/');
 	}
 
 	public function tearDown() {
-		unlink(self::file);
+		Temping::getInstance()->reset();
 		Config::unload();
 	}
 
@@ -41,7 +44,8 @@ END;
 
 	public function testLoad() {
 		$v = View::load('some/file');
-		$this->assertEquals('/tmp/some/file.php', $v->getViewName());
+		$expected = Temping::getInstance()->getDirectory() . 'some/file.php';
+		$this->assertEquals($expected, $v->getViewName());
 	}
 
 	public function testLoadPrefix() {
@@ -74,12 +78,14 @@ END;
 	}
 
 	public function testRenderAbsolutePath() {
-		$v = View::loadAbsolute(self::view);
+		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$v = View::loadAbsolute($view);
 		$this->assertEquals('testing', $v->render());
 	}
 
 	public function testViewVarIsNotOverridden() {
-		$v = View::loadAbsolute(self::view);
+		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$v = View::loadAbsolute($view);
 		$v->file = 'foo';
 		$this->assertEquals('foo', $v->file);
 		$this->assertEquals('testing', $v->render());
