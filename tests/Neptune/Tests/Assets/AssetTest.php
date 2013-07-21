@@ -4,6 +4,8 @@ namespace Neptune\Tests\Assets;
 
 use Neptune\Assets\Asset;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -12,13 +14,15 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class AssetTest extends \PHPUnit_Framework_TestCase {
 
+	protected $file;
 
 	public function setUp() {
-
+		$id = Temping::getInstance()->create('test_asset', 'content');
+		$this->file = Temping::getInstance()->getPathname($id);
 	}
 
 	public function tearDown() {
-
+		Temping::getInstance()->reset();
 	}
 
 	public function testConstruct() {
@@ -33,21 +37,15 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testAssetFromFile() {
-		$file = '/tmp/test_asset';
-		file_put_contents($file, 'content');
 		$a = new Asset();
 		$this->assertNull($a->getContent());
-		$a->loadFile($file);
+		$a->loadFile($this->file);
 		$this->assertEquals('content', $a->getContent());
-		@unlink($file);
 	}
 
 	public function testAssetFromFileConstruct() {
-		$file = '/tmp/test_asset';
-		file_put_contents($file, 'content');
-		$a = new Asset($file);
+		$a = new Asset($this->file);
 		$this->assertEquals('content', $a->getContent());
-		@unlink($file);
 	}
 
 	public function testExceptionThrownWhenFileNotFound() {
@@ -56,4 +54,3 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 	}
 
 }
-?>
