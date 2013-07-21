@@ -8,6 +8,8 @@ use Neptune\Core\Config;
 use Neptune\Http\Request;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -16,14 +18,17 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
+	protected $dir;
 
 	public function setUp() {
 		$c = Config::create('temp');
-		$c->set('assets.dir', '/tmp/');
+		$this->dir = Temping::getInstance()->getDirectory();
+		$c->set('assets.dir', $this->dir);
 	}
 
 	public function tearDown() {
 		Config::unload();
+		Temping::getInstance()->reset();
 	}
 
 	public function testConstruct() {
@@ -33,7 +38,8 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetAssetPath() {
 		$c = new AssetsController();
-		$this->assertEquals('/tmp/asset.css', $c->getAssetPath('asset.css'));
+		$actual = $this->dir . 'asset.css';
+		$this->assertEquals($actual, $c->getAssetPath('asset.css'));
 	}
 
 	public function testGetAssetFiltersSingle() {
@@ -57,24 +63,20 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeAsset() {
 		$c = new AssetsController();
-		$file = '/tmp/asset.css';
-		file_put_contents($file, 'css_content');
+		Temping::getInstance()->create('asset.css', 'css_content');
 		Request::getInstance()->setFormat('css');
 		$this->assertEquals('css_content', $c->serveAsset('asset'));
-		@unlink($file);
 		Request::getInstance()->resetStoredVars();
 	}
 
 	public function testServeFilteredAsset() {
 		$c = new AssetsController();
-		$file = '/tmp/filtered.js';
-		file_put_contents($file, 'js_content');
+		Temping::getInstance()->create('filtered.js', 'js_content');
 		$conf = Config::load();
 		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
 		Request::getInstance()->setFormat('js');
 		$this->assertEquals('JS_CONTENT', $c->serveAsset('filtered'));
-		@unlink($file);
 		Request::getInstance()->resetStoredVars();
 	}
 
