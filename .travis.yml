@@ -7,4 +7,5 @@ php:
 
 before_script:
   - composer install --no-dev
+  - composer require glynnforrest/temping dev-master
   - phpenv config-add travis-config.ini
