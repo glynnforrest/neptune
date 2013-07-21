@@ -5,6 +5,8 @@ namespace Neptune\Tests\Core;
 use Neptune\Core\Config;
 use Neptune\Core\Neptune;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -13,15 +15,12 @@ require_once __DIR__ . '/../../../bootstrap.php';
  */
 class ConfigTest extends \PHPUnit_Framework_TestCase {
 
-	const file = '/tmp/neptune-config-test/config.php';
-	const file2 = '/tmp/neptune-config-test/config2.php';
-	const file_override = '/tmp/neptune-config-test/configoverride.php';
+	const file = 'neptune-config-test/config.php';
+	const file2 = 'neptune-config-test/config2.php';
+	const file_override = 'neptune-config-test/configoverride.php';
 
 	public function setUp() {
-		@mkdir('/tmp/neptune-config-test', 0775, true);
-		touch(self::file);
-		touch(self::file2);
-		touch(self::file_override);
+		$this->temp = Temping::getInstance();
 		$content = '<?php';
 		$content .= <<<END
 		return array(
@@ -33,8 +32,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 		)
 END;
 		$content .= '?>';
-		file_put_contents(self::file, $content);
-		file_put_contents(self::file2, $content);
+		$this->temp->create(self::file, $content);
+		$this->temp->create(self::file2, $content);
 		$content = '<?php';
 		$content .= <<<END
 		return array(
@@ -45,20 +44,16 @@ END;
 		)
 END;
 		$content .= '?>';
-		file_put_contents(self::file_override, $content);
-		Config::unload();
+		$this->temp->create(self::file_override, $content);
 	}
 
 	public function tearDown() {
-		@unlink(self::file);
-		@unlink(self::file2);
-		@unlink(self::file_override);
-		@rmdir('/tmp/neptune-config-test');
+		$this->temp->reset();
 		Config::unload();
 	}
 
 	public function testLoad() {
-		$name_and_file = Config::load('testing', self::file);
+		$name_and_file = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertTrue($name_and_file instanceof Config);
 		$name_only = Config::load('testing');
 		$this->assertTrue($name_only instanceof Config);
@@ -70,8 +65,8 @@ END;
 	}
 
 	public function testLoadMultipleFiles() {
-		$default = Config::load('testing', self::file);
-		$extra = Config::load('extra', self::file2);
+		$default = Config::load('testing', $this->temp->getPathname(self::file));
+		$extra = Config::load('extra', $this->temp->getPathname(self::file2));
 		$none = Config::load();
 		$this->assertTrue($default instanceof Config);
 		$this->assertTrue($extra instanceof Config);
@@ -92,10 +87,12 @@ END;
 	}
 
 	public function testLoadOverwritesWithDifferentFilename() {
-		$c = Config::load('testing', self::file);
-		$d = Config::load('testing', self::file);
+		$file = $this->temp->getPathname(self::file);
+		$c = Config::load('testing', $file);
+		$d = Config::load('testing', $file);
 		$this->assertTrue($c === $d);
-		$e = Config::load('testing', self::file2);
+		$file2 = $this->temp->getPathname(self::file2);
+		$e = Config::load('testing', $file2);
 		$this->assertFalse($c === $e);
 	}
 
@@ -107,20 +104,20 @@ END;
 	}
 
 	public function testCreateCanSaveNewFiles() {
-		$c = Config::create('new', '/tmp/neptune-config-test/new-config.php');
+		$new_config = $this->temp->getDirectory() . 'new-config.php';
+		$c = Config::create('new', $new_config);
 		$c->set('key', 'value');
 		$c->save();
-		$this->assertTrue(file_exists('/tmp/neptune-config-test/new-config.php'));
-		@unlink('/tmp/neptune-config-test/new-config.php');
+		$this->assertFileExists($new_config);
 	}
 
 	public function testCreateDoesntLoadFileThatExists() {
-		$c = Config::create('new', self::file);
+		$c = Config::create('new', $this->temp->getPathname(self::file));
 		$this->assertNull($c->get('one'));
 	}
 
 	public function testGet() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals(1, $c->get('one'));
 		$this->assertEquals(2.1, $c->get('two.one'));
 		$expected = array(
@@ -134,7 +131,7 @@ END;
 	}
 
 	public function testGetDefault() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals('default', $c->get('fake-key', 'default'));
 		$expected = array(
 			'one' => 1,
@@ -147,25 +144,25 @@ END;
 	}
 
 	public function testGetFirst() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals(2.1, $c->getFirst('two'));
 		$this->assertEquals(1, $c->getFirst());
 	}
 
 	public function testGetFirstDefault() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals('default', $c->getFirst('fake-key', 'default'));
 	}
 
 	public function testGetRequired() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$c->getRequired('fake');
 		$this->assertEquals(2.1, $c->getRequired('two.one'));
 	}
 
 	public function testGetFirstRequired() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$c->getFirstRequired('fake');
 		/* $this->assertEquals(2.1, $c->getFirstRequired('two')); */
@@ -178,7 +175,7 @@ END;
 	}
 
 	public function testSet() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$c->set('three', 3);
 		$this->assertEquals(3, $c->get('three'));
 	}
@@ -218,7 +215,7 @@ END;
 	}
 
 	public function testEmptyGet() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals(array(
 			'one' => 1,
 			'two' => array(
@@ -236,7 +233,7 @@ END;
 	}
 
 	public function testUnload() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals(1, $c->get('one'));
 		$d = Config::load('testing');
 		$this->assertTrue($c === $d);
@@ -256,7 +253,7 @@ END;
 	}
 
 	public function testSave() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$c->set('one', 'changed');
 		$c->save();
 		$content = '<?php';
@@ -271,7 +268,7 @@ END;
 END;
 		$content .= '?>';
 		$this->assertEquals($this->flattenConfig($content),
-							$this->flattenConfig(file_get_contents(self::file)));
+							$this->flattenConfig($this->temp->getContents(self::file)));
 	}
 
 	public function testSaveThrowsExceptionWithNoFile() {
@@ -293,17 +290,16 @@ END;
 	}
 
 	public function testSaveDoesNotWriteIfNotModified() {
-		$file = '/tmp/neptune-config-test/do-not-write.php';
-		@unlink($file);
+		$file = $this->temp->getDirectory() . 'do-not-write.php';
 		$c = Config::create('new', $file);
 		$c->save();
 		$this->assertFalse(file_exists($file));
 	}
 
 	public function testSaveAll() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$c->set('two.one', 2.11);
-		$d = Config::load('other', self::file2);
+		$d = Config::load('other', $this->temp->getPathname(self::file2));
 		$d->set('one', 'changed');
 		Config::saveAll();
 		$expectedC = '<?php';
@@ -329,15 +325,17 @@ END;
 END;
 		$expectedD .= '?>';
 		$this->assertEquals($this->flattenConfig($expectedC),
-							$this->flattenConfig(file_get_contents(self::file)));
+							$this->flattenConfig($this->temp->getContents(self::file)));
 		$this->assertEquals($this->flattenConfig($expectedD),
-							$this->flattenConfig(file_get_contents(self::file2)));
+							$this->flattenConfig($this->temp->getContents(self::file2)));
 	}
 
 	public function testSetFilename() {
-		$c = Config::load('testing', self::file);
+		$file = $this->temp->getPathname(self::file);
+		$file2 = $this->temp->getPathname(self::file2);
+		$c = Config::load('testing', $file);
 		$c->set('one', 'changed');
-		$c->setFilename(self::file2);
+		$c->setFilename($file2);
 		$c->save();
 		//the first test file should be unmodified
 		$content = '<?php';
@@ -352,7 +350,7 @@ END;
 END;
 		$content .= '?>';
 		$this->assertEquals($this->flattenConfig($content),
-							$this->flattenConfig(file_get_contents(self::file)));
+							$this->flattenConfig(file_get_contents($file)));
 		//file2 should have changed instead
 		$changed = '<?php';
 		$changed .= <<<END
@@ -366,27 +364,28 @@ END;
 END;
 		$changed .= '?>';
 		$this->assertEquals($this->flattenConfig($changed),
-							$this->flattenConfig(file_get_contents(self::file2)));
+							$this->flattenConfig(file_get_contents($file2)));
 	}
 
 	public function testGetFilename() {
-		$c = Config::load('testing', self::file);
+		$file = $this->temp->getPathname(self::file);
+		$c = Config::load('testing', $file);
 		$d = Config::load('testing');
-		$this->assertEquals(self::file, $d->getFileName());
+		$this->assertEquals($file, $d->getFileName());
 	}
 
 	public function testOverride() {
-		$c = Config::load('testing', self::file);
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals(1, $c->get('one'));
 		$c->override(array('one' => 'override'));
 		$this->assertEquals('override', $c->get('one'));
 	}
 
 	public function testLoadCallsOverride() {
-		$default = Config::load('default', self::file);
+		$default = Config::load('default', $this->temp->getPathname(self::file));
 		$this->assertEquals(1, $default->get('one'));
 		$this->assertEquals(2.1, $default->get('two.one'));
-		Config::load('override', self::file_override, 'default');
+		Config::load('override', $this->temp->getPathname(self::file_override), 'default');
 		$this->assertEquals('override', $default->get('one'));
 		$this->assertEquals('override_again', $default->get('two.two'));
 		$this->assertEquals('2.1', $default->get('two.one'));
@@ -398,14 +397,12 @@ END;
 		//any file named config.php will be loaded in the config
 		//directory. Let's pretend the test config file is for a
 		//module.
-		@mkdir('/tmp/neptune-config-test/test_module', 0755, true);
-		copy(self::file, '/tmp/neptune-config-test/test_module/config.php');
-		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$this->temp->create('test_module/config.php',
+							$this->temp->getContents(self::file));
+		$neptune->set('dir.root', $this->temp->getDirectory());
 		$neptune->set('modules', array('test_module' => 'test_module/'));
 		$module = Config::loadModule('test_module');
 		$this->assertEquals(2.1, $module->get('two.one'));
-		unlink('/tmp/neptune-config-test/test_module/config.php');
-		rmdir('/tmp/neptune-config-test/test_module');
 	}
 
 	public function testLoadModuleThrowsExceptionForNoNeptune() {
@@ -415,17 +412,17 @@ END;
 
 	public function testLoadModuleThrowsExceptionForUnknownModule() {
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('dir.root', $this->temp->getDirectory());
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$module = Config::loadModule('unknown');
 	}
 
 	public function testLoadModuleThrowsExceptionForConfigFileNotFound() {
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', '/tmp/neptune-config-test/');
-		$neptune->set('modules', array('no-file' => '/path/to/no/file.php'));
+		$neptune->set('dir.root', $this->temp->getDirectory());
+		$neptune->set('modules', array('not-here' => '/path/to/not/here'));
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigFileException');
-		$module = Config::loadModule('no-file');
+		$module = Config::loadModule('not-here');
 	}
 
 	public function testLoadModuleAlsoLoadsOverride() {
@@ -433,39 +430,27 @@ END;
 		//override any values in the module config.
 		//it will use dir.root in the neptune config to get the path,
 		//so let's mock the config directory here.
-		@mkdir('/tmp/neptune-config-test/config/modules', 0755, true);
-		@mkdir('/tmp/neptune-config-test/test_module', 0755, true);
-		copy(self::file, '/tmp/neptune-config-test/test_module/config.php');
-		copy(self::file_override, '/tmp/neptune-config-test/config/modules/test_module.php');
+		$this->temp->create('test_module/config.php',
+							$this->temp->getContents(self::file));
+		$this->temp->create('config/modules/test_module.php',
+							$this->temp->getContents(self::file_override));
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('dir.root', $this->temp->getDirectory());
 		$neptune->set('modules', array('test_module' => 'test_module/'));
 		$module = Config::loadModule('test_module');
 		$this->assertEquals('override_again', $module->get('two.two'));
-		//TODO: this directory handling is total sludge... fix needed.
-		unlink('/tmp/neptune-config-test/config/modules/test_module.php');
-		unlink('/tmp/neptune-config-test/test_module/config.php');
-		rmdir('/tmp/neptune-config-test/config/modules');
-		rmdir('/tmp/neptune-config-test/test_module');
-		rmdir('/tmp/neptune-config-test/config');
 	}
 
 	public function testLoadCallsLoadModule() {
-		@mkdir('/tmp/neptune-config-test/config/modules', 0755, true);
-		@mkdir('/tmp/neptune-config-test/test_module', 0755, true);
-		copy(self::file, '/tmp/neptune-config-test/test_module/config.php');
-		copy(self::file_override, '/tmp/neptune-config-test/config/modules/test_module.php');
+		$this->temp->create('test_module/config.php',
+							$this->temp->getContents(self::file));
+		$this->temp->create('config/modules/test_module.php',
+							$this->temp->getContents(self::file_override));
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', '/tmp/neptune-config-test/');
+		$neptune->set('dir.root', $this->temp->getDirectory());
 		$neptune->set('modules', array('test_module' => 'test_module/'));
 		$module = Config::load('test_module');
 		$this->assertEquals('override_again', $module->get('two.two'));
-		unlink('/tmp/neptune-config-test/config/modules/test_module.php');
-		unlink('/tmp/neptune-config-test/test_module/config.php');
-		rmdir('/tmp/neptune-config-test/test_module');
-		rmdir('/tmp/neptune-config-test/config/modules');
-		rmdir('/tmp/neptune-config-test/config');
-
 	}
 
 	public function testLoadingNeptuneAsAModuleDoesNotBreakEverything() {
