@@ -5,6 +5,8 @@ namespace Neptune\Tests\File;
 use Neptune\File\UploadHandler;
 use Neptune\Helpers\String;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -13,26 +15,26 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 
-	protected static $file_path = '/tmp/file.txt';
-	protected static $files_index = 'file';
+	protected $filename = 'file.txt';
+	protected $files_index = 'file';
 	protected $object;
 
 
 	public function setUp() {
-		touch(self::$file_path);
+		Temping::getInstance()->create($this->filename);
 		$_FILES = array();
-		$_FILES[self::$files_index] = array(
+		$_FILES[$this->files_index] = array(
 			'name' => 'file.txt',
 			'type' => 'text/plain',
-			'tmp_name' => self::$file_path,
+			'tmp_name' => $this->filename,
 			'error' => 0,
 			'size' => 0
 		);
-		$this->object = new UploadHandler(self::$files_index);
+		$this->object = new UploadHandler($this->files_index);
 	}
 
 	public function tearDown() {
-		@unlink(self::$file_path);
+		Temping::getInstance()->reset();
 	}
 
 	public function testConstruct() {
