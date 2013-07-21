@@ -6,6 +6,5 @@ php:
   - "5.3"
 
 before_script:
-  - composer install --no-dev
-  - composer require glynnforrest/temping dev-master
+  - composer install
   - phpenv config-add travis-config.ini
