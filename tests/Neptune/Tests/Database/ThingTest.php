@@ -44,7 +44,6 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		Config::unload();
 	}
 
-
 	public function testConstruct() {
 		$d = new UpperCase('db');
 		$this->assertTrue($d instanceof Thing);
@@ -52,46 +51,42 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($d2 instanceof Thing);
 	}
 
-	public function testGetAndSet() {
+	public function testGetAndSetRaw() {
 		$d = new UpperCase('db');
-		$d->set('key', 'value');
-		$this->assertEquals('value', $d->get('key'));
-		$d->set('array', array());
-		$this->assertEquals(array(), $d->get('array'));
-		$obj = new \stdClass();
-		$d->set('obj', $obj);
-		$this->assertSame($obj, $d->get('obj'));
+		$d->setRaw('column', 'test');
+		$this->assertEquals('test', $d->getRaw('column'));
+		$d->setRaw('name', 'test');
+		$this->assertEquals('test', $d->getRaw('name'));
 	}
 
+	public function testGetAndSet() {
+		$d = new UpperCase('db');
+		$d->set('column', 'test');
+		$this->assertEquals('TEST', $d->get('column'));
+		$d->set('name', 'test');
+		$this->assertEquals('TEST', $d->get('name'));
+	}
 
 	public function test__GetAnd__Set() {
 		$d = new UpperCase('db');
-		$d->key = 'value';
-		$this->assertEquals('value', $d->key);
-		$d->array = array();
-		$this->assertEquals(array(), $d->array);
-		$obj = new \stdClass();
-		$d->obj = $obj;
-		$this->assertSame($obj, $d->obj);
+		$d->column = 'test';
+		$this->assertEquals('TEST', $d->column);
+		$d->name = 'test';
+		$this->assertEquals('TEST', $d->name);
 	}
 
 	public function testGetFromResultSet() {
-		$d = new Thing('db', array('id' => 1, 'column' => 'value'));
+		$d = new UpperCase('db', array('id' => 1, 'name' => 'test', 'column' => 'value'));
 		$this->assertEquals(1, $d->id);
-		$this->assertEquals('value', $d->column);
-	}
-
-	public function testGetOverride() {
-		$u = new UpperCase('db', array('id' => 2, 'column' => 'value'));
-		$this->assertEquals('value', $u->get('column'));
-		$this->assertEquals('VALUE', $u->column);
-	}
-
-	public function testSetOverride() {
-		$u = new UpperCase('db');
-		$u->name = ('test');
-		$this->assertEquals('TEST', $u->name);
-		$this->assertEquals('TEST', $u->get('name'));
+		//no magic set methods should be called as it most likely
+		//comes from a db query
+		$this->assertEquals('test', $d->name);
+		$this->assertEquals('test', $d->get('name'));
+		$this->assertEquals('test', $d->getRaw('name'));
+		//but magic get method is called when retrieving a value
+		$this->assertEquals('VALUE', $d->column);
+		$this->assertEquals('VALUE', $d->get('column'));
+		$this->assertEquals('value', $d->getRaw('column'));
 	}
 
 	public function testInsertBuild() {
@@ -99,21 +94,22 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (1, value)',
-		DatabaseFactory::getDriver('db')->getExecutedQuery());
+		$query = 'INSERT INTO table (`id`, `column`) VALUES (1, value)';
+		$driver = DatabaseFactory::getDriver('db');
+		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
 
 	public function testUpdateBuild() {
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->column = 'changed';
 		$d->save();
-		$this->assertEquals('UPDATE table SET `column` = changed WHERE id = 1',
-		DatabaseFactory::getDriver('db')->getExecutedQuery());
+		$query = 'UPDATE table SET `column` = changed WHERE id = 1';
+		$driver = DatabaseFactory::getDriver('db');
+		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
 
 	public function testNoUpdate() {
 		$db = DatabaseFactory::getDriver('db');
-		$db->reset();
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
@@ -121,7 +117,6 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 
 	public function testNoInsert() {
 		$db = DatabaseFactory::getDriver('db');
-		$db->reset();
 		$d = new UpperCase('db');
 		$d->save();
 		$this->assertNull($db->getExecutedQuery());
@@ -129,7 +124,6 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 
 	public function testNoUpdateDifferentFields() {
 		$db = DatabaseFactory::getDriver('db');
-		$db->reset();
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->foo = 'bar';
 		$d->save();
@@ -138,7 +132,6 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 
 	public function testNoInsertDifferentFields() {
 		$db = DatabaseFactory::getDriver('db');
-		$db->reset();
 		$d = new UpperCase('db');
 		$d->foo = 'bar';
 		$d->save();

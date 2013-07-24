@@ -23,7 +23,6 @@ class Thing {
 	protected static $rules = array();
 	protected static $messages = array();
 	protected $database;
-	protected $current_index;
 	protected $values = array();
 	protected $modified = array();
 	protected $stored = false;
@@ -31,28 +30,56 @@ class Thing {
 	protected $relation_keys = array();
 	protected $no_friends = array();
 
-	public function __construct($database, array $result = null) {
+	/**
+	 * Create a new Thing instance.
+	 *
+	 * @param string $database The name of the database instance to use.
+	 * @param array $values Initial values to give the instance. Note
+	 * that no set<Key> methods will be called. To apply these
+	 * methods, call setValues($data) after creation.
+	 */
+	public function __construct($database, array $values = array()) {
 		$this->database = $database;
-		if ($result && is_array($result)) {
-			foreach ($result as $key => $value) {
+		if(!empty($values)) {
+			foreach ($values as $key => $value) {
+				//don't call setRaw as we don't want the modified flag to be
+				//set.
 				$this->values[$key] = $value;
 			}
 			$this->stored = true;
 		}
 	}
 
+	/**
+	 * Convenience wrapper to set().
+	 */
 	public function __get($key) {
+		return $this->get($key);
+	}
+
+	/**
+	 * Get the value of $key. If the method get$key exists, the return
+	 * value will be the output of calling this function.
+	 *
+	 * @param string $key The name of the key to get.
+	 */
+	public function get($key) {
 		$method = 'get'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method();
 		}
-		return $this->get($key);
-	}
-
-	public function get($key) {
 		if (isset(static::$relations[$key])) {
 			return $this->getRelation($key);
 		}
+		return $this->getRaw($key);
+	}
+
+	/**
+	 * Get the value of $key. If $key doesn't exist, null will be returned.
+	 *
+	 * @param string $key The name of the key to get.
+	 */
+	public function getRaw($key) {
 		if (isset($this->values[$key])) {
 			return $this->values[$key];
 		}
@@ -64,8 +91,8 @@ class Thing {
 			return null;
 		}
 		if(!isset($this->relation_objects[$name])) {
-			RelationsManager::getInstance()->createRelation($this, $name,
-			static::$relations[$name]);
+			RelationsManager::getInstance()
+				->createRelation($this, $name, static::$relations[$name]);
 		}
 		$key = static::$relations[$name]['key'];
 		return $this->relation_objects[$name]->getRelatedObject($key);
@@ -73,24 +100,39 @@ class Thing {
 
 	protected function setRelation($name, &$value) {
 		if(!isset($this->relation_objects[$name])) {
-			RelationsManager::getInstance()->createRelation($this, $name,
-			static::$relations[$name], $value);
+			RelationsManager::getInstance()
+				->createRelation($this, $name, static::$relations[$name], $value);
 		}
 		$key = static::$relations[$name]['key'];
 		$this->no_friends[$name] = null;
 		$this->relation_objects[$name]->setRelatedObject($key, $value)
-			->updateKey($key, $this->get($key));
+									  ->updateKey($key, $this->get($key));
 	}
 
+	/**
+	 * Convenience wrapper to set().
+	 */
 	public function __set($key, $value) {
+		return $this->set($key, $value);
+	}
+
+	/**
+	 * Set $key to $value. If the method set$key exists, $value will
+	 * be the output of calling this function with $value as an
+	 * argument.
+	 *
+	 * @param string $key The name of the key to set.
+	 * @param mixed $value The value to set. This may a related object.
+	 * @param bool $overwrite Whether to overwrite the value if it is
+	 * already set. Setting this to false is useful in batch
+	 * operations on groups of Things, where there is a chance of
+	 * overwriting a change applied to a single Thing.
+	 */
+	public function set($key, $value, $overwrite = true) {
 		$method = 'set'.ucfirst($key);
 		if(method_exists($this, $method)) {
 			return $this->$method($value);
 		}
-		return $this->set($key, $value);
-	}
-
-	public function set($key, $value, $overwrite = true) {
 		if (isset(static::$relations[$key])) {
 			return $this->setRelation($key, $value);
 		}
@@ -98,20 +140,20 @@ class Thing {
 			$this->current_index = $this->values[$key];
 		}
 		if($overwrite) {
-			$this->setValue($key, $value);
+			$this->setRaw($key, $value);
 		} else {
 			if(!isset($this->values[$key])) {
-				$this->setValue($key, $value);
+				$this->setRaw($key, $value);
 			} else {
 				return false;
 			}
 		}
+	}
+
+	public function setRaw($key, $value) {
 		if (in_array($key, static::$fields) && !in_array($key, $this->modified)) {
 			$this->modified [] = $key;
 		}
-	}
-
-	protected function setValue($key, $value) {
 		$this->values[$key] = $value;
 		if(isset($this->relation_keys[$key])) {
 			$this->relation_objects[$this->relation_keys[$key]]->updateKey($key, $value);
@@ -213,8 +255,8 @@ class Thing {
 			if ($stmt->execute($values)) {
 				$this->modified = array();
 				$this->stored = true;
-				$this->set(static::$primary_key,
-					DatabaseFactory::getDriver($this->database)->lastInsertId());
+				$id = DatabaseFactory::getDriver($this->database)->lastInsertId();
+				$this->set(static::$primary_key, $id);
 				return true;
 			}
 		}
@@ -271,7 +313,7 @@ class Thing {
 	}
 
 	public static function select(SQLQuery $query = null,
-		$relations = array(), $database = false) {
+								  $relations = array(), $database = false) {
 		if (!$query) {
 			$query = SQLQuery::select($database);
 			$query->from(static::$table);
