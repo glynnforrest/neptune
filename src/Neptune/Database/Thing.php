@@ -23,6 +23,7 @@ class Thing {
 	protected static $rules = array();
 	protected static $messages = array();
 	protected $database;
+	protected $current_index;
 	protected $values = array();
 	protected $modified = array();
 	protected $stored = false;
@@ -58,7 +59,7 @@ class Thing {
 	}
 
 	/**
-	 * Get the value of $key. If the method get$key exists, the return
+	 * Get the value of $key. If the method get<Key> exists, the return
 	 * value will be the output of calling this function.
 	 *
 	 * @param string $key The name of the key to get.
@@ -117,7 +118,7 @@ class Thing {
 	}
 
 	/**
-	 * Set $key to $value. If the method set$key exists, $value will
+	 * Set $key to $value. If the method set<Key> exists, $value will
 	 * be the output of calling this function with $value as an
 	 * argument.
 	 *
@@ -133,12 +134,6 @@ class Thing {
 		if(method_exists($this, $method)) {
 			return $this->$method($value);
 		}
-		if (isset(static::$relations[$key])) {
-			return $this->setRelation($key, $value);
-		}
-		if($key === static::$primary_key && isset($this->values[$key])) {
-			$this->current_index = $this->values[$key];
-		}
 		if($overwrite) {
 			$this->setRaw($key, $value);
 		} else {
@@ -150,7 +145,21 @@ class Thing {
 		}
 	}
 
+	/**
+	 * Set $key to $value, ignoring any set<Key> methods.
+	 *
+	 * @param string $key The name of the key to set.
+	 * @param mixed $value The value to set. This may a related object.
+	 */
 	public function setRaw($key, $value) {
+		if (isset(static::$relations[$key])) {
+			return $this->setRelation($key, $value);
+		}
+		//if attempting to update the primary key, keep a copy of the current
+		if($key === static::$primary_key && isset($this->values[$key])) {
+			$this->current_index = $this->values[$key];
+		}
+		//maybe apply the modified flag
 		if (in_array($key, static::$fields) && !in_array($key, $this->modified)) {
 			$this->modified [] = $key;
 		}
@@ -167,6 +176,13 @@ class Thing {
 		return $this;
 	}
 
+	public function setValuesRaw($values = array()) {
+		foreach ($values as $k => $v) {
+			$this->setRaw($k, $v);
+		}
+		return $this;
+	}
+
 	public function noRelation($relation) {
 		$this->no_friends[$relation] = true;
 	}
@@ -176,6 +192,14 @@ class Thing {
 	}
 
 	public function getValues() {
+		$return = array();
+		foreach ($this->values as $k => $v) {
+			$return[$k] = $this->get($k);
+		}
+		return $return;
+	}
+
+	public function getValuesRaw() {
 		return $this->values;
 	}
 

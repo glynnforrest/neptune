@@ -78,15 +78,37 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 	public function testGetFromResultSet() {
 		$d = new UpperCase('db', array('id' => 1, 'name' => 'test', 'column' => 'value'));
 		$this->assertEquals(1, $d->id);
-		//no magic set methods should be called as it most likely
+		//no set methods should be called as it most likely
 		//comes from a db query
 		$this->assertEquals('test', $d->name);
 		$this->assertEquals('test', $d->get('name'));
 		$this->assertEquals('test', $d->getRaw('name'));
-		//but magic get method is called when retrieving a value
+		//but get method is called when retrieving a value
 		$this->assertEquals('VALUE', $d->column);
 		$this->assertEquals('VALUE', $d->get('column'));
 		$this->assertEquals('value', $d->getRaw('column'));
+	}
+
+	public function testGetAndSetValues() {
+		$d = new UpperCase('db');
+		$d->setValues(array('name' => 'test', 'column' => 'value'));
+		//set methods should have been called in setValues
+		$this->assertEquals('TEST', $d->getRaw('name'));
+		$this->assertEquals('value', $d->getRaw('column'));
+		//get methods should be called in getValues
+		$expected = array('name' => 'TEST', 'column' => 'VALUE');
+		$this->assertEquals($expected, $d->getValues());
+	}
+
+	public function testGetAndSetValuesRaw() {
+		$d = new UpperCase('db');
+		$d->setValuesRaw(array('name' => 'test', 'column' => 'value'));
+		//set methods should not have been called in setValuesRaw
+		$this->assertEquals('test', $d->getRaw('name'));
+		$this->assertEquals('value', $d->getRaw('column'));
+		//get methods should not be called in getValuesRaw
+		$expected = array('name' => 'test', 'column' => 'value');
+		$this->assertEquals($expected, $d->getValuesRaw());
 	}
 
 	public function testInsertBuild() {
