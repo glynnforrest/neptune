@@ -132,17 +132,12 @@ class Thing {
 	public function set($key, $value, $overwrite = true) {
 		$method = 'set'.ucfirst($key);
 		if(method_exists($this, $method)) {
-			return $this->$method($value);
+			return $this->setRaw($key, $this->$method($value));
 		}
-		if($overwrite) {
-			$this->setRaw($key, $value);
-		} else {
-			if(!isset($this->values[$key])) {
-				$this->setRaw($key, $value);
-			} else {
-				return false;
-			}
+		if($overwrite || !isset($this->values[$key])) {
+			return $this->setRaw($key, $value);
 		}
+		return false;
 	}
 
 	/**
@@ -237,7 +232,6 @@ class Thing {
 		return false;
 	}
 
-	//TODO: add params to update on other fields.
 	public function update() {
 		if (!empty($this->modified)) {
 			$q = SQLQuery::update($this->database);
@@ -374,8 +368,11 @@ class Thing {
 	}
 
 	/**
-	 * Deletes a single row from the database where column = value.
-	 * @return true on success, false on failure.
+	 * Delete a single row from the database where $column = $value.
+	 *
+	 * @param string $column The column name.
+	 * @param string $value The value of the column.
+	 * @return bool true on success, false on failure.
 	 */
 	public static function deleteOne($column, $value, $database = false) {
 		$q = SQLQuery::delete($database);

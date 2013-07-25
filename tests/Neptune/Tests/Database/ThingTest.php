@@ -1,4 +1,5 @@
 <?php
+
 namespace Neptune\Tests\Database;
 
 use Neptune\Database\Thing;
@@ -10,12 +11,12 @@ require_once __DIR__ . '/../../../bootstrap.php';
 
 class UpperCase extends Thing {
 
-	protected static $fields = array('id', 'column');
+	protected static $fields = array('id', 'name', 'column');
 	protected static $primary_key = 'id';
 	protected static $table = 'table';
 
 	public function setName($name) {
-		$this->values['name'] = strtoupper($name);
+		return strtoupper($name);
 	}
 
 	public function getColumn() {
@@ -126,6 +127,16 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'changed';
 		$d->save();
 		$query = 'UPDATE table SET `column` = changed WHERE id = 1';
+		$driver = DatabaseFactory::getDriver('db');
+		$this->assertEquals($query, $driver->getExecutedQuery());
+	}
+
+	public function testInsertBuildWithSetMethod() {
+		$d = new UpperCase('db');
+		$d->name = 'test';
+		//setName should be called, and modified flag set for saving
+		$d->save();
+		$query = 'INSERT INTO table (`name`) VALUES (TEST)';
 		$driver = DatabaseFactory::getDriver('db');
 		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
