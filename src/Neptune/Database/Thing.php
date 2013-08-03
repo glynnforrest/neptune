@@ -244,7 +244,11 @@ class Thing {
 			$stmt = $q->prepare();
 			$values = array();
 			foreach ($this->modified as $modified) {
-				$values[] = $this->values[$modified];
+				if($this->values[$modified]) {
+					$values[] = $this->values[$modified];
+				} else {
+					$values[] = '';
+				}
 			}
 			if($this->current_index) {
 				$index = $this->current_index;
@@ -266,7 +270,11 @@ class Thing {
 			$q->into(static::$table);
 			$values = array();
 			foreach ($this->modified as $modified) {
-				$values[] = $this->values[$modified];
+				if($this->values[$modified]) {
+					$values[] = $this->values[$modified];
+				} else {
+					$values[] = '';
+				}
 			}
 			$q->fields($this->modified);
 			$stmt = $q->prepare();
