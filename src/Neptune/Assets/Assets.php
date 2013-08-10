@@ -25,8 +25,20 @@ class Assets {
 	protected function __construct() {
 	}
 
+	/**
+	 * Return src with hashes stripped and cache busting added as
+	 * required.
+	 */
+	protected function createSrc($src) {
+		if(Config::load()->get('assets.cache_bust')) {
+			return str_replace('#', '/', $src) . '?' . md5(uniqid());
+		}
+		return str_replace('#', '/', $src);
+	}
+
+
 	public function addJs($name, $src, $dependencies = array(), $options = array()) {
-		$this->js[$name] = array('src' => str_replace('#', '/', $src),
+		$this->js[$name] = array('src' => $this->createSrc($src),
 								 'deps' => (array) $dependencies,
 								 'opts' => (array) $options);
 	}
@@ -45,7 +57,7 @@ class Assets {
 	}
 
 	public function addCss($name, $src, $dependencies = array(), $options = array()) {
-		$this->css[$name] = array('src' => str_replace('#', '/', $src),
+		$this->css[$name] = array('src' => $this->createSrc($src),
 								  'deps' => (array) $dependencies,
 								  'opts' => (array) $options);
 	}

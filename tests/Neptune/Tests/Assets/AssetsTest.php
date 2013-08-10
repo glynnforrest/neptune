@@ -136,4 +136,14 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, Assets::js());
 	}
 
+	public function testCacheBusting() {
+		Config::load('testing')->set('assets.cache_bust', true);
+		$this->assets->addCss('lib', '/css/lib.css');
+		$css_regex = '`<link rel="stylesheet" type="text/css" href="http://myapp.local/css/lib.css\?\w+" />`';
+		$this->assertRegExp($css_regex, Assets::css());
+		$this->assets->addJs('main', '/js/main.js');
+		$js_regex = '`<script type="text/javascript" src="http://myapp.local/js/main.js\?\w+"></script>`';
+		$this->assertRegExp($js_regex, Assets::js());
+	}
+
 }

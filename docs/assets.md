@@ -48,10 +48,17 @@ And loaded the config like this:
 
 	Config::load('package', 'app/package/config.php');
 
-You'd be able to include all assets in the app/package/assets directory like this:
+You'd be able to include assets in the app/package/assets directory like this:
 
 	Assets::addCss('package-theme', 'package#css/theme.css');
 
 ##Development mode
+
+##Cache busting
+
+It's useful in during development to make sure the browser is not
+caching any js or css files. Simply set `assets.cache_bust` to true in
+your configuration to automatically add cache busting to all asset
+urls.
 
 ##Using assets in production
