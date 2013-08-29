@@ -13,9 +13,14 @@ use Neptune\Core\Config;
 abstract class Task {
 
 	protected $console;
+	protected $config;
 
+	/**
+	 * Create a new Task instance. Neptune config must be loaded.
+	 */
 	public function __construct() {
 		$this->console = Console::getInstance();
+		$this->config = Config::load('neptune');
 	}
 
 	public function run($args = array()) {
@@ -49,12 +54,12 @@ abstract class Task {
 
 	//Helper functions for Tasks
 	protected function getAppDirectory() {
-		$c = Config::load('neptune');
-		return $c->getRequired('dir.app') . '/' . $c->getRequired('namespace') . '/';
+		return $this->config->getRequired('dir.app') .
+			'/' . $c->getRequired('namespace') . '/';
 	}
 
 	protected function getRootDirectory() {
-		$root = Config::load('neptune')->getRequired('dir.root');
+		$root = $this->config->getRequired('dir.root');
 		//make sure root has a trailing slash
 		if(substr($root, -1) !== '/') {
 			$root .= '/';
@@ -73,9 +78,8 @@ abstract class Task {
 		if(!file_exists($root . 'config/neptune.php')) {
 			return false;
 		}
-		$c = Config::load();
 		//check to see if config settings required for neptune have been set
-		return $c->get('namespace', false);
+		return $this->config->get('namespace', false);
 	}
 
     /**

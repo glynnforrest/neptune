@@ -2,6 +2,7 @@
 
 namespace Neptune\Tests\Tasks;
 
+use Neptune\Core\Config;
 use Neptune\Tests\Tasks\DummyTask;
 
 require_once __DIR__ . '/../../../bootstrap.php';
@@ -11,6 +12,14 @@ require_once __DIR__ . '/../../../bootstrap.php';
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
 class TaskTest extends \PHPUnit_Framework_TestCase {
+
+	public function setUp() {
+		Config::create('neptune');
+	}
+
+	public function tearDown() {
+		Config::unload();
+	}
 
 	public function testGetTaskMethods() {
 		$t = new DummyTask();
