@@ -32,9 +32,16 @@ class Asset {
 	}
 
 	/**
+	 * Save the content of this asset to $filename.
+	 */
+	public function saveFile($filename) {
+		file_put_contents($filename, $this->getContent());
+	}
+
+	/**
 	 * Get the filename of the currently loaded asset.
 	 */
-	public function getFileName() {
+	public function getFilename() {
 		return $this->filename;
 	}
 
