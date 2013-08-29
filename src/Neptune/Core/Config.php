@@ -226,6 +226,19 @@ class Config {
 	}
 
 	/**
+	 * Load the environment configuration called $name. The
+	 * environment should be located at config/env/$name.php. The
+	 * values in this file will then be merged into the 'neptune'
+	 * config instance.
+	 */
+	public static function loadEnv($name) {
+		$file = self::load('neptune')->get('dir.root') .
+			'config/env/' . $name . '.php';
+		//load $name as a config file, merging into neptune
+		return self::load($name, $file, 'neptune');
+	}
+
+	/**
 	 * Unload configuration settings with $name, requiring them to be
 	 * reloaded if they are to be used again.
 	 * If $name is not specified, all configuration files will be

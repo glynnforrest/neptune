@@ -458,4 +458,17 @@ END;
 		Config::loadModule('neptune');
 	}
 
+	public function testLoadEnv() {
+		//the loaded env gets merged into neptune config
+		$neptune = Config::create('neptune');
+		$neptune->set('one', 'default');
+		$neptune->set('dir.root', $this->temp->getDirectory());
+		$this->assertEquals('default', $neptune->get('one'));
+		$this->temp->create('config/env/test.php',
+							$this->temp->getContents(self::file_override));
+		Config::loadEnv('test');
+		$this->assertEquals('override', $neptune->get('one'));
+	}
+
+
 }
