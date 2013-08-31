@@ -26,11 +26,12 @@ class Assets {
 	}
 
 	/**
-	 * Return src with hashes stripped and cache busting added as
-	 * required.
+	 * Return src with hashes stripped and cache busting added if
+	 * assets.cache_bust is set, and src is not an external
+	 * url.
 	 */
 	protected function createSrc($src) {
-		if(Config::load()->get('assets.cache_bust')) {
+		if(Config::load()->get('assets.cache_bust') && !strpos($src, '://')) {
 			return str_replace('#', '/', $src) . '?' . md5(uniqid());
 		}
 		return str_replace('#', '/', $src);

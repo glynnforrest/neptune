@@ -146,4 +146,14 @@ class AssetsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertRegExp($js_regex, Assets::js());
 	}
 
+	public function testCacheBustingNotAppliedToExternalUrls() {
+		Config::load('testing')->set('assets.cache_bust', true);
+		$this->assets->addCss('lib', 'http://example.org/lib.css');
+		$css_expected = '<link rel="stylesheet" type="text/css" href="http://example.org/lib.css" />' . PHP_EOL;
+		$this->assertEquals($css_expected, Assets::css());
+		$this->assets->addJs('main', 'http://example.org/main.js');
+		$js_expected = '<script type="text/javascript" src="http://example.org/main.js"></script>' . PHP_EOL;
+		$this->assertEquals($js_expected, Assets::js());
+	}
+
 }
