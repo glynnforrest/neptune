@@ -94,6 +94,7 @@ public function testSlugifyWithDifferentSeparator() {
 		$this->assertEquals('monkeys', String::plural('monkey'));
 		$this->assertEquals('shoes', String::plural('shoe'));
 		$this->assertEquals('messages', String::plural('message'));
+        $this->assertEquals('geese', String::plural('goose'));
 	}
 
 	public function testSingle() {
@@ -119,6 +120,7 @@ public function testSlugifyWithDifferentSeparator() {
 		$this->assertEquals('monkey', String::single('monkeys'));
 		$this->assertEquals('shoe', String::single('shoes'));
 		$this->assertEquals('message', String::single('messages'));
+		$this->assertEquals('goose', String::single('geese'));
 	}
 
 	public function testJoinList() {

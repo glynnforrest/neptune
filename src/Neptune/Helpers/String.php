@@ -31,6 +31,7 @@ class String {
 		'`(t|p)us$`' => '\1i',
 		'`(a|e|i|o|u)s$`' => '\1ses',
 		'`(sh|x|ch)$`' => '\1es',
+		'`oose$`' => 'eese',
 		'`s$`' => 's',
 		'`$`' => 's'
 	);
@@ -43,6 +44,7 @@ class String {
 		'`s$`' => '',
 		'`ice$`' => 'ouse',
 		'`i$`' => 'us',
+		'`eese$`' => 'oose',
 	);
 
 	public static function spaces($string) {
