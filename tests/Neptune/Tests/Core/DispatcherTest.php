@@ -2,7 +2,7 @@
 
 namespace Neptune\Tests\Core;
 
-
+use Neptune\Core\Config;
 use Neptune\Core\Dispatcher;
 use Neptune\Core\Route;
 
@@ -52,7 +52,9 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testRouteAssets() {
 		$d = Dispatcher::getInstance();
-		$r = $d->routeAssets('/assets/');
+        $c = Config::create('neptune');
+        $c->set('assets.url', '/assets/');
+		$r = $d->routeAssets();
 		$this->assertEquals('/assets/:args', $r->getUrl());
 		$this->assertTrue($r->test('/assets/css/test'));
 		$this->assertEquals(
@@ -62,11 +64,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				array('css/test')
 			),
 			$r->getAction());
+        Config::unload();
 	}
 
 	public function testRouteAssetsMissingSlashes() {
 		$d = Dispatcher::getInstance();
-		$r = $d->routeAssets('assets');
+        $c = Config::create('neptune');
+        $c->set('assets.url', '/assets/');
+		$r = $d->routeAssets();
 		$this->assertEquals('/assets/:args', $r->getUrl());
 		$this->assertTrue($r->test('/assets/lib/js/test'));
 		$this->assertEquals(
@@ -76,6 +81,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				array('lib/js/test')
 			),
 			$r->getAction());
+        Config::unload();
 	}
 
 }

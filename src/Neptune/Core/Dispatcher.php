@@ -56,12 +56,11 @@ class Dispatcher {
 	}
 
 	/**
-	 * Tell Dispatcher to route assets for $url to
-	 * Neptune\Controller\AssetController.
-	 * Do not add a :placeholder for the asset, it will be appended
-	 * automatically.
+	 * Serve assets with Neptune\Controller\AssetsController at the
+	 * config key assets.url.
 	 */
-	public function routeAssets($url) {
+	public function routeAssets() {
+		$url = Config::load('neptune')->getRequired('assets.url');
 		//add a slash if the given url doesn't start or end with one
 		if(substr($url, 0, 1) !== '/') {
 			$url = '/' . $url;
