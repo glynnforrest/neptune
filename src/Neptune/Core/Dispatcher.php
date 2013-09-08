@@ -3,7 +3,6 @@
 namespace Neptune\Core;
 
 use Neptune\View\View;
-use Neptune\Http\Response;
 use Neptune\Http\Request;
 use Neptune\Cache\CacheFactory;
 use Neptune\Exceptions\NeptuneError;
@@ -16,16 +15,17 @@ use Neptune\Exceptions\ArgumentMissingException;
  */
 class Dispatcher {
 
-	protected static $instance;
-	protected $routes = array();
-	protected $names = array();
-	protected $globals;
-	protected $request;
+    protected static $instance;
+    protected $routes = array();
+    protected $names = array();
+    protected $globals;
+    protected $request;
+    protected $matched_url;
+    protected $other;
 
-	protected function __construct() {
-		$this->request = Request::getInstance();
-		$this->response = Response::getInstance();
-	}
+    protected function __construct() {
+        $this->request = Request::getInstance();
+    }
 
 	public static function getInstance() {
 		if (!self::$instance) {
@@ -88,6 +88,11 @@ class Dispatcher {
 		return $this;
 	}
 
+	public function clearGlobals() {
+		$this->globals = false;
+		return $this;
+	}
+
 	public function goCached($source = null) {
 		if(!$source) {
 			$source = $this->request->path();
@@ -109,7 +114,9 @@ class Dispatcher {
 		foreach($this->routes as $k => $v) {
 			if($v->test($source)) {
 				$actions = $v->getAction();
-				if($this->runMethod($actions)) {
+				$this->matched_url = $k;
+                $response = $this->runMethod($actions);
+				if($response) {
 					try {
 						$cm = CacheFactory::getDriver();
 						$key = 'Router' . $source . $this->request->method();
@@ -117,7 +124,7 @@ class Dispatcher {
 						$cm->set('Router.names', $this->names);
 					} catch	(\Exception $e) {
 					}
-					return true;
+					return $response;
 				}
 			}
 		}
@@ -139,21 +146,23 @@ class Dispatcher {
 			try {
 				set_error_handler('\Neptune\Core\Dispatcher::missingArgsHandler');
 				ob_start();
+                //$body is the return from the controller. $other is
+                //anything captured by output buffering, like echo and
+                //print.
 				$body = $c->_runMethod($actions[1], $actions[2]);
-				$other = ob_get_clean();
-				// if(!$body && !$other) {
-				// 	return false;
-				// }
-				restore_error_handler();
-				$format = $this->request->format();
-				if (!$this->response->getFormat()) {
-					$this->response->setFormat($format);
+				$this->other = ob_get_clean();
+                //return false if there is no $body or $other. If
+                //there is no $body but $other exists, use that as the
+                //response.
+				if(!$body) {
+                    if(!$this->other) {
+                        return false;
+                    }
+                    restore_error_handler();
+                    return $this->other;
 				}
-				$this->response->sendHeaders();
-				echo $other;
-				$this->formatBody($body, $format);
-				$this->response->body($body);
-				$this->response->send();
+				restore_error_handler();
+                return $body;
 			} catch (MethodNotFoundException $e) {
 				restore_error_handler();
 				return false;
@@ -167,25 +176,6 @@ class Dispatcher {
 		return false;
 	}
 
-	protected function formatBody(&$body, $format) {
-		if($body instanceof View) {
-			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
-			if(get_class($body) !== $view) {
-				if (class_exists($view)) {
-					$body = $view::load(null, $body->getValues());
-				}
-			}
-		} else {
-			$view = 'Neptune\\View\\' . ucfirst($format) . 'View';
-			if (class_exists($view)) {
-				$body = $view::load(null, array($body));
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public function setRouteName($name, $url) {
 		$this->names[$name] = $url;
 	}
@@ -197,6 +187,13 @@ class Dispatcher {
 		return isset($this->names[$name]) ? $this->names[$name] : null;
 	}
 
-}
+    public function getMatchedUrl() {
+        return $this->matched_url;
+    }
 
-?>
+    public function getOther() {
+        return $this->other;
+    }
+
+
+}

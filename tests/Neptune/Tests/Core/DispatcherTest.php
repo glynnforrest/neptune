@@ -15,7 +15,7 @@ include __DIR__ . ('/../../../bootstrap.php');
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Dispatcher::getInstance()->clearRoutes();
+		Dispatcher::getInstance()->clearRoutes()->clearGlobals();
 	}
 
 	public function testRouteReturnsRoute() {
@@ -38,7 +38,6 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$r = Dispatcher::getInstance()->route('test');
 		$this->assertEquals('/test', $r->getUrl());
 	}
-
 
 	public function testRouteInheritsGlobals() {
 		$d = Dispatcher::getInstance();
@@ -83,5 +82,33 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 			$r->getAction());
         Config::unload();
 	}
+
+    public function testGoReturnsControllerResponse() {
+        $d = Dispatcher::getInstance();
+        $d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'index');
+        $this->assertEquals('test route', $d->go('/test'));
+    }
+
+    //anything captured by output buffering should not be returned
+    //but still available after the request
+    public function testOtherContent() {
+        $d = Dispatcher::getInstance();
+        $d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'withEcho');
+        $this->assertEquals('return value', $d->go('/test'));
+        $this->assertEquals('hello from echo', $d->getOther());
+    }
+
+    //if no response is provided, output buffered content will be used
+    public function testEchoWhenNoControllerResponse() {
+        $d = Dispatcher::getInstance();
+        $d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'echos');
+        $this->assertEquals('testing', $d->go('/test'));
+    }
+
+    public function testNoResponse() {
+        $d = Dispatcher::getInstance();
+        $d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'nothing');
+        $this->assertFalse($d->go('/test'));
+    }
 
 }
