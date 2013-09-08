@@ -156,6 +156,7 @@ class Dispatcher {
                 //response.
                 if(!$body) {
                     if(!$this->other) {
+                        restore_error_handler();
                         return false;
                     }
                     restore_error_handler();
