@@ -14,7 +14,6 @@ class Response {
 
 	protected static $instance;
 	protected $headers = array();
-	protected $body;
 	protected $status_code = 200;
 	protected $status_codes = array(
 		100 => 'Continue',
@@ -87,10 +86,6 @@ class Response {
 	protected function __construct() {
 	}
 
-	public function body($body) {
-		$this->body = $body;
-	}
-
 	public function header($name, $value) {
 		$this->headers[$name] = $value;
 	}
@@ -115,21 +110,43 @@ class Response {
 	 */
 	public function sendHeaders() {
 		if (!headers_sent()) {
+			//before sending any headers, make sure format is set.
+			//If a format hasn't explicitly been set, use the format
+			//of the Request.
+			if (!$this->format) {
+				$this->setFormat(Request::getInstance()->format());
+			}
+			//initial http header
 			header('HTTP/1.1 ' . $this->status_code . ' ' . $this->status_codes[$this->status_code]);
+			//set the content-type (format)
 			if (array_key_exists($this->format, $this->formats)) {
 				$this->header('Content-Type', $this->formats[$this->format]);
 			} else {
 				$this->header('Content-Type', $this->format);
 			}
+			//set any other headers that have been defined
 			foreach ($this->headers as $key => $value) {
 				header($key . ': ' . $value);
 			}
 		}
 	}
 
-	public function send() {
+	/**
+	 * Send $content as a Response. Headers will be sent if they
+	 * haven't already.
+	 */
+	public function send($content) {
 		$this->sendHeaders();
-		echo $this->body;
+		echo $content;
+	}
+
+	/**
+	 * Send $content as a Response, formatted to match the current
+	 * request using formatBody(). Headers will be sent if they
+	 * haven't already.
+	 */
+	public function sendFormatted($content) {
+		$this->send($this->formatBody($content));
 	}
 
 	/**
