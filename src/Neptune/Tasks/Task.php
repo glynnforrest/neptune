@@ -82,19 +82,19 @@ abstract class Task {
 		return $this->config->get('namespace', false);
 	}
 
-    /**
-     * Check if app, config, public and storage directories have been
-     * created.
-     */
-    protected function directoriesCreated() {
+	/**
+	 * Check if app, config, public and storage directories have been
+	 * created.
+	 */
+	protected function directoriesCreated() {
 		$dirs = array('app', 'config', 'public', 'storage/logs');
-        foreach ($dirs as $dir) {
-            if(!file_exists($dir)) {
-                $this->console->error('Not found: ' . $dir);
-                return false;
-            }
-        }
-        return true;
-    }
+		foreach ($dirs as $dir) {
+			if(!file_exists($dir)) {
+				$this->console->error('Not found: ' . $dir);
+				return false;
+			}
+		}
+		return true;
+	}
 
 }

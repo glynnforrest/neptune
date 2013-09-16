@@ -39,9 +39,10 @@ class Assets {
 
 
 	public function addJs($name, $src, $dependencies = array(), $options = array()) {
-		$this->js[$name] = array('src' => $this->createSrc($src),
-								 'deps' => (array) $dependencies,
-								 'opts' => (array) $options);
+		$this->js[$name] = array(
+			'src' => $this->createSrc($src),
+			'deps' => (array) $dependencies,
+			'opts' => (array) $options);
 	}
 
 	public function removeJs($name) {
@@ -58,9 +59,10 @@ class Assets {
 	}
 
 	public function addCss($name, $src, $dependencies = array(), $options = array()) {
-		$this->css[$name] = array('src' => $this->createSrc($src),
-								  'deps' => (array) $dependencies,
-								  'opts' => (array) $options);
+		$this->css[$name] = array(
+			'src' => $this->createSrc($src),
+			'deps' => (array) $dependencies,
+			'opts' => (array) $options);
 	}
 
 	public function removeCss($name) {

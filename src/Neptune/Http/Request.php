@@ -144,7 +144,7 @@ class Request {
 
 	/**
 	 * Get the value of $_GET['$key'].
-     * If no key is specified the entire $_GET array will be returned.
+	 * If no key is specified the entire $_GET array will be returned.
 	 * $default will be returned (null unless specified) if
 	 * $_GET[$key] doesn't exist.
 	 */
@@ -157,7 +157,7 @@ class Request {
 
 	/**
 	 * Get the value of $_POST['$key'].
-     * If no key is specified the entire $_POST array will be returned.
+	 * If no key is specified the entire $_POST array will be returned.
 	 * $default will be returned (null unless specified) if
 	 * $_POST[$key] doesn't exist.
 	 */

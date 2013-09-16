@@ -29,8 +29,8 @@ class SetupTask extends Task {
 
 	public function run($args = array()) {
 		$this->structure();
-        $t = new ConfigTask();
-        $t->run();
+		$t = new ConfigTask();
+		$t->run();
 		$this->scaffold();
 		$this->versionControl();
 	}

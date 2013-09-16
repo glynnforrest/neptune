@@ -17,8 +17,8 @@ class MemcachedDriver implements CacheDriver {
 
 	public function __construct(array $config) {
 		if(!isset($config['host']) |
-		   !isset($config['port']) |
-		   !isset($config['prefix'])) {
+		!isset($config['port']) |
+		!isset($config['prefix'])) {
 			throw new ConfigKeyException('Incorrect credentials
 		supplied to memcached cache driver');
 		}
