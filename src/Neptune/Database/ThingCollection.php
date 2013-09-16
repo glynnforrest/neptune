@@ -33,6 +33,10 @@ class ThingCollection implements Iterator, ArrayAccess, Countable {
 		}
 	}
 
+	public function __toString() {
+		return get_class($this) . ' with ' . count($this->objects) . ' objects.';
+	}
+
 	public function save($recursive = false) {
 		if ($this->stored) {
 			if (!empty($this->modified)) {
@@ -76,9 +80,9 @@ class ThingCollection implements Iterator, ArrayAccess, Countable {
 				}
 			}
 			$this->modified = array();
-				$this->modified = array();
-				$this->stored = true;
-				return true;
+			$this->modified = array();
+			$this->stored = true;
+			return true;
 		}
 		return false;
 	}
@@ -211,6 +215,12 @@ class ThingCollection implements Iterator, ArrayAccess, Countable {
 		return count($this->objects);
 	}
 
-}
+	public function getLast() {
+		return end($this->objects);
+	}
 
-?>
+	public function getFirst() {
+		return $this->objects[0];
+	}
+
+}
