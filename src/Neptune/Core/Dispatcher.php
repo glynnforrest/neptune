@@ -22,6 +22,7 @@ class Dispatcher {
 	protected $request;
 	protected $matched_url;
 	protected $other;
+	protected $prefix;
 
 	protected function __construct() {
 		$this->request = Request::getInstance();
@@ -38,6 +39,10 @@ class Dispatcher {
 	 * Create a new Route for the Dispatcher to handle with $url.
 	 */
 	public function route($url, $controller = null, $method = null, $args = null) {
+		//substitute prefix as required
+		if($this->prefix) {
+			$url = str_replace(':prefix', $this->prefix, $url);
+		}
 		//add a slash if the given url doesn't start with one
 		if(substr($url, 0, 1) !== '/' && $url !== '.*') {
 			$url = '/' . $url;
@@ -196,4 +201,25 @@ class Dispatcher {
 		return $this->other;
 	}
 
+	/**
+	 * Set the prefix on all future routes. :prefix is substituted with the
+	 * prefix string in the route url.
+	 */
+	public function setPrefix($prefix) {
+		//remove leading and trailing slashes if present
+		if(substr($prefix, 0, 1) == '/') {
+			$prefix = substr($prefix, 1);
+		}
+		if(substr($prefix, -1) == '/') {
+			$prefix = substr($prefix, 0, -1);
+		}
+		$this->prefix = $prefix;
+	}
+
+	/**
+	 * Get the prefix for route urls.
+	 **/
+	public function getPrefix() {
+		return $this->prefix;
+	}
 }

@@ -111,4 +111,27 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($d->go('/test'));
     }
 
+	public function testSetPrefix() {
+		$d = Dispatcher::getInstance();
+		$d->setPrefix('admin');
+		$this->assertEquals('admin', $d->getPrefix());
+	}
+
+	public function testSetPrefixRemovesSlashes() {
+		$d = Dispatcher::getInstance();
+		$d->setPrefix('one/');
+		$this->assertEquals('one', $d->getPrefix());
+		$d->setPrefix('/two');
+		$this->assertEquals('two', $d->getPrefix());
+		$d->setPrefix('/three/');
+		$this->assertEquals('three', $d->getPrefix());
+	}
+
+	public function testPrefixIsAppliedToRoutes() {
+		$d = Dispatcher::getInstance();
+		$d->setPrefix('admin/');
+		$route = $d->route(':prefix/login');
+		$this->assertEquals('/admin/login', $route->getUrl());
+	}
+
 }
