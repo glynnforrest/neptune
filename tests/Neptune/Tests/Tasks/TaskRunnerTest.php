@@ -104,7 +104,7 @@ class TaskRunnerTest extends \PHPUnit_Framework_TestCase {
 			'flags' => array(),
 		);
 		$this->assertEquals($expected, $t->parse(''));
-		$this->assertEquals($expected, $t->parse('   '));
+		$this->assertEquals($expected, $t->parse('	 '));
 	}
 
 

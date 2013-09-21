@@ -25,10 +25,10 @@ class StringTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('oNe-TwO-THREE-four', String::slugify('oNe TwO THREE+four', false));
 	}
 
-public function testSlugifyWithDifferentSeparator() {
-    $this->assertEquals('url_with_characters_removed', String::slugify('Url with??> characters_removed;;\';;', true, '_'));
+	public function testSlugifyWithDifferentSeparator() {
+		$this->assertEquals('url_with_characters_removed', String::slugify('Url with??> characters_removed;;\';;', true, '_'));
 		$this->assertEquals('oNe_TwO_THREE_four', String::slugify('oNe TwO THREE+four', false, '_'));
-}
+	}
 
 	public function testCamelCase() {
 		$this->assertEquals('ClassName', String::camelCase('class name'));
@@ -94,7 +94,7 @@ public function testSlugifyWithDifferentSeparator() {
 		$this->assertEquals('monkeys', String::plural('monkey'));
 		$this->assertEquals('shoes', String::plural('shoe'));
 		$this->assertEquals('messages', String::plural('message'));
-        $this->assertEquals('geese', String::plural('goose'));
+		$this->assertEquals('geese', String::plural('goose'));
 	}
 
 	public function testSingle() {
@@ -124,17 +124,16 @@ public function testSlugifyWithDifferentSeparator() {
 	}
 
 	public function testJoinList() {
-		$this->assertEquals('one, two, three',
-							String::joinList(array('one', 'two', 'three')));
-		$this->assertEquals('one',
-							String::joinList(array('one')));
-		$this->assertEquals('one | two | three | four',
-							String::joinList(array('one', 'two', 'three', 'four'), ' | '));
-		$this->assertEquals('number one, number two',
-							String::joinList(array('one', 'two'), ', ', 'number '));
-		$this->assertEquals('`one`, `two`',
-							String::joinList(array('one', 'two'), ', ', '`', '`'));
+		$actual = String::joinList(array('one', 'two', 'three'));
+		$this->assertEquals('one, two, three', $actual);
+		$actual = String::joinList(array('one'));
+		$this->assertEquals('one', $actual);
+		$actual = String::joinList(array('one', 'two', 'three', 'four'),' | ');
+		$this->assertEquals('one | two | three | four', $actual);
+		$actual = String::joinList(array('one', 'two'), ', ', 'number ');
+		$this->assertEquals('number one, number two', $actual);
+		$actual = String::joinList(array('one', 'two'), ', ', '`', '`');
+		$this->assertEquals('`one`, `two`', $actual);
 	}
-
 
 }
