@@ -134,4 +134,12 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('/admin/login', $route->getUrl());
 	}
 
+	public function testGetRoutes() {
+		$d = Dispatcher::getInstance();
+		$d->catchAll('foo');
+		$routes = $d->getRoutes();
+		$this->assertEquals('.*', $routes[0]->getUrl());
+		$this->assertTrue($routes[0] instanceof Route);
+	}
+
 }

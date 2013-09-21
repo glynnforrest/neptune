@@ -88,6 +88,13 @@ class Dispatcher {
 		return $this->route($url, $controller, $method, $args)->format('any');
 	}
 
+	/**
+	 * Return all defined routes in an array.
+	 */
+	public function getRoutes() {
+		return array_values($this->routes);
+	}
+
 	public function clearRoutes() {
 		$this->routes = array();
 		return $this;
