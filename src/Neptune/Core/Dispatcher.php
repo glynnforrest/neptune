@@ -83,6 +83,39 @@ class Dispatcher {
 		return $this->routes[$url];
 	}
 
+	/**
+	 * Load all routes defined in the routes.php file in $module_name.
+	 * $prefix will be used as the url prefix if specified, otherwise
+	 * $module_name will be used.
+	 */
+	public function routeModule($module_name, $prefix = null) {
+		//store current globals and prefix so they aren't used in
+		//routes.php and can be restored later
+		$old_globals = $this->globals;
+		$old_prefix = $this->prefix;
+
+		// set prefix as the one we've been given
+		$this->setPrefix($module_name);
+
+		//include routes.php file
+		$neptune = Config::load('neptune');
+		$routes_file = $neptune->getRequired('dir.root')
+			. $neptune->getRequired('modules.' . $module_name)
+			. 'routes.php';
+		$routes = include($routes_file);
+
+		//routes.php should have a returned a function that we can
+		//call with this Dispatcher instance as an argument. If not,
+		//error out
+		if(!is_callable($routes)) {
+			throw new \Exception(
+				$routes_file . ' does not return a callable function.');
+		}
+		$routes($this);
+		//reset the prefix name and the globals as what they were before
+		$this->setPrefix($old_prefix);
+	}
+
 	public function catchAll($controller, $method ='index', $args = null) {
 		$url = '.*';
 		return $this->route($url, $controller, $method, $args)->format('any');

@@ -138,8 +138,51 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$d = Dispatcher::getInstance();
 		$d->catchAll('foo');
 		$routes = $d->getRoutes();
-		$this->assertEquals('.*', $routes[0]->getUrl());
 		$this->assertTrue($routes[0] instanceof Route);
+		$this->assertEquals('.*', $routes[0]->getUrl());
+	}
+
+	protected function setupTestModule($name) {
+		//a simple routes.php is in the etc/ directory
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', __DIR__ . '/');
+		$neptune->set('modules.' . $name, 'etc/');
+	}
+
+	public function testAddModuleSetsPrefix() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('foo');
+		//routes.php defines a route with '/:prefix/login
+		$d->routeModule('foo');
+		$routes = $d->getRoutes();
+		$this->assertTrue($routes[0] instanceof Route);
+		$this->assertEquals('/foo/login', $routes[0]->getUrl());
+	}
+
+	public function testAddModuleSetsDefinedPrefix() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('foo');
+		$d->routeModule('foo', 'different_prefix');
+		$routes = $d->getRoutes();
+		$this->assertTrue($routes[0] instanceof Route);
+		$this->assertEquals('/different_prefix/login', $routes[0]->getUrl());
+	}
+
+	public function testAddModuleDoesNotChangeGlobals() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('bar');
+		$before = $d->globals()->controller('foo');
+		$d->routeModule('bar');
+		$after = $d->globals();
+		$this->assertSame($before, $after);
+	}
+
+	public function testAddModuleDoesNotChangePrefix() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('bar');
+		$d->setPrefix('prefix_before');
+		$d->routeModule('bar');
+		$this->assertSame('prefix_before', $d->getPrefix());
 	}
 
 }
