@@ -18,6 +18,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		Dispatcher::getInstance()->clearRoutes()->clearGlobals();
 	}
 
+	public function tearDown() {
+		Config::unload();
+	}
+
 	public function testRouteReturnsRoute() {
 		$r = Dispatcher::getInstance()->route('/url');
 		$this->assertTrue($r instanceof Route);
@@ -63,7 +67,6 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				array('css/test')
 			),
 			$r->getAction());
-		Config::unload();
 	}
 
 	public function testRouteAssetsMissingSlashes() {
@@ -80,7 +83,6 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 				array('lib/js/test')
 			),
 			$r->getAction());
-		Config::unload();
 	}
 
 	public function testGoReturnsControllerResponse() {
@@ -142,7 +144,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('.*', $routes[0]->getUrl());
 	}
 
-	protected function setupTestModule($name) {
+	protected function setUpTestModule($name) {
 		//a simple routes.php is in the etc/ directory
 		$neptune = Config::create('neptune');
 		$neptune->set('dir.root', __DIR__ . '/');
@@ -151,7 +153,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleSetsPrefix() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('foo');
+		$this->setUpTestModule('foo');
 		//routes.php defines a route with '/:prefix/login
 		$d->routeModule('foo');
 		$routes = $d->getRoutes();
@@ -161,7 +163,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleSetsDefinedPrefix() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('foo');
+		$this->setUpTestModule('foo');
 		$d->routeModule('foo', 'different_prefix');
 		$routes = $d->getRoutes();
 		$this->assertTrue($routes[0] instanceof Route);
@@ -170,7 +172,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleHasLocalGlobals() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('foo');
+		$this->setUpTestModule('foo');
 		$d->routeModule('foo');
 		$routes = $d->getRoutes();
 		$route = $routes[0];
@@ -181,7 +183,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleDoesNotChangeGlobals() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('bar');
+		$this->setUpTestModule('bar');
 		$before = $d->globals()->controller('foo');
 		$d->routeModule('bar');
 		$after = $d->globals();
@@ -194,7 +196,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleDefinesNewGlobals() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('admin');
+		$this->setUpTestModule('admin');
 		$d->globals()->args(array('globals' => 'very_yes'));
 		$d->routeModule('admin');
 		$routes = $d->getRoutes();
@@ -207,7 +209,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testAddModuleDoesNotChangePrefix() {
 		$d = Dispatcher::getInstance();
-		$this->setupTestModule('bar');
+		$this->setUpTestModule('bar');
 		$d->setPrefix('prefix_before');
 		$d->routeModule('bar');
 		$this->assertSame('prefix_before', $d->getPrefix());
