@@ -199,10 +199,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$d->routeModule('admin');
 		$routes = $d->getRoutes();
 		$route = $routes[0];
-		$route->test('admin/login');
+		$route->test('/admin/login');
 		$action = $route->getAction();
 		$args = $action[2];
-		$this->assertEquals(null, $args);
+		$this->assertEquals(array(), $args);
 	}
 
 	public function testAddModuleDoesNotChangePrefix() {

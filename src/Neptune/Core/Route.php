@@ -4,6 +4,8 @@ namespace Neptune\Core;
 
 use Neptune\Http\Request;
 use Neptune\Validate\Validator;
+use Neptune\Core\RouteUntestedException;
+use Neptune\Core\RouteExceptionException;
 
 /**
  * Route
@@ -25,7 +27,7 @@ class Route {
 	protected $default_args = array();
 	protected $http_methods = array();
 	protected $request;
-	protected $passed;
+	protected $tested, $passed;
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
 		$this->url($url);
@@ -119,6 +121,7 @@ class Route {
 
 	//$source should begin with a forward slash
 	public function test($source) {
+		$this->tested = true;
 		//Strip any trailing slashes from the source,
 		//only if it's longer than 1 character (a single slash)
 		if(strlen($source) > 1) {
@@ -215,7 +218,13 @@ class Route {
 	}
 
 	public function getAction() {
-		return $this->passed ? array($this->controller, $this->method, (array) $this->args) : null;
+		if($this->passed) {
+			return array($this->controller, $this->method, (array) $this->args);
+		}
+		if(!$this->tested) {
+			throw new RouteUntestedException('Route untested, unable to get action.');
+		}
+		throw new RouteFailedException('Route failed, unable to get action.');
 	}
 
 }

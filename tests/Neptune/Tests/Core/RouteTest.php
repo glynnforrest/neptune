@@ -48,13 +48,23 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('foo', 'index', array(1)), $r->getAction());
 	}
 
-	public function testGetActionNullBeforeTest() {
+	public function testGetAction() {
 		$r = new Route('/hello', 'controller', 'method');
-		$this->assertNull($r->getAction());
-		$r->test('/fail');
-		$this->assertNull($r->getAction());
 		$r->test('/hello');
 		$this->assertNotNull($r->getAction());
+	}
+
+	public function testGetActionThrowsExceptionBeforeTest() {
+		$r = new Route('/hello', 'controller', 'method');
+		$this->setExpectedException('\\Neptune\\Core\\RouteUntestedException');
+		$r->getAction();
+	}
+
+	public function testGetActionThrowsExceptionWithFailedTest() {
+		$r = new Route('/hello', 'controller', 'method');
+		$r->test('/fails');
+		$this->setExpectedException('\\Neptune\\Core\\RouteFailedException');
+		$r->getAction();
 	}
 
 	public function testNamedArgs() {
