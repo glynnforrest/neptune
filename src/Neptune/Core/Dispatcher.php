@@ -93,9 +93,12 @@ class Dispatcher {
 		//routes.php and can be restored later
 		$old_globals = $this->globals;
 		$old_prefix = $this->prefix;
+		//reset globals so the module can define them
+		$this->globals = null;
 
-		// set prefix as the one we've been given
-		$this->setPrefix($module_name);
+		// set prefix as the one we've been given, or otherwise the
+		// name of the module
+		$this->setPrefix($prefix ? $prefix : $module_name);
 
 		//include routes.php file
 		$neptune = Config::load('neptune');
@@ -114,6 +117,8 @@ class Dispatcher {
 		$routes($this);
 		//reset the prefix name and the globals as what they were before
 		$this->setPrefix($old_prefix);
+		$this->globals = $old_globals;
+		return true;
 	}
 
 	public function catchAll($controller, $method ='index', $args = null) {

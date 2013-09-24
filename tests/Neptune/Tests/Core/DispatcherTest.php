@@ -168,6 +168,17 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('/different_prefix/login', $routes[0]->getUrl());
 	}
 
+	public function testAddModuleHasLocalGlobals() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('foo');
+		$d->routeModule('foo');
+		$routes = $d->getRoutes();
+		$route = $routes[0];
+		$this->assertTrue($route->test('/foo/login'));
+		$action = $route->getAction();
+		$this->assertEquals('foo_module_controller', $action[0]);
+	}
+
 	public function testAddModuleDoesNotChangeGlobals() {
 		$d = Dispatcher::getInstance();
 		$this->setupTestModule('bar');
@@ -175,6 +186,23 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$d->routeModule('bar');
 		$after = $d->globals();
 		$this->assertSame($before, $after);
+		$route = $d->route('.*', null, 'some_method');
+		$this->assertTrue($route->test('anything'));
+		$action = $route->getAction();
+		$this->assertSame('foo', $action[0]);
+	}
+
+	public function testAddModuleDefinesNewGlobals() {
+		$d = Dispatcher::getInstance();
+		$this->setupTestModule('admin');
+		$d->globals()->args(array('globals' => 'very_yes'));
+		$d->routeModule('admin');
+		$routes = $d->getRoutes();
+		$route = $routes[0];
+		$route->test('admin/login');
+		$action = $route->getAction();
+		$args = $action[2];
+		$this->assertEquals(null, $args);
 	}
 
 	public function testAddModuleDoesNotChangePrefix() {
