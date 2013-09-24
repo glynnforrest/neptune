@@ -1,6 +1,6 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Routing;
 
 /**
  * RouteUntestedException

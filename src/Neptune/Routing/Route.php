@@ -1,11 +1,11 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Routing;
 
 use Neptune\Http\Request;
 use Neptune\Validate\Validator;
-use Neptune\Core\RouteUntestedException;
-use Neptune\Core\RouteExceptionException;
+use Neptune\Routing\RouteUntestedException;
+use Neptune\Routing\RouteExceptionException;
 
 /**
  * Route

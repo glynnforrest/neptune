@@ -1,6 +1,6 @@
 <?php
 
-namespace Neptune\Tests\Core;
+namespace Neptune\Tests\Routing;
 
 use Neptune\Controller\Controller;
 

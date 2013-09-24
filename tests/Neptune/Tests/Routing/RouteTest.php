@@ -1,8 +1,8 @@
 <?php
 
-namespace Neptune\Tests\Core;
+namespace Neptune\Tests\Routing;
 
-use Neptune\Core\Route;
+use Neptune\Routing\Route;
 use Neptune\Http\Request;
 
 require_once __DIR__ . '/../../../bootstrap.php';
@@ -56,14 +56,14 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetActionThrowsExceptionBeforeTest() {
 		$r = new Route('/hello', 'controller', 'method');
-		$this->setExpectedException('\\Neptune\\Core\\RouteUntestedException');
+		$this->setExpectedException('\\Neptune\\Routing\\RouteUntestedException');
 		$r->getAction();
 	}
 
 	public function testGetActionThrowsExceptionWithFailedTest() {
 		$r = new Route('/hello', 'controller', 'method');
 		$r->test('/fails');
-		$this->setExpectedException('\\Neptune\\Core\\RouteFailedException');
+		$this->setExpectedException('\\Neptune\\Routing\\RouteFailedException');
 		$r->getAction();
 	}
 

@@ -1,7 +1,8 @@
 <?php
 
-namespace Neptune\Core;
+namespace Neptune\Routing;
 
+use Neptune\Core\Config;
 use Neptune\View\View;
 use Neptune\Http\Request;
 use Neptune\Cache\CacheFactory;
@@ -194,7 +195,7 @@ class Dispatcher {
 		if (class_exists($actions[0])) {
 			$c = new $actions[0]();
 			try {
-				set_error_handler('\Neptune\Core\Dispatcher::missingArgsHandler');
+				set_error_handler('\Neptune\Routing\Dispatcher::missingArgsHandler');
 				ob_start();
 				//$body is the return from the controller. $other is
 				//anything captured by output buffering, like echo and

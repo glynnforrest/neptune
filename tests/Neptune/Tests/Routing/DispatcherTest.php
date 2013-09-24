@@ -1,10 +1,10 @@
 <?php
 
-namespace Neptune\Tests\Core;
+namespace Neptune\Tests\Routing;
 
 use Neptune\Core\Config;
-use Neptune\Core\Dispatcher;
-use Neptune\Core\Route;
+use Neptune\Routing\Dispatcher;
+use Neptune\Routing\Route;
 
 include __DIR__ . ('/../../../bootstrap.php');
 
@@ -87,7 +87,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGoReturnsControllerResponse() {
 		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'index');
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'index');
 		$this->assertEquals('test route', $d->go('/test'));
 	}
 
@@ -95,7 +95,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	//but still available after the request
 	public function testOtherContent() {
 		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'withEcho');
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'withEcho');
 		$this->assertEquals('return value', $d->go('/test'));
 		$this->assertEquals('hello from echo', $d->getOther());
 	}
@@ -103,13 +103,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	//if no response is provided, output buffered content will be used
 	public function testEchoWhenNoControllerResponse() {
 		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'echos');
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'echos');
 		$this->assertEquals('testing', $d->go('/test'));
 	}
 
 	public function testNoResponse() {
 		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Core\\TestController', 'nothing');
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'nothing');
 		$this->assertFalse($d->go('/test'));
 	}
 
