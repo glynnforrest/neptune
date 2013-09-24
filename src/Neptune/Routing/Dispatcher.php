@@ -2,6 +2,7 @@
 
 namespace Neptune\Routing;
 
+use Neptune\Routing\Route;
 use Neptune\Core\Config;
 use Neptune\View\View;
 use Neptune\Http\Request;

@@ -22,6 +22,10 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
 		$this->obj = Response::getInstance();
 	}
 
+	public function tearDown() {
+		Request::getInstance()->resetStoredVars();
+	}
+
 	public function testFormatView() {
 		$content = View::loadAbsolute(null);
 		$expected = View::loadAbsolute(null);
