@@ -50,17 +50,23 @@ class Route {
 	}
 
 	public function controller($controller) {
-		$this->controller = $controller;
+		if($controller) {
+			$this->controller = $controller;
+		}
 		return $this;
 	}
 
 	public function method($method) {
-		$this->method = $method;
+		if($method) {
+			$this->method = $method;
+		}
 		return $this;
 	}
 
 	public function args($args) {
-		$this->args = $args;
+		if($args) {
+			$this->args = $args;
+		}
 		return $this;
 	}
 
@@ -213,5 +219,3 @@ class Route {
 	}
 
 }
-
-?>

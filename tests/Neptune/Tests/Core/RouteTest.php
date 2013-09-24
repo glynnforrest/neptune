@@ -232,7 +232,34 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test('/route/test.css/suffix/just/because'));
 		$this->assertEquals(array('Foo', 'bar', array('arg' => 'test.css')),
 							$r->getAction());
+	}
 
+	public function testControllerNullNotApplied() {
+		$r = new Route('.*', 'controller', 'method');
+		$r->controller(null);
+		$r->test('anything');
+		$action = $r->getAction();
+		$controller = $action[0];
+		$this->assertEquals('controller', $controller);
+	}
+
+	public function testMethodNullNotApplied() {
+		$r = new Route('.*', 'controller', 'method');
+		$r->method(null);
+		$r->test('anything');
+		$action = $r->getAction();
+		$method = $action[1];
+		$this->assertEquals('method', $method);
+	}
+
+	public function testArgsNullNotApplied() {
+		$args = array('foo' => 'bar');
+		$r = new Route('.*', 'controller', 'method', $args);
+		$r->args(null);
+		$r->test('anything');
+		$action = $r->getAction();
+		$actual_args = $action[2];
+		$this->assertEquals($args, $actual_args);
 	}
 
 }
