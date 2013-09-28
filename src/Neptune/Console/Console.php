@@ -2,6 +2,8 @@
 
 namespace Neptune\Console;
 
+use Neptune\Console\ConsoleException;
+
 /**
  * Console
  * @author Glynn Forrest me@glynnforrest.com
@@ -109,14 +111,17 @@ class Console {
 		$this->prompt_suffix = $string;
 	}
 
-
 	/**
 	 * Create a string combining a prompt and an array of
 	 * options, indexed with numbers for easy selection.
 	 */
 	public function options(array $options, $prompt = null) {
-		$prompt .= ' [';
 		$count = count($options) - 1;
+		if($count < 0) {
+			throw new ConsoleException(
+				'Empty $options array given to Console::options().');
+		}
+		$prompt .= ' [';
 		for ($i = 0; $i < $count; $i++) {
 			$prompt .= $i . ':' . $options[$i] . ', ';
 		};
@@ -158,7 +163,5 @@ class Console {
 		}
 		return $prompt;
 	}
-
-
 
 }
