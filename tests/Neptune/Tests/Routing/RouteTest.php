@@ -272,4 +272,54 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($args, $actual_args);
 	}
 
+	public function testGetResultPassed() {
+		$r = new Route('/url', 'controller', 'method');
+		$this->assertTrue($r->test('/url'));
+		$this->assertSame(Route::PASSED, $r->getResult());
+	}
+
+	public function testGetResultUntested() {
+		$r = new Route('.*');
+		$this->assertSame(Route::UNTESTED, $r->getResult());
+	}
+
+	public function testGetResultFailedRegexp() {
+		$r = new Route('/some_url');
+		$this->assertFalse($r->test('/something'));
+		$this->assertSame(Route::FAILURE_REGEXP, $r->getResult());
+	}
+
+	public function testGetResultFailedHttpMethod() {
+		$r = new Route('.*');
+		$r->httpMethod('post');
+		$this->assertFalse($r->test('/something'));
+		$this->assertSame(Route::FAILURE_HTTP_METHOD, $r->getResult());
+	}
+
+	public function testGetResultFailedFormat() {
+		$r = new Route('.*');
+		$r->format('json');
+		$this->assertFalse($r->test('/something'));
+		$this->assertSame(Route::FAILURE_FORMAT, $r->getResult());
+	}
+
+	public function testGetResultFailedController() {
+		$r = new Route('/url');
+		$this->assertFalse($r->test('/url'));
+		$this->assertSame(Route::FAILURE_CONTROLLER, $r->getResult());
+	}
+
+	public function testGetResultFailedMethod() {
+		$r = new Route('/url', 'controller');
+		$this->assertFalse($r->test('/url'));
+		$this->assertSame(Route::FAILURE_METHOD, $r->getResult());
+	}
+
+	public function testGetResultFailedValidation() {
+		$r = new Route('/foo/bar/:message');
+		$r->controller('foo')->method('bar');
+		$r->rules(array('message' => 'alpha'));
+		$this->assertFalse($r->test('/foo/bar/baz1'));
+	}
+
 }

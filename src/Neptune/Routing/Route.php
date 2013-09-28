@@ -19,6 +19,15 @@ class Route {
 	const ARGS_EXPLODE = 0;
 	const ARGS_SINGLE = 1;
 
+	const PASSED = 1;
+	const UNTESTED = 2;
+	const FAILURE_REGEXP = 3;
+	const FAILURE_HTTP_METHOD = 4;
+	const FAILURE_FORMAT = 5;
+	const FAILURE_CONTROLLER = 6;
+	const FAILURE_METHOD = 7;
+	const FAILURE_VALIDATION = 8;
+
 	protected $regex, $controller, $method;
 	protected $format, $catch_all, $args_format, $url;
 	protected $args = array();
@@ -27,7 +36,7 @@ class Route {
 	protected $default_args = array();
 	protected $http_methods = array();
 	protected $request;
-	protected $tested, $passed;
+	protected $result;
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
 		$this->url($url);
@@ -35,6 +44,7 @@ class Route {
 		$this->method = $method;
 		$this->args = $args;
 		$this->request = Request::getInstance();
+		$this->result = self::UNTESTED;
 	}
 
 	protected function generateRegex($regex) {
@@ -121,18 +131,19 @@ class Route {
 
 	//$source should begin with a forward slash
 	public function test($source) {
-		$this->tested = true;
 		//Strip any trailing slashes from the source,
 		//only if it's longer than 1 character (a single slash)
 		if(strlen($source) > 1) {
 			$source = rtrim($source, '/');
 		}
 		if (!preg_match($this->regex, $source, $vars)) {
+			$this->result = self::FAILURE_REGEXP;
 			return false;
 		}
 		//Check if the request method is supported by this route.
 		if ($this->http_methods) {
 			if (!in_array($this->request->method(), $this->http_methods)) {
+				$this->result = self::FAILURE_HTTP_METHOD;
 				return false;
 			}
 		}
@@ -140,11 +151,13 @@ class Route {
 		if ($this->format) {
 			if (!in_array($this->request->format(), $this->format)) {
 				if (!in_array('any', $this->format)) {
+					$this->result = self::FAILURE_FORMAT;
 					return false;
 				}
 			}
 		} else {
 			if ($this->request->format() !== 'html') {
+				$this->result = self::FAILURE_FORMAT;
 				return false;
 			}
 		}
@@ -156,7 +169,12 @@ class Route {
 			$vars['method'] = $this->method;
 		}
 		//should have a controller and function by now.
-		if (!$vars['controller'] | !$vars['method']) {
+		if (!$vars['controller']) {
+			$this->result = self::FAILURE_CONTROLLER;
+			return false;
+		}
+		if (!$vars['method']) {
+			$this->result = self::FAILURE_METHOD;
 			return false;
 		}
 		//process the transforms.
@@ -213,18 +231,32 @@ class Route {
 		if(!empty($args)) {
 			$this->args = $args;
 		}
-		$this->passed = true;
+		$this->result = self::PASSED;
 		return true;
 	}
 
 	public function getAction() {
-		if($this->passed) {
+		if($this->result === self::PASSED) {
 			return array($this->controller, $this->method, (array) $this->args);
 		}
-		if(!$this->tested) {
+		if($this->result === self::UNTESTED) {
 			throw new RouteUntestedException('Route untested, unable to get action.');
 		}
 		throw new RouteFailedException('Route failed, unable to get action.');
+	}
+
+	/**
+	 * Return the result code of this Route:
+	 *
+	 * Route::PASSED if the Route has been tested and is passing.
+	 * Route::UNTESTED if the Route has not been tested.
+	 * Route::FAILURE_<reason> if the Route failed testing because of
+	 * <reason>.
+	 *
+	 * @return int The result code.
+	 */
+	public function getResult() {
+		return $this->result;
 	}
 
 }
