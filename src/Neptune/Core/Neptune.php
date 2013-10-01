@@ -8,7 +8,8 @@ use Neptune\Core\Events;
 class Neptune {
 
 	protected static $instance;
-	protected $registry = array();
+	protected $components = array();
+	protected $singletons = array();
 
 	protected function __construct() {
 	}
@@ -20,19 +21,40 @@ class Neptune {
 		return self::$instance;
 	}
 
-	public static function set($key, $value) {
-		self::getInstance()->registry[$key] = $value;
+	public function set($name, $function) {
+		$this->components[$name] = $function;
 	}
 
-	public static function get($key) {
-		$me = self::getInstance();
-		if (isset($me->registry[$key])) {
-			if(is_callable($me->registry[$key])) {
-				return $me->registry[$key]();
-			}
-			return $me->registry[$key];
+	public function setSingleton($name, $function) {
+		$this->components[$name] = $function;
+		$this->singletons[$name] = null;
+	}
+
+	/**
+	 * Get an instance of component $name. If $name was set as a
+	 * singleton the same instance will be returned, otherwise a new
+	 * instance will be created.
+	 */
+	public function get($name) {
+		if(!isset($this->components[$name])) {
+			throw new ComponentException(
+				"Component not registered: $component"
+			);
 		}
-		return null;
+		if(isset($this->singletons[$name])) {
+			return $this->singletons[$name];
+		}
+		if(!is_callable($this->components[$name])) {
+			throw new ComponentException(
+				"Registered component is not a callable function:
+				$component"
+			);
+		}
+		$component = $this->components[$name]();
+		if(array_key_exists($name, $this->singletons) && is_null($this->singletons[$name])) {
+			$this->singletons[$name] = $component;
+		}
+		return $component;
 	}
 
 	public static function handleErrors() {
@@ -49,5 +71,3 @@ class Neptune {
 	}
 
 }
-
-?>

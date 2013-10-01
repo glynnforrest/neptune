@@ -13,44 +13,34 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
-	public function tearDown() {
-		Config::unload();
+	public function setUp() {
+		$this->neptune = Neptune::getInstance();
 	}
 
-	public function testSetAndGet() {
-		Neptune::set('key', 'value');
-		$this->assertEquals('value', Neptune::get('key'));
-	}
-
-	public function testSimpleClass() {
-		$class = new \stdClass();
-		$class->foo = 'hello';
-		Neptune::set('test', $class);
-		$this->assertEquals($class, Neptune::get('test'));
-	}
-
-	public function testGetReturnsNull() {
-		$this->assertNull(Neptune::get('foo'));
-	}
-
-	public function testFunctionIsCalled() {
-		Neptune::set('class', function() {
-			$class = new \stdClass();
-			$class->key = 'value';
-			return $class;
+	public function testGetAndSet() {
+		$this->neptune->set('my-component', function() {
+			return new \stdClass();
 		});
-		$this->assertEquals('value', Neptune::get('class')->key);
+		$component = $this->neptune->get('my-component');
+		$this->assertTrue($component instanceof \stdClass);
 	}
 
-	public function testFunctionNotCalledBeforeAccess() {
-		$c = Config::create('test');
-		$c->set('some_key', 'value');
-		Neptune::set('config_change', function() use ($c) {
-			$c->set('some_key', 'changed');
-			return 1;
+	public function testGetCreatesNewObjectEveryTime() {
+		$this->neptune->set('my-component', function() {
+			return new \stdClass();
 		});
-		$this->assertEquals('value', $c->get('some_key'));
-		$res = Neptune::get('config_change');
-		$this->assertEquals('changed', $c->get('some_key'));
+		$one = $this->neptune->get('my-component');
+		$two = $this->neptune->get('my-component');
+		$this->assertNotSame($one, $two);
 	}
+
+	public function testGetAndSetSingleton() {
+		$this->neptune->setSingleton('my-singleton', function() {
+			return new \stdClass();
+		});
+		$one = $this->neptune->get('my-singleton');
+		$two = $this->neptune->get('my-singleton');
+		$this->assertSame($one, $two);
+	}
+
 }
