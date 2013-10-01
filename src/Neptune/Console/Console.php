@@ -73,7 +73,7 @@ class Console {
 	 */
 	public function readOptions(array $options, $prompt = null, $default = null) {
 		$prompt = $this->options($options, $prompt);
-		while (true) {
+		while(true) {
 			$value = $this->read($prompt, $default);
 			if(in_array($value, $options)) {
 				return $value;
@@ -96,7 +96,7 @@ class Console {
 	 */
 	public function readYesNo($prompt = null) {
 		$prompt .= ' [Y]es, [N]o :';
-		while (true) {
+		while(true) {
 			$value = $this->read($prompt);
 			if(strtolower(substr($value, 0, 1)) === 'y') {
 				return true;

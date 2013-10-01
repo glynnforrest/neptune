@@ -207,7 +207,7 @@ class Config {
 			//neptune config not loaded
 			//rethrow a ConfigFileException with a more useful message
 			throw new ConfigFileException(
-				'Neptune config not loaded, unable to load modules.');
+				"Neptune config not loaded, unable to load module $name.");
 		}
 		//fetch the module path and load the config file
 		$module_config_file = $neptune->get('dir.root') . $neptune->getRequired('modules.' . $name) . 'config.php';

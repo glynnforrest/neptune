@@ -29,6 +29,9 @@ class Logger {
 		$this->save();
 	}
 
+	/**
+	 * Enable neptune logging.
+	 */
 	public static function enable() {
 		self::$enabled = true;
 	}
