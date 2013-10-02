@@ -4,6 +4,7 @@ namespace Neptune\Core;
 
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Core\Events;
+use Neptune\Core\ComponentException;
 
 class Neptune {
 
@@ -21,10 +22,18 @@ class Neptune {
 		return self::$instance;
 	}
 
+	/**
+	 * Create a component of $name, instantiated with $function.
+	 */
 	public function set($name, $function) {
 		$this->components[$name] = $function;
 	}
 
+	/**
+	 * Create a component of $name, instantiated with $function. A
+	 * single instance of the function result will be returned every
+	 * time.
+	 */
 	public function setSingleton($name, $function) {
 		$this->components[$name] = $function;
 		$this->singletons[$name] = null;
@@ -38,7 +47,7 @@ class Neptune {
 	public function get($name) {
 		if(!isset($this->components[$name])) {
 			throw new ComponentException(
-				"Component not registered: $component"
+				"Component not registered: $name"
 			);
 		}
 		if(isset($this->singletons[$name])) {
@@ -47,7 +56,7 @@ class Neptune {
 		if(!is_callable($this->components[$name])) {
 			throw new ComponentException(
 				"Registered component is not a callable function:
-				$component"
+				$name"
 			);
 		}
 		$component = $this->components[$name]();
@@ -55,6 +64,15 @@ class Neptune {
 			$this->singletons[$name] = $component;
 		}
 		return $component;
+	}
+
+
+	/**
+	 * Remove all registered components.
+	 */
+	public function reset() {
+		$this->components = array();
+		$this->singletons = array();
 	}
 
 	public static function handleErrors() {

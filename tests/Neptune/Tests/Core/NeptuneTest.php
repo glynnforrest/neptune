@@ -13,8 +13,11 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
+	protected $neptune;
+
 	public function setUp() {
 		$this->neptune = Neptune::getInstance();
+		$this->neptune->reset();
 	}
 
 	public function testGetAndSet() {
@@ -23,6 +26,17 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 		});
 		$component = $this->neptune->get('my-component');
 		$this->assertTrue($component instanceof \stdClass);
+	}
+
+	public function testGetThrowsExceptionNotRegistered() {
+		$this->setExpectedException('\Neptune\Core\ComponentException');
+		$this->neptune->get('my-component');
+	}
+
+	public function testGetThrowsExceptionNotCallable() {
+		$this->neptune->set('my-component', 'no-a-function');
+		$this->setExpectedException('\Neptune\Core\ComponentException');
+		$this->neptune->get('my-component');
 	}
 
 	public function testGetCreatesNewObjectEveryTime() {
