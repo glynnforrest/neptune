@@ -3,6 +3,7 @@
 namespace Neptune\Model;
 
 use Neptune\Cache\Cacheable;
+use Neptune\Core\Neptune;
 
 /**
  * Model
@@ -12,8 +13,10 @@ class Model extends Cacheable {
 
 	protected static $models = array();
 	protected $database;
+	protected $neptune;
 
 	protected function __construct() {
+		$this->neptune = Neptune::getInstance();
 	}
 
 	public static function getInstance($database = false) {
@@ -30,6 +33,4 @@ class Model extends Cacheable {
 		$this->database = $database;
 	}
 
-
 }
-?>

@@ -7,6 +7,7 @@ use Neptune\Security\SecurityFactory;
 use Neptune\Http\Request;
 use Neptune\Http\Response;
 use Neptune\Assets\Assets;
+use Neptune\Core\Neptune;
 
 /**
  * Base Controller
@@ -16,6 +17,7 @@ abstract class Controller {
 	protected $request;
 	protected $response;
 	protected $before_called;
+	protected $neptune;
 
 	public function __call($method, $args) {
 		throw new MethodNotFoundException('Method not found: ' . $method);
@@ -24,6 +26,7 @@ abstract class Controller {
 	public function __construct() {
 		$this->request = Request::getInstance();
 		$this->response = Response::getInstance();
+		$this->neptune = Neptune::getInstance();
 	}
 
 	public function _runMethod($method, $args = array()) {
