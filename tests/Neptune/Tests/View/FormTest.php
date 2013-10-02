@@ -96,7 +96,7 @@ END;
 		$v = Form::create('/url');
 		$v->add('set', 'text', 'value');
 		$this->assertTrue(isset($v->set));
-		$this->assertFalse(isset($v->unset));
+		$this->assertFalse(isset($v->not_set));
 	}
 
 	public function testRenderException() {

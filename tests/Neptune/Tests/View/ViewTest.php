@@ -66,9 +66,9 @@ END;
 
 	public function testIsset() {
 		$v = View::load('some/file');
-		$v->var = 'value';
-		$this->assertTrue(isset($v->var));
-		$this->assertFalse(isset($v->unset));
+		$v->key = 'value';
+		$this->assertTrue(isset($v->key));
+		$this->assertFalse(isset($v->not_set));
 	}
 
 	public function testRenderException() {

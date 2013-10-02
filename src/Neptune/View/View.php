@@ -4,7 +4,6 @@ namespace Neptune\View;
 
 use Neptune\Exceptions\ViewNotFoundException;
 use Neptune\Core\Config;
-use Neptune\Core\Neptune;
 
 class View {
 	const EXTENSION = '.php';
@@ -28,17 +27,11 @@ class View {
 	}
 
 	public function get($key) {
-		return isset($this->vars[$key]) ? $this->vars[$key] : Neptune::get($key);
+		return isset($this->vars[$key]) ? $this->vars[$key] : null;
 	}
 
 	public function __isset($key) {
-		if (isset($this->vars[$key])) {
-			return true;
-		} elseif (Neptune::get($key)) {
-			return true;
-		} else {
-			return false;
-		}
+		return isset($this->vars[$key]) ? true : false;
 	}
 
 	public function setValues(array $values=array()) {
