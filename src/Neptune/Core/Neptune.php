@@ -66,13 +66,28 @@ class Neptune {
 		return $component;
 	}
 
-
 	/**
 	 * Remove all registered components.
 	 */
 	public function reset() {
 		$this->components = array();
 		$this->singletons = array();
+	}
+
+	/**
+	 * Load the environment $env. This will include the file
+	 * app/env/$env.php and call Config::loadEnv($env). If $env is not
+	 * defined, the value of the config key 'env' in
+	 * config/neptune.php will be used.
+	 */
+	public function loadEnv($env = null) {
+		$c = Config::load('neptune');
+		if(!$env) {
+			$env = $c->getRequired('env');
+		}
+		include $c->getRequired('dir.root') . 'app/env/' . $env . '.php';
+		Config::loadEnv($env);
+		return true;
 	}
 
 	public static function handleErrors() {
