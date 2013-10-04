@@ -20,13 +20,35 @@ class UploadHandler {
 	protected $scramble_length = 16;
 
 	public function __construct($name) {
-		if (isset($_FILES[$name])) {
-			$this->name = $name;
-			$this->filename = $_FILES[$name]['name'];
-			$this->location = $this->getDirectoryFromPath($_FILES[$name]['tmp_name']);
-			$this->extension = $this->getExtensionFromPath($_FILES[$name]['name']);
-		} else {
-			throw new \Exception("Uploaded file not found: $name");
+		$this->checkErrors($name);
+		$this->name = $name;
+		$this->filename = $_FILES[$name]['name'];
+		$this->location = $this->getDirectoryFromPath($_FILES[$name]['tmp_name']);
+		$this->extension = $this->getExtensionFromPath($_FILES[$name]['name']);
+	}
+
+	protected function checkErrors($name) {
+		$code = $_FILES[$name]['error'];
+		if($code === UPLOAD_ERR_OK) {
+			return true;
+		}
+		switch ($code) {
+		case UPLOAD_ERR_INI_SIZE:
+			throw new FileException("File exceeds the maximum file size.");
+		case UPLOAD_ERR_FORM_SIZE:
+			throw new FileException("File exceeds the maximum file size.");
+		case UPLOAD_ERR_PARTIAL:
+			throw new FileException("File was only partially uploaded.");
+		case UPLOAD_ERR_NO_FILE:
+			throw new FileException("No file submitted.");
+		case UPLOAD_ERR_NO_TMP_DIR:
+			throw new FileException("Unable to find temporary location for file.");
+		case UPLOAD_ERR_CANT_WRITE:
+			throw new FileException("Failed to write file $name to disk.");
+		case UPLOAD_ERR_EXTENSION:
+			throw new FileException("A PHP extension prevented the upload from succeeding.");
+		default:
+			throw new FileException("The upload failed.");
 		}
 	}
 
