@@ -5,7 +5,7 @@ namespace Neptune\Routing;
 use Neptune\Http\Request;
 use Neptune\Validate\Validator;
 use Neptune\Routing\RouteUntestedException;
-use Neptune\Routing\RouteExceptionException;
+use Neptune\Routing\RouteFailedException;
 
 /**
  * Route
@@ -235,6 +235,12 @@ class Route {
 		return true;
 	}
 
+	/**
+	 * @return array An array with the controller class, method and
+	 * arguments to run.
+	 * @throws RouteUntestedException
+	 * @throws RouteFailedException
+	 */
 	public function getAction() {
 		if($this->result === self::PASSED) {
 			return array($this->controller, $this->method, (array) $this->args);
