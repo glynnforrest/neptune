@@ -109,7 +109,8 @@ class UploadHandler {
 		case self::CHUNK_START:
 			$file_path = $this->getChunkUploadPath($file['name'], $directory);
 			if(move_uploaded_file ($file['tmp_name'], $file_path)) {
-				$this->chunks[] = $file_path;
+				$file['path'] = $file_path;
+				$this->chunks[] = $file;
 				return true;
 			} else {
 				throw new FileException(
@@ -120,7 +121,8 @@ class UploadHandler {
 			$file_path = $this->getChunkUploadPath($file['name'], $directory);
 			file_put_contents(
 				$file_path, fopen($file['tmp_name'], 'r'), FILE_APPEND);
-			$this->chunks[] = $file_path;
+			$file['path'] = $file_path;
+			$this->chunks[] = $file;
 			break;
 		case self::CHUNK_END:
 			$file_path = $this->getChunkUploadPath($file['name'], $directory);
@@ -128,12 +130,14 @@ class UploadHandler {
 				$file_path, fopen($file['tmp_name'], 'r'), FILE_APPEND);
 			$new_file_path = $this->getFreeUploadPath($file['name'], $directory);
 			rename($file_path, $new_file_path);
-			$this->completed[] = $new_file_path;
+			$file['path'] = $new_file_path;
+			$this->completed[] = $file;
 			break;
 		default:
 			$file_path = $this->getFreeUploadPath($file['name'], $directory);
 			if(move_uploaded_file ($file['tmp_name'], $file_path)) {
-				$this->completed[] = $file_path;
+				$file['path'] = $file_path;
+				$this->completed[] = $file;
 				return true;
 			} else {
 				throw new FileException(
@@ -203,7 +207,17 @@ class UploadHandler {
 
 	/**
 	 * Get all files that were successfully processed.
-	 * @return array An array of filenames.
+	 * @return array An array of files, each of which are an array
+	 * with the follwing format:.
+	 *
+	 * array (
+	 * 'name' => 'example.mp3',
+	 * 'type' => 'audio/mp3',
+	 * 'tmp_name' => '/tmp/phpvREVWv',
+	 * 'error' => 0,
+	 * 'size' => 1493811,
+	 * 'path' => '/full/path/to/example.mp3',
+	 * )
 	 */
 	public function getUploadedFiles() {
 		return array_merge($this->completed, $this->chunks);
@@ -211,7 +225,17 @@ class UploadHandler {
 
 	/**
 	 * Get all files that have only partially uploaded.
-	 * @return array An array of filenames.
+	 * @return array An array of files, each of which are an array
+	 * with the follwing format:.
+	 *
+	 * array (
+	 * 'name' => 'example.mp3',
+	 * 'type' => 'audio/mp3',
+	 * 'tmp_name' => '/tmp/phpvREVWv',
+	 * 'error' => 0,
+	 * 'size' => 1493811,
+	 * 'path' => '/full/path/to/example.mp3',
+	 * )
 	 */
 	public function getPartialFiles() {
 		return $this->chunks;
@@ -219,7 +243,17 @@ class UploadHandler {
 
 	/**
 	 * Get all files that have uploaded completely.
-	 * @return array An array of filenames.
+	 * @return array An array of files, each of which are an array
+	 * with the follwing format:.
+	 *
+	 * array (
+	 * 'name' => 'example.mp3',
+	 * 'type' => 'audio/mp3',
+	 * 'tmp_name' => '/tmp/phpvREVWv',
+	 * 'error' => 0,
+	 * 'size' => 1493811,
+	 * 'path' => '/full/path/to/example.mp3',
+	 * )
 	 */
 	public function getCompletedFiles() {
 		return $this->completed;
