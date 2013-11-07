@@ -9,6 +9,7 @@ class View {
 	const EXTENSION = '.php';
 
 	protected $vars = array();
+	//complete file path to the view template.
 	protected $view;
 
 	protected function __construct() {
@@ -60,7 +61,7 @@ class View {
 	public static function load($view, $vars = array(), $absolute = false) {
 		$class = get_called_class();
 		$me = new $class();
-		$me->setViewName($view, $absolute);
+		$me->setView($view, $absolute);
 		$me->setValues($vars);
 		return $me;
 	}
@@ -69,7 +70,15 @@ class View {
 		return self::load($view, $vars, true);
 	}
 
-	public function setViewName($view, $absolute = false) {
+	/**
+	 * Set the template file to use for this View instance. If
+	 * $absolute is true, $view will be treated as an absolute
+	 * path. Otherwise, $view will be appended to the values of
+	 * `dir.root` and `view.dir` in the neptune config file. If $view
+	 * contains a prefix (content before a #) then the config file
+	 * with that name will be used instead.
+	 */
+	public function setView($view, $absolute = false) {
 		if(!$absolute) {
 			$pos = strpos($view, '#');
 			if($pos) {
@@ -78,12 +87,16 @@ class View {
 			} else {
 				$view = Config::load()->getRequired('view.dir') . $view;
 			}
+			$view = Config::load('neptune')->getRequired('dir.root') . $view;
 		}
 		$view = $view . self::EXTENSION;
 		$this->view = $view;
 	}
 
-	public function getViewName() {
+	/**
+	 * Get the file path of the template for this View instance.
+	 */
+	public function getView() {
 		return $this->view;
 	}
 
@@ -97,5 +110,3 @@ class View {
 	}
 
 }
-
-?>

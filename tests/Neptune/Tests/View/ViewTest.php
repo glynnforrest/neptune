@@ -26,10 +26,15 @@ END;
 		$content .= '?>';
 		$temp = Temping::getInstance();
 		$temp->create($this->file, $content);
-		$c = Config::create('view');
-		$c->set('view.dir', $temp->getDirectory());
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', $temp->getDirectory());
+		$neptune->set('view.dir', 'views/');
 		$d = Config::create('prefix');
 		$d->set('view.dir', 'folder_prefix/');
+	}
+
+	protected function getMockPath($view_name, $view_dir = 'views/') {
+		return Temping::getInstance()->getDirectory() . $view_dir . $view_name;
 	}
 
 	public function tearDown() {
@@ -44,13 +49,14 @@ END;
 
 	public function testLoad() {
 		$v = View::load('some/file');
-		$expected = Temping::getInstance()->getDirectory() . 'some/file.php';
-		$this->assertEquals($expected, $v->getViewName());
+		$expected = $this->getMockPath('some/file.php');
+		$this->assertEquals($expected, $v->getView());
 	}
 
 	public function testLoadPrefix() {
 		$v = View::load('prefix#view');
-		$this->assertEquals('folder_prefix/view.php', $v->getViewName());
+		$expected = $this->getMockPath('view.php', 'folder_prefix/');
+		$this->assertEquals($expected, $v->getView());
 	}
 
 	public function testSetAndGet() {
