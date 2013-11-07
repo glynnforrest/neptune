@@ -148,9 +148,9 @@ class Config {
 	 * If $name is not specified, the first loaded config file will be
 	 * returned, or an exception thrown if no Config instances are
 	 * set.
-	 * If $override_name is specified and matches the name of a loaded
-	 * config file, the values will be overwritten with the values of
-	 * the new file.
+	 * If $override_name is supplied and matches the name of a loaded
+	 * config file, the values of that Config instance will be
+	 * overwritten with the values of the new file.
 	 */
 	public static function load($name = null, $filename = null, $override_name = null) {
 		if (array_key_exists($name, self::$instances)){
