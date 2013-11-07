@@ -27,13 +27,13 @@ class SkeletonTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue(Skeleton::loadAbsolute('dummy') instanceof Skeleton);
 	}
 
-	public function testSetViewName() {
+	public function testSetView() {
 		$skeleton = Skeleton::load('model');
 		$this->assertEquals('/root/to/neptune/skeletons/model.php',
-							$skeleton->getViewName());
+							$skeleton->getView());
 		$skeleton = Skeleton::loadAbsolute('/home/model');
 		$this->assertEquals('/home/model.php',
-							$skeleton->getViewName());
+							$skeleton->getView());
 	}
 
 

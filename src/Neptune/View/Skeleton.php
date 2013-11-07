@@ -39,10 +39,10 @@ class Skeleton extends View {
 
 	/**
 	 * Set the view used for this skeleton.
-	 * This overrides setViewName in View to look in the neptune
-	 * skeleton directory.
+	 * This overrides the setView method in View to look in the
+	 * neptune skeleton directory.
 	 */
-	public function setViewName($view, $absolute = false) {
+	public function setView($view, $absolute = false) {
 		if(!$absolute) {
 			$view = Config::load('neptune')
 				->getRequired('dir.neptune') . 'skeletons/' . $view;
