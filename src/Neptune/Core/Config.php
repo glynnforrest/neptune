@@ -68,7 +68,7 @@ class Config {
 	 * not found or does not contain an array.
 	 */
 	public function getFirst($key = null, $default = null) {
-		$array = self::get($key);
+		$array = $this->get($key);
 		if(!is_array($array)) {
 			return $default;
 		}
@@ -82,7 +82,7 @@ class Config {
 	 * the key is not found.
 	 */
 	public function getRequired($key) {
-		$value = self::get($key);
+		$value = $this->get($key);
 		if ($value) {
 			return $value;
 		}
@@ -111,7 +111,7 @@ class Config {
 	 * ConfigKeyException will be thrown if the key is not found.
 	 */
 	public function getFirstRequired($key) {
-		$value = self::getFirst($key);
+		$value = $this->getFirst($key);
 		if ($value) {
 			return $value;
 		}
