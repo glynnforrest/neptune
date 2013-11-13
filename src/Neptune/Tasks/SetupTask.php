@@ -80,6 +80,21 @@ class SetupTask extends Task {
 	}
 
 	/**
+	 * Setup the dir array in neptune.php. This is useful when
+	 * transferring a codebase to different directories and machines.
+	 */
+	public function dirs() {
+	//The neptune command runner sets dir.*, but for the life of the
+	//command only. Calling save on the neptune config instance makes
+	//these settings permanent.
+		$this->console->write('Setting dir.root to ' . $this->config->get('dir.root'));
+		$this->console->write('Setting dir.neptune to ' . $this->config->get('dir.neptune'));
+		$this->console->write('Setting dir.app to ' . $this->config->get('dir.app'));
+		$this->config->save();
+		$this->console->write('Saved config/neptune.php');
+	}
+
+	/**
 	 *
 	 **/
 	public function versionControl() {
