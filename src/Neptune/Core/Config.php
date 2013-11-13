@@ -90,6 +90,22 @@ class Config {
 	}
 
 	/**
+	* Get a directory path from the configuration value that matches
+	* $key. The value will be added to dir.root to form a complete
+	* directory path. If the value begins with a slash it will be
+	* treated as an absolute path and returned explicitly. A
+	* ConfigKeyException will be thrown if the path can't be resolved.
+	 */
+	public function getPath($key) {
+		$path = $this->getRequired($key);
+		if(substr($path, 0, 1) === '/') {
+			return $path;
+		}
+		$root = self::load('neptune')->getRequired('dir.root');
+		return $root . $path;
+	}
+
+	/**
 	 * Get the first value from an array of configuration values that
 	 * matches $key in the same way as getFirst(), but a
 	 * ConfigKeyException will be thrown if the key is not found.

@@ -470,5 +470,26 @@ END;
 		$this->assertEquals('override', $neptune->get('one'));
 	}
 
+	public function testGetPath() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/path/to/root/');
+		$neptune->set('some.dir', 'my-dir');
+		$this->assertEquals('/path/to/root/my-dir', $neptune->getPath('some.dir'));
+	}
+
+	public function testGetPathAbsolute() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/path/to/root/');
+		$neptune->set('some.absolute.dir', '/my-dir');
+		$this->assertEquals('/my-dir', $neptune->getPath('some.absolute.dir'));
+	}
+
+	public function testGetPathDifferentFile() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/path/to/root/');
+		$other = Config::create('other');
+		$other->set('some.other.dir', 'other-dir');
+		$this->assertEquals('/path/to/root/other-dir', $other->getPath('some.other.dir'));
+	}
 
 }
