@@ -83,11 +83,10 @@ class View {
 			$pos = strpos($view, '#');
 			if($pos) {
 				$name = substr($view, 0, $pos);
-				$view = Config::load($name)->getRequired('view.dir') . substr($view, $pos + 1);
+				$view = Config::load($name)->getPath('view.dir') . substr($view, $pos + 1);
 			} else {
-				$view = Config::load()->getRequired('view.dir') . $view;
+				$view = Config::load()->getPath('view.dir') . $view;
 			}
-			$view = Config::load('neptune')->getRequired('dir.root') . $view;
 		}
 		$view = $view . self::EXTENSION;
 		$this->view = $view;
