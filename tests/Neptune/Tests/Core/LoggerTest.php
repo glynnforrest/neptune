@@ -18,8 +18,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 	protected $file = 'logtest.log';
 
 	public function setUp() {
-		$file = Temping::getInstance()->getDirectory() . $this->file;
-		$c = Config::create('config');
+		$c = Config::create('neptune');
 		$c->set('log', array(
 			'type' => array (
 				'fatal' => true,
@@ -27,9 +26,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 				'debug' => true,
 				'info' => true
 			),
-			'file' => $file,
+			'file' => $this->file,
 			'format' => ':message'
 		));
+		$c->set('dir.root', Temping::getInstance()->getDirectory());
 		Logger::enable();
 		Logger::temp();
 		Logger::flush();
