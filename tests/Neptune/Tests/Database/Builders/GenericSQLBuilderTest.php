@@ -112,6 +112,9 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q = SQLQuery::select();
 		$q->from('test')->where('column1 =', 0);
 		$this->assertEquals("SELECT * FROM test WHERE column1 = '0'", $q->__toString());
+		$q = SQLQuery::select();
+		$q->from('test')->where('column2 =', '0');
+		$this->assertEquals("SELECT * FROM test WHERE column2 = '0'", $q->__toString());
 	}
 
 	public function testWhereSelect() {
@@ -163,6 +166,18 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q = SQLQuery::select();
 		$q->from('test')->where('id =', $input);
 		$this->assertEquals("SELECT * FROM test WHERE id = '2; insert into test (name) values(\'hacked\')'", $q->__toString());
+	}
+
+	public function testWhereZero() {
+		$q = SQLQuery::select()
+			->from('test')
+			->limit(10)
+			->orderBy('date', 'DESC')
+			->where('boolean =', '0')
+			->orWhere('foo =', '0')
+			->andWhere('key =', '0');
+		$expected = "SELECT * FROM test WHERE boolean = '0' OR foo = '0' AND key = '0' ORDER BY date DESC LIMIT 10";
+		$this->assertEquals($expected, $q->__toString());
 	}
 
 	public function testWhereSelectParams() {
