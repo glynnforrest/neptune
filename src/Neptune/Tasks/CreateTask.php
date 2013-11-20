@@ -14,7 +14,7 @@ use Neptune\Exceptions\FileException;
  **/
 class CreateTask extends Task {
 
-	public function run() {
+	public function run($args = array()) {
 		//interactively choose function to run
 	}
 

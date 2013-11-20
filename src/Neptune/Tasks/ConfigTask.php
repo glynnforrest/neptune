@@ -35,7 +35,7 @@ class ConfigTask extends Task {
 	/**
 	 * Set up configuration for your application.
 	 */
-	public function run() {
+	public function run($args = array()) {
 		if(!$this->directoriesCreated()) {
 			return $this->console->write('Please run `neptune setup`.');
 		}

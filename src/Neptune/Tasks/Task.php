@@ -50,12 +50,10 @@ abstract class Task {
 		//print out all methods and their docblocks
 	}
 
-
-
 	//Helper functions for Tasks
 	protected function getAppDirectory() {
 		return $this->config->getRequired('dir.app') .
-			'/' . $c->getRequired('namespace') . '/';
+			'/' . $this->config->getRequired('namespace') . '/';
 	}
 
 	protected function getRootDirectory() {
