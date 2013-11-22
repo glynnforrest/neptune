@@ -6,7 +6,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
-        "glynnforrest/temping": "dev-master"
+        "glynnforrest/temping": "dev-master",
+        "liip/rmt": "0.9.*"
     },
     "authors": [
         {
