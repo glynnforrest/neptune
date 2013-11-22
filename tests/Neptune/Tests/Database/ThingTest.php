@@ -5,7 +5,7 @@ namespace Neptune\Tests\Database;
 use Neptune\Database\Thing;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
-use Neptune\View\Form;
+use Neptune\Form\Form;
 
 require_once __DIR__ . '/../../../bootstrap.php';
 

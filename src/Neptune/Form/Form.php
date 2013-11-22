@@ -1,9 +1,11 @@
 <?php
 
-namespace Neptune\View;
+namespace Neptune\Form;
 
 use Neptune\Helpers\Html;
 use Neptune\Http\Request;
+
+use Neptune\View\View;
 
 /**
  * Form

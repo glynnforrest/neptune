@@ -8,7 +8,7 @@ use Neptune\Database\DatabaseFactory;
 use Neptune\Database\Relations\Relation;
 use Neptune\Database\Relations\RelationsManager;
 use Neptune\Validate\Validator;
-use Neptune\View\Form;
+use Neptune\Form\Form;
 
 /**
  * Thing

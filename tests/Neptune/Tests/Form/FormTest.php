@@ -1,8 +1,8 @@
 <?php
 
-namespace Neptune\Tests\View;
+namespace Neptune\Tests\Form;
 
-use Neptune\View\Form;
+use Neptune\Form\Form;
 use Neptune\Core\Config;
 use Neptune\Helpers\Html;
 
