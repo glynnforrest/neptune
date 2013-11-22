@@ -16,6 +16,9 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
+		if(!class_exists('\\Memcached')) {
+			$this->markTestSkipped('Memcached extension not installed.');
+		}
 		$c = Config::create('unittest');
 		$c->set('cache', array(
 			'memcached' => array (
