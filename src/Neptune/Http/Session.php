@@ -9,7 +9,7 @@ namespace Neptune\Http;
 class Session {
 
 	/**
-	 * Set $key to $value in the $_SESSION array. 
+	 * Set $key to $value in the $_SESSION array.
 	 * If no session is set, session_start
 	 * will be called.
 	 */
@@ -27,13 +27,16 @@ class Session {
 	}
 
 	/**
-	 * Get $key from the $_SESSION array. 
-	 * If no session is set, session_start
-	 * will be called.
+	 * Get $key from the $_SESSION array. If $key is null, the whole
+	 * $_SESSION array will be returned.  If no session is set,
+	 * session_start will be called.
 	 */
-	public static function get($key) {
+	public static function get($key = null) {
 		if(!isset($_SESSION)) {
 			session_start();
+		}
+		if(!$key) {
+			return $_SESSION;
 		}
 		return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
 	}
