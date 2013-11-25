@@ -71,9 +71,15 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$expected = Html::input('text', 'username', 'user1');
 	}
 
+	public function testGetAndSetType() {
+		$r = new FormRow('text', 'username');
+		$this->assertSame('text', $r->getType());
+		$r->setType('password');
+		$this->assertSame('password', $r->getType());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}
-
 
 }

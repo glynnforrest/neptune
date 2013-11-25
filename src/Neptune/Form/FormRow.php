@@ -104,6 +104,22 @@ class FormRow {
 	}
 
 	/**
+	 * Get the type of input attached to this FormRow.
+	 */
+	public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * Set the type of input attached to this FormRow.
+	 *
+	 * @param string $type The input type.
+	 */
+	public function setType($type) {
+		$this->type = $type;
+	}
+
+	/**
 	 * Render this FormRow instance as Html, with label, input and
 	 * error message, if available.
 	 */
