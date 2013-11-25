@@ -126,14 +126,14 @@ class FormRow {
 	public function render() {
 		//a hidden field should be just an input
 		if($this->type == 'hidden' ) {
-			return $this->input($name);
+			return $this->input();
 		}
 		//a submit field should be just an input, but with extra html
 		//set in $this->row_string
 		if ($this->type == 'submit') {
 			$str = str_replace(':error', '', $this->row_string);
 			$str = str_replace(':label', '', $str);
-			$str = str_replace(':input', $this->input($name), $str);
+			$str = str_replace(':input', $this->input(), $str);
 			return $str;
 		}
 		//otherwise, substitute :label, :input and :error into

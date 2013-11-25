@@ -5,173 +5,197 @@ namespace Neptune\Form;
 use Neptune\Helpers\Html;
 use Neptune\Http\Request;
 
-use Neptune\View\View;
-
 /**
  * Form
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class Form extends View {
+class Form {
 
-	protected $header;
-	protected $fields = array();
-	protected $errors = array();
-	protected $types = array();
+	protected $action;
+	protected $method;
 	protected $options = array();
-	protected $row_string = '<li>:label:input:error</li>';
-	protected $selected = array();
-	//todo add strings for each.
+	protected $rows = array();
 
-	public static function loadAbsolute($view, $values = array(), $errors = array()) {
-		$me = parent::loadAbsolute($view);
-		$me->setValues($values, true);
-		$me->addErrors($errors);
-		return $me;
-	}
-
-	public static function load($view, $values = array(), $errors = array(), $action = null) {
-		$me = parent::load($view);
-		$me->setValues($values, true);
-		$me->addErrors($errors);
-		if($action) {
-			$me->header[0] = $action;
-		}
-		return $me;
-	}
-
-	public static function create($action = null, $method = 'post', $options = array()) {
+	public function __construct($action = null, $method = 'post', $options = array()) {
 		if(!$action) {
 			$action = Request::getInstance()->uri();
 		}
-		$form = new self();
-		$form->setHeader($action, $method, $options);
-		return $form;
+		$this->setHeader($action, $method, $options);
 	}
 
-	public function render() {
-		if(isset($this->view)) {
-			return parent::render();
-		}
-		return $this->renderForm();
-	}
-
-	public function setValues(array $values=array(), $create_fields = false) {
-		foreach ($values as $k => $v) {
-			if ($create_fields || in_array($k, $this->fields)) {
-				$this->vars[$k] = $v;
-				if(!in_array($k, $this->fields)) {
-					$this->fields[] = $k;
-				}
-			}
-		}
+	/**
+	 * Set the action attribute of this Form.
+	 *
+	 * @param string $action The action.
+	 */
+	public function setAction($action) {
+		$this->action = $action;
 		return $this;
 	}
 
-	public function renderForm() {
-		$form = $this->header();
-		$form .= '<ul>';
-		foreach($this->vars as $k => $v) {
-			$form .= $this->row($k);
+	/**
+	 * Get the action attribute of this Form.
+	 */
+	public function getAction() {
+		return $this->action;
+	}
+
+	/**
+	 * Set the method attribute of this Form. An exception will be
+	 * throw if $method is not an allowed http method.
+	 *
+	 * @param string $method The method.
+	 */
+	public function setMethod($method) {
+		$method = strtoupper($method);
+		if($method !== 'POST' && $method !== 'GET') {
+			throw new \Exception("Invalid method passed to Form::setMethod: $method");
 		}
-		$form .= '</ul></form>';
-		return $form;
-	}
-
-	public function addErrors($errors) {
-		$this->errors = $errors;
+		$this->method = $method;
 		return $this;
 	}
 
-	public function setHeader($action, $method = 'post', $options = array()) {
-		$this->header = array($action, $method, $options);
+	/**
+	 * Get the method attribute of this Form.
+	 */
+	public function getMethod() {
+		return $this->method;
+	}
+
+	/**
+	 * Set the options of this Form, such as class or id.
+	 *
+	 * @param array $options The options.
+	 */
+	public function setOptions(array $options = array()) {
+		$this->options = $options;
 		return $this;
 	}
 
-	public function add($name, $type = 'text', $value = null, $options = array()) {
-		$this->types[$name] = $type;
-		$this->vars[$name] = $value;
-		$this->fields[] = $name;
-		if($options) {
-			$this->options[$name] = $options;
-		}
+	/**
+	 * Get the options attribute of this Form, such as class or id.
+	 */
+	public function getOptions() {
+		return $this->options;
+	}
+
+	/**
+	 * Set the action, method and any additional options of the Form.
+	 *
+	 * @param string $action The action.
+	 * @param string $method The method.
+	 * @param array $options The options.
+	 */
+	public function setHeader($action, $method = 'POST', array $options = array()) {
+		$this->setAction($action);
+		$this->setMethod($method);
+		$this->setOptions($options);
 		return $this;
 	}
 
-	public function createFields($list = array()) {
-		foreach ($list as $item) {
-			$this->vars[$item] = null;
-		}
-		return $this;
-	}
-
+	/**
+	 * Render the header of this Form as Html.
+	 */
 	public function header() {
-		$options = $this->header[2];
-		$options['action'] = $this->header[0];
-		$options['method'] = $this->header[1];
+		$options = array('action' => $this->action, 'method' => $this->method);
+		$options = array_merge($options, $this->options);
 		return Html::openTag('form', $options);
 	}
 
-	public function input($name) {
-		if(!in_array($name, $this->fields)) {
-			return null;
+	/**
+	 * Render the entire Form as Html.
+	 */
+	public function render() {
+		$form = $this->header();
+		foreach($this->rows as $row) {
+			$form .= $row->render();
 		}
-		$value = isset($this->vars[$name]) ? $this->vars[$name] : null;
-		$type = isset($this->types[$name]) ? $this->types[$name] : 'text';
-		$options = isset($this->options[$name]) ? $this->options[$name] :
-			array();
-		if(is_array($value)) {
-			$selected = isset($this->selected[$name]) ? $this->selected[$name] : null;
-			return Html::select($name, $value, $selected, $options);
-		}
-		return Html::input($type, $name, $value, $options);
+		$form .= '</form>';
+		return $form;
 	}
 
-	public function error($name) {
-		return isset($this->errors[$name]) ? $this->errors[$name] : null;
+	public function __toString() {
+		return $this->render();
+	}
+
+	protected function addRow($type, $name, $value = null, $options = array()) {
+		$this->rows[$name] = new FormRow($type, $name, $value, $options);
+		return $this;
+	}
+
+	public function getRow($name) {
+		if(!array_key_exists($name, $this->rows)) {
+			throw new \Exception(
+				"Unknown form row '$name'"
+			);
+		}
+		return $this->rows[$name];
+	}
+
+	public function set($name, $value, $create_row = false) {
+		if(!array_key_exists($name, $this->rows)) {
+			if(!$create_row) {
+				throw new \Exception(
+					"Attempting to assign value '$value' to an unknown form row '$name'"
+				);
+			}
+			return $this->text($name, $value);
+		}
+		$this->rows[$name]->setValue($value);
+		return $this;
+	}
+
+	public function get($name) {
+		return $this->getRow($name)->getValue();
+	}
+
+	public function setValues(array $values=array(), $create_row = false) {
+		foreach ($values as $name => $value) {
+			$this->set($name, $value, $create_row);
+		}
+		return $this;
+	}
+
+	public function getValues() {
+		$values = array();
+		foreach ($this->rows as $name => $row) {
+			$values[$name] = $row->getValue();
+		}
+		return $values;
+	}
+
+	public function addErrors(array $errors = array()) {
+		foreach ($errors as $name => $msg) {
+			$this->getRow($name)->setError($msg);
+		}
 	}
 
 	public function label($name) {
-		return '<label for="' . $name .'">' . ucfirst($name) . '</label>';
+		return $this->getRow($name)->label();
+	}
+
+	public function input($name) {
+		return $this->getRow($name)->input();
+	}
+
+	public function error($name) {
+		return $this->getRow($name)->error();
 	}
 
 	public function row($name) {
-		if(!in_array($name, $this->fields)) {
-			return null;
-		}
-		$type = isset($this->types[$name]) ? $this->types[$name] : null;
-		if($type) {
-			if($type == 'hidden' ) {
-				return $this->input($name);
-			} elseif ($type == 'submit') {
-				$str = str_replace(':error', '', $this->row_string);
-				$str = str_replace(':label', '', $str);
-				$str = str_replace(':input', $this->input($name), $str);
-				return $str;
-			} else {
-				$str = str_replace(':label', $this->label($name), $this->row_string);
-			}
-		} else {
-			$str = str_replace(':label', $this->label($name), $this->row_string);
-		}
-		$str = str_replace(':error', $this->error($name), $str);
-		$str = str_replace(':input', $this->input($name), $str);
-		return $str;
+		return $this->getRow($name)->render();
 	}
 
-	public function setType($name, $type) {
-		$this->types[$name] = $type;
-		return $this;
+	public function text($name, $value = null, $options = array()) {
+		return $this->addRow('text', $name, $value, $options);
 	}
 
-	public function setOptions($name, $options) {
-		$this->options[$name] = $options;
-		return $this;
+	public function password($name, $value = null, $options = array()) {
+		return $this->addRow('password', $name, $value, $options);
 	}
 
-	public function setSelected($name, $selected) {
-		$this->selected[$name] = $selected;
-		return $this;
+	public function textarea($name, $value = null, $options = array()) {
+		return $this->addRow('textarea', $name, $value, $options);
 	}
 
 }
-?>
