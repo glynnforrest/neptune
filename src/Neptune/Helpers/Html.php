@@ -15,8 +15,14 @@ class Html {
 		return htmlentities($string, ENT_QUOTES, 'UTF-8', false);
 	}
 
-	protected static function options($options = array()) {
+	public static function options($options = array()) {
 		$text = array();
+		if(!is_array($options)) {
+			$type = gettype($options);
+			throw new \Exception(
+				"Html::$options() must be passed an array, $type given."
+			);
+		}
 		foreach($options as $k => $v) {
 			if(is_numeric($k)) {
 				$k = $v;
