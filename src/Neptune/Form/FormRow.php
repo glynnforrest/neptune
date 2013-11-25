@@ -81,6 +81,22 @@ class FormRow {
 	}
 
 	/**
+	 * Set the value of the input attached to this FormRow.
+	 *
+	 * @param string $value The value.
+	 */
+	public function setValue($value) {
+		$this->value = $value;
+	}
+
+	/**
+	 * Get the value of the input attached to this FormRow.
+	 */
+	public function getValue() {
+		return $this->value;
+	}
+
+	/**
 	 * Render the label attached to this FormRow as Html.
 	 */
 	public function input() {
