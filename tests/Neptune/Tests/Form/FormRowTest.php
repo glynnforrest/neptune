@@ -29,4 +29,17 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $r->render());
 	}
 
+	public function testError() {
+		$r = new FormRow('text', 'message');
+		$error = 'Message field is invalid.';
+		$r->setError($error);
+		$this->assertEquals($error, $r->getError());
+	}
+
+	public function testErrorHtml() {
+		$r = new FormRow('text', 'email');
+		$error = 'Email field is invalid.';
+		$r->setError($error);
+		$this->assertEquals(Html::tag('p', $error), $r->error());
+	}
 }

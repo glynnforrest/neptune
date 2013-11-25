@@ -20,7 +20,7 @@ class Html {
 		if(!is_array($options)) {
 			$type = gettype($options);
 			throw new \Exception(
-				"Html::$options() must be passed an array, $type given."
+				"Html::options() must be passed an array, $type given."
 			);
 		}
 		foreach($options as $k => $v) {
