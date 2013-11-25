@@ -19,32 +19,64 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 	const file2 = 'neptune-config-test/config2.php';
 	const file_override = 'neptune-config-test/configoverride.php';
 
+	protected $one_two_array = array (
+		'one' => 'one',
+		'two' => array(
+			'one' => 'two-one',
+			'two' => 'two-two'
+		)
+	);
+	protected $content;
+	protected $changed;
+	protected $override;
+
 	public function setUp() {
 		$this->temp = Temping::getInstance();
-		$content = '<?php';
-		$content .= <<<END
+
+		//a sample config
+		$this->content = '<?php';
+		$this->content .= <<<END
 		return array(
-			'one' => 1,
+			'one' => 'one',
 			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2,
+				'one' => 'two-one',
+				'two' => 'two-two',
 			),
 		)
 END;
-		$content .= '?>';
-		$this->temp->create(self::file, $content);
-		$this->temp->create(self::file2, $content);
-		$content = '<?php';
-		$content .= <<<END
+		$this->content .= '?>';
+
+		$this->temp->create(self::file, $this->content);
+		$this->temp->create(self::file2, $this->content);
+
+		//comparison against changed configs
+		$this->changed = '<?php';
+		$this->changed .= <<<END
+		return array(
+			'one' => 'changed',
+			'two' => array(
+				'one' => 'two-one',
+				'two' => 'two-two',
+			),
+		)
+END;
+		$this->changed .= '?>';
+
+		//comparison against overridden configs, for testing modules
+		//two.one should be present after merging with the base
+		//config.
+		$this->override = '<?php';
+		$this->override .= <<<END
 		return array(
 			'one' => 'override',
 			'two' => array(
-				'two' => 'override_again'
+				'two' => 'override_again',
 			),
 		)
 END;
-		$content .= '?>';
-		$this->temp->create(self::file_override, $content);
+		$this->override .= '?>';
+
+		$this->temp->create(self::file_override, $this->override);
 	}
 
 	public function tearDown() {
@@ -118,35 +150,21 @@ END;
 
 	public function testGet() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->assertEquals(1, $c->get('one'));
-		$this->assertEquals(2.1, $c->get('two.one'));
-		$expected = array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2
-			)
-		);
-		$this->assertEquals($expected, $c->get());
+		$this->assertEquals('one', $c->get('one'));
+		$this->assertEquals('two-one', $c->get('two.one'));
+		$this->assertEquals($this->one_two_array, $c->get());
 	}
 
 	public function testGetDefault() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals('default', $c->get('fake-key', 'default'));
-		$expected = array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2
-			)
-		);
-		$this->assertEquals($expected, $c->get(null, 'default'));
+		$this->assertEquals($this->one_two_array, $c->get(null, 'default'));
 	}
 
 	public function testGetFirst() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->assertEquals(2.1, $c->getFirst('two'));
-		$this->assertEquals(1, $c->getFirst());
+		$this->assertEquals('two-one', $c->getFirst('two'));
+		$this->assertEquals('one', $c->getFirst());
 	}
 
 	public function testGetFirstDefault() {
@@ -158,20 +176,28 @@ END;
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$c->getRequired('fake');
-		$this->assertEquals(2.1, $c->getRequired('two.one'));
+		$this->assertEquals('two-one', $c->getRequired('two.one'));
 	}
 
 	public function testGetFirstRequired() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
+		$this->assertEquals('two-one', $c->getFirstRequired('two'));
+	}
+
+	public function testGetFirstRequiredUnknownKey() {
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
 		$c->getFirstRequired('fake');
-		/* $this->assertEquals(2.1, $c->getFirstRequired('two')); */
-		//also throw an exception if the first value is an array
-		//why doesn't the second setExpectedException work?
-		$c->set('3.1', 'value');
+	}
+
+	/**
+	 * Throw an exception if there is no array to get first value from.
+	 */
+	public function testGetFirstRequiredNotArrayException() {
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
+		$c->set('3.1', 'not-an-array');
 		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
-		/* $this->assertEquals(4, 3); */
-		/* $c->getFirstRequired('4.1'); */
+		$c->getFirstRequired('3.1');
 	}
 
 	public function testSet() {
@@ -216,25 +242,13 @@ END;
 
 	public function testEmptyGet() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->assertEquals(array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2
-			)
-		), $c->get());
-		$this->assertEquals(array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2
-			)
-		), $c->get(null));
+		$this->assertEquals($this->one_two_array, $c->get());
+		$this->assertEquals($this->one_two_array, $c->get(null));
 	}
 
 	public function testUnload() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->assertEquals(1, $c->get('one'));
+		$this->assertEquals('one', $c->get('one'));
 		$d = Config::load('testing');
 		$this->assertTrue($c === $d);
 		Config::unload('testing');
@@ -256,18 +270,7 @@ END;
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$c->set('one', 'changed');
 		$c->save();
-		$content = '<?php';
-		$content .= <<<END
-		return array(
-			'one' => 'changed',
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2,
-			),
-		)
-END;
-		$content .= '?>';
-		$this->assertEquals($this->flattenConfig($content),
+		$this->assertEquals($this->flattenConfig($this->changed),
 							$this->flattenConfig($this->temp->getContents(self::file)));
 	}
 
@@ -298,35 +301,14 @@ END;
 
 	public function testSaveAll() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$c->set('two.one', 2.11);
+		$c->set('one', 'changed');
 		$d = Config::load('other', $this->temp->getPathname(self::file2));
-		$d->set('one', 'changed');
+		$d->set('one', 'override');
+		$d->set('two', array('two' => 'override_again'));
 		Config::saveAll();
-		$expectedC = '<?php';
-		$expectedC .= <<<END
-		return array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.11,
-				'two' => 2.2,
-			),
-		)
-END;
-		$expectedC .= '?>';
-		$expectedD = '<?php';
-		$expectedD .= <<<END
-		return array(
-			'one' => 'changed',
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2,
-			),
-		)
-END;
-		$expectedD .= '?>';
-		$this->assertEquals($this->flattenConfig($expectedC),
+		$this->assertEquals($this->flattenConfig($this->changed),
 							$this->flattenConfig($this->temp->getContents(self::file)));
-		$this->assertEquals($this->flattenConfig($expectedD),
+		$this->assertEquals($this->flattenConfig($this->override),
 							$this->flattenConfig($this->temp->getContents(self::file2)));
 	}
 
@@ -338,32 +320,10 @@ END;
 		$c->setFilename($file2);
 		$c->save();
 		//the first test file should be unmodified
-		$content = '<?php';
-		$content .= <<<END
-		return array(
-			'one' => 1,
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2,
-			),
-		)
-END;
-		$content .= '?>';
-		$this->assertEquals($this->flattenConfig($content),
+		$this->assertEquals($this->flattenConfig($this->content),
 							$this->flattenConfig(file_get_contents($file)));
 		//file2 should have changed instead
-		$changed = '<?php';
-		$changed .= <<<END
-		return array(
-			'one' => 'changed',
-			'two' => array(
-				'one' => 2.1,
-				'two' => 2.2,
-			),
-		)
-END;
-		$changed .= '?>';
-		$this->assertEquals($this->flattenConfig($changed),
+		$this->assertEquals($this->flattenConfig($this->changed),
 							$this->flattenConfig(file_get_contents($file2)));
 	}
 
@@ -376,19 +336,26 @@ END;
 
 	public function testOverride() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->assertEquals(1, $c->get('one'));
-		$c->override(array('one' => 'override'));
+		$this->assertEquals('one', $c->get('one'));
+		$c->override(array(
+			'one' => 'override',
+			'two' => array(
+				'three' => 'two-three'
+			)
+		));
 		$this->assertEquals('override', $c->get('one'));
+		$this->assertEquals('two-one', $c->get('two.one'));
+		$this->assertEquals('two-three', $c->get('two.three'));
 	}
 
 	public function testLoadCallsOverride() {
 		$default = Config::load('default', $this->temp->getPathname(self::file));
-		$this->assertEquals(1, $default->get('one'));
-		$this->assertEquals(2.1, $default->get('two.one'));
+		$this->assertEquals('one', $default->get('one'));
+		$this->assertEquals('two-one', $default->get('two.one'));
 		Config::load('override', $this->temp->getPathname(self::file_override), 'default');
 		$this->assertEquals('override', $default->get('one'));
 		$this->assertEquals('override_again', $default->get('two.two'));
-		$this->assertEquals('2.1', $default->get('two.one'));
+		$this->assertEquals('two-one', $default->get('two.one'));
 	}
 
 	public function testLoadModule() {
@@ -402,7 +369,7 @@ END;
 		$neptune->set('dir.root', $this->temp->getDirectory());
 		$neptune->set('modules', array('test_module' => 'test_module/'));
 		$module = Config::loadModule('test_module');
-		$this->assertEquals(2.1, $module->get('two.one'));
+		$this->assertEquals('two-one', $module->get('two.one'));
 	}
 
 	public function testLoadModuleThrowsExceptionForNoNeptune() {
