@@ -42,4 +42,21 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$this->assertEquals(Html::tag('p', $error), $r->error());
 	}
+
+	public function testNoErrorHtml() {
+		$r = new FormRow('text', 'email');
+		$this->assertNull($r->error());
+	}
+
+	public function testRowWithValueAndError() {
+		$password = 'super_secret';
+		$r = new FormRow('password', 'password', $password);
+		$password_error = 'Password is incorrect.';
+		$r->setError($password_error);
+		$expected = Html::tag('label', 'Password', array('for' => 'password', 'id' => 'password'));
+		$expected .= Html::input('password', 'password', $password);
+		$expected .= Html::tag('p', $password_error);
+		$this->assertEquals($expected, $r->render());
+	}
+
 }

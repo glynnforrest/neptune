@@ -15,11 +15,14 @@ class FormRow {
 	protected $name;
 	protected $value;
 	protected $options;
+	protected $label;
 	protected $error;
+	protected $row_string = ':label:input:error';
 
 	public function __construct($type, $name, $value = null, $options = array()) {
 		$this->type = $type;
 		$this->name = $name;
+		$this->label = ucfirst($name);
 		$this->value = $value;
 		$this->options = $options;
 	}
@@ -44,7 +47,44 @@ class FormRow {
 	 * Render the error message attached to this FormRow as Html.
 	 */
 	public function error() {
-		return '<p>' . $this->error . '</p>';
+		if($this->error) {
+			return '<p>' . $this->error . '</p>';
+		}
+		return null;
+	}
+
+	/**
+	 * Set the label text attached to this FormRow.
+	 *
+	 * @param string $label The label.
+	 */
+	public function setLabel($label) {
+		$this->label = $label;
+	}
+
+	/**
+	 * Get the label text attached to this FormRow.
+	 */
+	public function getLabel() {
+		return $this->label;
+	}
+
+	/**
+	 * Render the label attached to this FormRow as Html.
+	 */
+	public function label() {
+		return Html::tag(
+			'label', $this->label, array(
+				'for' => $this->name, 'id' => $this->name
+			)
+		);
+	}
+
+	/**
+	 * Render the label attached to this FormRow as Html.
+	 */
+	public function input() {
+		return Html::input($this->type, $this->name, $this->value, $this->options);
 	}
 
 	/**
@@ -52,14 +92,24 @@ class FormRow {
 	 * error message, if available.
 	 */
 	public function render() {
-		$row = Html::tag(
-			'label', ucfirst($this->name), array(
-				'for' => $this->name, 'id' => $this->name
-			)
-		);
-		$row .= Html::input($this->type, $this->name, $this->value, $this->options);
-		return $row;
+		//a hidden field should be just an input
+		if($this->type == 'hidden' ) {
+			return $this->input($name);
+		}
+		//a submit field should be just an input, but with extra html
+		//set in $this->row_string
+		if ($this->type == 'submit') {
+			$str = str_replace(':error', '', $this->row_string);
+			$str = str_replace(':label', '', $str);
+			$str = str_replace(':input', $this->input($name), $str);
+			return $str;
+		}
+		//otherwise, substitute :label, :input and :error into
+		//$this->row_string
+		$str = str_replace(':label', $this->label(), $this->row_string);
+		$str = str_replace(':error', $this->error(), $str);
+		$str = str_replace(':input', $this->input(), $str);
+		return $str;
 	}
-
 
 }
