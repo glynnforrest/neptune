@@ -78,6 +78,13 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('password', $r->getType());
 	}
 
+	public function setChangeType() {
+		$r = new FormRow('text', 'pass');
+		$this->assertSame(Html::input('text', 'pass', 'secret'), $f->input());
+		$r->setType('password');
+		$this->assertSame(Html::input('password', 'pass'), $f->input());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}
