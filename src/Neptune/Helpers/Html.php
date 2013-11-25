@@ -97,4 +97,11 @@ class Html {
 		return self::selfTag('link', $options) . PHP_EOL;
 	}
 
+	public static function label($for, $content = null, $options = array()) {
+		$options = array_merge(array(
+			'for' => $for,
+			'id' => $for), $options);
+		return self::tag('label', $content, $options);
+	}
+
 }

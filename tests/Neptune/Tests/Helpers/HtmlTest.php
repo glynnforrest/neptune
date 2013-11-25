@@ -111,4 +111,17 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		Html::options(null);
 	}
 
+	public function testLabel() {
+		$expected = '<label for="username" id="username">Username</label>';
+		$this->assertSame($expected, Html::label('username', 'Username'));
+	}
+
+	public function testLabelOverrideOptions() {
+		$expected = '<label for="username1" id="some-id-1">Username</label>';
+		$this->assertSame($expected, Html::label('username', 'Username', array(
+			'id' => 'some-id-1',
+			'for' => 'username1'
+		)));
+	}
+
 }
