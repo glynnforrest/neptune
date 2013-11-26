@@ -16,7 +16,7 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSimpleRow() {
 		$r = new FormRow('text', 'name');
-		$expected = Html::tag('label', 'Name', array('for' => 'name', 'id' => 'name'));
+		$expected = Html::label('name', 'Name');
 		$expected .= Html::input('text', 'name');
 		$this->assertSame($expected, $r->render());
 	}
@@ -24,7 +24,7 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 	public function testRowWithValue() {
 		$email = 'test@example.com';
 		$r = new FormRow('text', 'email', $email);
-		$expected = Html::tag('label', 'Email', array('for' => 'email', 'id' => 'email'));
+		$expected = Html::label('email', 'Email');
 		$expected .= Html::input('text', 'email', $email);
 		$this->assertSame($expected, $r->render());
 	}
@@ -53,7 +53,7 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$r = new FormRow('password', 'password', $password);
 		$password_error = 'Password is incorrect.';
 		$r->setError($password_error);
-		$expected = Html::tag('label', 'Password', array('for' => 'password', 'id' => 'password'));
+		$expected = Html::label('password', 'Password');
 		$expected .= Html::input('password', 'password', $password);
 		$expected .= Html::tag('p', $password_error);
 		$this->assertSame($expected, $r->render());

@@ -77,11 +77,7 @@ class FormRow {
 	 * Render the label attached to this FormRow as Html.
 	 */
 	public function label() {
-		return Html::tag(
-			'label', $this->label, array(
-				'for' => $this->name, 'id' => $this->name
-			)
-		);
+		return Html::label($this->name, $this->label);
 	}
 
 	/**

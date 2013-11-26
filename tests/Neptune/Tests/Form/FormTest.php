@@ -23,7 +23,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f = new Form('/post/url', 'get');
 		$f->text('name');
 		$expected = Html::openTag('form', array('action' => '/post/url', 'method' => 'GET'));
-		$expected .= Html::tag('label', 'Name', array('for' => 'name', 'id' => 'name'));
+		$expected .= Html::label('name', 'Name');
 		$expected .= Html::input('text', 'name');
 		$expected .= '</form>';
 		$this->assertSame($expected, $f->render());

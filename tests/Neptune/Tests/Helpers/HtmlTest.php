@@ -93,7 +93,7 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testInputTextarea() {
-		$expected = '<textarea id="comment" name="comment">Something</textarea>';
+		$expected = '<textarea id="comment" name="comment"></textarea>';
 		$this->assertSame($expected, Html::input('textarea', 'comment'));
 		$expected = '<textarea id="other-id" name="comment">Something</textarea>';
 		$this->assertSame($expected, Html::input('textarea', 'comment', 'Something', array('id' => 'other-id')));
