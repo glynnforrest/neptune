@@ -5,6 +5,7 @@ namespace Neptune\Form;
 use Neptune\Helpers\Html;
 use Neptune\Http\Request;
 
+
 /**
  * Form
  * @author Glynn Forrest me@glynnforrest.com
@@ -166,6 +167,15 @@ class Form {
 			);
 		}
 		return $this->rows[$name];
+	}
+
+	/**
+	 * Get a list of field names in this form.
+	 *
+	 * @return array An array of field names.
+	 */
+	public function getFields() {
+		return array_keys($this->rows);
 	}
 
 	public function set($name, $value, $create_row = false) {

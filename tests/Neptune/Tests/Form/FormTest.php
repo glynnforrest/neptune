@@ -266,7 +266,13 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFields() {
-
+		$f = new Form();
+		$f->hidden('id');
+		$f->text('username');
+		$f->text('email');
+		$f->password('password');
+		$expected = array('id', 'username', 'email', 'password');
+		$this->assertSame($expected, $f->getFields());
 	}
 
 }
