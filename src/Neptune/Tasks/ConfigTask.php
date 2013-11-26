@@ -3,8 +3,9 @@
 namespace Neptune\Tasks;
 
 use Neptune\Core\Config;
-use Neptune\Helpers\String;
 use Neptune\Tasks\Task;
+
+use Stringy\StaticStringy as S;
 
 /**
  * ConfigTask
@@ -46,7 +47,7 @@ class ConfigTask extends Task {
 			$c = Config::load('neptune', $file);
 			$pieces = explode('/', trim($this->getRootDirectory(), '/'));
 			$this->neptune_settings['namespace'] =
-				String::camelCase(array_pop($pieces), true);
+				S::upperCamelize(array_pop($pieces));
 			foreach ($this->neptune_settings as $setting => $default) {
 				$c->set($setting, $this->console->read("$setting:", $default));
 			}
@@ -72,7 +73,7 @@ class ConfigTask extends Task {
 		if(!$name) {
 			$name = $this->console->read('Configuration name', 'development');
 		}
-		$filename = $this->getRootDirectory() . 'config/' . String::slugify($name) . '.php';
+		$filename = $this->getRootDirectory() . 'config/' . S::slugify($name) . '.php';
 		if(file_exists($filename)) {
 			return $this->console->error('File exists: ' . $filename);
 		}
