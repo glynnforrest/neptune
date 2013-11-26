@@ -295,6 +295,22 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($v->validate());
 	}
 
-}
+	public function requiredMessagesProvider() {
+		return array (
+			array ('first_name', 'First name is required.'),
+			array ('email', 'Email is required.'),
+			array ('contact-info', 'Contact info is required.')
+		);
+	}
 
-?>
+	/**
+	 * @dataProvider requiredMessagesProvider()
+	 */
+	public function testErrorMessages($name, $msg) {
+		$v = new Validator(array($name => ''));
+		$v->check($name, 'required');
+		$this->assertFalse($v->validate());
+		$this->assertSame($msg, $v->errors($name));
+	}
+
+}
