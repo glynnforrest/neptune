@@ -78,32 +78,30 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		Html::selfTag('input', array('type' => 'checkbox', 'checked')));
 	}
 
-	public function testInput() {
-		$expected = '<input type="text" name="test" value="" />';
+	public function testInputText() {
+		$expected = '<input type="text" id="test" name="test" value="" />';
 		$this->assertSame($expected, Html::input('text', 'test'));
-		$expected = '<input type="text" name="test" value="foo" />';
-		$this->assertSame($expected, Html::input('text', 'test', 'foo'));
-		$expected = '<input type="text" name="test" value="foo" id="test" />';
-		$this->assertSame($expected, Html::input('text', 'test', 'foo', array('id' => 'test')));
+		$expected = '<input type="text" id="other-id" name="test" value="foo" class="text-input" />';
+		$this->assertSame($expected, Html::input('text', 'test', 'foo', array('id' => 'other-id', 'class' => 'text-input')));
 	}
 
 	public function testInputPassword() {
-		$expected = '<input type="password" name="pword" value="" />';
+		$expected = '<input type="password" id="pword" name="pword" value="" />';
 		$this->assertSame($expected, Html::input('password', 'pword', 'secret'));
-		$expected = '<input type="password" name="pword" value="" id="pword" />';
-		$this->assertSame($expected, Html::input('password', 'pword', 'secret', array('id' => 'pword')));
+		$expected = '<input type="password" id="password" name="pword" value="" />';
+		$this->assertSame($expected, Html::input('password', 'pword', 'secret', array('id' => 'password')));
 	}
 
 	public function testInputTextarea() {
-		$expected = '<textarea name="comment"></textarea>';
+		$expected = '<textarea id="comment" name="comment">Something</textarea>';
 		$this->assertSame($expected, Html::input('textarea', 'comment'));
-		$expected = '<textarea name="comment" id="comment">Something</textarea>';
-		$this->assertSame($expected, Html::input('textarea', 'comment', 'Something', array('id' => 'comment')));
+		$expected = '<textarea id="other-id" name="comment">Something</textarea>';
+		$this->assertSame($expected, Html::input('textarea', 'comment', 'Something', array('id' => 'other-id')));
 	}
 
 	public function testInputToken() {
 		$_SESSION['csrf_token'] = md5('token');
-		$this->assertSame('<input type="hidden" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
+		$this->assertSame('<input type="hidden" id="csrf_token" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
 	}
 
 	public function testOptionsThrowsExceptionForBadOptions() {
@@ -112,14 +110,13 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testLabel() {
-		$expected = '<label for="username" id="username">Username</label>';
+		$expected = '<label for="username">Username</label>';
 		$this->assertSame($expected, Html::label('username', 'Username'));
 	}
 
 	public function testLabelOverrideOptions() {
-		$expected = '<label for="username1" id="some-id-1">Username</label>';
+		$expected = '<label for="username1">Username</label>';
 		$this->assertSame($expected, Html::label('username', 'Username', array(
-			'id' => 'some-id-1',
 			'for' => 'username1'
 		)));
 	}

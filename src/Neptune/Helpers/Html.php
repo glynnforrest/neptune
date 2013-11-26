@@ -50,13 +50,21 @@ class Html {
 
 	public static function input($type, $name, $value = null, $options = array()) {
 		if($type === 'textarea') {
-			$options = array_merge(array('name' => $name), $options);
+			$options = array_merge(array(
+				'id' => $name,
+				'name' => $name
+			), $options);
 			return self::tag('textarea', $value, $options);
 		}
 		if($type === 'password') {
 			$value = null;
 		}
-		$options = array_merge(array('type' => $type, 'name' => $name, 'value' => $value), $options);
+		$options = array_merge(array(
+			'type' => $type,
+			'id' => $name,
+			'name' => $name,
+			'value' => $value
+		), $options);
 		return self::selfTag('input', $options);
 	}
 
@@ -98,9 +106,7 @@ class Html {
 	}
 
 	public static function label($for, $content = null, $options = array()) {
-		$options = array_merge(array(
-			'for' => $for,
-			'id' => $for), $options);
+		$options = array_merge(array('for' => $for), $options);
 		return self::tag('label', $content, $options);
 	}
 
