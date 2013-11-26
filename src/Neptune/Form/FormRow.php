@@ -4,6 +4,8 @@ namespace Neptune\Form;
 
 use Neptune\Helpers\Html;
 
+use Stringy\Stringy as S;
+
 /**
  * FormRow
  *
@@ -22,7 +24,9 @@ class FormRow {
 	public function __construct($type, $name, $value = null, $options = array()) {
 		$this->type = $type;
 		$this->name = $name;
-		$this->label = ucfirst($name);
+		//create a sensible default for the label.
+		$label = S::create($name)->underscored()->replace('_', ' ')->str;
+		$this->label = ucfirst($label);
 		$this->value = $value;
 		$this->options = $options;
 	}

@@ -85,6 +85,19 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(Html::input('password', 'pass'), $f->input());
 	}
 
+	public function testSensibleLabelString() {
+		$labels = array (
+			'password' => 'Password',
+			'user-id' => 'User id',
+			'EmailAddress' => 'Email address',
+			'date_format' => 'Date format'
+		);
+		foreach ($labels as $name => $label) {
+			$r = new FormRow('text', $name);
+			$this->assertSame($label, $r->getLabel());
+		}
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}
