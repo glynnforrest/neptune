@@ -11,24 +11,18 @@ use Neptune\Helpers\Url;
  */
 class Html {
 
-	public static function inputToken() {
-		return '<input type="hidden" name="csrf_token" value="' . Session::token() . '" />';
-	}
-
 	public static function escape($string) {
 		return htmlentities($string, ENT_QUOTES, 'UTF-8', false);
 	}
 
-	public static function js($src, $options = array()) {
-		return '<script type="text/javascript" src="' . Url::to($src) . '"' . self::options($options).'></script>'.PHP_EOL;
-	}
-
-	public static function css($src, $options = array()) {
-		return '<link rel="stylesheet" type="text/css" href="' . Url::to($src) . '"' . self::options($options).' />'.PHP_EOL;
-	}
-
-	protected static function options($options = array()) {
+	public static function options($options = array()) {
 		$text = array();
+		if(!is_array($options)) {
+			$type = gettype($options);
+			throw new \Exception(
+				"Html::options() must be passed an array, $type given."
+			);
+		}
 		foreach($options as $k => $v) {
 			if(is_numeric($k)) {
 				$k = $v;
@@ -38,7 +32,7 @@ class Html {
 		return empty($text) ? '' : ' ' . implode(' ', $text);
 	}
 
-	public static function openTag($tag, $options) {
+	public static function openTag($tag, $options = array()) {
 		return '<' . $tag . self::options($options) . '>';
 	}
 
@@ -46,16 +40,36 @@ class Html {
 		return '</' . $tag . '>';
 	}
 
+	public static function tag($tag, $content = null, $options = array()) {
+		return self::openTag($tag, $options) . $content . self::closeTag($tag);
+	}
+
+	public static function selfTag($tag, $options = array()) {
+		return '<' . $tag . self::options($options) . ' />';
+	}
+
 	public static function input($type, $name, $value = null, $options = array()) {
 		if($type === 'textarea') {
-			return '<textarea name="' . $name . '"' .
-				self::options($options) . '">' . $value . '</textarea>';
+			$options = array_merge(array(
+				'id' => $name,
+				'name' => $name
+			), $options);
+			return self::tag('textarea', $value, $options);
 		}
 		if($type === 'password') {
 			$value = null;
 		}
-		return '<input type="'. $type . '" name="' . $name . '" value="' .
-			$value . '"' . self::options($options) . '/>';
+		$options = array_merge(array(
+			'type' => $type,
+			'id' => $name,
+			'name' => $name,
+			'value' => $value
+		), $options);
+		return self::selfTag('input', $options);
+	}
+
+	public static function inputToken() {
+		return self::input('hidden', 'csrf_token', Session::token());
 	}
 
 	public static function select($name, $values, $selected = null, $options = array()) {
@@ -74,10 +88,26 @@ class Html {
 		}
 		$text .= self::closeTag('select');
 		return $text;
-
 	}
 
+	public static function js($src, $options = array()) {
+		$options = array_merge(array(
+			'type' => 'text/javascript',
+			'src' => Url::to($src)), $options);
+		return self::tag('script', null, $options) . PHP_EOL;
+	}
+
+	public static function css($src, $options = array()) {
+		$options = array_merge(array(
+			'rel' => 'stylesheet',
+			'type' => 'text/css',
+			'href' => Url::to($src)), $options);
+		return self::selfTag('link', $options) . PHP_EOL;
+	}
+
+	public static function label($for, $content = null, $options = array()) {
+		$options = array_merge(array('for' => $for), $options);
+		return self::tag('label', $content, $options);
+	}
 
 }
-
-?>

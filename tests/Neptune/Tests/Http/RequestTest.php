@@ -23,6 +23,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testUri() {
+		$this->reset();
 		$this->assertNull($this->request->uri());
 		$_SERVER['REQUEST_URI'] = 'test';
 		$this->assertEquals('test', $this->request->uri());

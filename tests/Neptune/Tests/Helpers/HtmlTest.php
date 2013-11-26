@@ -23,40 +23,102 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testJs() {
-		$this->assertEquals('<script type="text/javascript" src="http://myapp.local/js/test.js"></script>' . PHP_EOL, Html::js('js/test.js'));
+		$this->assertSame('<script type="text/javascript" src="http://myapp.local/js/test.js"></script>' . PHP_EOL, Html::js('js/test.js'));
 	}
 
 	public function testJsOptions() {
-		$this->assertEquals('<script type="text/javascript" src="http://myapp.local/js/test.js" id="my_script" class="script"></script>' . PHP_EOL, Html::js('js/test.js', array(
+		$this->assertSame('<script type="text/javascript" src="http://myapp.local/js/test.js" id="my_script" class="script"></script>' . PHP_EOL, Html::js('js/test.js', array(
 		'id' => 'my_script', 'class' => 'script')));
 	}
 
 	public function testJsAbsolute() {
-		$this->assertEquals('<script type="text/javascript" src="http://site.com/js/test.js"></script>' . PHP_EOL, Html::js('http://site.com/js/test.js'));
+		$this->assertSame('<script type="text/javascript" src="http://site.com/js/test.js"></script>' . PHP_EOL, Html::js('http://site.com/js/test.js'));
 	}
 
 	public function testCss() {
-		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" />' . PHP_EOL, Html::css('css/style.css'));
+		$this->assertSame('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" />' . PHP_EOL, Html::css('css/style.css'));
 	}
 
 	public function testCssOptions() {
-		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" id="my_style" class="style" />' . PHP_EOL, Html::css('css/style.css', array(
+		$this->assertSame('<link rel="stylesheet" type="text/css" href="http://myapp.local/css/style.css" id="my_style" class="style" />' . PHP_EOL, Html::css('css/style.css', array(
 		'id' => 'my_style', 'class' => 'style')));
 	}
 
 	public function testCssAbsolute() {
-		$this->assertEquals('<link rel="stylesheet" type="text/css" href="http://site.com/css/style.css" />' . PHP_EOL, Html::css('http://site.com/css/style.css'));
+		$this->assertSame('<link rel="stylesheet" type="text/css" href="http://site.com/css/style.css" />' . PHP_EOL, Html::css('http://site.com/css/style.css'));
 	}
 
 	public function testEscape() {
-		$this->assertEquals('&lt;p&gt;Paragraph&lt;/p&gt;', Html::escape('<p>Paragraph</p>'));
+		$this->assertSame('&lt;p&gt;Paragraph&lt;/p&gt;', Html::escape('<p>Paragraph</p>'));
+	}
+
+	public function testOpenTag() {
+		$this->assertSame('<p>', Html::openTag('p'));
+		$this->assertSame('<p class="text">',
+		Html::openTag('p', array('class' => 'text')));
+		$this->assertSame('<p class="text" id="paragraph5">',
+		Html::openTag('p', array('class' => 'text', 'id' => 'paragraph5')));
+	}
+
+	public function testCloseTag() {
+		$this->assertSame('</p>', Html::closeTag('p'));
+	}
+
+	public function testTag() {
+		$this->assertSame('<p></p>', Html::tag('p'));
+		$this->assertSame('<p>Hello world</p>',
+		Html::tag('p', 'Hello world'));
+		$this->assertSame('<p class="text" id="something">Hello world</p>',
+		Html::tag('p', 'Hello world', array('class' => 'text', 'id' => 'something')));
+	}
+
+	public function testSelfTag() {
+		$this->assertSame('<input />', Html::selfTag('input'));
+		$this->assertSame('<input type="checkbox" checked="checked" />',
+		Html::selfTag('input', array('type' => 'checkbox', 'checked')));
+	}
+
+	public function testInputText() {
+		$expected = '<input type="text" id="test" name="test" value="" />';
+		$this->assertSame($expected, Html::input('text', 'test'));
+		$expected = '<input type="text" id="other-id" name="test" value="foo" class="text-input" />';
+		$this->assertSame($expected, Html::input('text', 'test', 'foo', array('id' => 'other-id', 'class' => 'text-input')));
+	}
+
+	public function testInputPassword() {
+		$expected = '<input type="password" id="pword" name="pword" value="" />';
+		$this->assertSame($expected, Html::input('password', 'pword', 'secret'));
+		$expected = '<input type="password" id="password" name="pword" value="" />';
+		$this->assertSame($expected, Html::input('password', 'pword', 'secret', array('id' => 'password')));
+	}
+
+	public function testInputTextarea() {
+		$expected = '<textarea id="comment" name="comment"></textarea>';
+		$this->assertSame($expected, Html::input('textarea', 'comment'));
+		$expected = '<textarea id="other-id" name="comment">Something</textarea>';
+		$this->assertSame($expected, Html::input('textarea', 'comment', 'Something', array('id' => 'other-id')));
 	}
 
 	public function testInputToken() {
 		$_SESSION['csrf_token'] = md5('token');
-		$this->assertEquals('<input type="hidden" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
+		$this->assertSame('<input type="hidden" id="csrf_token" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
 	}
 
+	public function testOptionsThrowsExceptionForBadOptions() {
+		$this->setExpectedException('\Exception');
+		Html::options(null);
+	}
+
+	public function testLabel() {
+		$expected = '<label for="username">Username</label>';
+		$this->assertSame($expected, Html::label('username', 'Username'));
+	}
+
+	public function testLabelOverrideOptions() {
+		$expected = '<label for="username1">Username</label>';
+		$this->assertSame($expected, Html::label('username', 'Username', array(
+			'for' => 'username1'
+		)));
+	}
 
 }
-?>

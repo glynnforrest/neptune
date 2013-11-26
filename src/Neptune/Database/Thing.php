@@ -8,7 +8,7 @@ use Neptune\Database\DatabaseFactory;
 use Neptune\Database\Relations\Relation;
 use Neptune\Database\Relations\RelationsManager;
 use Neptune\Validate\Validator;
-use Neptune\View\Form;
+use Neptune\Form\Form;
 
 /**
  * Thing
@@ -413,12 +413,15 @@ class Thing {
 	}
 
 	public static function buildForm($action = null, $values = array(), $errors = array(), $method = 'POST') {
-		$f = Form::create($action, $method);
+		$f = new Form($action, $method);
 		foreach(static::$fields as $field) {
-			$f->add($field, 'text');
+			if($field !== static::$primary_key) {
+				$f->text($field);
+			}
 		}
-		$f->add('submit', 'submit', 'Submit');
-		$f->setType(static::$primary_key, 'hidden');
+		//Create a submit field, prefixed with an underscore to
+		//hopefully not conflict with any database columns
+		$f->submit('_save');
 		$f->setValues($values);
 		$f->addErrors($errors);
 		return $f;
