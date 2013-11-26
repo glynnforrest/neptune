@@ -191,7 +191,14 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testBuildForm() {
-		$this->assertTrue(UpperCase::buildForm() instanceof Form);
+		$f = UpperCase::buildForm();
+		$this->assertInstanceOf('\Neptune\Form\Form', $f);
+	}
+
+	public function testBuildFormDoesNotIncludePrimaryKey() {
+		$f = UpperCase::buildForm();
+		$expected = array('name', 'column', '_save');
+		$this->assertSame($expected, $f->getFields());
 	}
 
 }
