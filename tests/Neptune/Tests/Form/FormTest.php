@@ -101,42 +101,55 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($first, $second);
 	}
 
+	protected function stubRow($type, $name, $value = null, $error = null) {
+		$html = Html::label($name, ucfirst($name));
+		$html .= Html::input($type, $name, $value);
+		if($error) {
+			$html .= Html::tag('p', $error);
+		}
+		return $html;
+	}
+
 	public function testText() {
 		$f = new Form();
-		$f->text('username');
-		$r = $f->getRow('username');
-		$this->assertSame('text', $r->getType());
-		$expected = Html::input('text', 'username');
-		$this->assertSame($expected, $r->input());
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('username'));
+		$this->assertSame('text', $f->getRow('username')->getType());
+		$expected = $this->stubRow('text', 'username');
+		$this->assertSame($expected, $f->row('username'));
 	}
 
 	public function testPassword() {
 		$f = new Form();
-		$f->password('secret');
-		$r = $f->getRow('secret');
-		$this->assertSame('password', $r->getType());
-		$expected = Html::input('password', 'secret');
-		$this->assertSame($expected, $r->input());
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->password('secret'));
+		$this->assertSame('password', $f->getRow('secret')->getType());
+		$expected = $this->stubRow('password', 'secret');
+		$this->assertSame($expected, $f->row('secret'));
 	}
 
 	public function testTextarea() {
 		$f = new Form();
-		$f->textarea('comment', 'Some comment');
-		$r = $f->getRow('comment');
-		$this->assertSame('textarea', $r->getType());
-		$expected = Html::input('textarea', 'comment', 'Some comment');
-		$this->assertSame($expected, $r->input());
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->textarea('comment', 'Some comment'));
+		$this->assertSame('textarea', $f->getRow('comment')->getType());
+		$expected = $this->stubRow('textarea', 'comment', 'Some comment');
+		$this->assertSame($expected, $f->row('comment'));
 	}
 
 	public function testSubmit() {
 		$f = new Form();
 		$f->submit('button');
-		$r = $f->getRow('button');
-		$expected_input = Html::input('submit', 'button', 'Button');
-		$this->assertSame($expected_input, $r->input());
+		$this->assertSame('submit', $f->getRow('button')->getType());
 		//By default a row should just give the input
 		$expected_input = Html::input('submit', 'button', 'Button');
-		$this->assertSame($expected_input, $r->render());
+		$this->assertSame($expected_input, $f->row('button'));
+	}
+
+	public function testHidden() {
+		$f = new Form();
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->hidden('secret', '123456789'));
+		$this->assertSame('hidden', $f->getRow('secret')->getType());
+		//By default a row should just give the input
+		$expected_input = Html::input('hidden', 'secret', '123456789');
+		$this->assertSame($expected_input, $f->row('secret'));
 	}
 
 	public function testInput() {

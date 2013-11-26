@@ -263,4 +263,17 @@ class Form {
 		return $this->addRow('submit', $name, $value, $options);
 	}
 
+	/**
+	 * Add a hidden field to the form. Aside from the input tag, no
+	 * HTML is rendered for this type. If required, the label and
+	 * error message are available from label() and error().
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input
+	 * @param array $options Additional Html options to add to the input
+	 */
+	public function hidden($name, $value = null, $options = array()) {
+		return $this->addRow('hidden', $name, $value, $options);
+	}
+
 }
