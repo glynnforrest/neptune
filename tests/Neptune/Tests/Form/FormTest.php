@@ -134,6 +134,21 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(Html::input('text', 'name'), $f->input('name'));
 	}
 
+	public function testLabel() {
+		$f = new Form();
+		$f->text('username');
+		$this->assertSame(Html::label('username', 'Username'), $f->label('username'));
+	}
+
+	public function testError() {
+		$f = new Form();
+		$f->text('email');
+		$this->assertNull($f->error('email'));
+		$error_msg = 'Email is invalid.';
+		$f->getRow('email')->setError($error_msg);
+		$this->assertSame(Html::tag('p', $error_msg), $f->error('email'));
+	}
+
 	public function testGetAndSetValues() {
 		$f = new Form();
 		$f->text('username', 'glynn');
