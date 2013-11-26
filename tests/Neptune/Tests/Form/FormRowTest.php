@@ -112,7 +112,8 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 			'password' => 'Password',
 			'user-id' => 'User id',
 			'EmailAddress' => 'Email address',
-			'date_format' => 'Date format'
+			'date_format' => 'Date format',
+			'_save' => 'Save'
 		);
 		foreach ($labels as $name => $label) {
 			$r = new FormRow('text', $name);

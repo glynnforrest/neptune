@@ -25,7 +25,12 @@ class FormRow {
 		$this->type = $type;
 		$this->name = $name;
 		//create a sensible, human readable default for the label
-		$label = ucfirst(S::create($name)->underscored()->replace('_', ' ')->str);
+		$label = ucfirst(
+			S::create($name)
+				->underscored()
+				->replace('_', ' ')
+				->trim()
+				->str);
 		$this->label = $label;
 		if($type === 'submit' && $value === null) {
 			$value = $label;
