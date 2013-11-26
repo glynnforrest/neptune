@@ -198,10 +198,8 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$values = array('username' => 'glynn', 'age' => 100);
 		$f->setValues($values, true);
 		$expected = Html::openTag('form', array('action' => '/url', 'method' => 'POST'));
-		$expected .= Html::label('username', 'Username');
-		$expected .= Html::input('text', 'username', 'glynn');
-		$expected .= Html::label('age', 'Age');
-		$expected .= Html::input('text', 'age', 100);
+		$expected .= $this->stubRow('text', 'username', 'glynn');
+		$expected .= $this->stubRow('text', 'age', 100);
 		$expected .= '</form>';
 		$this->assertSame($expected, $f->render());
 	}
@@ -210,12 +208,11 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f = new Form('/url');
 		$f->text('username', 'glynn');
 		$comment =  'Hello world';
-		$f->text('comment', $comment);
+		$f->textarea('comment', $comment);
+
 		$first_form = Html::openTag('form', array('action' => '/url', 'method' => 'POST'));
-		$first_form .= Html::label('username', 'Username');
-		$first_form .= Html::input('text', 'username', 'glynn');
-		$first_form .= Html::label('comment', 'Comment');
-		$first_form .= Html::input('text', 'comment', $comment);
+		$first_form .= $this->stubRow('text', 'username', 'glynn');
+		$first_form .= $this->stubRow('textarea', 'comment', $comment);
 		$first_form .= '</form>';
 		$this->assertSame($first_form, $f->render());
 
@@ -224,13 +221,11 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$username_row->setValue('glynnforrest');
 
 		$comment_row = $f->getRow('comment');
-		$comment_row->setType('textarea');
+		$comment_row->setType('text');
 
 		$second_form = Html::openTag('form', array('action' => '/url', 'method' => 'POST'));
-		$second_form .= Html::label('username', 'Username');
-		$second_form .= Html::input('text', 'username', 'glynnforrest');
-		$second_form .= Html::label('comment', 'Comment');
-		$second_form .= Html::input('textarea', 'comment', $comment);
+		$second_form .= $this->stubRow('text', 'username', 'glynnforrest');
+		$second_form .= $this->stubRow('text', 'comment', $comment);
 		$second_form .= '</form>';
 		$this->assertSame($second_form, $f->render());
 	}
@@ -258,20 +253,20 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 
 		//test the error html is rendered
 		$username_error_html = Html::tag('p', $username_error);
-		$this->assertSame($username_error_html, $f->getRow('username')->error());
+		$this->assertSame($username_error_html, $f->error('username'));
 		$email_error_html = Html::tag('p', $email_error);
-		$this->assertSame($email_error_html, $f->getRow('email')->error());
+		$this->assertSame($email_error_html, $f->error('email'));
 
 		//test the completed form contains the errors
 		$form = Html::openTag('form', array('action' => '/url', 'method' => 'POST'));
-		$form .= Html::label('username', 'Username');
-		$form .= Html::input('text', 'username');
-		$form .= $username_error_html;
-		$form .= Html::label('email', 'Email');
-		$form .= Html::input('text', 'email', 'foo');
-		$form .= $email_error_html;
+		$form .= $this->stubRow('text', 'username', null, $username_error);
+		$form .= $this->stubRow('text', 'email', 'foo', $email_error);
 		$form .= '</form>';
 		$this->assertSame($form, $f->render());
+	}
+
+	public function testGetFields() {
+
 	}
 
 }
