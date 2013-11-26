@@ -59,9 +59,30 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $r->render());
 	}
 
-	public function testInput() {
+	public function testHiddenInput() {
 		$r = new FormRow('hidden', 'secret_value', '12345');
 		$expected = Html::input('hidden', 'secret_value', '12345');
+		$this->assertSame($expected, $r->input());
+		$this->assertSame($expected, $r->render());
+	}
+
+	public function testSubmitInputAutoValue() {
+		$r = new FormRow('submit', 'submit-form');
+		//Form Row should add a title to the submit button
+		$expected = Html::input('submit', 'submit-form', 'Submit form');
+		$this->assertSame($expected, $r->input());
+		//update this after row_html is implemented
+		$this->assertSame($expected, $r->render());
+	}
+
+	public function testSubmitInputOverrideValue() {
+		$r = new FormRow('submit', 'submit');
+		$expected = Html::input('submit', 'submit', 'Submit');
+		$this->assertSame($expected, $r->input());
+		//change the text on the button
+		$r->setValue('Send the form!');
+		$expected = Html::input('submit', 'submit', 'Send the form!');
+		$this->assertSame($expected, $r->input());
 	}
 
 	public function testSetValue() {
@@ -69,6 +90,7 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$r->setValue('user1');
 		$this->assertSame('user1', $r->getValue());
 		$expected = Html::input('text', 'username', 'user1');
+		$this->assertSame($expected, $r->input());
 	}
 
 	public function testGetAndSetType() {

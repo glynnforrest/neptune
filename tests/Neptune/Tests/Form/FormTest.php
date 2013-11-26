@@ -128,6 +128,17 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $r->input());
 	}
 
+	public function testSubmit() {
+		$f = new Form();
+		$f->submit('button');
+		$r = $f->getRow('button');
+		$expected_input = Html::input('submit', 'button', 'Button');
+		$this->assertSame($expected_input, $r->input());
+		//By default a row should just give the input
+		$expected_input = Html::input('submit', 'button', 'Button');
+		$this->assertSame($expected_input, $r->render());
+	}
+
 	public function testInput() {
 		$f = new Form();
 		$f->text('name');

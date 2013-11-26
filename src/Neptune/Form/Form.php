@@ -206,16 +206,61 @@ class Form {
 		}
 	}
 
+	/**
+	 * Add a text input to the form.
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input
+	 * @param array $options Additional Html options to add to the input
+	 */
 	public function text($name, $value = null, $options = array()) {
 		return $this->addRow('text', $name, $value, $options);
 	}
 
+	/**
+	 * Add a password field to the form. $value will not be added to
+	 * the password input for security reasons, though it is available
+	 * through get('$name'). If you understand the security
+	 * implications and still want to create a password field with a
+	 * default value, you will need to construct the HTML manually
+	 * without the Html class, e.g.
+	 *
+	 * <?=$f->label('pass');
+	 * <input type="password" id="pass" name="pass" value="<?=$f->get('pass')" />
+	 * <?=$f->error('pass');
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input (not shown)
+	 * @param array $options Additional Html options to add to the input
+	 */
 	public function password($name, $value = null, $options = array()) {
 		return $this->addRow('password', $name, $value, $options);
 	}
 
+	/**
+	 * Add a textarea to the form.
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input
+	 * @param array $options Additional Html options to add to the input
+	 */
 	public function textarea($name, $value = null, $options = array()) {
 		return $this->addRow('textarea', $name, $value, $options);
+	}
+
+	/**
+	 * Add a submit field to the form. No label or error
+	 * message is rendered for this type. If required, the label and
+	 * error message are available from label() and error(). If $value
+	 * is not supplied, the submit button will be given a value
+	 * automatically.
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input
+	 * @param array $options Additional Html options to add to the input
+	 */
+	public function submit($name, $value = null, $options = array()) {
+		return $this->addRow('submit', $name, $value, $options);
 	}
 
 }

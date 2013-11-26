@@ -24,9 +24,12 @@ class FormRow {
 	public function __construct($type, $name, $value = null, $options = array()) {
 		$this->type = $type;
 		$this->name = $name;
-		//create a sensible default for the label.
-		$label = S::create($name)->underscored()->replace('_', ' ')->str;
-		$this->label = ucfirst($label);
+		//create a sensible, human readable default for the label
+		$label = ucfirst(S::create($name)->underscored()->replace('_', ' ')->str);
+		$this->label = $label;
+		if($type === 'submit' && $value === null) {
+			$value = $label;
+		}
 		$this->value = $value;
 		$this->options = $options;
 	}
