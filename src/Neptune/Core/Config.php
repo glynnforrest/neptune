@@ -5,6 +5,8 @@ namespace Neptune\Core;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\ConfigFileException;
 
+use Crutches\DotArray;
+
 /**
  * Config
  * @author Glynn Forrest <me@glynnforrest.com>
@@ -12,10 +14,10 @@ use Neptune\Exceptions\ConfigFileException;
 class Config {
 
 	protected static $instances = array();
-	protected $values = array();
 	protected $name;
 	protected $filename;
 	protected $modified = false;
+	protected $dot_array;
 
 	protected function __construct($name, $filename = null) {
 		if($filename) {
@@ -23,14 +25,17 @@ class Config {
 				throw new ConfigFileException(
 					'Configuration file ' . $filename . ' not found');
 			}
-			$this->values = include $filename;
-			if (!is_array($this->values)) {
+			$values = include $filename;
+			if (!is_array($values)) {
 				throw new ConfigFileException(
 					'Configuration file ' . $filename . ' does not return a php array');
 			}
 			$this->filename = $filename;
+		} else {
+			$values = array();
 		}
 		$this->name = $name;
+		$this->dot_array = new DotArray($values);
 		return true;
 	}
 
@@ -44,21 +49,7 @@ class Config {
 	 * not found.
 	 */
 	public function get($key = null, $default = null) {
-		if(!$key) {
-			return $this->values;
-		}
-		$parts = explode('.', $key);
-		$scope = &$this->values;
-		for ($i = 0; $i < count($parts) - 1; $i++) {
-			if(!isset($scope[$parts[$i]])) {
-				return $default;
-			}
-			$scope = &$scope[$parts[$i]];
-		}
-		if(isset($scope[$parts[$i]])) {
-			return $scope[$parts[$i]];
-		}
-		return $default;
+		return $this->dot_array->get($key, $default);
 	}
 
 	/**
@@ -68,12 +59,7 @@ class Config {
 	 * not found or does not contain an array.
 	 */
 	public function getFirst($key = null, $default = null) {
-		$array = $this->get($key);
-		if(!is_array($array)) {
-			return $default;
-		}
-		reset($array);
-		return current($array);
+		return $this->dot_array->getFirst($key, $default);
 	}
 
 	/**
@@ -111,7 +97,7 @@ class Config {
 	 * ConfigKeyException will be thrown if the key is not found.
 	 */
 	public function getFirstRequired($key) {
-		$value = $this->getFirst($key);
+		$value = $this->dot_array->getFirst($key);
 		if ($value) {
 			return $value;
 		}
@@ -125,17 +111,7 @@ class Config {
 	 * dot array syntax.
 	 */
 	public function set($key, $value) {
-		$parts = explode('.', $key);
-		//loop through each part, create it if not present.
-		$scope = &$this->values;
-		$count = count($parts) - 1;
-		for ($i = 0; $i < $count; $i++) {
-			if(!isset($scope[$parts[$i]])) {
-				$scope[$parts[$i]] = array();
-			}
-			$scope = &$scope[$parts[$i]];
-		}
-		$scope[$parts[$i]] = $value;
+		$this->dot_array->set($key, $value);
 		$this->modified = true;
 	}
 
@@ -207,7 +183,7 @@ class Config {
 	 * $array.
 	 */
 	public function override(array $array) {
-		$this->values = array_replace_recursive($this->values, $array);
+		$this->dot_array->merge($array);
 	}
 
 	/**
@@ -274,32 +250,30 @@ class Config {
 	 * if php can't write to the file.
 	 */
 	public function save() {
-		if ($this->modified) {
-			if (!empty($this->values)) {
-				if(!$this->filename) {
-					throw new ConfigFileException(
-						"Unable to save configuration file '$this->name', \$filename is not set"
-					);
-				}
-				if(!file_exists($this->filename) && !@touch($this->filename)){
-					throw new ConfigFileException(
-						"Unable to create configuration file
-						$this->filename. Check file paths and permissions
-						are correct."
-					);
-				};
-				if(!is_writable($this->filename)) {
-					throw new ConfigFileException(
-						"Unable to write to configuration file
-						$this->filename. Check file paths and permissions
-						are correct."
-					);
-				}
-				$content = '<?php return ' . var_export($this->values, true) . '?>';
-				file_put_contents($this->filename, $content);
-				return true;
-			}
+		if (!$this->modified || empty($this->dot_array->get())) {
+			return true;
 		}
+		if(!$this->filename) {
+			throw new ConfigFileException(
+				"Unable to save configuration file '$this->name', \$filename is not set"
+			);
+		}
+		if(!file_exists($this->filename) && !@touch($this->filename)){
+			throw new ConfigFileException(
+				"Unable to create configuration file
+						$this->filename. Check file paths and permissions
+						are correct."
+			);
+		};
+		if(!is_writable($this->filename)) {
+			throw new ConfigFileException(
+				"Unable to write to configuration file
+						$this->filename. Check file paths and permissions
+						are correct."
+			);
+		}
+		$content = '<?php return ' . var_export($this->dot_array->get(), true) . '?>';
+		file_put_contents($this->filename, $content);
 		return true;
 	}
 
@@ -315,6 +289,8 @@ class Config {
 
 	/**
 	 * Set the filename for the current configuration instance.
+	 *
+	 * @param string $filename The name of the file
 	 */
 	public function setFileName($filename) {
 		$this->filename = $filename;

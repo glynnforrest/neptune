@@ -277,7 +277,8 @@ END;
 	public function testSaveThrowsExceptionWithNoFile() {
 		$c = Config::create('ad-hoc');
 		$c->set('key', 'value');
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigFileException');
+		$msg = 'Unable to save configuration file \'ad-hoc\', $filename is not set';
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigFileException', $msg);
 		$c->save();
 	}
 
