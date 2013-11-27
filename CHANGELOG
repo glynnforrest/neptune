@@ -1,0 +1,8 @@
+
+VERSION 0  INITIAL BETA
+=======================
+
+   Version 0.2 - Initial beta
+      27/11/2013 16:41  0.2.1  initial release
+         a67d7cb Updating .rmt.yml, improved releases.
+         bda8b8b Giving an error exit code in test bootstrap.
