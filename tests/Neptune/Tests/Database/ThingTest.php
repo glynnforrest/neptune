@@ -112,14 +112,17 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $d->getValuesRaw());
 	}
 
+	protected function lastQuery() {
+		return DatabaseFactory::getDriver('db')->getExecutedQuery();
+	}
+
 	public function testInsertBuild() {
 		$d = new UpperCase('db');
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
 		$query = 'INSERT INTO `table` (`id`, `column`) VALUES (`1`, `value`)';
-		$driver = DatabaseFactory::getDriver('db');
-		$this->assertEquals($query, $driver->getExecutedQuery());
+		$this->assertEquals($query, $this->lastQuery());
 	}
 
 	public function testUpdateBuild() {
@@ -127,8 +130,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'changed';
 		$d->save();
 		$query = 'UPDATE `table` SET `column` = `changed` WHERE id = `1`';
-		$driver = DatabaseFactory::getDriver('db');
-		$this->assertEquals($query, $driver->getExecutedQuery());
+		$this->assertEquals($query, $this->lastQuery());
 	}
 
 	public function testInsertBuildWithSetMethod() {
@@ -137,47 +139,42 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		//setName should be called, and modified flag set for saving
 		$d->save();
 		$query = 'INSERT INTO `table` (`name`) VALUES (`TEST`)';
-		$driver = DatabaseFactory::getDriver('db');
-		$this->assertEquals($query, $driver->getExecutedQuery());
+		$this->assertEquals($query, $this->lastQuery());
 	}
 
 	public function testNoUpdate() {
-		$db = DatabaseFactory::getDriver('db');
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->save();
-		$this->assertNull($db->getExecutedQuery());
+		$this->assertNull($this->lastQuery());
 	}
 
 	public function testNoInsert() {
-		$db = DatabaseFactory::getDriver('db');
 		$d = new UpperCase('db');
 		$d->save();
-		$this->assertNull($db->getExecutedQuery());
+		$this->assertNull($this->lastQuery());
 	}
 
 	public function testNoUpdateDifferentFields() {
-		$db = DatabaseFactory::getDriver('db');
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->foo = 'bar';
 		$d->save();
-		$this->assertNull($db->getExecutedQuery());
+		$this->assertNull($this->lastQuery());
 	}
 
 	public function testNoInsertDifferentFields() {
-		$db = DatabaseFactory::getDriver('db');
 		$d = new UpperCase('db');
 		$d->foo = 'bar';
 		$d->save();
-		$this->assertNull($db->getExecutedQuery());
+		$this->assertNull($this->lastQuery());
 	}
 
-	public function testPrimaryKeyIsNotUpdated() {
+	public function testPrimaryKeyIsUpdatedCorrectly() {
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->column = 'changed';
 		$d->id = 2;
 		$d->save();
-		$this->assertEquals('UPDATE `table` SET `column` = `changed`, `id` = `2` WHERE id = `1`',
-		DatabaseFactory::getDriver('db')->getExecutedQuery());
+		$query = 'UPDATE `table` SET `column` = `changed`, `id` = `2` WHERE id = `1`';
+		$this->assertEquals($query, $this->lastQuery());
 	}
 
 	public function testPrimaryKeyUpdatedOnInsert() {
@@ -186,8 +183,8 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 3;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO `table` (`id`, `column`) VALUES (`3`, `value`)',
-		DatabaseFactory::getDriver('db')->getExecutedQuery());
+		$query = 'INSERT INTO `table` (`id`, `column`) VALUES (`3`, `value`)';
+		$this->assertEquals($query, $this->lastQuery());
 	}
 
 	public function testBuildForm() {
