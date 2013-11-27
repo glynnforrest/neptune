@@ -23,11 +23,18 @@ class Html {
 				"Html::options() must be passed an array, $type given."
 			);
 		}
-		foreach($options as $k => $v) {
-			if(is_numeric($k)) {
-				$k = $v;
+		foreach($options as $key => $value) {
+			//if we have numeric keys (e.g. checked), set the value as
+			//the $key (e.g. checked="checked"), but only if it
+			//doesn't exist already
+			if(is_numeric($key)) {
+				if(!array_key_exists($value, $options)) {
+					$key = $value;
+				} else {
+					continue;
+				}
 			}
-			$text[] = $k . '="' . $v . '"';
+			$text[] = $key . '="' . $value . '"';
 		}
 		return empty($text) ? '' : ' ' . implode(' ', $text);
 	}
