@@ -35,13 +35,8 @@ class FormRow {
 		if($type === 'submit' && $value === null) {
 			$value = $label;
 		}
-		$this->options = $options;
-		//use set value after options, as setValue may override some
-		//options
 		$this->setValue($value);
-		if($type === 'checkbox') {
-			$this->value = 'checked';
-		}
+		$this->options = $options;
 	}
 
 	/**
@@ -99,15 +94,7 @@ class FormRow {
 	 * @param string $value The value.
 	 */
 	public function setValue($value) {
-		if($this->type === 'checkbox') {
-			if($value !== null) {
-				$this->options = array('checked');
-			} else {
-				$this->options = array();
-			}
-		} else {
-			$this->value = $value;
-		}
+		$this->value = $value;
 	}
 
 	/**
@@ -121,7 +108,18 @@ class FormRow {
 	 * Render the input attached to this FormRow as Html.
 	 */
 	public function input() {
-		return Html::input($this->type, $this->name, $this->value, $this->options);
+		//if input is a checkbox and it has a truthy value, add
+		//checked to options before render
+		if($this->type === 'checkbox') {
+			if($this->value !== null) {
+				$this->addOptions(array('checked'));
+			}
+			//no matter what, the value of the input is 'checked'
+			$value = 'checked';
+		} else {
+			$value = $this->value;
+		}
+		return Html::input($this->type, $this->name, $value, $this->options);
 	}
 
 	/**

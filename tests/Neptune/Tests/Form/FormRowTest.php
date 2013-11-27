@@ -179,6 +179,50 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($html, $r->input());
 	}
 
+	public function testCheckboxPlusAddOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->addOptions(array('id' => 'checkbox-id'));
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked', 'id' => 'checkbox-id'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxPlusSetOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->setOptions(array('id' => 'checkbox-id'));
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked', 'id' => 'checkbox-id'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetCheckedPreserveOptions() {
+		$r = new FormRow('checkbox', 'remember-me');
+		$r->setOptions(array('class' => 'checkbox'));
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+		$r->setValue('yes');
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('class' => 'checkbox', 'checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetUncheckedPreserveOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->setOptions(array('class' => 'checkbox'));
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+		$r->setValue(null);
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('class' => 'checkbox'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testStillGetCheckboxValueAfterRender() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$html = Html::label('remember-me', 'Remember me');
+		$html .= Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->render());
+		$this->assertSame('yes', $r->getValue());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}
