@@ -35,8 +35,13 @@ class FormRow {
 		if($type === 'submit' && $value === null) {
 			$value = $label;
 		}
-		$this->value = $value;
 		$this->options = $options;
+		//use set value after options, as setValue may override some
+		//options
+		$this->setValue($value);
+		if($type === 'checkbox') {
+			$this->value = 'checked';
+		}
 	}
 
 	/**
@@ -94,7 +99,15 @@ class FormRow {
 	 * @param string $value The value.
 	 */
 	public function setValue($value) {
-		$this->value = $value;
+		if($this->type === 'checkbox') {
+			if($value !== null) {
+				$this->options = array('checked');
+			} else {
+				$this->options = array();
+			}
+		} else {
+			$this->value = $value;
+		}
 	}
 
 	/**

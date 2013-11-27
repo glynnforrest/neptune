@@ -121,6 +121,33 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		}
 	}
 
+	public function testCheckboxUnchecked() {
+		$r = new FormRow('checkbox', 'remember-me');
+		//the checkbox will have the value of 'checked' always
+		$html = Html::input('checkbox', 'remember-me', 'checked');
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxChecked() {
+		$r = new FormRow('checkbox', 'remember-me', 'some-truthy-value');
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetChecked() {
+		$r = new FormRow('checkbox', 'remember-me');
+		$r->setValue('some-truthy-value');
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetUnchecked() {
+		$r = new FormRow('checkbox', 'remember-me', 'some-truthy-value');
+		$r->setValue(null);
+		$html = Html::input('checkbox', 'remember-me', 'checked');
+		$this->assertSame($html, $r->input());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}
