@@ -148,6 +148,37 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($html, $r->input());
 	}
 
+	public function testSetAndGetOptions() {
+		$r = new FormRow('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame(array('id' => 'username-input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame($html, $r->input());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setOptions(array('class' => 'input')));
+		$this->assertSame(array('class' => 'input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('class' => 'input'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testAddOptions() {
+		$r = new FormRow('text', 'username');
+		$this->assertSame(array(), $r->getOptions());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->addOptions(array('id' => 'username-input')));
+		$this->assertSame(array('id' => 'username-input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame($html, $r->input());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->addOptions(array('class' => 'input')));
+		$expected_options = array(
+			'id' => 'username-input',
+			'class' => 'input'
+		);
+		$this->assertSame($expected_options, $r->getOptions());
+		$html = Html::input('text', 'username', null, $expected_options);
+		$this->assertSame($html, $r->input());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}

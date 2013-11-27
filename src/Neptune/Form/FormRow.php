@@ -118,10 +118,19 @@ class FormRow {
 	}
 
 	/**
-	 * Render the label attached to this FormRow as Html.
+	 * Render the input attached to this FormRow as Html.
 	 */
 	public function input() {
 		return Html::input($this->type, $this->name, $this->value, $this->options);
+	}
+
+	/**
+	 * Set the type of input attached to this FormRow.
+	 *
+	 * @param string $type The input type.
+	 */
+	public function setType($type) {
+		$this->type = $type;
 	}
 
 	/**
@@ -132,12 +141,31 @@ class FormRow {
 	}
 
 	/**
-	 * Set the type of input attached to this FormRow.
+	 * Set the html options of the input attached to this FormRow. All
+	 * previous options will be reset.
 	 *
-	 * @param string $type The input type.
+	 * @param array $options An array of keys and values
 	 */
-	public function setType($type) {
-		$this->type = $type;
+	public function setOptions(array $options) {
+		$this->options = $options;
+		return $this;
+	}
+
+	/**
+	 * Add to the html options of the input attached to this FormRow.
+	 *
+	 * @param array $options An array of keys and values
+	 */
+	public function addOptions(array $options) {
+		$this->options = array_merge($this->options, $options);
+		return $this;
+	}
+
+	/**
+	 * Get the html options of the input attached to this FormRow.
+	 */
+	public function getOptions() {
+		return $this->options;
 	}
 
 	/**
