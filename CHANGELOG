@@ -3,6 +3,17 @@ VERSION 0  INITIAL BETA
 =======================
 
    Version 0.2 - Initial beta
+      27/11/2013 16:47  0.2.2  Replacing String helper class with stringy and crutches.
+         aedf72b Merge branch 'stringy'
+         ebb1527 s/String/Inflector in JsonView and XmlView.
+         a3e4933 Removing String - replaced with Stringy library.
+         1517001 Cleanup ThingTest.
+         38e517b Updating ThingTest to expects quotes in queries.
+         299de8e Quoting substituted ? in DebugStatement.
+         31a6a53 Quoting tables in insert statements in GenericSQLBuilder.
+         36a6b1e Replacing String with ItemList in GenericSQLBuilder.
+         53c2bc5 s/String/Stringy library in Tasks.
+         59ddc32 Removing String dependency in Validator.
       27/11/2013 16:41  0.2.1  initial release
          a67d7cb Updating .rmt.yml, improved releases.
          bda8b8b Giving an error exit code in test bootstrap.
