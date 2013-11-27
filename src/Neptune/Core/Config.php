@@ -250,7 +250,8 @@ class Config {
 	 * if php can't write to the file.
 	 */
 	public function save() {
-		if (!$this->modified || empty($this->dot_array->get())) {
+		$values = $this->dot_array->get();
+		if (!$this->modified || empty($values)) {
 			return true;
 		}
 		if(!$this->filename) {
@@ -272,7 +273,7 @@ class Config {
 						are correct."
 			);
 		}
-		$content = '<?php return ' . var_export($this->dot_array->get(), true) . '?>';
+		$content = '<?php return ' . var_export($values, true) . '?>';
 		file_put_contents($this->filename, $content);
 		return true;
 	}
