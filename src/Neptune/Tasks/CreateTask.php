@@ -3,10 +3,11 @@
 namespace Neptune\Tasks;
 
 use Neptune\Tasks\Task;
-use Neptune\Helpers\String;
 use Neptune\View\Skeleton;
 use Neptune\Core\Config;
 use Neptune\Exceptions\FileException;
+
+use Stringy\StaticStringy as S;
 
 /**
  * CreateTask
@@ -35,7 +36,7 @@ class CreateTask extends Task {
 		if(!$name) {
 			$name = $this->console->read('Controller name:', 'Home');
 		}
-		$name = String::camelCase($name, true) . 'Controller';
+		$name = S::UpperCamelize($name) . 'Controller';
 		$new_file = $this->getAppDirectory() . 'Controller/' . $name . '.php';
 		$c = Config::load('neptune');
 		$skeleton_path = $c->getRequired('dir.neptune') . '/skeletons/controller';
@@ -48,7 +49,7 @@ class CreateTask extends Task {
 		if(!$name) {
 			$name = $this->console->read('Model name:');
 		}
-		$name = String::camelCase($name, true) . 'Model';
+		$name = S::UpperCamelize($name) . 'Model';
 		$new_file = $this->getAppDirectory() . 'Model/' . $name . '.php';
 		$c = Config::load('neptune');
 		$skeleton_path = $c->getRequired('dir.neptune') . '/skeletons/model';
@@ -61,13 +62,13 @@ class CreateTask extends Task {
 		if(!$name) {
 			$name = $this->console->read('Entity name:', 'User');
 		}
-		$class = String::camelCase($name, true);
+		$class = S::UpperCamelize($name);
 		$new_file = $this->getAppDirectory() . 'Thing/' . $class . '.php';
 		$c = Config::load('neptune');
 		$skeleton_path = $c->getRequired('dir.neptune') . '/skeletons/thing';
 		$skeleton = Skeleton::loadAbsolute($skeleton_path);
 		$skeleton->thing_name = $class;
-		$skeleton->table = String::plural(String::slugify($name, '_'));
+		$skeleton->table = Inflector::plural(S::slugify($name, '_'));
 		$this->saveSkeletonToFile($skeleton, $new_file);
 	}
 

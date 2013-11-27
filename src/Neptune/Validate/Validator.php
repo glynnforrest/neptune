@@ -7,7 +7,6 @@
 
 namespace Neptune\Validate;
 
-use Neptune\Helpers\String;
 use Neptune\Http\Session;
 
 class Validator {
@@ -148,7 +147,7 @@ class Validator {
 			$this->fails[] = $name;
 			$msg = $this->getMessage($name, $type);
 			if ($msg) {
-				$msg = str_replace(':name', String::spaces($name), $msg);
+				$msg = str_replace(':name', str_replace(array('_', '-'), ' ', $name), $msg);
 				$msg = isset($this->input_array[$name]) && !empty($this->input_array[$name]) ?
 					str_replace(':value', $this->input_array[$name], $msg) : $msg;
 			}

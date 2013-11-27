@@ -20,4 +20,3 @@ class Json extends Format {
 	}
 
 }
-?>

@@ -5,7 +5,8 @@ namespace Neptune\Tasks;
 use Neptune\Core\Config;
 use Neptune\Console\Console;
 use Neptune\Exceptions\ClassNotFoundException;
-use Neptune\Helpers\String;
+
+use Stringy\StaticStringy as S;
 
 /**
  * TaskRunner
@@ -60,7 +61,7 @@ class TaskRunner {
 		$return = array();
 		$return['task'] = $task_pieces[0];
 		if(isset($task_pieces[1])) {
-			$return['method'] = String::CamelCase($task_pieces[1], false);
+			$return['method'] = S::camelize($task_pieces[1]);
 		} else {
 			$return['method'] = 'run';
 		}
@@ -93,7 +94,7 @@ class TaskRunner {
 	 **/
 	public function getTaskClass($task) {
 		$c = Config::load();
-		$task =	String::CamelCase($task) . 'Task';
+		$task =	S::upperCamelize($task) . 'Task';
 		$candidates = array(
 			$c->get('namespace') . '\\Tasks\\'. $task,
 			'Neptune\\Tasks\\' . $task,

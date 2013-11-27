@@ -3,7 +3,8 @@
 namespace Neptune\Database\Builders;
 
 use Neptune\Database\SQLQuery;
-use Neptune\Helpers\String;
+
+use Crutches\ItemList as I;
 
 /**
  * GenericSQLBuilder
@@ -56,6 +57,9 @@ class GenericSQLBuilder extends SQLQuery {
 				case 'FIELDS':
 					$this->addInsertFields($query);
 					break;
+				case 'INTO':
+					$query .= ' INTO `' . $this->query[$verb] . '`';
+					break;
 				default:
 					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 				}
@@ -107,11 +111,11 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addFrom(&$query) {
-		$query .= ' FROM ' . String::joinList($this->query['FROM']);
+		$query .= ' FROM ' . $this->createList($this->query['FROM']);
 	}
 
 	protected function addFields(&$query) {
-		$query .= ' ' . String::joinList($this->query['FIELDS'], ', ', '`', '`');
+		$query .= ' ' . $this->createList($this->query['FIELDS']);
 	}
 
 	protected function addWhere(&$query) {
@@ -139,7 +143,7 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addInsertFields(&$query) {
-		$query .= ' (' . String::joinList($this->query['FIELDS'], ', ', '`', '`');
+		$query .= ' (' . $this->createList($this->query['FIELDS']);
 		$query .= ') VALUES (';
 		for ($i = 0; $i < count($this->query['FIELDS']) - 1; $i++) {
 			$query .= '?, ';
@@ -148,16 +152,19 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function addUpdateFields(&$query) {
-		$query .= ' SET '. String::joinList($this->query['FIELDS'], ', ', '`', '` = ?');
+		$query .= ' SET '. $this->createList($this->query['FIELDS'], '` = ?');
 	}
 
 	protected function addTables(&$query) {
-		$query .= ' ' . String::joinList($this->query['TABLES'], ', ');
+		$query .= ' ' . $this->createList($this->query['TABLES']);
 	}
 
 	protected function addDistinct(&$query) {
 		$query .= ' DISTINCT';
 	}
-}
 
-?>
+	protected function createList($list, $suffix = '`') {
+		return I::create($list)->stringify(', ', '`', $suffix);
+	}
+
+}

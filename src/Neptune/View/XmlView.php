@@ -6,7 +6,8 @@ use Neptune\View\View;
 use Neptune\Format\Xml;
 use Neptune\Database\Thing;
 use Neptune\Database\ThingCollection;
-use Neptune\Helpers\String;
+
+use Crutches\Inflector;
 
 /**
  * XmlView
@@ -19,7 +20,7 @@ class XmlView extends View {
 		$c = 0;
 		foreach($this->vars as $k => $v) {
 			if($v instanceof Thing) {
-				$k = String::single($v->getTable()) . '#' . $c;
+				$k = Inflector::locale()->single($v->getTable()) . '#' . $c;
 				$vars[$k] = $v->getValues();
 				$c++;
 			}
@@ -28,7 +29,7 @@ class XmlView extends View {
 				$results = $v->getValues();
 				$data = array();
 				$d = 0;
-				$table = String::single($v->getTable()) . '#';
+				$table = Inflector::locale()->single($v->getTable()) . '#';
 				foreach($results as $result) {
 					$data[$table . $d] = $result;
 					$d++;
