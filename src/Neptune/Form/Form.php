@@ -286,4 +286,18 @@ class Form {
 		return $this->addRow('hidden', $name, $value, $options);
 	}
 
+	/**
+	 * Add a checkbox field to the form. By convention, the value of
+	 * the input tag will always be 'checked'. If required, the real
+	 * value is available from get(). If the $value is truthy, a
+	 * checked attribute will be added automatically.
+	 *
+	 * @param string $name The name of the input
+	 * @param string $value The initial value of the input
+	 * @param array $options Additional Html options to add to the input
+	 */
+	public function checkbox($name, $value = null, $options = array()) {
+		return $this->addRow('checkbox', $name, $value, $options);
+	}
+
 }
