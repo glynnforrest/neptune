@@ -6,7 +6,8 @@ use Neptune\View\View;
 use Neptune\Format\Json;
 use Neptune\Database\Thing;
 use Neptune\Database\ThingCollection;
-use Neptune\Helpers\String;
+
+use Crutches\Inflector;
 
 /**
  * JsonView
@@ -18,7 +19,7 @@ class JsonView extends View {
 		$vars = array();
 		foreach($this->vars as $k => $v) {
 			if($v instanceof Thing) {
-				$v->_type = String::single($v->getTable());
+				$v->_type = Inflector::locale()->single($v->getTable());
 				$vars[$k] = $v->getValues();
 			}
 			if($v instanceof ThingCollection) {
@@ -34,5 +35,5 @@ class JsonView extends View {
 	public function render() {
 		return Json::create($this->getPreferredVars())->encode();
 	}
+
 }
-?>
