@@ -1,5 +1,10 @@
 <?php
+
 namespace Neptune\Database\Statements;
+
+use Neptune\Database\Statements\DatabaseStatement;
+
+use Crutches\ItemList as I;
 
 /**
  * DebugStatement
@@ -14,7 +19,7 @@ class DebugStatement implements DatabaseStatement {
 	}
 
 	public function execute($params = array()) {
-		foreach($params as $param) {
+		foreach(I::create($params)->surround('`')->getList() as $param) {
 			$this->query = preg_replace('`\?`', $param, $this->query, 1);
 		}
 	}

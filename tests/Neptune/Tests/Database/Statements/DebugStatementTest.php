@@ -59,16 +59,16 @@ class DebugStatementTest extends \PHPUnit_Framework_TestCase {
 
 	public function testQueryIsParsedSimple() {
 		$db = DatabaseFactory::getDriver('debug');
-		$stmt = $db->prepare('SELECT * FROM test WHERE id = ?');
+		$stmt = $db->prepare('SELECT * FROM `test` WHERE id = ?');
 		$stmt->execute(array(2));
-		$this->assertEquals('SELECT * FROM test WHERE id = 2', $stmt->getExecutedQuery());
+		$this->assertEquals('SELECT * FROM `test` WHERE id = `2`', $stmt->getExecutedQuery());
 	}
 
 	public function testQueryIsParsedComplex() {
 		$db = DatabaseFactory::getDriver('debug');
-		$stmt = $db->prepare('SELECT * FROM test WHERE id = ? AND count > ? LIMIT ?');
+		$stmt = $db->prepare('SELECT * FROM `test` WHERE id = ? AND count > ? LIMIT ?');
 		$stmt->execute(array(2,10,1));
-		$this->assertEquals('SELECT * FROM test WHERE id = 2 AND count > 10 LIMIT 1', $stmt->getExecutedQuery());
+		$this->assertEquals('SELECT * FROM `test` WHERE id = `2` AND count > `10` LIMIT `1`', $stmt->getExecutedQuery());
 	}
 
 

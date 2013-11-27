@@ -52,8 +52,8 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetPreparedQuery() {
 		$db = DatabaseFactory::getDriver('debug');
-		$db->prepare('SELECT * FROM test');
-		$this->assertEquals('SELECT * FROM test', $db->getPreparedQuery());
+		$db->prepare('SELECT * FROM `test`');
+		$this->assertEquals('SELECT * FROM `test`', $db->getPreparedQuery());
 	}
 
 	public function testGetPreparedQueryNull() {
@@ -63,9 +63,9 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetExecutedQuery() {
 		$db = DatabaseFactory::getDriver('debug');
-		$stmt = $db->prepare('INSERT INTO test (id, column) VALUES (?, ?)');
+		$stmt = $db->prepare('INSERT INTO `test` (id, column) VALUES (?, ?)');
 		$stmt->execute(array(1, 'value'));
-		$this->assertEquals('INSERT INTO test (id, column) VALUES (1, value)',
+		$this->assertEquals('INSERT INTO `test` (id, column) VALUES (`1`, `value`)',
 			$db->getExecutedQuery());
 	}
 
@@ -74,4 +74,3 @@ class DebugDriverTest extends \PHPUnit_Framework_TestCase {
 		$this->assertNull($db->getExecutedQuery());
 	}
 }
-?>
