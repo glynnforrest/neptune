@@ -117,7 +117,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 1;
 		$d->column = 'value';
 		$d->save();
-		$query = 'INSERT INTO table (`id`, `column`) VALUES (1, value)';
+		$query = 'INSERT INTO `table` (`id`, `column`) VALUES (`1`, `value`)';
 		$driver = DatabaseFactory::getDriver('db');
 		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
@@ -126,7 +126,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d = new UpperCase('db', array('id' => 1, 'column' => 'value'));
 		$d->column = 'changed';
 		$d->save();
-		$query = 'UPDATE table SET `column` = changed WHERE id = 1';
+		$query = 'UPDATE `table` SET `column` = `changed` WHERE id = `1`';
 		$driver = DatabaseFactory::getDriver('db');
 		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
@@ -136,7 +136,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->name = 'test';
 		//setName should be called, and modified flag set for saving
 		$d->save();
-		$query = 'INSERT INTO table (`name`) VALUES (TEST)';
+		$query = 'INSERT INTO `table` (`name`) VALUES (`TEST`)';
 		$driver = DatabaseFactory::getDriver('db');
 		$this->assertEquals($query, $driver->getExecutedQuery());
 	}
@@ -176,7 +176,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->column = 'changed';
 		$d->id = 2;
 		$d->save();
-		$this->assertEquals('UPDATE table SET `column` = changed, `id` = 2 WHERE id = 1',
+		$this->assertEquals('UPDATE `table` SET `column` = `changed`, `id` = `2` WHERE id = `1`',
 		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
@@ -186,7 +186,7 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$d->id = 3;
 		$d->column = 'value';
 		$d->save();
-		$this->assertEquals('INSERT INTO table (`id`, `column`) VALUES (3, value)',
+		$this->assertEquals('INSERT INTO `table` (`id`, `column`) VALUES (`3`, `value`)',
 		DatabaseFactory::getDriver('db')->getExecutedQuery());
 	}
 
