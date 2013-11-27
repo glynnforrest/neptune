@@ -57,6 +57,9 @@ class GenericSQLBuilder extends SQLQuery {
 				case 'FIELDS':
 					$this->addInsertFields($query);
 					break;
+				case 'INTO':
+					$query .= ' INTO `' . $this->query[$verb] . '`';
+					break;
 				default:
 					$query .= ' ' . $verb . ' ' . $this->query[$verb];
 				}

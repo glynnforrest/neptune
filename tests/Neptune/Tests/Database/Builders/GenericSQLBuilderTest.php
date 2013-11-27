@@ -283,14 +283,14 @@ class GenericSQLBuilderTest extends \PHPUnit_Framework_TestCase {
 		$q = SQLQuery::insert();
 		$q->into('users');
 		$q->fields('one_field');
-		$this->assertEquals('INSERT INTO users (`one_field`) VALUES (?)', $q->__toString());
+		$this->assertEquals('INSERT INTO `users` (`one_field`) VALUES (?)', $q->__toString());
 	}
 
 	public function testInsertMultiple() {
 		$q = SQLQuery::insert();
 		$q->into('users');
 		$q->fields(array('one', 'two', 'three'));
-		$this->assertEquals('INSERT INTO users (`one`, `two`, `three`) VALUES (?, ?, ?)', $q->__toString());
+		$this->assertEquals('INSERT INTO `users` (`one`, `two`, `three`) VALUES (?, ?, ?)', $q->__toString());
 	}
 
 	public function testUpdate() {
