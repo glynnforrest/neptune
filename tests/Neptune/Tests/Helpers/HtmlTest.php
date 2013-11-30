@@ -134,4 +134,19 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $options);
 	}
 
+	public function testSelect() {
+		$expected = '<select name="choice">';
+		$expected .= '<option value="foo">Foo</option>';
+		$expected .= '</select>';
+		$this->assertSame($expected, Html::select('choice', array('Foo' => 'foo')));
+	}
+
+	public function testSelectWithOptions() {
+		$expected = '<select name="choice">';
+		$expected .= '<option value="foo">Foo</option>';
+		$expected .= '<option value="bar" selected="selected">Bar</option>';
+		$expected .= '</select>';
+		$this->assertSame($expected, Html::select('choice', array('Foo' => 'foo', 'Bar' => 'bar'), 'bar'));
+	}
+
 }

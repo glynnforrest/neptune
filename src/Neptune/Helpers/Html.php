@@ -79,7 +79,20 @@ class Html {
 		return self::input('hidden', 'csrf_token', Session::token());
 	}
 
-	public static function select($name, $values, $selected = null, $options = array()) {
+	/**
+	 * Create a select tag with child option tags. Option tags are
+	 * created from the $values array, where the keys become the
+	 * content of the tag (the name visible in the browser) and values
+	 * become the value of the tag (the value attribute). Pass
+	 * $selected, where $selected is a value (not a key) in $values,
+	 * to pre-select one of the options.
+	 *
+	 * @param string $name The name attribute of the select tag
+	 * @param array $name An array of keys and value to use as option tags.
+	 * @param string $selected The value of the input to pre-select.
+	 * @param options array An array of html options.
+	 */
+	public static function select($name, array $values, $selected = null, $options = array()) {
 		$options['name'] = $name;
 		$text = self::openTag('select', $options);
 		foreach($values as $k => $v) {
@@ -87,11 +100,11 @@ class Html {
 				$k = $v;
 			}
 			if($v === $selected) {
-				$text .= self::openTag('option', array('value' => $v, 'selected'));
+				$options = array('value' => $v, 'selected');
 			} else {
-				$text .= self::openTag('option', array('value' => $v));
+				$options = array('value' => $v);
 			}
-			$text .= $k . self::closeTag('option');
+			$text .= self::tag('option', $k, $options);
 		}
 		$text .= self::closeTag('select');
 		return $text;
