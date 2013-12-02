@@ -223,6 +223,67 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('yes', $r->getValue());
 	}
 
+	public function testSelect() {
+		$r = new FormRow('select', 'variables');
+		$html = Html::select('variables', array());
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSelectWithOptions() {
+		$r = new FormRow('select', 'variables');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('Foo' => 'foo', 'Bar' => 'bar')));
+		$html = Html::select('variables', array('Foo' => 'foo', 'Bar' => 'bar'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSetAndGetChoices() {
+		$r = new FormRow('radio', 'gender');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('male', 'female')));
+		$this->assertSame(array('Male' => 'male', 'Female' => 'female'),
+		$r->getChoices());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setChoices(array()));
+		$this->assertSame(array(), $r->getChoices());
+	}
+
+	public function testSetChoicesAddsSensibleLabels() {
+		$r = new FormRow('select', 'variables');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('first_name', 'last_name')));
+
+		$nice_array = array('First name' => 'first_name', 'Last name' => 'last_name');
+		$this->assertSame($nice_array, $r->getChoices());
+
+		$html = Html::select('variables', $nice_array);
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSetChoicesDoesNotChangeFloatKeys() {
+		$r = new FormRow('select', 'var');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('0.1' => 'foo', '0.2' => 'bar')));
+		$this->assertSame(array('0.1' => 'foo', '0.2' => 'bar'),
+		$r->getChoices());
+	}
+
+	public function testSetChoicesInvalidTypeThrowsException() {
+		$r = new FormRow('text', 'username');
+		$error = "Choices are only allowed with a FormRow of type 'select' or 'radio', 'username' has disallowed type 'text'";
+		$this->setExpectedException('\Exception', $error);
+		$r->setChoices(array());
+	}
+
+	public function testAddChoices() {
+		$r = new FormRow('radio', 'decision');
+		$r->setChoices(array('yes', 'no'));
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->addChoices(array('maybe')));
+		$this->assertSame(array('Yes' => 'yes', 'No' => 'no', 'Maybe' => 'maybe'),
+		$r->getChoices());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}

@@ -16,6 +16,8 @@ class FormRow {
 	protected $type;
 	protected $name;
 	protected $value;
+	//only applicable for selects and radios
+	protected $choices = array();
 	protected $options;
 	protected $label;
 	protected $error;
@@ -24,19 +26,29 @@ class FormRow {
 	public function __construct($type, $name, $value = null, $options = array()) {
 		$this->type = $type;
 		$this->name = $name;
-		//create a sensible, human readable default for the label
-		$label = ucfirst(
-			S::create($name)
-				->underscored()
-				->replace('_', ' ')
-				->trim()
-				->str);
+		$label = $this->sensible($name);
 		$this->label = $label;
 		if($type === 'submit' && $value === null) {
 			$value = $label;
 		}
 		$this->setValue($value);
 		$this->options = $options;
+	}
+
+	/**
+	 * Create a sensible, human readable default for $string,
+	 * e.g. creating a label for the name of form inputs.
+	 *
+	 * @param string $string the string to transform
+	 */
+	protected function sensible($string) {
+		return ucfirst(
+			S::create($string)
+			->underscored()
+			->replace('_', ' ')
+			->trim()
+			->str
+		);
 	}
 
 	/**
@@ -119,6 +131,10 @@ class FormRow {
 		} else {
 			$value = $this->value;
 		}
+		if($this->type === 'select') {
+			$selected = $this->value;
+			return Html::select($this->name, $this->choices, $selected, $this->options);
+		}
 		return Html::input($this->type, $this->name, $value, $this->options);
 	}
 
@@ -164,6 +180,67 @@ class FormRow {
 	 */
 	public function getOptions() {
 		return $this->options;
+	}
+
+	/**
+	 * Return true if this FormRow can use choices. Throw an Exception
+	 * otherwise.
+	 */
+	protected function checkCanUseChoices() {
+		if($this->type === 'select' || $this->type === 'radio') {
+			return true;
+		}
+		throw new \Exception("Choices are only allowed with a FormRow of type 'select' or 'radio', '$this->name' has disallowed type '$this->type'");
+	}
+
+
+	/**
+	 * Set the choices for the input attached to this FormRow. If no
+	 * keys are given in the choices array or, due to PHP's array
+	 * implementation, keys are strings containing valid integers,
+	 * keys will be created automatically by calling
+	 * FormRow::sensible. An Exception will be thrown if this FormRow
+	 * does not have the type 'radio' or 'select'.
+	 *
+	 * @param array $choices An array of keys and values to use in
+	 * option tags
+	 */
+	public function setChoices(array $choices) {
+		$this->checkCanUseChoices();
+		$this->choices = array();
+		$this->addChoices($choices);
+		return $this;
+	}
+
+	/**
+	 * Add to the choices for the input attached to this FormRow. If
+	 * no keys are given in the choices array or, due to PHP's array
+	 * implementation, keys are strings containing valid integers,
+	 * keys will be created automatically by calling
+	 * FormRow::sensible. An Exception will be thrown if this FormRow
+	 * does not have the type 'radio' or 'select'.
+	 *
+	 * @param array $choices An array of keys and values to use in
+	 * option tags
+	 */
+	public function addChoices(array $choices) {
+		foreach ($choices as $k => $v) {
+			if(is_int($k)) {
+				$k = $this->sensible($v);
+			}
+			$this->choices[$k] = $v;
+		}
+		return $this;
+	}
+
+	/**
+	 * Get the choices for the input attached to this FormRow. An
+	 * Exception will be thrown if this FormRow does not have the type
+	 * 'radio' or 'select'.
+	 */
+	public function getChoices() {
+		$this->checkCanUseChoices();
+		return $this->choices;
 	}
 
 	/**
