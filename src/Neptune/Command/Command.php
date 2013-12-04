@@ -56,8 +56,8 @@ abstract class Command extends SymfonyCommand {
 	abstract public function go();
 
 	protected function getAppDirectory() {
-		return $this->config->getRequired('dir.app') .
-			'/' . $this->config->getRequired('namespace') . '/';
+		return $this->getRootDirectory() . 'app/' .
+			$this->getNamespace() . '/';
 	}
 
 	protected function getRootDirectory() {
@@ -70,9 +70,19 @@ abstract class Command extends SymfonyCommand {
 	}
 
 	/**
-	 * Check if any configuration profiles have been setup.
+	 * Get the project namespace with no beginning slash.
+	 */
+	protected function getNamespace() {
+		$namespace = $this->config->getRequired('namespace');
+		if(substr($namespace, 0, 1) === '\\') {
+			$namespace = substr($namespace, 0, 1);
+		}
+		return $namespace;
+	}
+
+	/**
+	 * Check if the neptune config has been setup.
 	 *
-	 * An array of profiles wil be returned if any exist.
 	 * Return false if the neptune cli config hasn't been setup.
 	 */
 	protected function neptuneConfigSetup() {
