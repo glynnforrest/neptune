@@ -5,9 +5,6 @@ namespace Neptune\Command;
 use Neptune\Command\CreateCommand;
 use Neptune\View\Skeleton;
 
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-
 use Stringy\StaticStringy as S;
 
 /**
