@@ -3,7 +3,9 @@
 
 //this script needs to be in the root directory of your app to work properly.
 //Make sure that you have run `composer install` if the autoloader isn't working.
-include('vendor/autoload.php');
+$root = __DIR__ . '/';
+
+include($root . 'vendor/autoload.php');
 
 use Neptune\Core\Config;
 use Neptune\Console\Application;
@@ -24,13 +26,15 @@ if(file_exists($config)) {
 	$output->writeln('You should run <info>create:config</info> to create <info>config/neptune.php</info>');
 	$output->writeln('Creating temporary neptune config...');
 	$c = Config::create('neptune', $config);
-	$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune/');
+	$c->set('dir.neptune', $root . 'vendor/glynnforrest/neptune/');
 }
 
-$c->set('dir.root', __DIR__ . '/');
-$c->set('dir.app', __DIR__ . '/app/');
+$c->set('dir.root', $root);
 
 //off we go
-$app = new Application();
+$app = new Application($c);
+$app->add(new \Neptune\Command\CreateControllerCommand($c));
+$app->add(new \Neptune\Command\CreateModelCommand($c));
+$app->add(new \Neptune\Command\CreateThingCommand($c));
 
 $app->run(null, $output);
