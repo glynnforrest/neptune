@@ -5,25 +5,32 @@
 //Make sure that you have run `composer install` if the autoloader isn't working.
 include('vendor/autoload.php');
 
-use Neptune\Console\Console;
 use Neptune\Core\Config;
-use Neptune\Tasks\TaskRunner;
+use Neptune\Console\Application;
+use Neptune\Console\OutputFormatter;
 
-//load neptune cli config
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+$output = new ConsoleOutput();
+$output->setFormatter(new OutputFormatter());
+
+//load neptune config
 $config = 'config/neptune.php';
+
 if(file_exists($config)) {
 	$c = Config::load('neptune', $config);
 } else {
-	Console::getInstance()->write('Creating neptune config file...');
+	$output->writeln('No neptune config file found!');
+	$output->writeln('You should run <info>create:config</info> to create <info>config/neptune.php</info>');
+	$output->writeln('Creating temporary neptune config...');
 	$c = Config::create('neptune', $config);
+	$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune/');
 }
+
 $c->set('dir.root', __DIR__ . '/');
-$c->set('dir.neptune', __DIR__ . '/vendor/glynnforrest/neptune/');
 $c->set('dir.app', __DIR__ . '/app/');
 
-//prepare the command string
-unset($_SERVER['argv'][0]);
-$cmd = implode($_SERVER['argv'], ' ');
-
 //off we go
-TaskRunner::getInstance()->run($cmd);
+$app = new Application();
+
+$app->run(null, $output);
