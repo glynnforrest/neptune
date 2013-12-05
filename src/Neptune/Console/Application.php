@@ -72,7 +72,6 @@ class Application extends SymfonyApplication {
 			return $current->isFile() && substr($current->getFilename(), -11) === 'Command.php';
 		});
 		foreach ($candidates as $file) {
-			echo $file;
 			$r = new ReflectionClass($namespace . '\\Command\\' . $file->getBasename('.php'));
 			if ($r->isSubclassOf('Neptune\\Command\\Command') && !$r->isAbstract()) {
 				$this->add($r->newInstance($this->config));
