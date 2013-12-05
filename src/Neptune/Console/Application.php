@@ -72,9 +72,14 @@ class Application extends SymfonyApplication {
 			return $current->isFile() && substr($current->getFilename(), -11) === 'Command.php';
 		});
 		foreach ($candidates as $file) {
-			$r = new ReflectionClass($namespace . '\\Command\\' . $file->getBasename('.php'));
-			if ($r->isSubclassOf('Neptune\\Command\\Command') && !$r->isAbstract()) {
-				$this->add($r->newInstance($this->config));
+			$class = $namespace . '\\Command\\' . $file->getBasename('.php');
+			try {
+				$r = new ReflectionClass($class);
+				if ($r->isSubclassOf('Neptune\\Command\\Command') && !$r->isAbstract()) {
+					$this->add($r->newInstance($this->config));
+				}
+			} catch (\ReflectionException $e) {
+				continue;
 			}
 		}
 	}
