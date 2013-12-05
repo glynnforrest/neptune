@@ -33,8 +33,5 @@ $c->set('dir.root', $root);
 
 //off we go
 $app = new Application($c);
-$app->add(new \Neptune\Command\CreateControllerCommand($c));
-$app->add(new \Neptune\Command\CreateModelCommand($c));
-$app->add(new \Neptune\Command\CreateThingCommand($c));
 
 $app->run(null, $output);
