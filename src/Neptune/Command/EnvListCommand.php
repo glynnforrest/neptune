@@ -38,10 +38,10 @@ class EnvListCommand extends Command {
 	protected function getEnvsHighlightCurrent() {
 		$current_env = $this->config->getRequired('env');
 		return array_map(function($env) use ($current_env) {
-            if($env === $current_env) {
-                return "<info>$env</info>";
-            }
-            return $env;
+			if($env === $current_env) {
+				return "<info>$env</info>";
+			}
+			return $env;
 		}, $this->getEnvs());
 	}
 
