@@ -121,4 +121,32 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		)));
 	}
 
+	public function testDuplicateOptionsRemoved() {
+		$expected = ' id="tick" name="tick" checked="checked"';
+		$options = Html::options(array(
+			'id' => 'foo',
+			'name' => 'bar',
+			'id' => 'tick',
+			'name' => 'tick',
+			'checked' => 'checked',
+			'checked'
+		));
+		$this->assertSame($expected, $options);
+	}
+
+	public function testSelect() {
+		$expected = '<select name="choice">';
+		$expected .= '<option value="foo">Foo</option>';
+		$expected .= '</select>';
+		$this->assertSame($expected, Html::select('choice', array('Foo' => 'foo')));
+	}
+
+	public function testSelectWithOptions() {
+		$expected = '<select name="choice">';
+		$expected .= '<option value="foo">Foo</option>';
+		$expected .= '<option value="bar" selected="selected">Bar</option>';
+		$expected .= '</select>';
+		$this->assertSame($expected, Html::select('choice', array('Foo' => 'foo', 'Bar' => 'bar'), 'bar'));
+	}
+
 }

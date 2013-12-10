@@ -121,6 +121,169 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		}
 	}
 
+	public function testCheckboxUnchecked() {
+		$r = new FormRow('checkbox', 'remember-me');
+		//the checkbox will have the value of 'checked' always
+		$html = Html::input('checkbox', 'remember-me', 'checked');
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxChecked() {
+		$r = new FormRow('checkbox', 'remember-me', 'some-truthy-value');
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetChecked() {
+		$r = new FormRow('checkbox', 'remember-me');
+		$r->setValue('some-truthy-value');
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetUnchecked() {
+		$r = new FormRow('checkbox', 'remember-me', 'some-truthy-value');
+		$r->setValue(null);
+		$html = Html::input('checkbox', 'remember-me', 'checked');
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSetAndGetOptions() {
+		$r = new FormRow('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame(array('id' => 'username-input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame($html, $r->input());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setOptions(array('class' => 'input')));
+		$this->assertSame(array('class' => 'input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('class' => 'input'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testAddOptions() {
+		$r = new FormRow('text', 'username');
+		$this->assertSame(array(), $r->getOptions());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->addOptions(array('id' => 'username-input')));
+		$this->assertSame(array('id' => 'username-input'), $r->getOptions());
+		$html = Html::input('text', 'username', null, array('id' => 'username-input'));
+		$this->assertSame($html, $r->input());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->addOptions(array('class' => 'input')));
+		$expected_options = array(
+			'id' => 'username-input',
+			'class' => 'input'
+		);
+		$this->assertSame($expected_options, $r->getOptions());
+		$html = Html::input('text', 'username', null, $expected_options);
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxPlusAddOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->addOptions(array('id' => 'checkbox-id'));
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked', 'id' => 'checkbox-id'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxPlusSetOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->setOptions(array('id' => 'checkbox-id'));
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('checked', 'id' => 'checkbox-id'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetCheckedPreserveOptions() {
+		$r = new FormRow('checkbox', 'remember-me');
+		$r->setOptions(array('class' => 'checkbox'));
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+		$r->setValue('yes');
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('class' => 'checkbox', 'checked'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testCheckboxSetUncheckedPreserveOptions() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$r->setOptions(array('class' => 'checkbox'));
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+		$r->setValue(null);
+		$this->assertSame(array('class' => 'checkbox'), $r->getOptions());
+
+		$html = Html::input('checkbox', 'remember-me', 'checked', array('class' => 'checkbox'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testStillGetCheckboxValueAfterRender() {
+		$r = new FormRow('checkbox', 'remember-me', 'yes');
+		$html = Html::label('remember-me', 'Remember me');
+		$html .= Html::input('checkbox', 'remember-me', 'checked', array('checked'));
+		$this->assertSame($html, $r->render());
+		$this->assertSame('yes', $r->getValue());
+	}
+
+	public function testSelect() {
+		$r = new FormRow('select', 'variables');
+		$html = Html::select('variables', array());
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSelectWithOptions() {
+		$r = new FormRow('select', 'variables');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('Foo' => 'foo', 'Bar' => 'bar')));
+		$html = Html::select('variables', array('Foo' => 'foo', 'Bar' => 'bar'));
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSetAndGetChoices() {
+		$r = new FormRow('radio', 'gender');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('male', 'female')));
+		$this->assertSame(array('Male' => 'male', 'Female' => 'female'),
+		$r->getChoices());
+
+		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setChoices(array()));
+		$this->assertSame(array(), $r->getChoices());
+	}
+
+	public function testSetChoicesAddsSensibleLabels() {
+		$r = new FormRow('select', 'variables');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('first_name', 'last_name')));
+
+		$nice_array = array('First name' => 'first_name', 'Last name' => 'last_name');
+		$this->assertSame($nice_array, $r->getChoices());
+
+		$html = Html::select('variables', $nice_array);
+		$this->assertSame($html, $r->input());
+	}
+
+	public function testSetChoicesDoesNotChangeFloatKeys() {
+		$r = new FormRow('select', 'var');
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->setChoices(array('0.1' => 'foo', '0.2' => 'bar')));
+		$this->assertSame(array('0.1' => 'foo', '0.2' => 'bar'),
+		$r->getChoices());
+	}
+
+	public function testSetChoicesInvalidTypeThrowsException() {
+		$r = new FormRow('text', 'username');
+		$error = "Choices are only allowed with a FormRow of type 'select' or 'radio', 'username' has disallowed type 'text'";
+		$this->setExpectedException('\Exception', $error);
+		$r->setChoices(array());
+	}
+
+	public function testAddChoices() {
+		$r = new FormRow('radio', 'decision');
+		$r->setChoices(array('yes', 'no'));
+		$this->assertInstanceOf('\Neptune\Form\FormRow',
+		$r->addChoices(array('maybe')));
+		$this->assertSame(array('Yes' => 'yes', 'No' => 'no', 'Maybe' => 'maybe'),
+		$r->getChoices());
+	}
+
 	public function testInvalidInputTypeThrowsException() {
 
 	}

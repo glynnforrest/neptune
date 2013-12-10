@@ -23,11 +23,18 @@ class Html {
 				"Html::options() must be passed an array, $type given."
 			);
 		}
-		foreach($options as $k => $v) {
-			if(is_numeric($k)) {
-				$k = $v;
+		foreach($options as $key => $value) {
+			//if we have numeric keys (e.g. checked), set the value as
+			//the $key (e.g. checked="checked"), but only if it
+			//doesn't exist already
+			if(is_numeric($key)) {
+				if(!array_key_exists($value, $options)) {
+					$key = $value;
+				} else {
+					continue;
+				}
 			}
-			$text[] = $k . '="' . $v . '"';
+			$text[] = $key . '="' . $value . '"';
 		}
 		return empty($text) ? '' : ' ' . implode(' ', $text);
 	}
@@ -72,7 +79,20 @@ class Html {
 		return self::input('hidden', 'csrf_token', Session::token());
 	}
 
-	public static function select($name, $values, $selected = null, $options = array()) {
+	/**
+	 * Create a select tag with child option tags. Option tags are
+	 * created from the $values array, where the keys become the
+	 * content of the tag (the name visible in the browser) and values
+	 * become the value of the tag (the value attribute). Pass
+	 * $selected, where $selected is a value (not a key) in $values,
+	 * to pre-select one of the options.
+	 *
+	 * @param string $name The name attribute of the select tag
+	 * @param array $name An array of keys and value to use as option tags.
+	 * @param string $selected The value of the input to pre-select.
+	 * @param options array An array of html options.
+	 */
+	public static function select($name, array $values, $selected = null, $options = array()) {
 		$options['name'] = $name;
 		$text = self::openTag('select', $options);
 		foreach($values as $k => $v) {
@@ -80,11 +100,11 @@ class Html {
 				$k = $v;
 			}
 			if($v === $selected) {
-				$text .= self::openTag('option', array('value' => $v, 'selected'));
+				$options = array('value' => $v, 'selected');
 			} else {
-				$text .= self::openTag('option', array('value' => $v));
+				$options = array('value' => $v);
 			}
-			$text .= $k . self::closeTag('option');
+			$text .= self::tag('option', $k, $options);
 		}
 		$text .= self::closeTag('select');
 		return $text;

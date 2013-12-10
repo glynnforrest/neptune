@@ -101,9 +101,9 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($first, $second);
 	}
 
-	protected function stubRow($type, $name, $value = null, $error = null) {
+	protected function stubRow($type, $name, $value = null, $error = null, $options = array()) {
 		$html = Html::label($name, ucfirst($name));
-		$html .= Html::input($type, $name, $value);
+		$html .= Html::input($type, $name, $value, $options);
 		if($error) {
 			$html .= Html::tag('p', $error);
 		}
@@ -273,6 +273,24 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f->password('password');
 		$expected = array('id', 'username', 'email', 'password');
 		$this->assertSame($expected, $f->getFields());
+	}
+
+	public function testCheckboxUnchecked() {
+		$f = new Form();
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->checkbox('tick'));
+		$this->assertSame('checkbox', $f->getRow('tick')->getType());
+		$expected = $this->stubRow('checkbox', 'tick', 'checked');
+		$this->assertSame($expected, $f->row('tick'));
+		$this->assertSame(null, $f->get('tick'));
+	}
+
+	public function testCheckboxChecked() {
+		$f = new Form();
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->checkbox('tick', 'yes'));
+		$this->assertSame('checkbox', $f->getRow('tick')->getType());
+		$expected = $this->stubRow('checkbox', 'tick', 'checked', null, array('checked'));
+		$this->assertSame($expected, $f->row('tick'));
+		$this->assertSame('yes', $f->get('tick'));
 	}
 
 }
