@@ -46,6 +46,14 @@ class FormRowSelectTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($html, $r->input());
 	}
 
+	public function testInputWithStrangeTypes() {
+		$r = new FormRow('select', 'decision');
+		$choices = array(1.1 => 1, 2 => 2, '3' => 3, 4);
+		$r->setChoices($choices);
+		$html = Html::select('decision', $choices);
+		$this->assertSame($html, $r->input());
+	}
+
 	public function testRow() {
 		$r = new FormRow('select', 'decision');
 		$r->setChoices(array('yes', 'no'));
