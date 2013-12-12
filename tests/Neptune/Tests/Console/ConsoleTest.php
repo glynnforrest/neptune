@@ -236,4 +236,57 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 		$this->c->getHelperSet();
 	}
 
+	public function outputTypesHelloProvider() {
+		return array(
+			array(StreamOutput::OUTPUT_NORMAL, 'Hello world'),
+			array(StreamOutput::OUTPUT_RAW, 'Hello <comment>world</comment>'),
+			array(StreamOutput::OUTPUT_PLAIN, 'Hello world'),
+		);
+	}
+
+	public function testOutputNormal() {
+		Console::outputNormal();
+		$this->c->write('Hello <comment>world</comment>');
+		$this->assertSame('Hello world', $this->getOutput());
+	}
+
+	/**
+	 * @dataProvider outputTypesHelloProvider()
+	 */
+	public function testOutputNormalWithTypes($type, $expected) {
+		Console::outputNormal();
+		$this->c->write('Hello <comment>world</comment>', false, $type);
+		$this->assertSame($expected, $this->getOutput());
+	}
+
+	public function testOutputRaw() {
+		Console::outputRaw();
+		$this->c->write('Hello <comment>world</comment>');
+		$this->assertSame('Hello <comment>world</comment>', $this->getOutput());
+	}
+
+	/**
+	 * @dataProvider outputTypesHelloProvider()
+	 */
+	public function testOutputRawWithTypes($type, $expected) {
+		Console::outputRaw();
+		$this->c->write('Hello <comment>world</comment>', false, $type);
+		$this->assertSame($expected, $this->getOutput());
+	}
+
+	public function testOutputPlain() {
+		Console::outputPlain();
+		$this->c->write('Hello <comment>world</comment>');
+		$this->assertSame('Hello world', $this->getOutput());
+	}
+
+	/**
+	 * @dataProvider outputTypesHelloProvider()
+	 */
+	public function testOutputPlainWithTypes($type, $expected) {
+		Console::outputPlain();
+		$this->c->write('Hello <comment>world</comment>', false, $type);
+		$this->assertSame($expected, $this->getOutput());
+	}
+
 }
