@@ -62,6 +62,16 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame("Hello world\n", $this->getOutput());
 	}
 
+	public function testWritelnRaw() {
+		$this->c->writeln('Hello <info>world</info>', StreamOutput::OUTPUT_RAW);
+		$this->assertSame("Hello <info>world</info>\n", $this->getOutput());
+	}
+
+	public function testWritelnPlain() {
+		$this->c->writeln('Hello <info>world</info>', false, StreamOutput::OUTPUT_PLAIN);
+		$this->assertSame("Hello world\n", $this->getOutput());
+	}
+
 	public function testWritelnQuiet() {
 		$this->output->setVerbosity(StreamOutput::VERBOSITY_QUIET);
 		$this->c->writeln('Hello world');
@@ -84,6 +94,32 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 	public function testVerbose($verbosity, $should_write) {
 		$this->output->setVerbosity($verbosity);
 		$this->c->verbose('Verbose message');
+		if($should_write) {
+			$this->assertSame("Verbose message\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
+	/**
+	 * @dataProvider verboseProvider()
+	 */
+	public function testVerboseRaw($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->verbose('Verbose <info>message</info>', true, StreamOutput::OUTPUT_RAW);
+		if($should_write) {
+			$this->assertSame("Verbose <info>message</info>\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
+	/**
+	 * @dataProvider verboseProvider()
+	 */
+	public function testVerbosePlain($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->verbose('Verbose <info>message</info>', true, StreamOutput::OUTPUT_PLAIN);
 		if($should_write) {
 			$this->assertSame("Verbose message\n", $this->getOutput());
 		} else {
@@ -114,6 +150,32 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 		}
 	}
 
+	/**
+	 * @dataProvider veryVerboseProvider()
+	 */
+	public function testVeryVerboseRaw($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->veryVerbose('Very verbose <info>message</info>', true, StreamOutput::OUTPUT_RAW);
+		if($should_write) {
+			$this->assertSame("Very verbose <info>message</info>\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
+	/**
+	 * @dataProvider veryVerboseProvider()
+	 */
+	public function testVeryVerbosePlain($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->veryVerbose('Very verbose <info>message</info>', true, StreamOutput::OUTPUT_PLAIN);
+		if($should_write) {
+			$this->assertSame("Very verbose message\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
 	public function debugProvider() {
 		return array(
 			array(StreamOutput::VERBOSITY_QUIET, false),
@@ -130,6 +192,32 @@ class ConsoleTest extends \PHPUnit_Framework_TestCase {
 	public function testDebug($verbosity, $should_write) {
 		$this->output->setVerbosity($verbosity);
 		$this->c->debug('Debug message');
+		if($should_write) {
+			$this->assertSame("Debug message\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
+	/**
+	 * @dataProvider debugProvider()
+	 */
+	public function testDebugRaw($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->debug('Debug <info>message</info>', true, StreamOutput::OUTPUT_RAW);
+		if($should_write) {
+			$this->assertSame("Debug <info>message</info>\n", $this->getOutput());
+		} else {
+			$this->assertSame('', $this->getOutput());
+		}
+	}
+
+	/**
+	 * @dataProvider debugProvider()
+	 */
+	public function testDebugPlain($verbosity, $should_write) {
+		$this->output->setVerbosity($verbosity);
+		$this->c->debug('Debug <info>message</info>', true, StreamOutput::OUTPUT_PLAIN);
 		if($should_write) {
 			$this->assertSame("Debug message\n", $this->getOutput());
 		} else {
