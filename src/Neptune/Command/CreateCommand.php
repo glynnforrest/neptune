@@ -3,6 +3,7 @@
 namespace Neptune\Command;
 
 use Neptune\Command\Command;
+use Neptune\Console\Console;
 use Neptune\View\Skeleton;
 use Neptune\Exceptions\FileException;
 
@@ -54,7 +55,7 @@ abstract class CreateCommand extends Command {
 		return $this->config->getRequired('dir.neptune') . 'skeletons/' . $skeleton;
 	}
 
-	public function go() {
+	public function go(Console $console) {
 		$name = $this->input->getArgument('name');
 		if(!$name) {
 			$dialog = $this->getHelper('dialog');
@@ -63,7 +64,6 @@ abstract class CreateCommand extends Command {
 		$skeleton = $this->getSkeleton($name);
 		$new_file = $this->getResourceFilename($name);
 		$this->saveSkeletonToFile($skeleton, $new_file);
-		/* $this->output->writeln('<info>Created ' . $new_file . '</info>'); */
 	}
 
 	public function isEnabled() {

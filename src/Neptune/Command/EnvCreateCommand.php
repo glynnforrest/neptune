@@ -3,6 +3,7 @@
 namespace Neptune\Command;
 
 use Neptune\Command\Command;
+use Neptune\Console\Console;
 use Neptune\Exceptions\FileException;
 use Neptune\Core\Config;
 
@@ -30,7 +31,7 @@ class EnvCreateCommand extends Command {
 			 );
 	}
 
-	public function go() {
+	public function go(Console $console) {
 		$name = $this->input->getArgument('name');
 		$dialog = $this->getHelper('dialog');
 		if(!$name) {

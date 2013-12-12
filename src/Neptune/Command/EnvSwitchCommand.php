@@ -3,6 +3,7 @@
 namespace Neptune\Command;
 
 use Neptune\Command\EnvListCommand;
+use Neptune\Console\Console;
 
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -28,7 +29,7 @@ class EnvSwitchCommand extends EnvListCommand {
 			 );
 	}
 
-	public function go() {
+	public function go(Console $console) {
 		$name = $this->input->getArgument('name');
 		$dialog = $this->getHelper('dialog');
 		$envs = $this->getEnvs();
