@@ -3,6 +3,33 @@ VERSION 0  INITIAL BETA
 =======================
 
    Version 0.2 - Initial beta
+      15/12/2013 13:10  0.2.3  Form rewrite
+         5037ccb Merge branch 'form'
+         ad209bd Adding LICENSE.
+         440ab81 Fixing Stringy usage in FormRow.
+         c3201df Checking for strange types in FormRowSelectTest.
+         fa7aace Adding FormRowTextareaTest.
+         1a8454e Removing type-specific tests from FormTest.
+         a4d5563 Form docblock improvements.
+         dc90c6a Adding FormRowSelectTest.
+         bc25955 Adding FormRowCheckboxTest.
+         5cb19bb Adding FormRowSubmitTest.
+         68011ce Adding FormRowHiddenTest.
+         0e8d7d6 Adding FormRowPasswordTest.
+         3ae4041 Adding FormRowTextTest.
+         5aa85dd Removing type specific tests in FormRowTest.
+         68a04b4 Passwords are not hidden by the Html.
+         1c6c4a8 Merge branch 'form'
+         30b5a06 Adding symfony/console and base Command classes.
+         50124c9 Adding support for select tags in FormRow.
+         65415de Adding tests and docblock for Html::select.
+         79b22c1 Adding Form->checkbox().
+         25181b4 Adding check for duplicate Html options.
+         1b59e21 FormRow checkbox - options are still rendered.
+         f2cc126 Adding get, set and add options to FormRow.
+         c3e20e9 Adding checkbox support in FormRow.
+         fa80634 Saving the DotArray->get() in Config->save().
+         1ce2b5e Simplifying Config with DotArray from crutches.
       27/11/2013 16:47  0.2.2  Replacing String helper class with stringy and crutches.
          aedf72b Merge branch 'stringy'
          ebb1527 s/String/Inflector in JsonView and XmlView.
