@@ -43,11 +43,10 @@ class FormRow {
 	 */
 	protected function sensible($string) {
 		return ucfirst(
-			S::create($string)
+			(string) S::create($string)
 			->underscored()
 			->replace('_', ' ')
 			->trim()
-			->str
 		);
 	}
 
@@ -58,6 +57,7 @@ class FormRow {
 	 */
 	public function setError($error) {
 		$this->error = $error;
+		return $this;
 	}
 
 	/**
@@ -84,6 +84,7 @@ class FormRow {
 	 */
 	public function setLabel($label) {
 		$this->label = $label;
+		return $this;
 	}
 
 	/**
@@ -107,6 +108,7 @@ class FormRow {
 	 */
 	public function setValue($value) {
 		$this->value = $value;
+		return $this;
 	}
 
 	/**
@@ -120,21 +122,29 @@ class FormRow {
 	 * Render the input attached to this FormRow as Html.
 	 */
 	public function input() {
+		if($this->type === 'select') {
+			$selected = $this->value;
+			return Html::select($this->name, $this->choices, $selected, $this->options);
+		}
+
+		switch ($this->type) {
 		//if input is a checkbox and it has a truthy value, add
 		//checked to options before render
-		if($this->type === 'checkbox') {
+		case 'checkbox':
 			if($this->value !== null) {
 				$this->addOptions(array('checked'));
 			}
 			//no matter what, the value of the input is 'checked'
 			$value = 'checked';
-		} else {
+			break;
+		case 'password';
+			//remove the value from all password fields
+			$value = null;
+			break;
+		default:
 			$value = $this->value;
 		}
-		if($this->type === 'select') {
-			$selected = $this->value;
-			return Html::select($this->name, $this->choices, $selected, $this->options);
-		}
+
 		return Html::input($this->type, $this->name, $value, $this->options);
 	}
 
@@ -145,6 +155,7 @@ class FormRow {
 	 */
 	public function setType($type) {
 		$this->type = $type;
+		return $this;
 	}
 
 	/**

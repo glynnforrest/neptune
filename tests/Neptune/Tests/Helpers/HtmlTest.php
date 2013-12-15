@@ -85,10 +85,14 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, Html::input('text', 'test', 'foo', array('id' => 'other-id', 'class' => 'text-input')));
 	}
 
+	/**
+	 * Passwords are not hidden by the Html. Use FormRow and Form to
+	 * avoid self-foot-shooting.
+	 */
 	public function testInputPassword() {
-		$expected = '<input type="password" id="pword" name="pword" value="" />';
+		$expected = '<input type="password" id="pword" name="pword" value="secret" />';
 		$this->assertSame($expected, Html::input('password', 'pword', 'secret'));
-		$expected = '<input type="password" id="password" name="pword" value="" />';
+		$expected = '<input type="password" id="password" name="pword" value="secret" />';
 		$this->assertSame($expected, Html::input('password', 'pword', 'secret', array('id' => 'password')));
 	}
 

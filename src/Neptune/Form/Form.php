@@ -160,6 +160,11 @@ class Form {
 		return $this;
 	}
 
+	/**
+	 * Get the FormRow instance with name $name.
+	 *
+	 * @param string $name The name of the FormRow instance to get.
+	 */
 	public function getRow($name) {
 		if(!array_key_exists($name, $this->rows)) {
 			throw new \Exception(
@@ -178,6 +183,16 @@ class Form {
 		return array_keys($this->rows);
 	}
 
+	/**
+	 * Set the value of the input attached to FormRow $name. If
+	 * $create_row is true, a new FormRow of name $name will be
+	 * created with type 'text'. Otherwise, an Exception will be
+	 * thrown if the FormRow doesn't exist.
+	 *
+	 * @param string $name The name of the FormRow
+	 * @param string $value The value
+	 * @param bool $create_row Create a new FormRow if it doesn't exist
+	 */
 	public function set($name, $value, $create_row = false) {
 		if(!array_key_exists($name, $this->rows)) {
 			if(!$create_row) {
@@ -191,17 +206,32 @@ class Form {
 		return $this;
 	}
 
+	/**
+	 * Get the value of the input attached to FormRow $name.
+	 */
 	public function get($name) {
 		return $this->getRow($name)->getValue();
 	}
 
-	public function setValues(array $values=array(), $create_row = false) {
+	/**
+	 * Set the value of the input in multiple FormRows. If
+	 * $create_rows is true, new FormRows will be created with type
+	 * 'text' if they don't exist. Otherwise, an Exception will be
+	 * thrown if a FormRow doesn't exist.
+	 *
+	 * @param array $values An array of keys and values to set
+	 * @param bool $create_row Create a new FormRow if it doesn't exist
+	 */
+	public function setValues(array $values=array(), $create_rows = false) {
 		foreach ($values as $name => $value) {
-			$this->set($name, $value, $create_row);
+			$this->set($name, $value, $create_rows);
 		}
 		return $this;
 	}
 
+	/**
+	 * Get the values of all inputs attached to this form.
+	 */
 	public function getValues() {
 		$values = array();
 		foreach ($this->rows as $name => $row) {
@@ -210,6 +240,13 @@ class Form {
 		return $values;
 	}
 
+	/**
+	 * Add multiple errors to this Form. $errors should be an array of
+	 * keys and values, where a key is a name of a FormRow attached to
+	 * this form, and a value is the error message.
+	 *
+	 * @param array $errors An array of names and errors
+	 */
 	public function addErrors(array $errors = array()) {
 		foreach ($errors as $name => $msg) {
 			$this->getRow($name)->setError($msg);
@@ -233,11 +270,11 @@ class Form {
 	 * through get('$name'). If you understand the security
 	 * implications and still want to create a password field with a
 	 * default value, you will need to construct the HTML manually
-	 * without the Html class, e.g.
+	 * using the Html class, e.g.
 	 *
-	 * <?=$f->label('pass');
-	 * <input type="password" id="pass" name="pass" value="<?=$f->get('pass')" />
-	 * <?=$f->error('pass');
+	 * <?=$f->label('pass');?>
+	 * <?=Html::input('password', 'pass', $f->get('pass'), array('id' => 'password')'?>
+	 * <?=$f->error('pass');?>
 	 *
 	 * @param string $name The name of the input
 	 * @param string $value The initial value of the input (not shown)

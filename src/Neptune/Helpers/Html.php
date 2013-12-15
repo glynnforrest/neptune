@@ -63,9 +63,6 @@ class Html {
 			), $options);
 			return self::tag('textarea', $value, $options);
 		}
-		if($type === 'password') {
-			$value = null;
-		}
 		$options = array_merge(array(
 			'type' => $type,
 			'id' => $name,

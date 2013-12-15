@@ -19,9 +19,31 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $f->render());
 	}
 
+	public function testInput() {
+		$f = new Form();
+		$f->text('name');
+		$this->assertSame(Html::input('text', 'name'), $f->input('name'));
+	}
+
+	public function testLabel() {
+		$f = new Form();
+		$f->text('username');
+		$this->assertSame(Html::label('username', 'Username'), $f->label('username'));
+	}
+
+	public function testError() {
+		$f = new Form();
+		$f->text('email');
+		$this->assertNull($f->error('email'));
+		$error_msg = 'Email is invalid.';
+		$f->getRow('email')->setError($error_msg);
+		$this->assertSame(Html::tag('p', $error_msg), $f->error('email'));
+	}
+
+
 	public function testCreateSimpleForm() {
 		$f = new Form('/post/url', 'get');
-		$f->text('name');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('name'));
 		$expected = Html::openTag('form', array('action' => '/post/url', 'method' => 'GET'));
 		$expected .= Html::label('name', 'Name');
 		$expected .= Html::input('text', 'name');
@@ -32,7 +54,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	public function testGetAndSetAction() {
 		$f = new Form('/login');
 		$this->assertSame('/login', $f->getAction());
-		$f->setAction('/login/somewhere/else');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setAction('/login/somewhere/else'));
 		$this->assertSame('/login/somewhere/else', $f->getAction());
 	}
 
@@ -45,7 +67,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	public function testGetAndSetMethod() {
 		$f = new Form();
 		$this->assertSame('POST', $f->getMethod());
-		$f->setMethod('get');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setMethod('get'));
 		$this->assertSame('GET', $f->getMethod());
 	}
 
@@ -59,33 +81,64 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f = new Form();
 		$this->assertSame(array(), $f->getOptions());
 		$options = array('id' => 'my-form', 'class' => 'form');
-		$f->setOptions($options);
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setOptions($options));
 		$this->assertSame($options, $f->getOptions());
 	}
 
-	public function testSetAndGet() {
+	public function testGetAndSet() {
 		$f = new Form();
 		$f->text('message');
 		$this->assertSame(null, $f->get('message'));
-		$f->set('message', 'hello');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('message', 'hello'));
 		$this->assertSame('hello', $f->get('message'));
 	}
 
-	public function testSetThrowsException() {
+	public function testSetThrowsExceptionUndefinedRow() {
 		$f = new Form();
-		$this->setExpectedException('\Exception');
+		$this->setExpectedException('\Exception', "Attempting to assign value 'user42' to an unknown form row 'username'");
 		$f->set('username', 'user42');
 	}
 
 	public function testSetCreateNewRow() {
 		$f = new Form();
-		$f->set('username', 'user42', true);
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('username', 'user42', true));
 		$this->assertSame('user42', $f->get('username'));
+		$this->assertSame('text', $f->getRow('username')->getType());
+	}
+
+	public function testGetAndSetValues() {
+		$f = new Form();
+		$f->text('username', 'glynn');
+		$f->password('password', 'secret');
+		$expected = array('username' => 'glynn', 'password' => 'secret');
+		$this->assertSame($expected, $f->getValues());
+		$changed = array('username' => 'glynnforrest', 'password' => 'token');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValues($changed));
+		$this->assertSame($changed, $f->getValues());
+	}
+
+	public function testSetValuesThrowsExceptionUndefinedRow() {
+		$f = new Form();
+		$f->text('username');
+		$f->password('password');
+		$expected = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
+		$this->setExpectedException('\Exception', "Attempting to assign value 'bar' to an unknown form row 'foo'");
+		$f->setValues($expected);
+	}
+
+	public function testSetValuesCreateRows() {
+		$f = new Form();
+		$new = array('foo' => 'bar', 'baz' => 'qux', 'fu bar' => 'foo bar');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValues($new, true));
+		foreach ($new as $name => $value) {
+			$this->assertSame($value, $f->get($name));
+			$this->assertSame('text', $f->getRow($name)->getType());
+		}
 	}
 
 	public function testGetRow() {
 		$f = new Form();
-		$f->text('username');
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('username'));
 		$this->assertInstanceOf('\Neptune\Form\FormRow', $f->getRow('username'));
 	}
 
@@ -108,89 +161,6 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 			$html .= Html::tag('p', $error);
 		}
 		return $html;
-	}
-
-	public function testText() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('username'));
-		$this->assertSame('text', $f->getRow('username')->getType());
-		$expected = $this->stubRow('text', 'username');
-		$this->assertSame($expected, $f->row('username'));
-	}
-
-	public function testPassword() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->password('secret'));
-		$this->assertSame('password', $f->getRow('secret')->getType());
-		$expected = $this->stubRow('password', 'secret');
-		$this->assertSame($expected, $f->row('secret'));
-	}
-
-	public function testTextarea() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->textarea('comment', 'Some comment'));
-		$this->assertSame('textarea', $f->getRow('comment')->getType());
-		$expected = $this->stubRow('textarea', 'comment', 'Some comment');
-		$this->assertSame($expected, $f->row('comment'));
-	}
-
-	public function testSubmit() {
-		$f = new Form();
-		$f->submit('button');
-		$this->assertSame('submit', $f->getRow('button')->getType());
-		//By default a row should just give the input
-		$expected_input = Html::input('submit', 'button', 'Button');
-		$this->assertSame($expected_input, $f->row('button'));
-	}
-
-	public function testHidden() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->hidden('secret', '123456789'));
-		$this->assertSame('hidden', $f->getRow('secret')->getType());
-		//By default a row should just give the input
-		$expected_input = Html::input('hidden', 'secret', '123456789');
-		$this->assertSame($expected_input, $f->row('secret'));
-	}
-
-	public function testInput() {
-		$f = new Form();
-		$f->text('name');
-		$this->assertSame(Html::input('text', 'name'), $f->input('name'));
-	}
-
-	public function testLabel() {
-		$f = new Form();
-		$f->text('username');
-		$this->assertSame(Html::label('username', 'Username'), $f->label('username'));
-	}
-
-	public function testError() {
-		$f = new Form();
-		$f->text('email');
-		$this->assertNull($f->error('email'));
-		$error_msg = 'Email is invalid.';
-		$f->getRow('email')->setError($error_msg);
-		$this->assertSame(Html::tag('p', $error_msg), $f->error('email'));
-	}
-
-	public function testGetAndSetValues() {
-		$f = new Form();
-		$f->text('username', 'glynn');
-		$f->password('password', 'secret');
-		$expected = array('username' => 'glynn', 'password' => 'secret');
-		$this->assertSame($expected, $f->getValues());
-		$changed = array('username' => 'glynnforrest', 'password' => 'token');
-		$f->setValues($changed);
-		$this->assertSame($changed, $f->getValues());
-	}
-
-	public function testSetValuesThrowsException() {
-		$f = new Form();
-		$f->text('username', 'glynn');
-		$f->password('password', 'secret');
-		$expected = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
-		$this->setExpectedException('\Exception');
-		$f->setValues($expected);
 	}
 
 	public function testCreateFromArray() {
@@ -273,24 +243,6 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f->password('password');
 		$expected = array('id', 'username', 'email', 'password');
 		$this->assertSame($expected, $f->getFields());
-	}
-
-	public function testCheckboxUnchecked() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->checkbox('tick'));
-		$this->assertSame('checkbox', $f->getRow('tick')->getType());
-		$expected = $this->stubRow('checkbox', 'tick', 'checked');
-		$this->assertSame($expected, $f->row('tick'));
-		$this->assertSame(null, $f->get('tick'));
-	}
-
-	public function testCheckboxChecked() {
-		$f = new Form();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->checkbox('tick', 'yes'));
-		$this->assertSame('checkbox', $f->getRow('tick')->getType());
-		$expected = $this->stubRow('checkbox', 'tick', 'checked', null, array('checked'));
-		$this->assertSame($expected, $f->row('tick'));
-		$this->assertSame('yes', $f->get('tick'));
 	}
 
 }
