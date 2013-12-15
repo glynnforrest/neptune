@@ -7,6 +7,7 @@
         "glynnforrest/crutches": "dev-master",
         "symfony/console": "2.4.*"
     },
+    "license": "MIT",
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
         "glynnforrest/temping": "0.1.*",
