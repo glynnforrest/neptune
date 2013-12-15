@@ -41,26 +41,22 @@ abstract class Command extends SymfonyCommand {
 		$this->input = $input;
 		$this->output = $output;
 		//add a neptune Console helper for useful functions
-		/* $this->console = new Console($input, $output); */
-		$this->go();
+		$console = new Console($input, $output);
+		//set helper set
+		$this->go($console);
 		//return status code here
 	}
 
 	/**
 	 * Run the command. The following are available:
+	 * $console ==> instance of Console helper
 	 * $this->input ==> InputInterface
 	 * $this->output ==> OutputInterface
-	 * $this->console ==> instance of Console helper
 	 * $this->config ==> 'neptune' Config instance
 	 */
-	abstract public function go();
+	abstract public function go(Console $console);
 
-	protected function getAppDirectory() {
-		return $this->config->getRequired('dir.app') .
-			'/' . $this->config->getRequired('namespace') . '/';
-	}
-
-	protected function getRootDirectory() {
+	public function getRootDirectory() {
 		$root = $this->config->getRequired('dir.root');
 		//make sure root has a trailing slash
 		if(substr($root, -1) !== '/') {
@@ -69,13 +65,28 @@ abstract class Command extends SymfonyCommand {
 		return $root;
 	}
 
+	public function getAppDirectory() {
+		return $this->getRootDirectory() . 'app/' .
+			$this->getNamespace() . '/';
+	}
+
 	/**
-	 * Check if any configuration profiles have been setup.
+	 * Get the project namespace with no beginning slash.
+	 */
+	public function getNamespace() {
+		$namespace = $this->config->getRequired('namespace');
+		if(substr($namespace, 0, 1) === '\\') {
+			$namespace = substr($namespace, 0, 1);
+		}
+		return $namespace;
+	}
+
+	/**
+	 * Check if the neptune config has been setup.
 	 *
-	 * An array of profiles wil be returned if any exist.
 	 * Return false if the neptune cli config hasn't been setup.
 	 */
-	protected function neptuneConfigSetup() {
+	public function neptuneConfigSetup() {
 		$root = $this->getRootDirectory();
 		if(!file_exists($root . 'config/neptune.php')) {
 			return false;
@@ -88,7 +99,7 @@ abstract class Command extends SymfonyCommand {
 	 * Check if app, config, public and storage directories have been
 	 * created.
 	 */
-	protected function directoriesCreated() {
+	public function directoriesCreated() {
 		$dirs = array('app', 'config', 'public', 'storage/logs');
 		foreach ($dirs as $dir) {
 			if(!file_exists($dir)) {
