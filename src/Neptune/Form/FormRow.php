@@ -43,11 +43,10 @@ class FormRow {
 	 */
 	protected function sensible($string) {
 		return ucfirst(
-			S::create($string)
+			(string) S::create($string)
 			->underscored()
 			->replace('_', ' ')
 			->trim()
-			->str
 		);
 	}
 
