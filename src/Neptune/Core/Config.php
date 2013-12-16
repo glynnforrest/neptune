@@ -72,7 +72,7 @@ class Config {
 		if ($value) {
 			return $value;
 		}
-		throw new ConfigKeyException("Required value not found: $key");
+		throw new ConfigKeyException("Required value not found in Config instance '$this->name': $key");
 	}
 
 	/**
@@ -127,7 +127,7 @@ class Config {
 		if ($value) {
 			return $value;
 		}
-		throw new ConfigKeyException("Required value not found: $key");
+		throw new ConfigKeyException("Required first value not found in Config instance '$this->name': $key");
 	}
 
 	/**
@@ -180,7 +180,7 @@ class Config {
 		if(!$name) {
 			if(empty(self::$instances)) {
 				throw new ConfigFileException(
-					'No configuration file loaded, unable to get default');
+					'No Config instance loaded, unable to get default');
 			}
 			reset(self::$instances);
 			return self::$instances[key(self::$instances)];
@@ -193,7 +193,7 @@ class Config {
 			}
 			//if it isn't a module, we can't do anything without a file
 			throw new ConfigFileException(
-				"No filename specified for configuration file $name"
+				"No filename specified for Config instance $name"
 			);
 		}
 		self::$instances[$name] = new self($name, $filename);
@@ -282,7 +282,7 @@ class Config {
 		}
 		if(!$this->filename) {
 			throw new ConfigFileException(
-				"Unable to save configuration file '$this->name', \$filename is not set"
+				"Unable to save Config instance '$this->name', \$filename is not set"
 			);
 		}
 		if(!file_exists($this->filename) && !@touch($this->filename)){

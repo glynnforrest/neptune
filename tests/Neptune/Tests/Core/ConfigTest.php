@@ -174,9 +174,14 @@ END;
 
 	public function testGetRequired() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
-		$c->getRequired('fake');
 		$this->assertEquals('two-one', $c->getRequired('two.one'));
+	}
+
+	public function testGetRequiredThrowsException() {
+		$c = Config::load('testing', $this->temp->getPathname(self::file));
+		$msg = "Required value not found in Config instance 'testing': fake";
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
+		$c->getRequired('fake');
 	}
 
 	public function testGetFirstRequired() {
@@ -184,19 +189,21 @@ END;
 		$this->assertEquals('two-one', $c->getFirstRequired('two'));
 	}
 
-	public function testGetFirstRequiredUnknownKey() {
+	public function testGetFirstRequiredThrowsException() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
-		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
+		$msg = "Required first value not found in Config instance 'testing': fake";
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
 		$c->getFirstRequired('fake');
 	}
 
 	/**
 	 * Throw an exception if there is no array to get first value from.
 	 */
-	public function testGetFirstRequiredNotArrayException() {
+	public function testGetFirstRequiredThrowsExceptionNoArray() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$c->set('3.1', 'not-an-array');
-		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException');
+		$msg = "Required first value not found in Config instance 'testing': 3.1";
+		$this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
 		$c->getFirstRequired('3.1');
 	}
 
@@ -277,7 +284,7 @@ END;
 	public function testSaveThrowsExceptionWithNoFile() {
 		$c = Config::create('ad-hoc');
 		$c->set('key', 'value');
-		$msg = 'Unable to save configuration file \'ad-hoc\', $filename is not set';
+		$msg = 'Unable to save Config instance \'ad-hoc\', $filename is not set';
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigFileException', $msg);
 		$c->save();
 	}
