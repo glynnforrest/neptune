@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  **/
 class DialogHelper extends SymfonyDialogHelper {
 
-	protected $suffix = ' ';
 	protected $defaults = array();
 
 	protected function setDefault($question, $option) {
@@ -44,13 +43,13 @@ class DialogHelper extends SymfonyDialogHelper {
 	protected function addDefaultToQuestion($question, $default = null) {
 		$default = $this->getDefault($question, $default);
 		if(!is_null($default) && $default !== '') {
-			$question .= ' [Default: <info>'. $default . '</info>]';
+			$question .= '[Default: <info>'. $default . '</info>] ';
 		}
 		return $question;
 	}
 
 	public function ask(OutputInterface $output, $question, $default = null, array $autocomplete = null) {
-		$question_with_default = $this->addDefaultToQuestion($question, $default) . $this->suffix;
+		$question_with_default = $this->addDefaultToQuestion($question, $default);
 		$default = $this->getDefault($question, $default);
 		$return = parent::ask($output, $question_with_default, $default, $autocomplete);
 		//now we have an answer, set it as the default for next time
@@ -58,10 +57,6 @@ class DialogHelper extends SymfonyDialogHelper {
 			$this->setDefault($question, $return);
 		}
 		return $return;
-	}
-
-	public function setSuffix($string) {
-		$this->suffix = (string) $string;
 	}
 
 }
