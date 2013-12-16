@@ -102,10 +102,10 @@ class AssetsController extends Controller {
 	 *
 	 *	array(
 	 *	'`.*\.js$`' => 'minifyjs',
-	 *	'`.*\.css$`' => 'minifycss\addcopyright'
+	 *	'`.*\.css$`' => 'minifycss|addcopyright'
 	 *	)
 	 */
-	public function getAssetFilters($filename, $regexps) {
+	public function getAssetFilters($filename, array $regexps) {
 		//list of filters that have matched.
 		$matched = array();
 		foreach ($regexps as $regex => $filter_string) {
