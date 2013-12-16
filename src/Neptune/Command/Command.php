@@ -41,17 +41,19 @@ abstract class Command extends SymfonyCommand {
 		$this->input = $input;
 		$this->output = $output;
 		//add a neptune Console helper for useful functions
-		$console = new Console($input, $output);
+		$this->console = new Console($input, $output);
 		//set helper set
-		$this->go($console);
+		$this->console->setHelperSet($this->getHelperSet());
+		$this->go($this->console);
 		//return status code here
 	}
 
 	/**
 	 * Run the command. The following are available:
-	 * $console ==> instance of Console helper
+	 * $console ==> Console instance
 	 * $this->input ==> InputInterface
 	 * $this->output ==> OutputInterface
+	 * $this->console ==> Console instance
 	 * $this->config ==> 'neptune' Config instance
 	 */
 	abstract public function go(Console $console);
