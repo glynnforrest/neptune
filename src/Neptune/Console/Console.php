@@ -2,8 +2,6 @@
 
 namespace Neptune\Console;
 
-use Neptune\Console\DialogHelper;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -141,6 +139,10 @@ class Console {
 		if($this->output->isDebug()) {
 			$this->write($messages, $newline, $type);
 		}
+	}
+
+	public function ask($question, $default = null, array $autocomplete = null) {
+		return $this->getHelperSet()->get('dialog')->ask($this->output, $question, $default, $autocomplete);
 	}
 
 }
