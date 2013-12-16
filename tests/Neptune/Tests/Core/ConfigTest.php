@@ -447,7 +447,6 @@ END;
 
 	public function testGetPathAbsolute() {
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', '/path/to/root/');
 		$neptune->set('some.absolute.dir', '/my-dir');
 		$this->assertEquals('/my-dir', $neptune->getPath('some.absolute.dir'));
 	}
@@ -458,6 +457,25 @@ END;
 		$other = Config::create('other');
 		$other->set('some.other.dir', 'other-dir');
 		$this->assertEquals('/path/to/root/other-dir', $other->getPath('some.other.dir'));
+	}
+
+	public function testGetModulePath() {
+		$module = Config::create('module', '/some/path/to/module/config.php');
+		$module->set('assets.dir', 'assets/');
+		$this->assertSame('/some/path/to/module/assets/', $module->getModulePath('assets.dir'));
+	}
+
+	public function testGetModulePathAbsolute() {
+		$module = Config::create('module', '/some/path/to/module/config.php');
+		$module->set('some.absolute.dir', '/my-dir');
+		$this->assertEquals('/my-dir', $module->getPath('some.absolute.dir'));
+	}
+
+	public function testGetModulePathNeptune() {
+		$neptune = Config::create('neptune');
+		$neptune->set('dir.root', '/path/to/root/');
+		$neptune->set('assets.dir', 'assets/');
+		$this->assertEquals('/path/to/root/assets/', $neptune->getPath('assets.dir'));
 	}
 
 }

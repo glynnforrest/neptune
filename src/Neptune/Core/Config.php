@@ -76,11 +76,13 @@ class Config {
 	}
 
 	/**
-	* Get a directory path from the configuration value that matches
-	* $key. The value will be added to dir.root to form a complete
-	* directory path. If the value begins with a slash it will be
-	* treated as an absolute path and returned explicitly. A
-	* ConfigKeyException will be thrown if the path can't be resolved.
+	 * Get a directory path from the configuration value that matches
+	 * $key. The value will be added to dir.root to form a complete
+	 * directory path. If the value begins with a slash it will be
+	 * treated as an absolute path and returned explicitly. A
+	 * ConfigKeyException will be thrown if the path can't be resolved.
+	 *
+	 * @param string $key The key in the config file
 	 */
 	public function getPath($key) {
 		$path = $this->getRequired($key);
@@ -89,6 +91,30 @@ class Config {
 		}
 		$root = self::load('neptune')->getRequired('dir.root');
 		return $root . $path;
+	}
+
+	/**
+	 * Get a directory path from the configuration value that matches
+	 * $key. The value will be added to the directory of this module
+	 * to form a complete directory path. If the value begins
+	 * with a slash it will be treated as an absolute path and
+	 * returned explicitly. If this config instance is
+	 * 'neptune', the result will be the same as getPath(). A
+	 * ConfigKeyException will be thrown if the path can't be
+	 * resolved.
+	 *
+	 * @param string $key The key in the config file
+	 */
+	public function getModulePath($key) {
+		if($this->name === 'neptune') {
+			return $this->getPath($key);
+		} else {
+			$path = $this->getRequired($key);
+			if(substr($path, 0, 1) === '/') {
+				return $path;
+			}
+			return dirname($this->filename) . '/' . $path;
+		}
 	}
 
 	/**
