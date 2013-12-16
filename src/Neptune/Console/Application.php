@@ -5,6 +5,7 @@ namespace Neptune\Console;
 use Neptune\Core\Config;
 use Neptune\Exceptions\ClassNotFoundException;
 use Neptune\Console\Shell;
+use Neptune\Console\DialogHelper as NeptuneDialogHelper;
 
 use \DirectoryIterator;
 use \CallbackFilterIterator;
@@ -14,6 +15,10 @@ use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Helper\TableHelper;
+use Symfony\Component\Console\Helper\ProgressHelper;
 
 use Stringy\StaticStringy as S;
 
@@ -29,6 +34,16 @@ class Application extends SymfonyApplication {
 	public function __construct(Config $config) {
 		$this->config = $config;
 		parent::__construct('Neptune', '0.2');
+		$this->useNeptuneHelperSet();
+	}
+
+	public function useNeptuneHelperSet() {
+		$this->setHelperSet(new HelperSet(array(
+			new FormatterHelper(),
+			new NeptuneDialogHelper(),
+			new ProgressHelper(),
+			new TableHelper(),
+		)));
 	}
 
 	/**
