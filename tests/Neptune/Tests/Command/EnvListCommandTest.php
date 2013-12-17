@@ -42,13 +42,13 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testListNoEnvs() {
-        $this->tester->execute(array());
+		$this->tester->execute(array());
 		$this->assertSame('', $this->tester->getDisplay());
 	}
 
 	public function testListOneEnv() {
 		$this->temping->create('config/env/development.php');
-        $this->tester->execute(array());
+		$this->tester->execute(array());
 		$this->assertSame("development\n", $this->tester->getDisplay(true));
 	}
 
@@ -56,7 +56,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 		//create a mock project folder containing some stub config files
 		$this->temping->create('config/env/production.php');
 		$this->temping->create('config/env/development.php');
-        $this->tester->execute(array());
+		$this->tester->execute(array());
 		$this->assertSame("development\nproduction\n", $this->tester->getDisplay(true));
 	}
 
@@ -67,7 +67,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 		$this->config->set('env', 'production');
 		$this->temping->create('config/env/production.php');
 		$this->temping->create('config/env/development.php');
-        $this->tester->execute(array());
+		$this->tester->execute(array());
 		$expected = "development\n<info>production</info>\n";
 		$this->assertSame($expected, $this->tester->getDisplay(true));
 	}

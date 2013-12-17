@@ -34,7 +34,7 @@ abstract class Command extends SymfonyCommand {
 
 	protected function configure() {
 		$this->setName($this->name)
-             ->setDescription($this->description);
+			 ->setDescription($this->description);
 	}
 
 	public function execute(InputInterface $input, OutputInterface $output) {
