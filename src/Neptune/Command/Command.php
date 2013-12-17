@@ -28,8 +28,9 @@ abstract class Command extends SymfonyCommand {
 	 * Create a new Command instance. Neptune config must be loaded.
 	 */
 	public function __construct(Config $config) {
-		parent::__construct();
+		//make config instance available to configure()
 		$this->config = $config;
+		parent::__construct();
 	}
 
 	protected function configure() {
