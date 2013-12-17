@@ -75,10 +75,10 @@ class Console {
 	/**
 	 * Write a message to output.
 	 *
-     * @param string|array $messages The message as an array of lines
-     * or a single string
-     * @param Boolean $newline Whether to add a newline
-     * @param integer $type The type of output (one of the OUTPUT constants)
+	 * @param string|array $messages The message as an array of lines
+	 * or a single string
+	 * @param Boolean $newline Whether to add a newline
+	 * @param integer $type The type of output (one of the OUTPUT constants)
 	 */
 	public function write($messages, $newline = false, $type = null) {
 		$type = is_int($type) ? $type : self::$output_type;
@@ -88,9 +88,9 @@ class Console {
 	/**
 	 * Write a message to output.
 	 *
-     * @param string|array $messages The message as an array of lines
-     * or a single string
-     * @param integer $type The type of output (one of the OUTPUT constants)
+	 * @param string|array $messages The message as an array of lines
+	 * or a single string
+	 * @param integer $type The type of output (one of the OUTPUT constants)
 	 */
 	public function writeln($messages, $type = null) {
 		$this->write($messages, true, $type);
@@ -100,10 +100,10 @@ class Console {
 	 * Write a message to output, but only if the current verbosity
 	 * level is verbose or higher.
 	 *
-     * @param string|array $messages The message as an array of lines
-     * or a single string
-     * @param Boolean $newline Whether to add a newline
-     * @param integer $type The type of output (one of the OUTPUT constants)
+	 * @param string|array $messages The message as an array of lines
+	 * or a single string
+	 * @param Boolean $newline Whether to add a newline
+	 * @param integer $type The type of output (one of the OUTPUT constants)
 	 */
 	public function verbose($messages, $newline = true, $type = null) {
 		if($this->output->isVerbose()) {
@@ -115,10 +115,10 @@ class Console {
 	 * Write a message to output, but only if the current verbosity
 	 * level is very verbose or higher.
 	 *
-     * @param string|array $messages The message as an array of lines
-     * or a single string
-     * @param Boolean $newline Whether to add a newline
-     * @param integer $type The type of output (one of the OUTPUT constants)
+	 * @param string|array $messages The message as an array of lines
+	 * or a single string
+	 * @param Boolean $newline Whether to add a newline
+	 * @param integer $type The type of output (one of the OUTPUT constants)
 	 */
 	public function veryVerbose($messages, $newline = true, $type = null) {
 		if($this->output->isVeryVerbose()) {
@@ -130,10 +130,10 @@ class Console {
 	 * Write a message to output, but only if the current verbosity
 	 * level is debug or higher.
 	 *
-     * @param string|array $messages The message as an array of lines
-     * or a single string
-     * @param Boolean $newline Whether to add a newline
-     * @param integer $type The type of output (one of the OUTPUT constants)
+	 * @param string|array $messages The message as an array of lines
+	 * or a single string
+	 * @param Boolean $newline Whether to add a newline
+	 * @param integer $type The type of output (one of the OUTPUT constants)
 	 */
 	public function debug($messages, $newline = true, $type = null) {
 		if($this->output->isDebug()) {
@@ -143,6 +143,10 @@ class Console {
 
 	public function ask($question, $default = null, array $autocomplete = null) {
 		return $this->getHelperSet()->get('dialog')->ask($this->output, $question, $default, $autocomplete);
+	}
+
+	public function askAndValidate($question, $validator, $attempts = false, $default = null, array $autocomplete = null) {
+		return $this->getHelperSet()->get('dialog')->askAndValidate($this->output, $question, $validator, $attempts, $default, $autocomplete);
 	}
 
 }
