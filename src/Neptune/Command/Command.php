@@ -67,16 +67,29 @@ abstract class Command extends SymfonyCommand {
 		return $root;
 	}
 
-	public function getAppDirectory() {
-		return $this->getRootDirectory() . 'app/' .
-			$this->getNamespace() . '/';
+	/**
+	 * Get the name of the first module in the neptune config file.
+	 */
+	public function getFirstModule() {
+		return array_keys($this->config->get('modules'))[0];
 	}
 
 	/**
-	 * Get the project namespace with no beginning slash.
+	 * Get the absolute path to a module directory.
+	 *
+	 * @param string $module The name of the module
 	 */
-	public function getNamespace() {
-		$namespace = $this->config->getRequired('namespace');
+	public function getModuleDirectory($module) {
+		return $this->config->getPath('modules.' . $module);
+	}
+
+	/**
+	 * Get the namespace of a module with no beginning slash.
+	 *
+	 * @param string $module the name of the module
+	 */
+	public function getModuleNamespace($module) {
+		$namespace = Config::load($module)->getRequired('namespace');
 		if(substr($namespace, 0, 1) === '\\') {
 			$namespace = substr($namespace, 0, 1);
 		}

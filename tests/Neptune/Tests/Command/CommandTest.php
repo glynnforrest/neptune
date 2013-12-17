@@ -6,9 +6,9 @@ require_once __DIR__ . '/../../../bootstrap.php';
 
 use Neptune\Core\Config;
 use Neptune\Tests\Command\EmptyCommand;
+use Neptune\Console\Application;
 
 use Symfony\Component\Console\Tester\CommandTester;
-use Neptune\Console\Application;
 
 /**
  * CommandTest
@@ -23,7 +23,6 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
 	public function setup() {
 		$this->config = Config::create('neptune');
 		$this->config->set('dir.root', '/path/to/root/');
-		$this->config->set('namespace', 'MyEmptyApp');
 		$this->command = new EmptyCommand($this->config);
 	}
 
@@ -37,14 +36,29 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('/no/trailing/slash/', $this->command->getRootDirectory());
 	}
 
-	public function testGetAppDirectory() {
-		$expected = $this->config->get('dir.root') . 'app/MyEmptyApp/';
-		$this->assertSame($expected, $this->command->getAppDirectory());
+	public function testGetModuleDirectory() {
+		$modules = array(
+			'my-app' => 'app/MyApp/');
+		$this->config->set('modules', $modules);
+		$expected = $this->config->get('dir.root') . 'app/MyApp/';
+		$this->assertSame($expected, $this->command->getModuleDirectory('my-app'));
+		//check it is an absolute path
 	}
 
-	public function testNamespace() {
-		$this->assertSame('MyEmptyApp', $this->command->getNamespace());
+	public function testGetFirstModule() {
+		$modules = array(
+			'my-app' => 'app/MyApp/',
+			'other-module' => 'app/OtherModel/');
+		$this->config->set('modules', $modules);
+		$this->assertSame('my-app', $this->command->getFirstModule());
 	}
 
+	public function testGetModuleNamespace() {
+		$config = Config::create('my-app');
+		$config->set('namespace', 'MyApp');
+		$this->assertSame('MyApp', $this->command->getModuleNamespace('my-app'));
+		$config->set('namespace', 'Changed');
+		$this->assertSame('Changed', $this->command->getModuleNamespace('my-app'));
+	}
 
 }
