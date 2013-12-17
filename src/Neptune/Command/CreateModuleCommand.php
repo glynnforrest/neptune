@@ -55,19 +55,21 @@ class CreateModuleCommand extends Command {
 			$namespace = $console->ask('Namespace for this module: ', S::upperCamelize($name));
 		}
 		//create dirs
-		$this->createDirectories($this->getModuleDirectory($namespace));
+		$this->createDirectories($this->createModuleDirectory($namespace));
 		//create config.php
-		$config = Config::create('new-module', $this->getModuleDirectory($namespace) . 'config.php');
+		$config = Config::create('new-module', $this->createModuleDirectory($namespace) . 'config.php');
 		$config->set('namespace', $namespace);
 		$config->set('assets.dir', 'assets/');
 		$config->save();
+		//add module to neptune modules config
+		$this->config->set('modules.' . $name, $this->createModuleDirectory($namespace, false));
+		$this->config->save();
 		//create controller
 		//$this->runCommand
 		//create view
 		//create services.php
 		//create routes.php
 		//create command
-		//add module to neptune modules config
 		//update composer.json autoload
 	}
 
@@ -75,11 +77,14 @@ class CreateModuleCommand extends Command {
 		return true;
 	}
 
-	protected function getModuleDirectory($namespace) {
+	protected function createModuleDirectory($namespace, $absolute = true) {
 		if(substr($namespace, -1) !== '/') {
 			$namespace .= '/';
 		}
-		return $this->getRootDirectory() . 'app/' . $namespace;
+		if($absolute) {
+			return $this->getRootDirectory() . 'app/' . $namespace;
+		}
+		return 'app/' . $namespace;
 	}
 
 	protected function createDirectories($root) {
