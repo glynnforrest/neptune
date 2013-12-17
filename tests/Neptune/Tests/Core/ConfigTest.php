@@ -475,14 +475,14 @@ END;
 	public function testGetModulePathAbsolute() {
 		$module = Config::create('module', '/some/path/to/module/config.php');
 		$module->set('some.absolute.dir', '/my-dir');
-		$this->assertEquals('/my-dir', $module->getPath('some.absolute.dir'));
+		$this->assertEquals('/my-dir', $module->getModulePath('some.absolute.dir'));
 	}
 
 	public function testGetModulePathNeptune() {
 		$neptune = Config::create('neptune');
 		$neptune->set('dir.root', '/path/to/root/');
 		$neptune->set('assets.dir', 'assets/');
-		$this->assertEquals('/path/to/root/assets/', $neptune->getPath('assets.dir'));
+		$this->assertEquals('/path/to/root/assets/', $neptune->getModulePath('assets.dir'));
 	}
 
 }
