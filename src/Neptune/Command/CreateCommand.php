@@ -6,6 +6,7 @@ use Neptune\Command\Command;
 use Neptune\Console\Console;
 use Neptune\View\Skeleton;
 use Neptune\Exceptions\FileException;
+use Neptune\Exceptions\ConfigKeyException;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,6 +32,13 @@ abstract class CreateCommand extends Command {
 				 //make this an array to create loads
 			 )
 			 ->addOption(
+				 'module',
+				 'm',
+				 InputOption::VALUE_REQUIRED,
+				 'The module of the new resource.',
+				 $this->getFirstModule()
+			 )
+			 ->addOption(
 				 'with-test',
 				 't',
 				 InputOption::VALUE_NONE,
@@ -45,25 +53,43 @@ abstract class CreateCommand extends Command {
 	}
 
 	/**
-	 * Get the file name of the resource to create.
+	 * Get the path of the resource to create, relative to the module
+	 * directory.
 	 */
-	abstract protected function getResourceFilename($name);
+	abstract protected function getTargetPath($name);
 
+	/**
+	 * Get a skeleton instance with all required variables set.
+	 */
 	abstract protected function getSkeleton($name);
 
 	protected function getSkeletonPath($skeleton) {
 		return $this->config->getRequired('dir.neptune') . 'skeletons/' . $skeleton;
 	}
 
+	protected function checkModule() {
+		$module = $this->input->getOption('module');
+		$this->config->getRequired('modules.' . $module);
+		$this->console->verbose(sprintf('Target module: <info>%s</info>', $module));
+	}
+
 	public function go(Console $console) {
+		try {
+			$this->checkModule();
+		} catch (ConfigKeyException $e) {
+			$console->writeln(sprintf("<error>%s</error>", $e->getMessage()));
+			return false;
+		}
+
 		$name = $this->input->getArgument('name');
 		if(!$name) {
 			$dialog = $this->getHelper('dialog');
 			$name = $dialog->ask($this->output, $this->prompt, $this->default);
 		}
 		$skeleton = $this->getSkeleton($name);
-		$new_file = $this->getResourceFilename($name);
-		$this->saveSkeletonToFile($skeleton, $new_file);
+		$target_file = $this->getModuleDirectory($this->input->getOption('module')) .
+			$this->getTargetPath($name);
+		$this->saveSkeletonToFile($skeleton, $target_file);
 	}
 
 	public function isEnabled() {

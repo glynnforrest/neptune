@@ -18,10 +18,8 @@ class CreateControllerCommand extends CreateCommand {
 	protected $prompt = 'Controller name: ';
 	protected $default = 'Home';
 
-	protected function getResourceFilename($name) {
-		$name = S::UpperCamelize($name) . 'Controller';
-		$filename = $this->getAppDirectory() . 'Controller/' . $name . '.php';
-		return $filename;
+	protected function getTargetPath($name) {
+		return 'Controller/' . S::UpperCamelize($name) . 'Controller.php';
 	}
 
 	protected function getSkeleton($name) {

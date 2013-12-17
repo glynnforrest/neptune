@@ -20,10 +20,8 @@ class CreateThingCommand extends CreateCommand {
 	protected $prompt = 'Entity name (a singular noun): ';
 	protected $default = 'User';
 
-	protected function getResourceFilename($name) {
-		$name = S::UpperCamelize($name);
-		$filename = $this->getAppDirectory() . 'Thing/' . $name . '.php';
-		return $filename;
+	protected function getTargetPath($name) {
+		return 'Thing/' . S::UpperCamelize($name) . '.php';
 	}
 
 	protected function getSkeleton($name) {
