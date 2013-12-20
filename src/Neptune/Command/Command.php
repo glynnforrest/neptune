@@ -72,7 +72,12 @@ abstract class Command extends SymfonyCommand {
 	 * Get the name of the first module in the neptune config file.
 	 */
 	public function getFirstModule() {
-		return array_keys($this->config->get('modules'))[0];
+		$modules = $this->config->get('modules');
+		if(!$modules) {
+			return null;
+		}
+		$module_names = array_keys($modules);
+		return $module_names[0];
 	}
 
 	/**
