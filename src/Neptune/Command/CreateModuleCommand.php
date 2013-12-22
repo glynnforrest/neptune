@@ -57,7 +57,9 @@ class CreateModuleCommand extends Command {
 		//create dirs
 		$this->createDirectories($this->createModuleDirectory($namespace));
 		//create config.php
-		$config = Config::create('new-module', $this->createModuleDirectory($namespace) . 'config.php');
+		$file = $this->createModuleDirectory($namespace) . 'config.php';
+		$console->verbose("Creating <info>$file</info>");
+		$config = Config::create('new-module', $file);
 		$config->set('namespace', $namespace);
 		$config->set('assets.dir', 'assets/');
 		$config->save();
