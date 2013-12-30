@@ -2,7 +2,6 @@
 
 namespace Neptune\Command;
 
-use \ReflectionMethod;
 use Neptune\Console\Console;
 use Neptune\Core\Config;
 
