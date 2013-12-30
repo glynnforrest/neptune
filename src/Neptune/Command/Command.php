@@ -28,30 +28,33 @@ abstract class Command extends SymfonyCommand {
 	 * Create a new Command instance. Neptune config must be loaded.
 	 */
 	public function __construct(Config $config) {
-		parent::__construct();
+		//make config instance available to configure()
 		$this->config = $config;
+		parent::__construct();
 	}
 
 	protected function configure() {
 		$this->setName($this->name)
-             ->setDescription($this->description);
+			 ->setDescription($this->description);
 	}
 
 	public function execute(InputInterface $input, OutputInterface $output) {
 		$this->input = $input;
 		$this->output = $output;
 		//add a neptune Console helper for useful functions
-		$console = new Console($input, $output);
+		$this->console = new Console($input, $output);
 		//set helper set
-		$this->go($console);
+		$this->console->setHelperSet($this->getHelperSet());
+		$this->go($this->console);
 		//return status code here
 	}
 
 	/**
 	 * Run the command. The following are available:
-	 * $console ==> instance of Console helper
+	 * $console ==> Console instance
 	 * $this->input ==> InputInterface
 	 * $this->output ==> OutputInterface
+	 * $this->console ==> Console instance
 	 * $this->config ==> 'neptune' Config instance
 	 */
 	abstract public function go(Console $console);
@@ -65,16 +68,34 @@ abstract class Command extends SymfonyCommand {
 		return $root;
 	}
 
-	public function getAppDirectory() {
-		return $this->getRootDirectory() . 'app/' .
-			$this->getNamespace() . '/';
+	/**
+	 * Get the name of the first module in the neptune config file.
+	 */
+	public function getFirstModule() {
+		$modules = $this->config->get('modules');
+		if(!$modules) {
+			return null;
+		}
+		$module_names = array_keys($modules);
+		return $module_names[0];
 	}
 
 	/**
-	 * Get the project namespace with no beginning slash.
+	 * Get the absolute path to a module directory.
+	 *
+	 * @param string $module The name of the module
 	 */
-	public function getNamespace() {
-		$namespace = $this->config->getRequired('namespace');
+	public function getModuleDirectory($module) {
+		return $this->config->getPath('modules.' . $module);
+	}
+
+	/**
+	 * Get the namespace of a module with no beginning slash.
+	 *
+	 * @param string $module the name of the module
+	 */
+	public function getModuleNamespace($module) {
+		$namespace = Config::load($module)->getRequired('namespace');
 		if(substr($namespace, 0, 1) === '\\') {
 			$namespace = substr($namespace, 0, 1);
 		}

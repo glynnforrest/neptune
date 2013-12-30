@@ -1,6 +1,11 @@
 <?php
 
-namespace Neptune\Console;
+namespace Neptune\Tests\Console;
+
+use Neptune\Console\DialogHelper;
+use Symfony\Component\Console\Output\StreamOutput;
+
+require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
  * DialogHelperTest
@@ -9,49 +14,69 @@ namespace Neptune\Console;
  **/
 class DialogHelperTest extends \PHPUnit_Framework_TestCase {
 
-	public function setup() {
-
+	protected function getInputStream($input) {
+		$stream = fopen('php://memory', 'r+', false);
+		fputs($stream, $input);
+		rewind($stream);
+		return $stream;
 	}
 
-	public function tearDown() {
-
+	protected function getOutputStream() {
+		return new StreamOutput(fopen('php://memory', 'r+', false));
 	}
 
-	public function testNoDefault() {
-		/* $this->c->setDefaultOption('Pick a colour', 'black'); */
-		/* $this->assertEquals('Pick a colour', $this->c->addDefaultToPrompt('Pick a colour', null)); */
-		/* $this->assertEquals('Pick a colour', $this->c->addDefaultToPrompt('Pick a colour', "")); */
+	public function testAsk() {
+		$dialog = new DialogHelper();
+		$dialog->setInputStream($this->getInputStream("black\n"));
+		$this->assertEquals('black', $dialog->ask($output = $this->getOutputStream(), 'Favourite colour? '));
+		rewind($output->getStream());
+		$this->assertEquals('Favourite colour? ', stream_get_contents($output->getStream()));
 	}
 
-	/* public function testNamedDefault() { */
-	/* 	$this->c->setDefaultOption('Pick a colour', 'black'); */
-	/* 	$this->assertEquals('Pick a colour (Default: white)', $this->c->addDefaultToPrompt('Pick a colour', 'white')); */
-	/* } */
+	public function testAskEmptyAnswer() {
+		$dialog = new DialogHelper();
+		$dialog->setInputStream($this->getInputStream("\n"));
+		$this->assertEquals(null, $dialog->ask($this->getOutputStream(), 'Favourite colour? '));
+	}
 
-	/* public function testDefaultWorksWithZero() { */
-	/* 	$this->assertEquals('Enter a number (Default: 0)', $this->c->addDefaultToPrompt('Enter a number', 0)); */
-	/* 	$this->assertEquals('Enter a number (Default: 0)', $this->c->addDefaultToPrompt('Enter a number', '0')); */
-	/* } */
+	public function testAskWithDefault() {
+		$dialog = new DialogHelper();
+		$dialog->setInputStream($this->getInputStream("\nblack\n"));
+		$this->assertEquals('white', $dialog->ask($this->getOutputStream(), 'Favourite colour? ', 'white'));
+		$this->assertEquals('black', $dialog->ask($output = $this->getOutputStream(), 'Favourite colour? ', 'white'));
+		rewind($output->getStream());
+		$this->assertEquals('Favourite colour? [Default: white] ', stream_get_contents($output->getStream()));
+	}
 
-	/* public function testLastDefault() { */
-	/* 	$this->c->setDefaultOption('Pick a colour', 'black'); */
-	/* 	$this->assertEquals('Pick a colour (Default: black)', $this->c->addDefaultToPrompt('Pick a colour', true)); */
-	/* } */
+	public function testAskWithPreviousDefault() {
+		$dialog = new DialogHelper();
+		$dialog->setInputStream($this->getInputStream("\ngreen\n\nred\nred\n"));
 
-	/* public function testOptions() { */
-	/* 	$expected = 'Pick a colour [0:black, 1:white] '; */
-	/* 	$actual = $this->c->options(array('black', 'white'), 'Pick a colour'); */
-	/* 	$this->assertEquals($expected, $actual); */
-	/* 	$expected ='Pick a colour [0:black, 1:white, 2:red, 3:yellow, 4:green] '; */
-	/* 	$actual = $this->c->options(array('black', 'white', 'red', 'yellow', 'green'), */
-	/* 						  'Pick a colour'); */
-	/* 	$this->assertEquals($expected, $actual); */
-	/* } */
+		//first no answer is given, so expect null
+		$this->assertEquals(null, $dialog->ask($this->getOutputStream(), 'Favourite colour? ', true));
+		//green is given, so expect green
+		$this->assertEquals('green', $dialog->ask($this->getOutputStream(), 'Favourite colour? ', true));
+		//no answer is given, but green is returned as it is the new default
+		$this->assertEquals('green', $dialog->ask($green_output = $this->getOutputStream(), 'Favourite colour? ', true));
+		rewind($green_output->getStream());
+		$this->assertEquals('Favourite colour? [Default: green] ', stream_get_contents($green_output->getStream()));
 
-	/* public function testOptionsEmptyArray() { */
-	/* 	$this->setExpectedException('\\Neptune\\Console\\ConsoleException'); */
-	/* 	$this->c->options(array()); */
-	/* } */
+		//now again with another colour
+		//even if the third parameter is missing a default should still be set
+		$this->assertEquals('red', $dialog->ask($this->getOutputStream(), 'Favourite colour? '));
+		//no answer is given, but we have the new default
+		$this->assertEquals('red', $dialog->ask($red_output = $this->getOutputStream(), 'Favourite colour? ', true));
+		rewind($red_output->getStream());
+		$this->assertEquals('Favourite colour? [Default: red] ', stream_get_contents($red_output->getStream()));
+	}
 
+	public function testDefaultWorksWithZero() {
+		$dialog = new DialogHelper();
+		$dialog->setInputStream($this->getInputStream("0\n\n"));
+		$this->assertEquals('0', $dialog->ask($this->getOutputStream(), 'Pick a number ', '4'));
+		$this->assertEquals('0', $dialog->ask($output = $this->getOutputStream(), 'Pick a number ', true));
+		rewind($output->getStream());
+		$this->assertEquals('Pick a number [Default: 0] ', stream_get_contents($output->getStream()));
+	}
 
 }

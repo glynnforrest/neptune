@@ -18,10 +18,8 @@ class CreateModelCommand extends CreateCommand {
 	protected $prompt = 'Model name: ';
 	protected $default = 'User';
 
-	protected function getResourceFilename($name) {
-		$name = S::UpperCamelize($name) . 'Model';
-		$filename = $this->getAppDirectory() . 'Model/' . $name . '.php';
-		return $filename;
+	protected function getTargetPath($name) {
+		return 'Model/' . S::UpperCamelize($name) . 'Model.php';
 	}
 
 	protected function getSkeleton($name) {

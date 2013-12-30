@@ -22,9 +22,12 @@ $config = 'config/neptune.php';
 if(file_exists($config)) {
 	$c = Config::load('neptune', $config);
 } else {
-	$output->writeln('No neptune config file found!');
-	$output->writeln('You should run <info>create:config</info> to create <info>config/neptune.php</info>');
-	$output->writeln('Creating temporary neptune config...');
+	//write a warning if no neptune config is present and this isn't the setup command
+	if(!isset($_SERVER['argv'][1]) || $_SERVER['argv'][1] !== 'setup') {
+		$output->writeln('<error>No neptune config file found!</error>');
+		$output->writeln('<error>You should run create:config to create config/neptune.php</error>');
+		$output->writeln('<info>Creating temporary neptune config...</info>');
+	}
 	$c = Config::create('neptune', $config);
 	$c->set('dir.neptune', $root . 'vendor/glynnforrest/neptune/');
 }
