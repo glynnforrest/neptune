@@ -51,4 +51,4 @@ Neptune is under heavy development so expect the code to change regularly.
 License
 -------
 
-Have fun!
+MIT
