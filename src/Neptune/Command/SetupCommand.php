@@ -57,9 +57,9 @@ class SetupCommand extends Command {
 		//create public/index.php
 		//create public/.htaccess
 		//add to .gitignore?
-		//create module task
+		//create module
 		$this->createFirstModule();
-		//create env task
+		//create env
 	}
 
 	public function isEnabled() {
