@@ -62,13 +62,16 @@ class Application extends SymfonyApplication {
 	}
 
 	/**
-	 * Register Commands contained from the following:
-	 * - Neptune\Command\<Command>
-	 * - <application namespace>\Command\<Command>
-	 * - From modules set in neptune.php
+	 * Register Commands in the neptune 'Command' directory and from
+	 * the modules set in neptune.php
 	 */
 	public function registerCommands() {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
+		$root = $this->config->getRequired('dir.root');
+		foreach ($this->config->get('modules') as $module => $path) {
+			$namespace = $this->getModuleNamespace($module);
+			$this->registerNamespace($namespace, $root . $path . 'Command/');
+		}
 	}
 
 	/**
@@ -97,6 +100,19 @@ class Application extends SymfonyApplication {
 				continue;
 			}
 		}
+	}
+
+	/**
+	 * Get the namespace of a module with no beginning slash.
+	 *
+	 * @param string $module the name of the module
+	 */
+	public function getModuleNamespace($module) {
+		$namespace = Config::load($module)->getRequired('namespace');
+		if(substr($namespace, 0, 1) === '\\') {
+			$namespace = substr($namespace, 0, 1);
+		}
+		return $namespace;
 	}
 
 }

@@ -94,11 +94,7 @@ abstract class Command extends SymfonyCommand {
 	 * @param string $module the name of the module
 	 */
 	public function getModuleNamespace($module) {
-		$namespace = Config::load($module)->getRequired('namespace');
-		if(substr($namespace, 0, 1) === '\\') {
-			$namespace = substr($namespace, 0, 1);
-		}
-		return $namespace;
+		return $this->getApplication()->getModuleNamespace($module);
 	}
 
 	/**
