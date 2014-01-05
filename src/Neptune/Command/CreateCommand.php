@@ -87,7 +87,10 @@ abstract class CreateCommand extends Command {
 			$name = $dialog->ask($this->output, $this->prompt, $this->default);
 		}
 		$skeleton = $this->getSkeleton($name);
-		$target_file = $this->getModuleDirectory($this->input->getOption('module')) .
+
+		$module = $this->input->getOption('module');
+		$skeleton->setNamespace($this->getModuleNamespace($module));
+		$target_file = $this->getModuleDirectory($module) .
 			$this->getTargetPath($name);
 		$this->saveSkeletonToFile($skeleton, $target_file);
 	}
