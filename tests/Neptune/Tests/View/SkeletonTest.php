@@ -15,7 +15,6 @@ class SkeletonTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$c = Config::create('neptune');
-		$c->set('namespace', 'Testapp');
 		$c->set('dir.neptune', '/root/to/neptune/');
 	}
 
@@ -36,5 +35,10 @@ class SkeletonTest extends \PHPUnit_Framework_TestCase {
 							$skeleton->getView());
 	}
 
+	public function testGetAndSetNamespace() {
+		$skeleton = Skeleton::load(null);
+		$this->assertInstanceOf('\Neptune\View\Skeleton', $skeleton->setNamespace('Foo'));
+		$this->assertSame('Foo', $skeleton->getNamespace());
+	}
 
 }

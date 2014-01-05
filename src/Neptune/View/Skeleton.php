@@ -15,12 +15,26 @@ class Skeleton extends View {
 
 	protected $namespace;
 
-	/**
-	 * Automatically get the namespace of the application for use in
-	 * the saveSkeleton method.
-	 */
 	protected function __construct() {
-		$this->namespace = Config::load('neptune')->getRequired('namespace');
+	}
+
+	/**
+	 * Set the namespace for the class created by this Skeleton.
+	 *
+	 * @param string $namespace The namespace for this Skeleton.
+	 */
+	public function setNamespace($namespace) {
+		$this->namespace = $namespace;
+		return $this;
+	}
+
+	/**
+	 * Set the namespace for the class created by this Skeleton.
+	 *
+	 * @param string $namespace The namespace for this Skeleton.
+	 */
+	public function getNamespace() {
+		return $this->namespace;
 	}
 
 	/**
