@@ -10,7 +10,7 @@
     "license": "MIT",
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
-        "glynnforrest/temping": "0.1.*",
+        "glynnforrest/temping": "0.3.*",
         "liip/rmt": "0.9.*"
     },
     "authors": [

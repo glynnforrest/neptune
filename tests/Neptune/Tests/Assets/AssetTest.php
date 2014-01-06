@@ -17,8 +17,9 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 	protected $file;
 
 	public function setUp() {
-		$id = Temping::getInstance()->create('test_asset', 'content');
-		$this->file = Temping::getInstance()->getPathname($id);
+		$this->file = Temping::getInstance()
+			->create('test_asset', 'content')
+			->getPathname('test_asset');
 	}
 
 	public function tearDown() {
