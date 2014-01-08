@@ -19,16 +19,18 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	protected $dir;
+	protected $temp;
 
 	public function setUp() {
 		$c = Config::create('temp');
-		$this->dir = Temping::getInstance()->getDirectory();
+		$this->temp = new Temping();
+		$this->dir = $this->temp->getDirectory();
 		$c->set('assets.dir', $this->dir);
 	}
 
 	public function tearDown() {
 		Config::unload();
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 	}
 
 	public function testConstruct() {
@@ -63,7 +65,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeAsset() {
 		$c = new AssetsController();
-		Temping::getInstance()->create('asset.css', 'css_content');
+		$this->temp->create('asset.css', 'css_content');
 		Request::getInstance()->setFormat('css');
 		$this->assertEquals('css_content', $c->serveAsset('asset'));
 		Request::getInstance()->resetStoredVars();
@@ -71,7 +73,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeFilteredAsset() {
 		$c = new AssetsController();
-		Temping::getInstance()->create('filtered.js', 'js_content');
+		$this->temp->create('filtered.js', 'js_content');
 		$conf = Config::load();
 		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');

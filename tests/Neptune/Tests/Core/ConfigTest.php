@@ -31,7 +31,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 	protected $override;
 
 	public function setUp() {
-		$this->temp = Temping::getInstance();
+		$this->temp = new Temping();
 
 		//a sample config
 		$this->content = '<?php';
@@ -329,10 +329,10 @@ END;
 		$c->save();
 		//the first test file should be unmodified
 		$this->assertEquals($this->flattenConfig($this->content),
-							$this->flattenConfig(file_get_contents($file)));
+							$this->flattenConfig($this->temp->getContents(self::file)));
 		//file2 should have changed instead
 		$this->assertEquals($this->flattenConfig($this->changed),
-							$this->flattenConfig(file_get_contents($file2)));
+							$this->flattenConfig($this->temp->getContents(self::file2)));
 	}
 
 	public function testGetFilename() {

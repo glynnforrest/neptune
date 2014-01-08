@@ -27,7 +27,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 	public function setup() {
 		$this->config = Config::create('neptune');
 
-		$this->temping = Temping::getInstance();
+		$this->temping = new Temping();
 		$this->temping->createDirectory('config/env');
 		$this->config->set('dir.root', $this->temping->getDirectory());
 

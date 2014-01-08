@@ -18,9 +18,11 @@ class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 	protected $filename = 'file.txt';
 	protected $files_index = 'file';
 	protected $object;
+	protected $temp;
 
 	public function setUp() {
-		Temping::getInstance()->create($this->filename);
+		$this->temp = new Temping();
+		$this->temp->create($this->filename);
 		$_FILES = array();
 		$_FILES[$this->files_index] = array(
 			'name' => 'file.txt',
@@ -34,7 +36,7 @@ class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 		$_SERVER['REQUEST_METHOD'] = null;
 	}
 

@@ -17,13 +17,13 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 	protected $file;
 
 	public function setUp() {
-		$this->file = Temping::getInstance()
-			->create('test_asset', 'content')
-			->getPathname('test_asset');
+		$this->temp = new Temping();
+		$this->file = $this->temp->create('test_asset', 'content')
+								 ->getPathname('test_asset');
 	}
 
 	public function tearDown() {
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 	}
 
 	public function testConstruct() {

@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class LoggerTest extends \PHPUnit_Framework_TestCase {
 
 	protected $file = 'logtest.log';
+	protected $temp;
 
 	public function setUp() {
 		$c = Config::create('neptune');
@@ -29,7 +30,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 			'file' => $this->file,
 			'format' => ':message'
 		));
-		$c->set('dir.root', Temping::getInstance()->getDirectory());
+		$this->temp = new Temping();
+		$c->set('dir.root', $this->temp->getDirectory());
 		Logger::enable();
 		Logger::temp();
 		Logger::flush();
@@ -37,7 +39,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		Config::unload();
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 	}
 
 	public function testConstruct() {
@@ -91,8 +93,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 		Logger::debug('saved to file');
 		Logger::save();
 		$expected = 'saved to file' . PHP_EOL;
-		$filename = Temping::getInstance()->getDirectory() . $this->file;
-		$actual = file_get_contents($filename);
+		$actual = $this->temp->getContents($this->file);
 		$this->assertEquals($expected, $actual);
 	}
 

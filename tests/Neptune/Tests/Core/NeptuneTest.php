@@ -16,14 +16,16 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	protected $neptune;
+	protected $temp;
 
 	public function setUp() {
 		$this->neptune = Neptune::getInstance();
 		$this->neptune->reset();
+		$this->temp = new Temping();
 	}
 
 	public function tearDown() {
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 		Config::unload();
 	}
 
@@ -65,19 +67,17 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testLoadEnv() {
-		$temp = Temping::getInstance();
 		$config_file = '<?php';
 		$config_file .= <<<END
 		return array(
 			'foo' => 'override',
 		);
 END;
-		$temp->create('config/env/development.php', $config_file);
-		$env_file = file_get_contents(__DIR__ . '/etc/sample_env.php');
-		$temp->create('app/env/development.php', $env_file);
+		$this->temp->create('config/env/development.php', $config_file);
+		$this->temp->create('app/env/development.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
 		$c = Config::create('neptune');
 		$c->set('foo', 'default');
-		$c->set('dir.root', $temp->getDirectory());
+		$c->set('dir.root', $this->temp->getDirectory());
 		$this->assertEquals('default', $c->get('foo'));
 		$this->assertFalse(defined('SOME_CONSTANT'));
 		//loadEnv should call Config::loadEnv and include app/env/<env>.php
@@ -87,19 +87,17 @@ END;
 	}
 
 	public function testLoadEnvDefaultNoArg() {
-		$temp = Temping::getInstance();
 		$config_file = '<?php';
 		$config_file .= <<<END
 		return array(
 			'foo' => 'override',
 		);
 END;
-		$temp->create('config/env/development.php', $config_file);
-		$env_file = file_get_contents(__DIR__ . '/etc/sample_env.php');
-		$temp->create('app/env/development.php', $env_file);
+		$this->temp->create('config/env/development.php', $config_file);
+		$this->temp->create('app/env/development.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
 		$c = Config::create('neptune');
 		$c->set('foo', 'default');
-		$c->set('dir.root', $temp->getDirectory());
+		$c->set('dir.root', $this->temp->getDirectory());
 		$this->assertEquals('default', $c->get('foo'));
 		$c->set('env', 'development');
 		$this->neptune->loadEnv();

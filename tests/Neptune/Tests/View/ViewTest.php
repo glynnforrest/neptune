@@ -17,6 +17,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 
 	protected $file = 'viewtest.php';
 	protected $view = 'viewtest';
+	protected $temp;
 
 	public function setUp() {
 		$content = '<?php';
@@ -24,21 +25,21 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
 		echo 'testing';
 END;
 		$content .= '?>';
-		$temp = Temping::getInstance();
-		$temp->create($this->file, $content);
+		$this->temp = new Temping();
+		$this->temp->create($this->file, $content);
 		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', $temp->getDirectory());
+		$neptune->set('dir.root', $this->temp->getDirectory());
 		$neptune->set('view.dir', 'views/');
 		$d = Config::create('prefix');
 		$d->set('view.dir', 'folder_prefix/');
 	}
 
 	protected function getMockPath($view_name, $view_dir = 'views/') {
-		return Temping::getInstance()->getDirectory() . $view_dir . $view_name;
+		return $this->temp->getDirectory() . $view_dir . $view_name;
 	}
 
 	public function tearDown() {
-		Temping::getInstance()->reset();
+		$this->temp->reset();
 		Config::unload();
 	}
 
@@ -84,13 +85,13 @@ END;
 	}
 
 	public function testRenderAbsolutePath() {
-		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$view = $this->temp->getDirectory() . $this->view;
 		$v = View::loadAbsolute($view);
 		$this->assertEquals('testing', $v->render());
 	}
 
 	public function testViewVarIsNotOverridden() {
-		$view = Temping::getInstance()->getDirectory() . $this->view;
+		$view = $this->temp->getDirectory() . $this->view;
 		$v = View::loadAbsolute($view);
 		$v->file = 'foo';
 		$this->assertEquals('foo', $v->file);
