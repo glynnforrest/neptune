@@ -2,6 +2,7 @@
 
 namespace Neptune\Tests\Cache\Drivers;
 
+use Neptune\Tests\Cache\Drivers\CacheDriverTest;
 use Neptune\Cache\Drivers\FileDriver;
 
 use Temping\Temping;
@@ -13,7 +14,7 @@ require_once __DIR__ . '/../../../../bootstrap.php';
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class FileDriverTest extends \PHPUnit_Framework_TestCase {
+class FileDriverTest extends CacheDriverTest {
 
 	public function setup() {
 		$this->temp = new Temping();
@@ -26,6 +27,14 @@ class FileDriverTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		$this->temp->reset();
+	}
+
+	protected function setContents($key, $value) {
+		$this->temp->create($key, serialize($value));
+	}
+
+	protected function getContents($key) {
+		return unserialize($this->temp->getContents($key));
 	}
 
 	public function testNoConfigThrowsException() {
@@ -41,38 +50,56 @@ class FileDriverTest extends \PHPUnit_Framework_TestCase {
 		));
 	}
 
-	public function testAdd() {
-		$this->driver->add('foo', 'bar');
-		$this->assertTrue($this->temp->exists('testing_foo'));
-		$this->assertEquals('bar', $this->temp->getContents('testing_foo'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testAdd($key, $val) {
+		$this->driver->add($key, $val);
+		$this->assertTrue($this->temp->exists('testing_' . $key));
+		$this->assertEquals($val, $this->getContents('testing_' . $key));
 	}
 
-	public function testAddNoPrefix() {
-		$this->driver->add('foo', 'bar', null, false);
-		$this->assertTrue($this->temp->exists('foo'));
-		$this->assertEquals('bar', $this->temp->getContents('foo'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testAddNoPrefix($key, $val) {
+		$this->driver->add($key, $val, null, false);
+		$this->assertTrue($this->temp->exists($key));
+		$this->assertEquals($val, $this->getContents($key));
 	}
 
-	public function testSet() {
-		$this->driver->set('one', 'two');
-		$this->assertTrue($this->temp->exists('testing_one'));
-		$this->assertEquals('two', $this->temp->getContents('testing_one'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testSet($key, $val) {
+		$this->driver->set($key, $val);
+		$this->assertTrue($this->temp->exists('testing_' . $key));
+		$this->assertEquals($val, $this->getContents('testing_' . $key));
 	}
 
-	public function testSetNoPrefix() {
-		$this->driver->set('one', 'two', null, false);
-		$this->assertTrue($this->temp->exists('one'));
-		$this->assertEquals('two', $this->temp->getContents('one'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testSetNoPrefix($key, $val) {
+		$this->driver->set($key, $val, null, false);
+		$this->assertTrue($this->temp->exists($key));
+		$this->assertEquals($val, $this->getContents($key));
 	}
 
-	public function testGet() {
-		$this->temp->create('testing_fuzz', 'buzz');
-		$this->assertEquals('buzz', $this->driver->get('fuzz'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testGet($key, $val) {
+		$this->setContents('testing_' . $key, $val);
+		$this->assertEquals($val, $this->driver->get($key));
 	}
 
-	public function testGetNoPrefix() {
-		$this->temp->create('fuzz', 'buzz');
-		$this->assertEquals('buzz', $this->driver->get('fuzz', false));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testGetNoPrefix($key, $val) {
+		$this->setContents($key, $val);
+		$this->assertEquals($val, $this->driver->get($key, false));
 	}
 
 	public function testGetReturnsNullOnMiss() {
@@ -80,10 +107,40 @@ class FileDriverTest extends \PHPUnit_Framework_TestCase {
 		$this->assertNull($this->driver->get('foo', false));
 	}
 
-	public function testDelete() {
-		$this->driver->set('whoops', 'something');
-		$this->assertTrue($this->driver->delete('whoops'));
-		$this->assertFalse($this->temp->exists('whoops'));
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testGetAndSet($key, $val) {
+		$this->driver->set($key, $val);
+		$this->assertEquals($val, $this->driver->get($key));
+	}
+
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testGetAndSetNoPrefix($key, $val) {
+		$this->driver->set($key, $val, null, false);
+		$this->assertEquals($val, $this->driver->get($key, false));
+	}
+
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testDelete($key, $val) {
+		$this->driver->set($key, $val);
+		$this->assertTrue($this->temp->exists('testing_' . $key));
+		$this->assertTrue($this->driver->delete($key));
+		$this->assertFalse($this->temp->exists('testing_' . $key));
+	}
+
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testDeleteNoPrefix($key, $val) {
+		$this->driver->set($key, $val, null, false);
+		$this->assertTrue($this->temp->exists($key));
+		$this->assertTrue($this->driver->delete($key, null, false));
+		$this->assertFalse($this->temp->exists($key));
 	}
 
 	public function testDeleteNonExistent() {
@@ -91,9 +148,11 @@ class FileDriverTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($this->temp->exists('not_here'));
 	}
 
-	public function testFlush() {
-		$this->driver->set('foo', 'bar');
-		$this->driver->set('bar', 'baz');
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testFlush($key, $val) {
+		$this->driver->set($key,$val);
 		$this->assertFalse($this->temp->isEmpty());
 		$this->driver->flush();
 		$this->assertTrue($this->temp->isEmpty());
