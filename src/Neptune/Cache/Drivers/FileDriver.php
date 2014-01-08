@@ -31,14 +31,14 @@ class FileDriver implements CacheDriver {
 		if($use_prefix) {
 			$key = $this->prefix . $key;
 		}
-		return $this->temping->create($key, $value);
+		return $this->temping->create($key, serialize($value));
 	}
 
 	public function set($key, $value, $time = null, $use_prefix = true) {
 		if($use_prefix) {
 			$key = $this->prefix . $key;
 		}
-		return $this->temping->create($key, $value);
+		return $this->temping->create($key, serialize($value));
 	}
 
 	public function get($key, $use_prefix = true) {
@@ -46,13 +46,16 @@ class FileDriver implements CacheDriver {
 			$key = $this->prefix . $key;
 		}
 		try {
-			return $this->temping->getContents($key);
+			return unserialize($this->temping->getContents($key));
 		} catch (\Exception $e) {
 			return null;
 		}
 	}
 
 	public function delete($key, $time = null, $use_prefix = true) {
+		if($use_prefix) {
+			$key = $this->prefix . $key;
+		}
 		$this->temping->delete($key);
 		return true;
 	}
