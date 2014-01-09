@@ -2,8 +2,14 @@
 
 namespace Neptune\Cache;
 
+use Neptune\Cache\Drivers\DebugDriver;
+use Neptune\Cache\Drivers\FileDriver;
+
 use Neptune\Core\Config;
+use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
+
+use Temping\Temping;
 
 /**
  * CacheFactory
@@ -11,59 +17,67 @@ use Neptune\Exceptions\DriverNotFoundException;
  */
 class CacheFactory {
 
-	protected static $caches = array();
+	protected $config;
+	protected $drivers = array();
+
+	public function __construct(Config $config) {
+		$this->config = $config;
+	}
 
 	/**
-	 * @return CacheDriver
-	 * A neptune cache driver.
+	 * Get the driver called $name in the config instance. If $name is
+	 * not specified, the first driver will be returned.
+	 *
+	 * @param string $name The name of the cache driver
 	 */
-	public static function getDriver($name = null) {
-		if ($name == null) {
-			if (!empty(self::$caches)) {
-				reset(self::$caches);
-				return current(self::$caches);
+	public function getDriver($name = null) {
+		if (!$name) {
+			if (!empty($this->drivers)) {
+				reset($this->drivers);
+				return current($this->drivers);
 			} else {
-				return self::createDriver();
+				return $this->createDriver();
 			}
 		}
-		if (!array_key_exists($name, self::$caches)) {
-			return self::createDriver($name);
+		if (array_key_exists($name, $this->drivers)) {
+			return $this->drivers[$name];
 		}
-		return self::$caches[$name];
+		return $this->createDriver($name);
 	}
 
-	protected static function createDriver($name = null) {
-		$pos = strpos($name, '#');
-		if($pos) {
-			$prefix = substr($name, 0, $pos);
-			$key = substr($name, $pos + 1);
-			$c = Config::load($prefix);
-		} else {
-			$key = $name;
-			$c = Config::load();
+	protected function createDriver($name = null) {
+		if (!$name) {
+			$cache_names = array_keys($this->config->getRequired("cache"));
+			if(empty($cache_names)) {
+				throw new ConfigKeyException(
+					"Cache configuration array is empty");
+			}
+			$name = $cache_names[0];
 		}
-		if (!$key) {
-			$array = $c->getRequired("cache");
-			reset($array);
-			$key = key($array);
-			$name = isset($prefix)? $prefix . '#' . $key: $key;
-		}
-		$driver = 'Neptune\Cache\Drivers\\' . ucfirst($c->getRequired("cache.$key.driver")) . 'Driver';
-		$config = $c->getRequired("cache.$key");
-		if (class_exists($driver)) {
-			self::$caches[$name] = new $driver($config);
-			return self::$caches[$name];
+		$driver = $this->config->getRequired("cache.$name.driver");
+		$config_array = $this->config->getRequired("cache.$name");
+		$method = 'create' . ucfirst($driver) . 'Driver';
+		if (method_exists($this, $method)) {
+			$this->drivers[$name] = $this->$method($config_array);
+			return $this->drivers[$name];
 		} else {
-			throw new DriverNotFoundException("Cache driver not found: $driver");
+			throw new DriverNotFoundException(
+				"Cache driver not implemented: $driver");
 		}
 	}
 
-	public static function remove($name = null) {
-		if($name) {
-			unset(self::$caches[$name]);
-		} else {
-			self::$caches = array();
-		}
+	protected function readArray(array $array, $name) {
+		return isset($array[$name]) ? $array[$name] : null;
+	}
+
+	public function createDebugDriver(array $config) {
+		return new DebugDriver($this->readArray($config, 'prefix'));
+	}
+
+	public function createFileDriver(array $config) {
+		$prefix = $this->readArray($config, 'prefix');
+		$dir = $this->readArray($config, 'prefix');
+		return new FileDriver($prefix, new Temping($dir));
 	}
 
 }

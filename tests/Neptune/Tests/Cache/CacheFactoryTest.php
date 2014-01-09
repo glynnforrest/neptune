@@ -15,70 +15,63 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
+	protected $config;
+	protected $factory;
+
 	public function setUp() {
-		if(!class_exists('\\Memcached')) {
-			$this->markTestSkipped('Memcached extension not installed.');
-		}
-		$c = Config::create('unittest');
-		$c->set('cache', array(
-			'memcached' => array (
-				'host' => 'localhost',
-				'driver' => 'memcached',
-				'port' => '11211',
-				'prefix' => 'unittest-',
-			),
-			'debug' => array (
-				'driver' => 'debug',
-				'prefix' => 'unittest-',
-			),
-			'undefined' => array (
-				'driver' => 'undefined',
-				'prefix' => 'unittest-',
-			),
+		$this->config = Config::create('testing');
+
+		$this->config->set('cache.driver1', array(
+			'driver' => 'file',
+			'prefix' => 'testing_'
 		));
+
+		$this->config->set('cache.driver2', array(
+			'driver' => 'debug',
+			'prefix' => 'testing_'
+		));
+		$this->factory = new CacheFactory($this->config);
 	}
 
 	public function tearDown() {
-		Config::unload();
 	}
 
-	public function testGetDriver() {
-		$this->assertTrue(CacheFactory::getDriver() instanceof MemcachedDriver);
-		$this->assertTrue(CacheFactory::getDriver('memcached') instanceof MemcachedDriver);
-		$this->assertTrue(CacheFactory::getDriver('debug') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver() === CacheFactory::getDriver('memcached'));
+	public function testGetDefaultDriver() {
+		$this->assertInstanceOf('\Neptune\Cache\Drivers\FileDriver', $this->factory->getDriver());
 	}
 
-	public function testGetDriverPrefix() {
-		$c = Config::create('prefix');
-		$c->set('cache', array(
-			'debug' => array (
-				'driver' => 'debug',
-				'prefix' => 'unittest-',
-			),
-			'memcached' => array (
-				'host' => 'localhost',
-				'driver' => 'memcached',
-				'port' => '11211',
-				'prefix' => 'unittest-',
-			)));
-		$this->assertTrue(CacheFactory::getDriver('prefix#debug') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#memcached') instanceof MemcachedDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#') === CacheFactory::getDriver('prefix#debug'));
+	public function testGetFileDriver() {
+		$this->assertInstanceOf('\Neptune\Cache\Drivers\FileDriver', $this->factory->getDriver('driver1'));
+	}
+
+	public function testGetDebugDriver() {
+		$this->assertInstanceOf('\Neptune\Cache\Drivers\DebugDriver', $this->factory->getDriver('driver2'));
+	}
+
+	public function testGetNoConfig() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->factory->getDriver('wrong');
+	}
+
+	public function testGetDefaultNoConfig() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$factory = new CacheFactory(Config::create('empty'));
+		$factory->getDriver();
 	}
 
 	public function testGetBadConfig() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		$c = Config::load('unittest');
-		$c->set('security', array());
-		CacheFactory::getDriver('wrong');
+		$this->config->set('cache.wrong', array(
+			'prefix' => 'test_'
+			//no driver
+		));
+		$this->factory->getDriver('wrong');
 	}
 
 	public function testGetUndefinedDriver() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-		CacheFactory::getDriver('undefined');
+		$this->config->set('cache.unknown', array('driver' => 'unicorn', 'prefix' => 'testing_'));
+		$this->factory->getDriver('unknown');
 	}
-
 
 }
