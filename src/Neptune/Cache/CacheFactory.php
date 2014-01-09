@@ -54,11 +54,26 @@ class CacheFactory {
 			}
 			$name = $cache_names[0];
 		}
-		$driver = $this->config->getRequired("cache.$name.driver");
 		$config_array = $this->config->getRequired("cache.$name");
+
+		//cache driver and prefix are required for all drivers
+		if(!isset($config_array['driver'])) {
+			throw new ConfigKeyException(
+				"Cache configuration '$name' does not list a driver"
+			);
+		}
+		$driver = $config_array['driver'];
+
+		if(!isset($config_array['prefix'])) {
+			throw new ConfigKeyException(
+				"Cache configuration '$name' does not list a prefix"
+			);
+		}
+		$prefix = $config_array['prefix'];
+
 		$method = 'create' . ucfirst($driver) . 'Driver';
 		if (method_exists($this, $method)) {
-			$this->drivers[$name] = $this->$method($config_array);
+			$this->drivers[$name] = $this->$method($prefix, $config_array);
 			return $this->drivers[$name];
 		} else {
 			throw new DriverNotFoundException(
@@ -70,12 +85,11 @@ class CacheFactory {
 		return isset($array[$name]) ? $array[$name] : null;
 	}
 
-	public function createDebugDriver(array $config) {
-		return new DebugDriver($this->readArray($config, 'prefix'));
+	public function createDebugDriver($prefix) {
+		return new DebugDriver($prefix);
 	}
 
-	public function createFileDriver(array $config) {
-		$prefix = $this->readArray($config, 'prefix');
+	public function createFileDriver($prefix, array $config) {
 		$dir = $this->readArray($config, 'prefix');
 		return new FileDriver($prefix, new Temping($dir));
 	}

@@ -57,11 +57,22 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 		$factory->getDriver();
 	}
 
-	public function testGetBadConfig() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+	public function testGetNoDriver() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException',
+		"Cache configuration 'wrong' does not list a driver");
 		$this->config->set('cache.wrong', array(
-			'prefix' => 'test_'
+			'prefix' => 'testing:'
 			//no driver
+		));
+		$this->factory->getDriver('wrong');
+	}
+
+	public function testGetNoPrefix() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException',
+		"Cache configuration 'wrong' does not list a prefix");
+		$this->config->set('cache.wrong', array(
+			'driver' => 'file'
+			//no prefix
 		));
 		$this->factory->getDriver('wrong');
 	}
