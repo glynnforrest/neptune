@@ -16,13 +16,12 @@ require_once __DIR__ . '/../../../../bootstrap.php';
  **/
 class FileDriverTest extends CacheDriverTest {
 
+	protected $driver;
+	protected $temp;
+
 	public function setup() {
 		$this->temp = new Temping();
-		$config = array(
-			'dir' => $this->temp->getDirectory(),
-			'prefix' => 'testing_'
-		);
-		$this->driver = new FileDriver($config);
+		$this->driver = new FileDriver('testing_', $this->temp);
 	}
 
 	public function tearDown() {
@@ -37,35 +36,9 @@ class FileDriverTest extends CacheDriverTest {
 		return unserialize($this->temp->getContents($key));
 	}
 
-	public function testNoConfigThrowsException() {
-		$this->setExpectedException('\Exception');
-		$driver = new FileDriver(array());
-	}
-
 	public function testNonWritableDirectoryThrowsException() {
-		$this->setExpectedException('\Exception');
-		$driver = new FileDriver(array(
-			'dir' => 'some/dir',
-			'prefix' => 'testing_'
-		));
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testAdd($key, $val) {
-		$this->driver->add($key, $val);
-		$this->assertTrue($this->temp->exists('testing_' . $key));
-		$this->assertEquals($val, $this->getContents('testing_' . $key));
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testAddNoPrefix($key, $val) {
-		$this->driver->add($key, $val, null, false);
-		$this->assertTrue($this->temp->exists($key));
-		$this->assertEquals($val, $this->getContents($key));
+		$this->setExpectedException('\Exception', "'some/dir/' is not a directory");
+		$driver = new FileDriver('testing_', new Temping('some/dir'));
 	}
 
 	/**
@@ -99,27 +72,6 @@ class FileDriverTest extends CacheDriverTest {
 	 */
 	public function testGetNoPrefix($key, $val) {
 		$this->setContents($key, $val);
-		$this->assertEquals($val, $this->driver->get($key, false));
-	}
-
-	public function testGetReturnsNullOnMiss() {
-		$this->assertNull($this->driver->get('foo'));
-		$this->assertNull($this->driver->get('foo', false));
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testGetAndSet($key, $val) {
-		$this->driver->set($key, $val);
-		$this->assertEquals($val, $this->driver->get($key));
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testGetAndSetNoPrefix($key, $val) {
-		$this->driver->set($key, $val, null, false);
 		$this->assertEquals($val, $this->driver->get($key, false));
 	}
 

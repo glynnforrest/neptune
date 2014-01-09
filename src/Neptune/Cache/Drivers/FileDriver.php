@@ -2,7 +2,7 @@
 
 namespace Neptune\Cache\Drivers;
 
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Cache\Drivers\CacheDriverInterface;
 
 use Temping\Temping;
 
@@ -11,27 +11,14 @@ use Temping\Temping;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class FileDriver implements CacheDriver {
+class FileDriver implements CacheDriverInterface {
 
 	protected $temping;
 	protected $prefix;
 
-	public function __construct(array $config) {
-		if(!isset($config['prefix']) ||
-		!isset($config['dir'])) {
-			throw new ConfigKeyException(
-				'Incorrect credentials supplied to file cache driver.'
-			);
-		}
-		$this->prefix = $config['prefix'];
-		$this->temping = new Temping($config['dir']);
-	}
-
-	public function add($key, $value, $time = null, $use_prefix = true) {
-		if($use_prefix) {
-			$key = $this->prefix . $key;
-		}
-		return $this->temping->create($key, serialize($value));
+	public function __construct($prefix, Temping $temping) {
+		$this->prefix = $prefix;
+		$this->temping = $temping;
 	}
 
 	public function set($key, $value, $time = null, $use_prefix = true) {
