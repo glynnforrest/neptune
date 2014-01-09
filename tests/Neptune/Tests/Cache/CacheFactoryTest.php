@@ -3,8 +3,6 @@
 namespace Neptune\Tests\Cache;
 
 use Neptune\Cache\CacheFactory;
-use Neptune\Cache\Drivers\DebugDriver;
-use Neptune\Cache\Drivers\MemcachedDriver;
 use Neptune\Core\Config;
 
 require_once __DIR__ . '/../../../bootstrap.php';
