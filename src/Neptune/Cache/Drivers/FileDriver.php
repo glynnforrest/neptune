@@ -39,7 +39,7 @@ class FileDriver implements CacheDriverInterface {
 		}
 	}
 
-	public function delete($key, $time = null, $use_prefix = true) {
+	public function delete($key, $use_prefix = true) {
 		if($use_prefix) {
 			$key = $this->prefix . $key;
 		}

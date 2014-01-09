@@ -91,7 +91,7 @@ class FileDriverTest extends CacheDriverTest {
 	public function testDeleteNoPrefix($key, $val) {
 		$this->driver->set($key, $val, null, false);
 		$this->assertTrue($this->temp->exists($key));
-		$this->assertTrue($this->driver->delete($key, null, false));
+		$this->assertTrue($this->driver->delete($key, false));
 		$this->assertFalse($this->temp->exists($key));
 	}
 
