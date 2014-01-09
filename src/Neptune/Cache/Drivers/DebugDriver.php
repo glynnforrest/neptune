@@ -2,67 +2,49 @@
 
 namespace Neptune\Cache\Drivers;
 
-use Neptune\Exceptions\ConfigKeyException;
-
+use Neptune\Cache\Drivers\CacheDriverInterface;
 
 /**
  * DebugDriver
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class DebugDriver implements CacheDriver {
+class DebugDriver implements CacheDriverInterface {
 
 	protected $cache = array();
 	protected $prefix;
 
-	public function __construct(array $config) {
-		if(!isset($config['prefix'])) {
-			throw new ConfigKeyException('Incorrect credentials
-		supplied to debug cache driver');
-		}
-		$this->prefix = $config['prefix'];
-
-	}
-
-	public function add($key, $value, $time = null, $use_prefix = true) {
-		if($use_prefix) {
-			$this->cache[$this->prefix . $key] = $value;
-		} else {
-			$this->cache[$key] = $value;
-		}
+	public function __construct($prefix) {
+		$this->prefix = $prefix;
 	}
 
 	public function set($key, $value, $time = null, $use_prefix = true) {
 		if($use_prefix) {
-			$this->cache[$this->prefix . $key] = $value;
-		} else {
-			$this->cache[$key] = $value;
+			$key = $this->prefix . $key;
 		}
+		$this->cache[$key] = $value;
 	}
 
 	public function get($key, $use_prefix = true) {
 		if($use_prefix) {
-			return isset($this->cache[$this->prefix . $key]) ?
-			$this->cache[$this->prefix . $key]: false;
-		} else {
-			return isset($this->cache[$key]) ?
-			$this->cache[$key]: false;
+			$key = $this->prefix . $key;
 		}
+		return isset($this->cache[$key]) ? $this->cache[$key]: null;
 	}
 
-	public function delete($key, $time = null, $use_prefix = true) {
+	public function delete($key, $use_prefix = true) {
 		if($use_prefix) {
-			unset($this->cache[$this->prefix . $key]);
-		} else {
-			unset($this->cache[$key]);
+			$key = $this->prefix . $key;
 		}
+		unset($this->cache[$key]);
+		return true;
 	}
 
-	public function flush($time = null, $use_prefix = true) {
+	public function flush($use_prefix = true) {
 		$this->cache = array();
-
 	}
 
 	public function dump() {
 		return $this->cache;
 	}
+
 }

@@ -3,8 +3,6 @@
 namespace Neptune\Tests\Cache\Drivers;
 
 use Neptune\Cache\Drivers\DebugDriver;
-use Neptune\Cache\CacheFactory;
-use Neptune\Core\Config;
 
 require_once __DIR__ . '/../../../../bootstrap.php';
 
@@ -12,102 +10,43 @@ require_once __DIR__ . '/../../../../bootstrap.php';
  * DebugDriverTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class DebugDriverTest extends \PHPUnit_Framework_TestCase {
+class DebugDriverTest extends CacheDriverTest {
+
+	protected $driver;
 
 	public function setUp() {
-		$c = Config::create('testing');
-		$c->set('cache', array(
-			'debug' => array(
-				'driver' => 'debug',
-				'prefix' => 'DEBUG__',
-			),
-			'incomplete' => array(
-				'driver' => 'debug'
-			),
-			'fake' => array(
-				'driver' => 'fake',
-			)
-			));
+		$this->driver = new DebugDriver('testing_');
 	}
 
-	public function tearDown() {
-		CacheFactory::getDriver('debug')->flush();
-		CacheFactory::remove();
-		Config::unload();
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testDelete($key, $val) {
+		$this->driver->set($key, $val);
+		$this->assertTrue($this->driver->delete($key));
+		$this->assertNull($this->driver->get($key));
 	}
 
-	public function testGetDriver() {
-		$this->assertTrue(CacheFactory::getDriver('debug') instanceof DebugDriver);
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testDeleteNoPrefix($key, $val) {
+		$this->driver->set($key, $val, null, false);
+		$this->assertTrue($this->driver->delete($key, false));
+		$this->assertNull($this->driver->get($key, false));
 	}
 
-	public function testGetDriverPrefix() {
-		$c = Config::create('prefix');
-		$c->set('cache', array(
-			'debug' => array(
-				'driver' => 'debug',
-				'prefix' => 'unittest-'
-			),
-			'second' => array(
-				'driver' => 'debug',
-				'prefix' => 'unittest-'
-			),
-		));
-		$this->assertTrue(CacheFactory::getDriver('prefix#') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#debug') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#second') instanceof DebugDriver);
-		$this->assertTrue(CacheFactory::getDriver('prefix#') === CacheFactory::getDriver('prefix#debug'));
+	public function testDeleteNonExistent() {
+		$this->assertTrue($this->driver->delete('not_here'));
+		$this->assertNull($this->driver->get('not_here'));
 	}
 
-	public function testGetDriverBadConfig() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		CacheFactory::getDriver('wrong');
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		CacheFactory::getDriver('incomplete');
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testFlush($key, $val) {
+		$this->driver->set($key,$val);
+		$this->driver->flush();
+		$this->assertSame(array(), $this->driver->dump());
 	}
-
-	public function testAddGetAndSet() {
-		$cache = CacheFactory::getDriver('debug');
-		$cache->add('foo', 'bar');
-		$this->assertEquals('bar', $cache->get('foo'));
-		$cache->set('foo', 'blah');
-		$this->assertEquals('blah', $cache->get('foo'));
-	}
-
-	public function testGetDriverUndefinedDriver() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-		CacheFactory::getDriver('fake');
-	}
-
-	public function testDelete() {
-		$cache = CacheFactory::getDriver('debug');
-		$cache->add('key', 'value');
-		$cache->delete('key');
-		$this->assertFalse($cache->get('key'));
-	}
-
-	public function testPrefixIsAdded() {
-		$cache = CacheFactory::getDriver('debug');
-		$cache->add('foo', 'baz');
-		$this->assertEquals(array('DEBUG__foo' => 'baz'), $cache->dump());
-		$cache->set('foo', 'bah');
-		$this->assertEquals(array('DEBUG__foo' => 'bah'), $cache->dump());
-	}
-
-	public function testPrefixIsNotAdded() {
-		$cache = CacheFactory::getDriver('debug');
-		$cache->add('foo', 'baz', null, false);
-		$this->assertEquals(array('foo' => 'baz'), $cache->dump());
-		$cache->set('foo', 'bah', null, false);
-		$this->assertEquals(array('foo' => 'bah'), $cache->dump());
-	}
-
-
-	public function testFlush() {
-		$cache = CacheFactory::getDriver('debug');
-		$cache->add('foo', 'baz');
-		$cache->add('one', 1);
-		$cache->flush();
-		$this->assertEquals(array(), $cache->dump());
-	}
-
 }
