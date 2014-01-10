@@ -90,7 +90,7 @@ class CacheFactory {
 	}
 
 	public function createFileDriver($prefix, array $config) {
-		$dir = $this->readArray($config, 'prefix');
+		$dir = $this->readArray($config, 'dir');
 		return new FileDriver($prefix, new Temping($dir));
 	}
 

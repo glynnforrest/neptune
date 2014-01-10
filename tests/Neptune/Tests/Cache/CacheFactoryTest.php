@@ -21,7 +21,8 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 		$this->config->set('cache.driver1', array(
 			'driver' => 'file',
-			'prefix' => 'testing_'
+			'prefix' => 'testing_',
+			'dir' => __DIR__ . '/test_cache'
 		));
 
 		$this->config->set('cache.driver2', array(
@@ -39,7 +40,11 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFileDriver() {
-		$this->assertInstanceOf('\Neptune\Cache\Drivers\FileDriver', $this->factory->getDriver('driver1'));
+		$driver = $this->factory->getDriver('driver1');
+		$this->assertInstanceOf('\Neptune\Cache\Drivers\FileDriver', $driver);
+		$this->assertSame(__DIR__ . '/test_cache/', $driver->getDirectory());
+		//check that no directory has been made
+		$this->assertFileNotExists(__DIR__ . '/test_cache');
 	}
 
 	public function testGetDebugDriver() {
