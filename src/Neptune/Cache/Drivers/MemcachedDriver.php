@@ -2,64 +2,50 @@
 
 namespace Neptune\Cache\Drivers;
 
-use Neptune\Exceptions\ConfigKeyException;
-use Memcached;
+use Neptune\Cache\Drivers\CacheDriverInterface;
+
+use \Memcached;
 
 /**
  * MemcachedDriver
  * This requires the Memcached PHP extension.
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class MemcachedDriver implements CacheDriver {
+class MemcachedDriver implements CacheDriverInterface {
 
 	protected $memcached;
 	protected $prefix;
 
-	public function __construct(array $config) {
-		if(!isset($config['host']) |
-		!isset($config['port']) |
-		!isset($config['prefix'])) {
-			throw new ConfigKeyException('Incorrect credentials
-		supplied to memcached cache driver');
-		}
-		$this->prefix = $config['prefix'];
-		$this->memcached = new Memcached();
-		$this->memcached->addserver($config['host'], $config['port']);
-	}
-
-	public function add($key, $value, $time = null, $use_prefix = true) {
-		if($use_prefix) {
-			return $this->memcached->add($this->prefix . $key, $value, $time);
-		} else {
-			return $this->memcached->add($key, $value, $time);
-		}
+	public function __construct($prefix, Memcached $memcached) {
+		$this->prefix = $prefix;
+		$this->memcached = $memcached;
 	}
 
 	public function set($key, $value, $time = null, $use_prefix = true) {
 		if($use_prefix) {
-			return $this->memcached->set($this->prefix . $key, $value, $time);
-		} else {
-			return $this->memcached->set($key, $value, $time);
+			$key = $this->prefix . $key;
 		}
+		return $this->memcached->set($key, $value, $time);
 	}
 
 	public function get($key, $use_prefix = true) {
 		if($use_prefix) {
-			return $this->memcached->get($this->prefix . $key);
-		} else {
-			return $this->memcached->get($key);
+			$key = $this->prefix . $key;
+		}
+		$result = $this->memcached->get($key);
+		if ($this->memcached->getResultCode() === 0) {
+			return $result;
 		}
 	}
 
-	public function delete($key, $time = null, $use_prefix = true) {
+	public function delete($key, $use_prefix = true) {
 		if($use_prefix) {
-			return $this->memcached->delete($this->prefix . $key, $time);
-		} else {
-			return $this->memcached->delete($key, $time);
+			$key = $this->prefix . $key;
 		}
+		return $this->memcached->delete($key);
 	}
 
-	public function flush($time = null, $use_prefix = true) {
+	public function flush($use_prefix = true) {
 		return $this->memcached->flush($time);
 	}
 
