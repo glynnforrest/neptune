@@ -9,8 +9,6 @@ namespace Neptune\Tests\Cache\Drivers;
  **/
 abstract class CacheDriverTest extends \PHPUnit_Framework_TestCase {
 
-	protected $driver;
-
 	public function cacheDataProvider() {
 		return array(
 			array('foo', 'bar'),
@@ -18,29 +16,9 @@ abstract class CacheDriverTest extends \PHPUnit_Framework_TestCase {
 			array(1, 1),
 			array('an-array', array()),
 			array('another-array', array(1, '2', array(), new \stdClass())),
-			array('object', new \stdClass())
+			array('object', new \stdClass()),
+			array('false', false)
 		);
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testGetAndSet($key, $val) {
-		$this->driver->set($key, $val);
-		$this->assertEquals($val, $this->driver->get($key));
-	}
-
-	/**
-	 * @dataProvider cacheDataProvider()
-	 */
-	public function testGetAndSetNoPrefix($key, $val) {
-		$this->driver->set($key, $val, null, false);
-		$this->assertEquals($val, $this->driver->get($key, false));
-	}
-
-	public function testGetReturnsNullOnMiss() {
-		$this->assertNull($this->driver->get('foo'));
-		$this->assertNull($this->driver->get('foo', false));
 	}
 
 }

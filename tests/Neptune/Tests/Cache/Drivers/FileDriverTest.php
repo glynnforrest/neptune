@@ -79,6 +79,27 @@ class FileDriverTest extends CacheDriverTest {
 	/**
 	 * @dataProvider cacheDataProvider()
 	 */
+	public function testGetAndSet($key, $val) {
+		$this->driver->set($key, $val);
+		$this->assertEquals($val, $this->driver->get($key));
+	}
+
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
+	public function testGetAndSetNoPrefix($key, $val) {
+		$this->driver->set($key, $val, null, false);
+		$this->assertEquals($val, $this->driver->get($key, false));
+	}
+
+	public function testGetReturnsNullOnMiss() {
+		$this->assertNull($this->driver->get('foo'));
+		$this->assertNull($this->driver->get('foo', false));
+	}
+
+	/**
+	 * @dataProvider cacheDataProvider()
+	 */
 	public function testDelete($key, $val) {
 		$this->driver->set($key, $val);
 		$this->assertTrue($this->temp->exists('testing_' . $key));
