@@ -1,8 +1,8 @@
 <?php
 
-namespace Neptune\Tests\Cache\Drivers;
+namespace Neptune\Tests\Cache\Driver;
 
-use Neptune\Cache\Drivers\DebugDriver;
+use Neptune\Cache\Driver\DebugDriver;
 
 require_once __DIR__ . '/../../../../bootstrap.php';
 

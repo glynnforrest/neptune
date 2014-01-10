@@ -1,6 +1,6 @@
 <?php
 
-namespace Neptune\Tests\Cache\Drivers;
+namespace Neptune\Tests\Cache\Driver;
 
 /**
  * FileDriverTest

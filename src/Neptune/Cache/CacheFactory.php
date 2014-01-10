@@ -2,9 +2,9 @@
 
 namespace Neptune\Cache;
 
-use Neptune\Cache\Drivers\DebugDriver;
-use Neptune\Cache\Drivers\FileDriver;
-use Neptune\Cache\Drivers\MemcachedDriver;
+use Neptune\Cache\Driver\DebugDriver;
+use Neptune\Cache\Driver\FileDriver;
+use Neptune\Cache\Driver\MemcachedDriver;
 
 use Neptune\Core\Config;
 use Neptune\Exceptions\ConfigKeyException;

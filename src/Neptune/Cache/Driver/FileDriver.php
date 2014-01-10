@@ -1,8 +1,8 @@
 <?php
 
-namespace Neptune\Cache\Drivers;
+namespace Neptune\Cache\Driver;
 
-use Neptune\Cache\Drivers\CacheDriverInterface;
+use Neptune\Cache\Driver\CacheDriverInterface;
 
 use Temping\Temping;
 

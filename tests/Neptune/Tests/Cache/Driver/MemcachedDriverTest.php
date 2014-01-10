@@ -1,9 +1,9 @@
 <?php
 
-namespace Neptune\Tests\Cache\Drivers;
+namespace Neptune\Tests\Cache\Driver;
 
-use Neptune\Tests\Cache\Drivers\CacheDriverTest;
-use Neptune\Cache\Drivers\MemcachedDriver;
+use Neptune\Tests\Cache\Driver\CacheDriverTest;
+use Neptune\Cache\Driver\MemcachedDriver;
 
 use Temping\Temping;
 
