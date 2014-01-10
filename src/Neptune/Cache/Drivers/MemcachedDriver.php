@@ -46,7 +46,7 @@ class MemcachedDriver implements CacheDriverInterface {
 	}
 
 	public function flush($use_prefix = true) {
-		return $this->memcached->flush($time);
+		return $this->memcached->flush();
 	}
 
 }

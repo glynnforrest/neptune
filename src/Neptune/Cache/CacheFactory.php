@@ -4,10 +4,13 @@ namespace Neptune\Cache;
 
 use Neptune\Cache\Drivers\DebugDriver;
 use Neptune\Cache\Drivers\FileDriver;
+use Neptune\Cache\Drivers\MemcachedDriver;
 
 use Neptune\Core\Config;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
+
+use \Memcached;
 
 use Temping\Temping;
 
@@ -92,6 +95,14 @@ class CacheFactory {
 	public function createFileDriver($prefix, array $config) {
 		$dir = $this->readArray($config, 'dir');
 		return new FileDriver($prefix, new Temping($dir));
+	}
+
+	public function createMemcachedDriver($prefix, array $config) {
+		$host = $this->readArray($config, 'host');
+		$port = $this->readArray($config, 'port');
+		$memcached = new Memcached();
+		$memcached->addserver($host, $port);
+		return new MemcachedDriver($prefix, $memcached);
 	}
 
 }
