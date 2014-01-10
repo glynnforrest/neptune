@@ -88,6 +88,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSave() {
+		$this->temp->init();
 		Logger::saving();
 		Logger::setFormat(':message');
 		Logger::debug('saved to file');
