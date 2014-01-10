@@ -52,4 +52,8 @@ class FileDriver implements CacheDriverInterface {
 		$this->temping->init();
 	}
 
+	public function getDirectory() {
+		return $this->temping->getDirectory();
+	}
+
 }

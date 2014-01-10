@@ -39,6 +39,7 @@ class FileDriverTest extends CacheDriverTest {
 	public function testNonWritableDirectoryThrowsException() {
 		$this->setExpectedException('\Exception', "'some/dir/' is not a directory");
 		$driver = new FileDriver('testing_', new Temping('some/dir'));
+		$driver->set('foo', 'bar');
 	}
 
 	/**
@@ -109,6 +110,14 @@ class FileDriverTest extends CacheDriverTest {
 		$this->driver->flush();
 		$this->assertTrue($this->temp->isEmpty());
 		$this->assertTrue($this->temp->exists());
+	}
+
+	public function testGetDirectory() {
+		$this->assertEquals($this->temp->getDirectory(), $this->driver->getDirectory());
+	}
+
+	public function testDirectoryIsNotCreatedOnConstruct() {
+		$this->assertFileNotExists($this->temp->getDirectory());
 	}
 
 }
