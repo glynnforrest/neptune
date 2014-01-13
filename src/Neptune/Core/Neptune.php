@@ -73,6 +73,7 @@ class Neptune {
 	public function reset() {
 		$this->components = array();
 		$this->singletons = array();
+		$this->env = null;
 	}
 
 	/**

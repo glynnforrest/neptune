@@ -20,11 +20,11 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->neptune = Neptune::getInstance();
-		$this->neptune->reset();
 		$this->temp = new Temping();
 	}
 
 	public function tearDown() {
+		$this->neptune->reset();
 		$this->temp->reset();
 		Config::unload();
 	}
@@ -110,6 +110,10 @@ END;
 		$c = Config::create('neptune');
 		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
 		$this->neptune->loadEnv();
+	}
+
+	public function testGetEnvReturnsNullWithNoEnv() {
+		$this->assertNull($this->neptune->getEnv());
 	}
 
 }
