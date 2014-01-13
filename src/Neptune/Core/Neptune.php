@@ -11,6 +11,7 @@ class Neptune {
 	protected static $instance;
 	protected $components = array();
 	protected $singletons = array();
+	protected $env;
 
 	protected function __construct() {
 	}
@@ -85,9 +86,17 @@ class Neptune {
 		if(!$env) {
 			$env = $c->getRequired('env');
 		}
+		$this->env = $env;
 		include $c->getRequired('dir.root') . 'app/env/' . $env . '.php';
 		Config::loadEnv($env);
 		return true;
+	}
+
+	/**
+	 * Get the name of the currently loaded environment.
+	 */
+	public function getEnv() {
+		return $this->env;
 	}
 
 	public static function handleErrors() {

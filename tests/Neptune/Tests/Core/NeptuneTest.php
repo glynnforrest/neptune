@@ -66,27 +66,28 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($one, $two);
 	}
 
-	public function testLoadEnv() {
+	public function testLoadAndGetEnv() {
 		$config_file = '<?php';
 		$config_file .= <<<END
 		return array(
 			'foo' => 'override',
 		);
 END;
-		$this->temp->create('config/env/development.php', $config_file);
-		$this->temp->create('app/env/development.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
+		$this->temp->create('config/env/production.php', $config_file);
+		$this->temp->create('app/env/production.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
 		$c = Config::create('neptune');
 		$c->set('foo', 'default');
 		$c->set('dir.root', $this->temp->getDirectory());
 		$this->assertEquals('default', $c->get('foo'));
 		$this->assertFalse(defined('SOME_CONSTANT'));
 		//loadEnv should call Config::loadEnv and include app/env/<env>.php
-		$this->neptune->loadEnv('development');
+		$this->neptune->loadEnv('production');
 		$this->assertTrue(defined('SOME_CONSTANT'));
 		$this->assertEquals('override', $c->get('foo'));
+		$this->assertSame('production', $this->neptune->getEnv());
 	}
 
-	public function testLoadEnvDefaultNoArg() {
+	public function testLoadAndGetEnvDefaultNoArg() {
 		$config_file = '<?php';
 		$config_file .= <<<END
 		return array(
@@ -102,6 +103,7 @@ END;
 		$c->set('env', 'development');
 		$this->neptune->loadEnv();
 		$this->assertEquals('override', $c->get('foo'));
+		$this->assertSame('development', $this->neptune->getEnv());
 	}
 
 	public function testLoadEnvNoArgThrowsException() {
