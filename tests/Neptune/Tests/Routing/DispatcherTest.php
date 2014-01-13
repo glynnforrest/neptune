@@ -5,6 +5,7 @@ namespace Neptune\Tests\Routing;
 use Neptune\Core\Config;
 use Neptune\Routing\Dispatcher;
 use Neptune\Routing\Route;
+use Neptune\Cache\Driver\DebugDriver;
 
 include __DIR__ . ('/../../../bootstrap.php');
 
@@ -103,7 +104,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	//if no response is provided, output buffered content will be used
 	public function testEchoWhenNoControllerResponse() {
 		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'echos');
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'echo');
 		$this->assertEquals('testing', $d->go('/test'));
 	}
 
@@ -213,6 +214,23 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$d->setPrefix('prefix_before');
 		$d->routeModule('bar');
 		$this->assertSame('prefix_before', $d->getPrefix());
+	}
+
+	public function testGetAndSetCacheDriver() {
+		$d = Dispatcher::getInstance();
+		$driver = new DebugDriver('testing_');
+		$d->setCacheDriver($driver);
+		$this->assertSame($driver, $d->getCacheDriver());
+	}
+
+	public function testRouteIsCachedOnSuccess() {
+		$d = Dispatcher::getInstance();
+		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver->expects($this->exactly(2))
+			   ->method('set');
+		$d->setCacheDriver($driver);
+		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'index');
+		$this->assertEquals('test route', $d->go('/test'));
 	}
 
 }

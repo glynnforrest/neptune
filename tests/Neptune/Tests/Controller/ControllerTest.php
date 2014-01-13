@@ -4,100 +4,60 @@ namespace Neptune\Tests\Controller;
 
 use Neptune\Controller\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
-class SampleController extends Controller {
-
-	public function _before() {
-		$_GET['before_counter']++;
-		if(!isset($_GET['return_false'])) {
-			return true;
-		}
-	}
-
-	public function method() {
-		return 'Hello World';
-	}
-
-	public function _hidden() {
-		return 'Hidden';
-	}
-
-}
-
-class AnotherController extends Controller {
-
-	public function go() {
-		return true;
-	}
-
-}
 /**
  * ControllerTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
 class ControllerTest extends \PHPUnit_Framework_TestCase {
 
+	protected $obj;
+
 	public function setUp() {
-		$_GET['before_counter'] = 0;
-	}
-
-	public function testBeforeIsCalled() {
-		$c = new SampleController();
-		$c->_runMethod('method');
-		$this->assertEquals(1, $_GET['before_counter']);
-	}
-
-	public function testBeforeIsCalledOnce() {
-		$c = new SampleController();
-		$c->_runMethod('method');
-		$c->_runMethod('method');
-		$this->assertEquals(1, $_GET['before_counter']);
+		$this->request = new Request();
+		$this->obj = new FooController($this->request);
 	}
 
 	public function testMethodIsCalled() {
-		$c = new SampleController();
-		$this->assertEquals('Hello World', $c->_runMethod('method'));
+		$this->assertSame('Foo', $this->obj->runMethod('foo'));
 	}
 
-	public function testAfterIsCalled() {
-
+	protected function getMockFoo() {
+		return $this->getMockBuilder('\Neptune\Tests\Controller\FooController')
+					->setMethods(array('before'))
+					->setConstructorArgs(array($this->request))
+					->getMock();
 	}
 
-	public function testMethodNotRunIfBeforeIsFalse() {
-		$c = new SampleController();
-		$_GET['return_false'] = true;
-		$this->assertFalse($c->_runMethod('method'));
+	public function testBeforeIsCalled() {
+		$mock = $this->getMockFoo();
+		$mock->expects($this->once())
+			 ->method('before')
+			 ->will($this->returnValue(true));
+		$this->assertSame('Foo', $mock->runMethod('foo'));
+		$this->assertSame('Foo', $mock->runMethod('foo'));
+		$this->assertSame('Foo', $mock->runMethod('foo'));
+	}
+
+	public function testBeforeFalse() {
+		$mock = $this->getMockFoo();
+		$mock->expects($this->once())
+			 ->method('before')
+			 ->will($this->returnValue(false));
+		$this->assertFalse($mock->runMethod('actionFoo'));
 	}
 
 	public function testUnknownMethodThrowsException() {
-		$c = new SampleController();
 		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
-		$c->unknown();
-		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
-		$c->_runMethod('unknown');
+		$this->obj->actionUnknown();
 	}
 
-	public function testUnderScoreMethodNotCalled() {
-		$c = new SampleController();
-		$this->assertFalse($c->_runMethod('_security'));
-		$this->assertFalse($c->_runMethod('_before'));
-		$this->assertFalse($c->_runMethod('_after'));
-		$this->assertFalse($c->_runMethod('_hidden'));
-		$this->assertEquals('Hidden', $c->_hidden());
-	}
-
-	public function testRunMethodNotCalled() {
-		$c = new SampleController();
-		$this->assertFalse($c->_runMethod('_runMethod'));
-	}
-
-	public function testBeforeNotFoundExceptionCaught() {
-		$c = new AnotherController();
-		$this->assertTrue($c->_runMethod('go'));
+	public function testUnknownRunMethodThrowsException() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\MethodNotFoundException');
-		$c->_before();
+		$this->obj->runMethod('actionUnknown');
 	}
 
 }
-?>

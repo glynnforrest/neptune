@@ -6,14 +6,16 @@ use Neptune\Routing\Route;
 use Neptune\Core\Config;
 use Neptune\View\View;
 use Neptune\Http\Request;
-use Neptune\Cache\CacheFactory;
+use Neptune\Cache\Driver\CacheDriverInterface;
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Exceptions\MethodNotFoundException;
 use Neptune\Exceptions\ArgumentMissingException;
 
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
 /**
- * Handles an application request
- * and launches the required controller and action.
+ * Dispatcher
+ * @author Glynn Forrest <me@glynnforrest.com>
  */
 class Dispatcher {
 
@@ -25,6 +27,7 @@ class Dispatcher {
 	protected $matched_url;
 	protected $other;
 	protected $prefix;
+	protected $cache;
 
 	protected function __construct() {
 		$this->request = Request::getInstance();
@@ -35,6 +38,14 @@ class Dispatcher {
 			self::$instance = new self();
 		}
 		return self::$instance;
+	}
+
+	public function setCacheDriver(CacheDriverInterface $driver) {
+		$this->cache = $driver;
+	}
+
+	public function getCacheDriver() {
+		return $this->cache;
 	}
 
 	/**
@@ -150,7 +161,7 @@ class Dispatcher {
 			$source = $this->request->path();
 		}
 		$key = 'Router' . $source . $this->request->method();
-		$cached = CacheFactory::getDriver()->get($key);
+		$cached = $this->cache->get($key);
 		if($cached) {
 			if($this->runMethod($cached)) {
 				return true;
@@ -169,12 +180,14 @@ class Dispatcher {
 				$this->matched_url = $k;
 				$response = $this->runMethod($actions);
 				if($response) {
-					try {
-						$cm = CacheFactory::getDriver();
-						$key = 'Router' . $source . $this->request->method();
-						$cm->set($key, $actions);
-						$cm->set('Router.names', $this->names);
-					} catch		(\Exception $e) {
+					if($this->cache) {
+						try {
+							$key = 'Router' . $source . $this->request->method();
+							$this->cache->set($key, $actions);
+							$this->cache->set('Router.names', $this->names);
+						} catch	(\Exception $e) {
+							//send failed cache event
+						}
 					}
 					return $response;
 				}
@@ -194,14 +207,14 @@ class Dispatcher {
 
 	protected function runMethod($actions) {
 		if (class_exists($actions[0])) {
-			$c = new $actions[0]();
+			$c = new $actions[0](SymfonyRequest::createFromGlobals());
 			try {
 				set_error_handler('\Neptune\Routing\Dispatcher::missingArgsHandler');
 				ob_start();
 				//$body is the return from the controller. $other is
 				//anything captured by output buffering, like echo and
 				//print.
-				$body = $c->_runMethod($actions[1], $actions[2]);
+				$body = $c->runMethod($actions[1], $actions[2]);
 				$this->other = ob_get_clean();
 				//return false if there is no $body or $other. If
 				//there is no $body but $other exists, use that as the
@@ -235,7 +248,7 @@ class Dispatcher {
 
 	public function getRouteUrl($name) {
 		if(empty($this->names)) {
-			$this->names = CacheFactory::getDriver()->get('Router.names');
+			$this->names = $this->cache->get('Router.names');
 		}
 		return isset($this->names[$name]) ? $this->names[$name] : null;
 	}
@@ -269,4 +282,5 @@ class Dispatcher {
 	public function getPrefix() {
 		return $this->prefix;
 	}
+
 }

@@ -4,18 +4,18 @@ namespace Neptune\Controller;
 
 use Neptune\Exceptions\MethodNotFoundException;
 use Neptune\Security\SecurityFactory;
-use Neptune\Http\Request;
-use Neptune\Http\Response;
 use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
- * Base Controller
+ * Controller
+ * @author Glynn Forrest me@glynnforrest.com
  */
 abstract class Controller {
 
 	protected $request;
-	protected $response;
 	protected $before_called;
 	protected $neptune;
 
@@ -23,20 +23,17 @@ abstract class Controller {
 		throw new MethodNotFoundException('Method not found: ' . $method);
 	}
 
-	public function __construct() {
-		$this->request = Request::getInstance();
-		$this->response = Response::getInstance();
+	public function __construct(Request $request) {
+		$this->request = $request;
 		$this->neptune = Neptune::getInstance();
 	}
 
-	public function _runMethod($method, $args = array()) {
-		if(substr($method, 0, 1) === '_') {
-			return false;
-		}
+	public function runMethod($method, $args = array()) {
+		$method .= 'Action';
 		if(!$this->before_called) {
 			$this->before_called = true;
 			try {
-				if(!$this->_before()) {
+				if(!$this->before()) {
 					return false;
 				}
 			} catch (MethodNotFoundException $e) {}
@@ -53,5 +50,3 @@ abstract class Controller {
 	}
 
 }
-
-?>

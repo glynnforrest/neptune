@@ -11,20 +11,20 @@ use Neptune\Controller\Controller;
  **/
 class TestController extends Controller {
 
-	public function index() {
+	public function indexAction() {
 		return 'test route';
 	}
 
-	public function withEcho() {
+	public function withEchoAction() {
 		echo 'hello from echo';
 		return 'return value';
 	}
 
-	public function echos() {
+	public function echoAction() {
 		echo 'testing';
 	}
 
-	public function nothing() {
+	public function nothingAction() {
 		//do nothing
 	}
 

@@ -7,6 +7,8 @@ use Neptune\Assets\Filter;
 use Neptune\Assets\Assets;
 use Neptune\Core\Config;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * AssetsController
  * @author Glynn Forrest me@glynnforrest.com
@@ -17,6 +19,12 @@ class AssetsController extends Controller {
 	//array of options that are passed to a filter on instantiation.
 	protected static $filter_options = array();
 	protected $current_prefix;
+
+	public function __construct(Request $request) {
+		//quick fix to keep tests passing, remove old neptune http classes!
+		$this->request = \Neptune\Http\Request::getInstance();
+		$this->response = \Neptune\Http\Response::getInstance();
+	}
 
 	protected function _before() {
 		//register all of neptune's built in filters here.
