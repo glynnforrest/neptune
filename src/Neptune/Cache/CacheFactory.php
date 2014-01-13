@@ -94,6 +94,9 @@ class CacheFactory {
 
 	public function createFileDriver($prefix, array $config) {
 		$dir = $this->readArray($config, 'dir');
+		if($dir && substr($dir, 0, 1) !== '/') {
+			$dir = $this->config->getRequired('dir.root') . $dir;
+		}
 		return new FileDriver($prefix, new Temping($dir));
 	}
 

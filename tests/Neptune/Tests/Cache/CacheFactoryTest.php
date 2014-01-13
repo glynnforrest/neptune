@@ -5,6 +5,8 @@ namespace Neptune\Tests\Cache;
 use Neptune\Cache\CacheFactory;
 use Neptune\Core\Config;
 
+use Temping\Temping;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -40,6 +42,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
+		Config::unload();
 	}
 
 	public function testGetDefaultDriver() {
@@ -56,6 +59,31 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(__DIR__ . '/test_cache/', $driver->getDirectory());
 		//check that no directory has been made
 		$this->assertFileNotExists(__DIR__ . '/test_cache');
+	}
+
+	public function testGetFileDriverRelativeDir() {
+		//a dir without a leading slash should be appended to dir.root
+		$this->config->set('dir.root', '/path/to/app/root/');
+		$this->config->set('cache.driver1.dir', 'cache/');
+		$driver = $this->factory->getDriver('driver1');
+		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
+		$this->assertSame('/path/to/app/root/cache/', $driver->getDirectory());
+	}
+
+	public function testGetFileDriverRelativeDirThrowsExceptionOnNoRoot() {
+		$this->config->set('cache.driver1.dir', 'cache/');
+		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
+		$driver = $this->factory->getDriver();
+	}
+
+	public function testGetFileDriverNoDir() {
+		$this->config->set('cache.driver1.dir', null);
+		$driver = $this->factory->getDriver('driver1');
+		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
+		//when no dir is defined, FileDriver will use the system
+		//temporary directory that is provided by Temping, which will
+		//contain Temping::TEMPING_DIR_NAME
+		$this->assertContains(Temping::TEMPING_DIR_NAME, $driver->getDirectory());
 	}
 
 	public function testGetDebugDriver() {
