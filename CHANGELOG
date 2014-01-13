@@ -2,6 +2,38 @@
 VERSION 0  INITIAL BETA
 =======================
 
+   Version 0.3 - Cache rewrite
+      13/01/2014 11:55  0.3.0  initial release
+         ba14ff5 Allow relative and absolute file cache directory.
+         c9f78d3 Pre-release 0.3
+         6928386 Adding cache:flush command.
+         e539f6a Adding global console option --env.
+         64f8f39 Adding test for getEnv returning null.
+         adfde91 Adding Neptune#getEnv().
+         ddb48d0 Updating Cacheable to use new cache drivers.
+         2c13413 s/Drivers/Driver for Cache.
+         77dc078 Adding MemcachedDriver to CacheFactory.
+         3b2acd2 Updating MemcachedDriver and creating test.
+         9083610 Moving shared test methods out of CacheDriverTest.
+         6b63c70 Ensuring CacheFactory creates FileDriver properly.
+         d203123 Adding getDirectory() to FileDriver.
+         4c7f06c Small fix after update to temping 0.4.3
+         874642c Cache config requires both a driver and prefix.
+         88ec0a7 Cleanup use statments.
+         18ccae9 Rewriting CacheFactory.
+         f5888a7 Updating delete method in FileDriver cache.
+         f05a140 FileDriver implements CacheDriverInterface.
+         237b4ee s/CacheDriver/CacheDriverInterface
+         c9c2399 Updating FileDriverTest to extend CacheDriverTest.
+         052515d Making FileDriver work with different types.
+         a7d2a67 Adding the beginnings of a FileDriver cache.
+         c245b08 Updating glynnforrest/temping to 0.4.
+         d8fcc97 Update glynnforrest/temping to 0.3.
+         ced5fb8 Adding create:command.
+         e489a00 Create commands use the correct module namespace.
+         87668ed Namespace must be explicitly set in Skeleton.
+         5063446 Neptune Application autoloads module commands.
+
    Version 0.2 - Initial beta
       30/12/2013 14:09  0.2.4  Console rewrite
          49dea8e Bump Neptune Application version.
