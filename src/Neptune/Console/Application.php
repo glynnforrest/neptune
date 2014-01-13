@@ -6,6 +6,7 @@ use Neptune\Core\Config;
 use Neptune\Exceptions\ClassNotFoundException;
 use Neptune\Console\Shell;
 use Neptune\Console\DialogHelper as NeptuneDialogHelper;
+use Neptune\Core\Neptune;
 
 use \DirectoryIterator;
 use \CallbackFilterIterator;
@@ -29,7 +30,7 @@ use Stringy\StaticStringy as S;
 class Application extends SymfonyApplication {
 
 	protected $config;
-	protected $commandsRegistered;
+	protected $commands_registered;
 
 	public function __construct(Config $config) {
 		$this->config = $config;
@@ -55,8 +56,19 @@ class Application extends SymfonyApplication {
 	 * @return integer 0 if everything went fine, or an error code
 	 */
 	public function doRun(InputInterface $input, OutputInterface $output) {
-		if (!$this->commandsRegistered) {
+		if (!$this->commands_registered) {
 			$this->registerCommands();
+		}
+		if($input->hasParameterOption(array('--env', '-e'))) {
+			$env = $input->getParameterOption(array('--env', '-e'));
+		} else {
+			$env = $this->config->get('env');
+		}
+		if($env) {
+			Neptune::getInstance()->loadEnv($env);
+			if($output->isVeryVerbose()) {
+				$output->writeln("Using environment <info>$env</info>");
+			}
 		}
 		return parent::doRun($input, $output);
 	}
@@ -65,13 +77,14 @@ class Application extends SymfonyApplication {
 	 * Register Commands in the neptune 'Command' directory and from
 	 * the modules set in neptune.php
 	 */
-	public function registerCommands() {
+	protected function registerCommands() {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
 		$root = $this->config->getRequired('dir.root');
 		foreach ($this->config->get('modules') as $module => $path) {
 			$namespace = $this->getModuleNamespace($module);
 			$this->registerNamespace($namespace, $root . $path . 'Command/');
 		}
+		$this->commands_registered = true;
 	}
 
 	/**
@@ -113,6 +126,13 @@ class Application extends SymfonyApplication {
 			$namespace = substr($namespace, 0, 1);
 		}
 		return $namespace;
+	}
+
+	protected function getDefaultInputDefinition() {
+		$definition = parent::getDefaultInputDefinition();
+		$option = new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The name of the environment, instead of the default in config/neptune.php');
+		$definition->addOption($option);
+		return $definition;
 	}
 
 }
