@@ -7,6 +7,8 @@ use Neptune\Routing\Dispatcher;
 use Neptune\Routing\Route;
 use Neptune\Cache\Driver\DebugDriver;
 
+use Symfony\Component\HttpFoundation\Request;
+
 include __DIR__ . ('/../../../bootstrap.php');
 
 /**
@@ -23,6 +25,11 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		Config::unload();
+	}
+
+	protected function routeTest($route, $url) {
+		$req = Request::create($url);
+		return $route->test($req);
 	}
 
 	public function testRouteReturnsRoute() {
@@ -52,7 +59,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		return ucfirst($controller) . 'Controller';
 	});
 		$r = $this->router->route('/foo', 'foo', 'index');
-		$r->test('/foo');
+		$this->routeTest($r, '/foo');
 		$this->assertSame(array('FooController', 'index', array()), $r->getAction());
 	}
 
@@ -60,7 +67,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->config->set('assets.url', '/assets/');
 		$r = $this->router->routeAssets();
 		$this->assertSame('/assets/:args', $r->getUrl());
-		$this->assertTrue($r->test('/assets/css/test'));
+		$this->assertTrue($this->routeTest($r, '/assets/css/test'));
 		$expected = array(
 			'Neptune\Controller\AssetsController',
 			'serveAsset',
@@ -75,7 +82,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->config->set('assets.url', 'assets');
 		$r = $this->router->routeAssets();
 		$this->assertSame('/assets/:args', $r->getUrl());
-		$this->assertTrue($r->test('/assets/lib/js/test'));
+		$this->assertTrue($this->routeTest($r, '/assets/lib/js/test'));
 		$expected = array(
 			'Neptune\Controller\AssetsController',
 			'serveAsset',
@@ -91,7 +98,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testMatchThrowsExceptionNoAction() {
-		$msg = 'No route found that matches \'foo\'';
+		$msg = 'No route found that matches "foo"';
 		$this->setExpectedException('\Neptune\Routing\RouteNotFoundException', $msg);
 		$this->router->match('foo');
 	}
@@ -151,7 +158,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->router->routeModule('foo');
 		$routes = $this->router->getRoutes();
 		$route = $routes[0];
-		$this->assertTrue($route->test('/foo/login'));
+		$this->assertTrue($this->routeTest($route, '/foo/login'));
 		$action = $route->getAction();
 		$this->assertSame('foo_module_controller', $action[0]);
 	}
@@ -163,7 +170,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$after = $this->router->globals();
 		$this->assertSame($before, $after);
 		$route = $this->router->route('.*', null, 'some_method');
-		$this->assertTrue($route->test('anything'));
+		$this->assertTrue($this->routeTest($route, 'anything'));
 		$action = $route->getAction();
 		$this->assertSame('foo', $action[0]);
 	}
@@ -174,7 +181,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->router->routeModule('admin');
 		$routes = $this->router->getRoutes();
 		$route = $routes[0];
-		$route->test('/admin/login');
+		$this->assertTrue($this->routeTest($route, '/admin/login'));
 		$action = $route->getAction();
 		$args = $action[2];
 		$this->assertSame(array(), $args);

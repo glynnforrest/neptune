@@ -2,10 +2,12 @@
 
 namespace Neptune\Routing;
 
-use Neptune\Http\Request;
 use Neptune\Validate\Validator;
 use Neptune\Routing\RouteUntestedException;
 use Neptune\Routing\RouteFailedException;
+use Neptune\Helpers\RequestHelper;
+
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Route
@@ -35,7 +37,6 @@ class Route {
 	protected $rules = array();
 	protected $default_args = array();
 	protected $http_methods = array();
-	protected $request;
 	protected $result;
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
@@ -43,7 +44,6 @@ class Route {
 		$this->controller = $controller;
 		$this->method = $method;
 		$this->args = $args;
-		$this->request = Request::getInstance();
 		$this->result = self::UNTESTED;
 	}
 
@@ -119,34 +119,28 @@ class Route {
 		return $this->url;
 	}
 
-	//$source should begin with a forward slash
-	public function test($source) {
-		//Strip any trailing slashes from the source,
-		//only if it's longer than 1 character (a single slash)
-		if(strlen($source) > 1) {
-			$source = rtrim($source, '/');
-		}
-		if (!preg_match($this->regex, $source, $vars)) {
+	public function test(Request $request) {
+		$helper = new RequestHelper($request);
+		if (!preg_match($this->regex, $helper->getBarePath(), $vars)) {
 			$this->result = self::FAILURE_REGEXP;
 			return false;
 		}
 		//Check if the request method is supported by this route.
 		if ($this->http_methods) {
-			if (!in_array($this->request->method(), $this->http_methods)) {
+			if (!in_array($request->getMethod(), $this->http_methods)) {
 				$this->result = self::FAILURE_HTTP_METHOD;
 				return false;
 			}
 		}
 		//Check if the format requested is supported by this route.
+		$format = $helper->getBestFormat();
 		if ($this->format) {
-			if (!in_array($this->request->format(), $this->format)) {
-				if (!in_array('any', $this->format)) {
+			if (!in_array($format, $this->format) && !in_array('any', $this->format)) {
 					$this->result = self::FAILURE_FORMAT;
 					return false;
-				}
 			}
 		} else {
-			if ($this->request->format() !== 'html') {
+			if ($format !== 'html') {
 				$this->result = self::FAILURE_FORMAT;
 				return false;
 			}

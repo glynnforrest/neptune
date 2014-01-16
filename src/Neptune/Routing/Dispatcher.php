@@ -186,29 +186,36 @@ class Dispatcher {
 		return $this->match($path);
 	}
 
-	public function match($path) {
-		//what to do about format, with no Request object?
+	public function match($pathinfo, $method = 'GET') {
+		$request = Request::create($pathinfo);
+		$request->setMethod($method);
+		return $this->matchRequest($request);
+	}
+
+	public function matchRequest(Request $request) {
 		foreach($this->routes as $url => $route) {
-			if(!$route->test($path)) {
+			if(!$route->test($request)) {
 				continue;
 			}
 			$actions = $route->getAction();
 			$this->matched_url = $url;
-			if($this->cache) {
-				try {
-					$this->cache->set('Router.' . $path, $actions);
-					$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
-				} catch	(\Exception $e) {
-					//send failed cache event
-				}
-			}
+			$this->cacheResults($request, $actions);
 			return $actions;
 		}
-		throw new RouteNotFoundException("No route found that matches '$path'");
+		throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
 	}
 
-	public function matchRequest(Request $request) {
-
+	protected function cacheResults(Request $request, $actions) {
+		if($this->cache) {
+			try {
+				$path = $request->getPathInfo();
+				$method = $request->getMethod();
+				$this->cache->set('Router.' . $path . $method, $actions);
+				$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
+			} catch	(\Exception $e) {
+				//send failed cache event
+			}
+		}
 	}
 
 	public function getMatchedUrl() {
