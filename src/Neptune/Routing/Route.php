@@ -29,7 +29,7 @@ class Route {
 	const FAILURE_VALIDATION = 8;
 
 	protected $regex, $controller, $method;
-	protected $format, $catch_all, $args_format, $url;
+	protected $format, $args_format, $url;
 	protected $args = array();
 	protected $transforms = array();
 	protected $rules = array();
@@ -107,11 +107,6 @@ class Route {
 
 	public function defaultArgs($default_args) {
 		$this->default_args = (array) $default_args;
-		return $this;
-	}
-
-	public function catchAll($catch_all) {
-		$this->catch_all = $catch_all;
 		return $this;
 	}
 
@@ -220,8 +215,9 @@ class Route {
 			$v = new Validator($args, $this->rules);
 			$v->controller = $this->controller;
 			$v->method = $this->method;
-			if (!$v->validate())
+			if (!$v->validate()) {
 				return false;
+			}
 		}
 		if(!empty($args)) {
 			$this->args = $args;
