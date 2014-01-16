@@ -22,6 +22,7 @@ class Dispatcher {
 
 	const CACHE_KEY_NAMES = 'Router.names';
 
+	protected $config;
 	protected $routes = array();
 	protected $names = array();
 	protected $globals;
@@ -31,6 +32,7 @@ class Dispatcher {
 	protected $current_name;
 
 	public function __construct(Config $config) {
+		$this->config = $config;
 	}
 
 	public function setCacheDriver(CacheDriverInterface $driver) {
@@ -75,7 +77,7 @@ class Dispatcher {
 	 * config key assets.url.
 	 */
 	public function routeAssets() {
-		$url = Config::load('neptune')->getRequired('assets.url');
+		$url = $this->config->getRequired('assets.url');
 		//add a slash if the given url doesn't start or end with one
 		if(substr($url, 0, 1) !== '/') {
 			$url = '/' . $url;
@@ -90,6 +92,7 @@ class Dispatcher {
 			  ->format('any')
 			  ->argsFormat(Route::ARGS_SINGLE);
 		$this->routes[$url] = $route;
+		$this->names['neptune.assets'] = $url;
 		return $this->routes[$url];
 	}
 
@@ -133,6 +136,7 @@ class Dispatcher {
 
 	public function catchAll($controller, $method ='index', $args = null) {
 		$url = '.*';
+		$this->names['neptune.catch_all'] = $url;
 		return $this->route($url, $controller, $method, $args)->format('any');
 	}
 
