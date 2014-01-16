@@ -21,7 +21,6 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		Config::unload();
-		Dispatcher::getInstance()->clearRoutes()->clearGlobals();
 	}
 
 	public function testTo() {
@@ -38,42 +37,4 @@ class UrlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('ftp://google.com', Url::to('ftp://google.com'));
 	}
 
-	public function testSimpleRoute() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url', 'controller')->name('simple');
-		$this->assertEquals('http://myapp.local/url', Url::toRoute('simple'));
-	}
-
-	public function testSimpleFtpRoute() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url', 'controller')->name('ftp');
-		$this->assertEquals('ftp://myapp.local/url', Url::toRoute('ftp', array(), 'ftp'));
-	}
-
-	public function testRouteArgs() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/:var/:second', 'controller')->name('args');
-		$this->assertEquals('http://myapp.local/url/foo/bar', Url::toRoute('args', array('var' => 'foo', 'second' => 'bar')));
-	}
-
-	public function testRouteArgsFtp() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/:var/:second', 'controller')->name('args_ftp');
-		$this->assertEquals('ftp://myapp.local/url/foo/bar', Url::toRoute('args_ftp',
-			array('var' => 'foo', 'second' => 'bar'), 'ftp'));
-	}
-
-	public function testOptionalArgs() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/(:var(/:second))', 'controller')->name('opt_args');
-		$this->assertEquals('http://myapp.local/url/foo',
-			Url::toRoute('opt_args', array('var' => 'foo')));
-	}
-
-	public function testNoOptionalArgs() {
-		$d = Dispatcher::getInstance();
-		$d->route('/url/(:var(/:second))', 'controller')->name('no_opt_args');
-		$this->assertEquals('http://myapp.local/url', Url::toRoute('no_opt_args'));
-	}
 }
-?>
