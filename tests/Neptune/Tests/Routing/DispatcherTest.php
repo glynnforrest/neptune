@@ -91,7 +91,9 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testMatchThrowsExceptionNoAction() {
-
+		$msg = 'No route found that matches \'foo\'';
+		$this->setExpectedException('\Neptune\Routing\RouteNotFoundException', $msg);
+		$this->router->match('foo');
 	}
 
 	public function testSetPrefix() {

@@ -4,15 +4,11 @@ namespace Neptune\Routing;
 
 use Neptune\Routing\Route;
 use Neptune\Core\Config;
-use Neptune\View\View;
-use Neptune\Http\Request;
 use Neptune\Cache\Driver\CacheDriverInterface;
-use Neptune\Exceptions\NeptuneError;
-use Neptune\Exceptions\MethodNotFoundException;
-use Neptune\Exceptions\ArgumentMissingException;
 use Neptune\Helpers\Url;
+use Neptune\Routing\RouteNotFoundException;
 
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Dispatcher
@@ -114,9 +110,8 @@ class Dispatcher {
 		$this->setPrefix($prefix ? $prefix : $module_name);
 
 		//include routes.php file
-		$neptune = Config::load('neptune');
-		$routes_file = $neptune->getRequired('dir.root')
-			. $neptune->getRequired('modules.' . $module_name)
+		$routes_file = $this->config->getRequired('dir.root')
+			. $this->config->getRequired('modules.' . $module_name)
 			. 'routes.php';
 		$routes = include($routes_file);
 
@@ -191,26 +186,25 @@ class Dispatcher {
 		return $this->match($path);
 	}
 
-	//on fail, throw route not found exception
 	public function match($path) {
 		//what to do about format, with no Request object?
-		foreach($this->routes as $name => $route) {
-			if($route->test($path)) {
-				$actions = $route->getAction();
-				$this->matched_url = $name;
-				if($this->cache) {
-					try {
-						$key = 'Router' . $path;
-						$this->cache->set($key, $actions);
-						$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
-					} catch	(\Exception $e) {
-						//send failed cache event
-					}
-				}
-				return $actions;
+		foreach($this->routes as $url => $route) {
+			if(!$route->test($path)) {
+				continue;
 			}
+			$actions = $route->getAction();
+			$this->matched_url = $url;
+			if($this->cache) {
+				try {
+					$this->cache->set('Router.' . $path, $actions);
+					$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
+				} catch	(\Exception $e) {
+					//send failed cache event
+				}
+			}
+			return $actions;
 		}
-		return false;
+		throw new RouteNotFoundException("No route found that matches '$path'");
 	}
 
 	public function matchRequest(Request $request) {
@@ -244,19 +238,10 @@ class Dispatcher {
 	}
 
 	/**
-	 * Get the url of a route called $name.
-	 *
-	 * Substitute any variables in the route url with the $args
-	 * array. If this array contains variables that aren't in the url,
-	 * they will be added as GET parameters.
-	 *
-	 * @param string $name The name of the route
-	 * @param array $args An array of keys and values to substitute
-	 * @param string $protocol The protocol to use - default is http
-	 *
-	 * @return string The url of the route.
+	 * Make sure $this->names exists, perhaps by fetching it from the
+	 * cache.
 	 */
-	public function url($name, $args = array(), $protocol = 'http') {
+	public function getNamedUrl($name) {
 		if(empty($this->names)) {
 			//no named routes have been defined
 			//attempt to fetch names from cache
@@ -271,7 +256,24 @@ class Dispatcher {
 		if(!isset($this->names[$name])) {
 			throw new \Exception("Unknown route '$name'");
 		}
-		$url = $this->names[$name];
+		return $this->names[$name];
+	}
+
+	/**
+	 * Get the url of a route called $name.
+	 *
+	 * Substitute any variables in the route url with the $args
+	 * array. If this array contains variables that aren't in the url,
+	 * they will be added as GET parameters.
+	 *
+	 * @param string $name The name of the route
+	 * @param array $args An array of keys and values to substitute
+	 * @param string $protocol The protocol to use - default is http
+	 *
+	 * @return string The url of the route.
+	 */
+	public function url($name, $args = array(), $protocol = 'http') {
+		$url = $this->getNamedUrl($name);
 		//replace any variables in the route definition with supplied args
 		if(preg_match_all('`:([a-zA-Z][a-zA-Z0-9]+)`', $url, $matches)) {
 			foreach ($matches[1] as $m) {
