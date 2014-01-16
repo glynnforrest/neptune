@@ -10,6 +10,7 @@ use Neptune\Cache\Driver\CacheDriverInterface;
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Exceptions\MethodNotFoundException;
 use Neptune\Exceptions\ArgumentMissingException;
+use Neptune\Helpers\Url;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -19,25 +20,17 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
  */
 class Dispatcher {
 
-	protected static $instance;
+	const CACHE_KEY_NAMES = 'Router.names';
+
 	protected $routes = array();
 	protected $names = array();
 	protected $globals;
-	protected $request;
 	protected $matched_url;
-	protected $other;
 	protected $prefix;
 	protected $cache;
+	protected $current_name;
 
-	protected function __construct() {
-		$this->request = Request::getInstance();
-	}
-
-	public static function getInstance() {
-		if (!self::$instance) {
-			self::$instance = new self();
-		}
-		return self::$instance;
+	public function __construct(Config $config) {
 	}
 
 	public function setCacheDriver(CacheDriverInterface $driver) {
@@ -63,6 +56,10 @@ class Dispatcher {
 		$route = clone $this->globals();
 		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
+		if(!is_null($this->current_name)) {
+			$this->names[$this->current_name] = $url;
+			$this->current_name = null;
+		}
 		return $this->routes[$url];
 	}
 
@@ -140,6 +137,28 @@ class Dispatcher {
 	}
 
 	/**
+	 * Give the next defined route a name.
+	 */
+	public function name($name) {
+		$this->current_name = $name;
+		return $this;
+	}
+
+	/**
+	 * Get the name that will be assigned to the next route.
+	 */
+	public function getName() {
+		return $this->current_name;
+	}
+
+	/**
+	 * Get a list of all named routes and their urls.
+	 */
+	public function getNames() {
+		return $this->names;
+	}
+
+	/**
 	 * Return all defined routes in an array.
 	 */
 	public function getRoutes() {
@@ -156,109 +175,43 @@ class Dispatcher {
 		return $this;
 	}
 
-	public function goCached($source = null) {
-		if(!$source) {
-			$source = $this->request->path();
-		}
-		$key = 'Router' . $source . $this->request->method();
+	public function matchCached($path) {
+		$key = 'Router' . $path;
 		$cached = $this->cache->get($key);
 		if($cached) {
-			if($this->runMethod($cached)) {
-				return true;
-			}
+			return $this->cached;
 		}
-		return false;
+		return $this->match($path);
 	}
 
-	public function go($source = null) {
-		if(!$source) {
-			$source = $this->request->path();
-		}
-		foreach($this->routes as $k => $v) {
-			if($v->test($source)) {
-				$actions = $v->getAction();
-				$this->matched_url = $k;
-				$response = $this->runMethod($actions);
-				if($response) {
-					if($this->cache) {
-						try {
-							$key = 'Router' . $source . $this->request->method();
-							$this->cache->set($key, $actions);
-							$this->cache->set('Router.names', $this->names);
-						} catch	(\Exception $e) {
-							//send failed cache event
-						}
+	//on fail, throw route not found exception
+	public function match($path) {
+		//what to do about format, with no Request object?
+		foreach($this->routes as $name => $route) {
+			if($route->test($path)) {
+				$actions = $route->getAction();
+				$this->matched_url = $name;
+				if($this->cache) {
+					try {
+						$key = 'Router' . $path;
+						$this->cache->set($key, $actions);
+						$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
+					} catch	(\Exception $e) {
+						//send failed cache event
 					}
-					return $response;
 				}
+				return $actions;
 			}
 		}
 		return false;
 	}
 
-	public static function missingArgsHandler($errno, $errstr, $errfile, $errline, $errcontext) {
-		$str = "Missing argument";
-		if ($str === substr($errstr, 0, strlen($str))) {
-			throw new ArgumentMissingException();
-		} else {
-			throw new NeptuneError($errno, $errstr, $errfile, $errline, $errcontext);
-		}
-	}
+	public function matchRequest(Request $request) {
 
-	protected function runMethod($actions) {
-		if (class_exists($actions[0])) {
-			$c = new $actions[0](SymfonyRequest::createFromGlobals());
-			try {
-				set_error_handler('\Neptune\Routing\Dispatcher::missingArgsHandler');
-				ob_start();
-				//$body is the return from the controller. $other is
-				//anything captured by output buffering, like echo and
-				//print.
-				$body = $c->runMethod($actions[1], $actions[2]);
-				$this->other = ob_get_clean();
-				//return false if there is no $body or $other. If
-				//there is no $body but $other exists, use that as the
-				//response.
-				if(!$body) {
-					if(!$this->other) {
-						restore_error_handler();
-						return false;
-					}
-					restore_error_handler();
-					return $this->other;
-				}
-				restore_error_handler();
-				return $body;
-			} catch (MethodNotFoundException $e) {
-				restore_error_handler();
-				return false;
-			} catch (ArgumentMissingException $e) {
-				restore_error_handler();
-				return false;
-			}
-			restore_error_handler();
-			return true;
-		}
-		return false;
-	}
-
-	public function setRouteName($name, $url) {
-		$this->names[$name] = $url;
-	}
-
-	public function getRouteUrl($name) {
-		if(empty($this->names)) {
-			$this->names = $this->cache->get('Router.names');
-		}
-		return isset($this->names[$name]) ? $this->names[$name] : null;
 	}
 
 	public function getMatchedUrl() {
 		return $this->matched_url;
-	}
-
-	public function getOther() {
-		return $this->other;
 	}
 
 	/**
@@ -281,6 +234,56 @@ class Dispatcher {
 	 **/
 	public function getPrefix() {
 		return $this->prefix;
+	}
+
+	/**
+	 * Get the url of a route called $name.
+	 *
+	 * Substitute any variables in the route url with the $args
+	 * array. If this array contains variables that aren't in the url,
+	 * they will be added as GET parameters.
+	 *
+	 * @param string $name The name of the route
+	 * @param array $args An array of keys and values to substitute
+	 * @param string $protocol The protocol to use - default is http
+	 *
+	 * @return string The url of the route.
+	 */
+	public function url($name, $args = array(), $protocol = 'http') {
+		if(empty($this->names)) {
+			//no named routes have been defined
+			//attempt to fetch names from cache
+			if(!$this->cache || !$result = $this->cache->get(self::CACHE_KEY_NAMES)) {
+				throw new \Exception("No named routes defined");
+			}
+			if(!is_array($result)) {
+				throw new \Exception('Cache value \'' . self::CACHE_KEY_NAMES . '\' is not an array');
+			}
+			$this->names = $result;
+		}
+		if(!isset($this->names[$name])) {
+			throw new \Exception("Unknown route '$name'");
+		}
+		$url = $this->names[$name];
+		//replace any variables in the route definition with supplied args
+		if(preg_match_all('`:([a-zA-Z][a-zA-Z0-9]+)`', $url, $matches)) {
+			foreach ($matches[1] as $m) {
+				if(isset($args[$m])) {
+					$url = str_replace(":{$m}", $args[$m], $url);
+					unset($args[$m]);
+				} else {
+					$url = str_replace(":{$m}", null, $url);
+				}
+			}
+			$url = str_replace('(', '', $url);
+			$url = str_replace(')', '', $url);
+			$url = rtrim($url, '/');
+		}
+		//append get variables using any args that are left
+		if(!empty($args)) {
+			$url .= '?' . http_build_query($args);
+		}
+		return Url::to($url, $protocol);
 	}
 
 }

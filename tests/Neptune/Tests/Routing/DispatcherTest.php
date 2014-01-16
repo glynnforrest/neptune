@@ -16,7 +16,9 @@ include __DIR__ . ('/../../../bootstrap.php');
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		Dispatcher::getInstance()->clearRoutes()->clearGlobals();
+		$this->config = Config::create('neptune');
+		$this->config->set('root_url', 'myapp.local/');
+		$this->router = new Dispatcher($this->config);
 	}
 
 	public function tearDown() {
@@ -24,44 +26,39 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testRouteReturnsRoute() {
-		$r = Dispatcher::getInstance()->route('/url');
-		$this->assertTrue($r instanceof Route);
+		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->route('/url'));
 	}
 
 	public function testGlobalsReturnsRoute() {
-		$r = Dispatcher::getInstance()->globals();
-		$this->assertTrue($r instanceof Route);
+		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->globals());
 	}
 
 	public function testCatchAllReturnRoute() {
-		$r = Dispatcher::getInstance()->catchAll('foo');
-		$this->assertTrue($r instanceof Route);
-		$this->assertEquals('.*', $r->getUrl());
+		$r = $this->router->catchAll('foo');
+		$this->assertInstanceOf('\Neptune\Routing\Route', $r);
+		$this->assertSame('.*', $r->getUrl());
 	}
 
 	public function testMissingSlash() {
-		$r = Dispatcher::getInstance()->route('test');
-		$this->assertEquals('/test', $r->getUrl());
+		$r = $this->router->route('test');
+		$this->assertSame('/test', $r->getUrl());
 	}
 
 	public function testRouteInheritsGlobals() {
-		$d = Dispatcher::getInstance();
-		$d->globals()->transforms('controller', function($controller) {
+		$this->router->globals()->transforms('controller', function($controller) {
 		return ucfirst($controller) . 'Controller';
 	});
-		$r = $d->route('/foo', 'foo', 'index');
+		$r = $this->router->route('/foo', 'foo', 'index');
 		$r->test('/foo');
-		$this->assertEquals(array('FooController', 'index', array()), $r->getAction());
+		$this->assertSame(array('FooController', 'index', array()), $r->getAction());
 	}
 
 	public function testRouteAssets() {
-		$d = Dispatcher::getInstance();
-		$c = Config::create('neptune');
-		$c->set('assets.url', '/assets/');
-		$r = $d->routeAssets();
-		$this->assertEquals('/assets/:args', $r->getUrl());
+		$this->config->set('assets.url', '/assets/');
+		$r = $this->router->routeAssets();
+		$this->assertSame('/assets/:args', $r->getUrl());
 		$this->assertTrue($r->test('/assets/css/test'));
-		$this->assertEquals(
+		$this->assertSame(
 			array(
 				'Neptune\Controller\AssetsController',
 				'serveAsset',
@@ -71,13 +68,11 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testRouteAssetsMissingSlashes() {
-		$d = Dispatcher::getInstance();
-		$c = Config::create('neptune');
-		$c->set('assets.url', '/assets/');
-		$r = $d->routeAssets();
-		$this->assertEquals('/assets/:args', $r->getUrl());
+		$this->config->set('assets.url', '/assets/');
+		$r = $this->router->routeAssets();
+		$this->assertSame('/assets/:args', $r->getUrl());
 		$this->assertTrue($r->test('/assets/lib/js/test'));
-		$this->assertEquals(
+		$this->assertSame(
 			array(
 				'Neptune\Controller\AssetsController',
 				'serveAsset',
@@ -86,151 +81,224 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 			$r->getAction());
 	}
 
-	public function testGoReturnsControllerResponse() {
-		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'index');
-		$this->assertEquals('test route', $d->go('/test'));
+	public function testMatch() {
+		$this->router->route('/test', 'test', 'index');
+		$expected = array('test', 'index', array());
+		$this->assertSame($expected, $this->router->match('/test'));
 	}
 
-	//anything captured by output buffering should not be returned
-	//but still available after the request
-	public function testOtherContent() {
-		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'withEcho');
-		$this->assertEquals('return value', $d->go('/test'));
-		$this->assertEquals('hello from echo', $d->getOther());
-	}
+	public function testMatchThrowsExceptionNoAction() {
 
-	//if no response is provided, output buffered content will be used
-	public function testEchoWhenNoControllerResponse() {
-		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'echo');
-		$this->assertEquals('testing', $d->go('/test'));
-	}
-
-	public function testNoResponse() {
-		$d = Dispatcher::getInstance();
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'nothing');
-		$this->assertFalse($d->go('/test'));
 	}
 
 	public function testSetPrefix() {
-		$d = Dispatcher::getInstance();
-		$d->setPrefix('admin');
-		$this->assertEquals('admin', $d->getPrefix());
+		$this->router->setPrefix('admin');
+		$this->assertSame('admin', $this->router->getPrefix());
 	}
 
 	public function testSetPrefixRemovesSlashes() {
-		$d = Dispatcher::getInstance();
-		$d->setPrefix('one/');
-		$this->assertEquals('one', $d->getPrefix());
-		$d->setPrefix('/two');
-		$this->assertEquals('two', $d->getPrefix());
-		$d->setPrefix('/three/');
-		$this->assertEquals('three', $d->getPrefix());
+		$this->router->setPrefix('one/');
+		$this->assertSame('one', $this->router->getPrefix());
+		$this->router->setPrefix('/two');
+		$this->assertSame('two', $this->router->getPrefix());
+		$this->router->setPrefix('/three/');
+		$this->assertSame('three', $this->router->getPrefix());
 	}
 
 	public function testPrefixIsAppliedToRoutes() {
-		$d = Dispatcher::getInstance();
-		$d->setPrefix('admin/');
-		$route = $d->route(':prefix/login');
-		$this->assertEquals('/admin/login', $route->getUrl());
+		$this->router->setPrefix('admin/');
+		$route = $this->router->route(':prefix/login');
+		$this->assertSame('/admin/login', $route->getUrl());
 	}
 
 	public function testGetRoutes() {
-		$d = Dispatcher::getInstance();
-		$d->catchAll('foo');
-		$routes = $d->getRoutes();
-		$this->assertTrue($routes[0] instanceof Route);
-		$this->assertEquals('.*', $routes[0]->getUrl());
+		$this->router->catchAll('foo');
+		$routes = $this->router->getRoutes();
+		$this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
+		$this->assertSame('.*', $routes[0]->getUrl());
 	}
 
 	protected function setUpTestModule($name) {
 		//a simple routes.php is in the etc/ directory
-		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', __DIR__ . '/');
-		$neptune->set('modules.' . $name, 'etc/');
+		$this->config->set('dir.root', __DIR__ . '/');
+		$this->config->set('modules.' . $name, 'etc/');
 	}
 
 	public function testAddModuleSetsPrefix() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('foo');
 		//routes.php defines a route with '/:prefix/login
-		$d->routeModule('foo');
-		$routes = $d->getRoutes();
-		$this->assertTrue($routes[0] instanceof Route);
-		$this->assertEquals('/foo/login', $routes[0]->getUrl());
+		$this->router->routeModule('foo');
+		$routes = $this->router->getRoutes();
+		$this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
+		$this->assertSame('/foo/login', $routes[0]->getUrl());
 	}
 
 	public function testAddModuleSetsDefinedPrefix() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('foo');
-		$d->routeModule('foo', 'different_prefix');
-		$routes = $d->getRoutes();
-		$this->assertTrue($routes[0] instanceof Route);
-		$this->assertEquals('/different_prefix/login', $routes[0]->getUrl());
+		$this->router->routeModule('foo', 'different_prefix');
+		$routes = $this->router->getRoutes();
+		$this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
+		$this->assertSame('/different_prefix/login', $routes[0]->getUrl());
 	}
 
 	public function testAddModuleHasLocalGlobals() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('foo');
-		$d->routeModule('foo');
-		$routes = $d->getRoutes();
+		$this->router->routeModule('foo');
+		$routes = $this->router->getRoutes();
 		$route = $routes[0];
 		$this->assertTrue($route->test('/foo/login'));
 		$action = $route->getAction();
-		$this->assertEquals('foo_module_controller', $action[0]);
+		$this->assertSame('foo_module_controller', $action[0]);
 	}
 
 	public function testAddModuleDoesNotChangeGlobals() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('bar');
-		$before = $d->globals()->controller('foo');
-		$d->routeModule('bar');
-		$after = $d->globals();
+		$before = $this->router->globals()->controller('foo');
+		$this->router->routeModule('bar');
+		$after = $this->router->globals();
 		$this->assertSame($before, $after);
-		$route = $d->route('.*', null, 'some_method');
+		$route = $this->router->route('.*', null, 'some_method');
 		$this->assertTrue($route->test('anything'));
 		$action = $route->getAction();
 		$this->assertSame('foo', $action[0]);
 	}
 
 	public function testAddModuleDefinesNewGlobals() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('admin');
-		$d->globals()->args(array('globals' => 'very_yes'));
-		$d->routeModule('admin');
-		$routes = $d->getRoutes();
+		$this->router->globals()->args(array('globals' => 'very_yes'));
+		$this->router->routeModule('admin');
+		$routes = $this->router->getRoutes();
 		$route = $routes[0];
 		$route->test('/admin/login');
 		$action = $route->getAction();
 		$args = $action[2];
-		$this->assertEquals(array(), $args);
+		$this->assertSame(array(), $args);
 	}
 
 	public function testAddModuleDoesNotChangePrefix() {
-		$d = Dispatcher::getInstance();
 		$this->setUpTestModule('bar');
-		$d->setPrefix('prefix_before');
-		$d->routeModule('bar');
-		$this->assertSame('prefix_before', $d->getPrefix());
+		$this->router->setPrefix('prefix_before');
+		$this->router->routeModule('bar');
+		$this->assertSame('prefix_before', $this->router->getPrefix());
 	}
 
 	public function testGetAndSetCacheDriver() {
-		$d = Dispatcher::getInstance();
 		$driver = new DebugDriver('testing_');
-		$d->setCacheDriver($driver);
-		$this->assertSame($driver, $d->getCacheDriver());
+		$this->router->setCacheDriver($driver);
+		$this->assertSame($driver, $this->router->getCacheDriver());
 	}
 
 	public function testRouteIsCachedOnSuccess() {
-		$d = Dispatcher::getInstance();
 		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
 		$driver->expects($this->exactly(2))
 			   ->method('set');
-		$d->setCacheDriver($driver);
-		$d->route('/test', '\\Neptune\\Tests\\Routing\\TestController', 'index');
-		$this->assertEquals('test route', $d->go('/test'));
+		$this->router->setCacheDriver($driver);
+		$this->router->route('/test', 'module:controller', 'index');
+		$expected = array('module:controller', 'index', array());
+		$this->assertSame($expected, $this->router->match('/test'));
+	}
+
+	public function testName() {
+		$this->assertInstanceOf('\Neptune\Routing\Dispatcher', $this->router->name('route'));
+		$this->assertSame('route', $this->router->getName());
+	}
+
+	public function testNameIsAddedToRouteThenUnset() {
+		$this->router->name('foo');
+		$this->assertSame('foo', $this->router->getName());
+		$r = $this->router->route('/test', 'foo');
+		$this->assertNull($this->router->getName());
+		$expected = array('foo' => $r->getUrl());
+		$this->assertSame($expected, $this->router->getNames());
+		//second route doesn't have a name, so names should not be modified
+		$this->router->route('/second', 'bar');
+		$this->assertNull($this->router->getName());
+		$this->assertSame($expected, $this->router->getNames());
+	}
+
+	public function testGetNamesReturnsEmptyArray() {
+		$this->assertSame(array(), $this->router->getNames());
+	}
+
+	public function testUrlSimple() {
+		$this->router->name('simple')->route('/url', 'controller');
+		$this->assertSame('http://myapp.local/url', $this->router->url('simple'));
+	}
+
+	public function testUrlSimpleFtp() {
+		$this->router->name('ftp')->route('/url', 'controller');
+		$this->assertSame('ftp://myapp.local/url', $this->router->url('ftp', array(), 'ftp'));
+	}
+
+	public function testUrlWithArgs() {
+		$this->router->name('args')->route('/url/:var/:second', 'controller');
+		$this->assertSame('http://myapp.local/url/foo/bar', $this->router->url('args', array('var' => 'foo', 'second' => 'bar')));
+	}
+
+	public function testUrlWithArgsFtp() {
+		$this->router->name('args_ftp')->route('/url/:var/:second', 'controller');
+		$this->assertSame('ftp://myapp.local/url/foo/bar', $this->router->url('args_ftp',
+			array('var' => 'foo', 'second' => 'bar'), 'ftp'));
+	}
+
+	public function testUrlOptionalArgs() {
+		$this->router->name('opt_args')->route('/url/(:var(/:second))');
+		$this->assertSame('http://myapp.local/url/foo',
+			$this->router->url('opt_args', array('var' => 'foo')));
+	}
+
+	public function testUrlNoOptionalArgs() {
+		$this->router->name('no_opt_args')->route('/url/(:var(/:second))', 'controller');
+		$this->assertSame('http://myapp.local/url', $this->router->url('no_opt_args'));
+	}
+
+	public function testUrlAppendedGetVariables() {
+		$this->router->name('get')->route('/get/:id', 'getController');
+		$args = array('id' => 34, 'foo' => 'bar', 'baz' => 'qoz');
+		$actual = $this->router->url('get', $args);
+		$this->assertSame('http://myapp.local/get/34?foo=bar&baz=qoz', $actual);
+	}
+
+	public function testUrlThrowsExceptionWithNoNames() {
+		$this->setExpectedException('\Exception', 'No named routes defined');
+		$this->router->url('get');
+	}
+
+	public function testUrlThrowsExceptionUnknownName() {
+		$this->router->name('foo')->route('/foo', 'bar');
+		$this->setExpectedException('\Exception', "Unknown route 'get'");
+		$this->router->url('get');
+	}
+
+	public function testUrlGetsNamesFromCache() {
+		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver->expects($this->exactly(1))
+			   ->method('get')
+			   ->with(Dispatcher::CACHE_KEY_NAMES)
+			   ->will($this->returnValue(array('get' => '/get/:id')));
+		$this->router->setCacheDriver($driver);
+		$this->assertSame('http://myapp.local/get/42', $this->router->url('get', array('id' => 42)));
+	}
+
+	public function testUrlThrowsExceptionWithInvalidCache() {
+		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver->expects($this->exactly(1))
+			   ->method('get')
+			   ->with(Dispatcher::CACHE_KEY_NAMES)
+			   ->will($this->returnValue('foo'));
+		$this->router->setCacheDriver($driver);
+		$this->setExpectedException('\Exception', 'Cache value \'Router.names\' is not an array');
+		$this->router->url('get');
+	}
+
+	public function testUrlThrowsExceptionWithCacheMiss() {
+		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver->expects($this->exactly(1))
+			   ->method('get')
+			   ->with(Dispatcher::CACHE_KEY_NAMES);
+		$this->router->setCacheDriver($driver);
+		$this->setExpectedException('\Exception', 'No named routes defined');
+		$this->router->url('get');
 	}
 
 }

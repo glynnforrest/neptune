@@ -120,11 +120,6 @@ class Route {
 		return $this;
 	}
 
-	public function name($name) {
-		Dispatcher::getInstance()->setRouteName($name, $this->url);
-		return $this;
-	}
-
 	public function getUrl() {
 		return $this->url;
 	}
