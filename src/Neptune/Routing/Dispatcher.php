@@ -144,6 +144,9 @@ class Dispatcher {
 	 * Give the next defined route a name.
 	 */
 	public function name($name) {
+		if($this->prefix) {
+			$name = $this->prefix . '.' . $name;
+		}
 		$this->current_name = $name;
 		return $this;
 	}

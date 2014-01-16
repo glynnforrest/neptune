@@ -304,4 +304,23 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->router->url('get');
 	}
 
+	public function testNameUsesPrefix() {
+		$this->router->setPrefix('foo');
+		$this->router->name('name');
+		$this->assertSame('foo.name', $this->router->getName());
+	}
+
+	public function testNamedRouteInModuleUsesPrefix() {
+		//the second route in etc/routes.php sets a name of 'secret'
+		$this->setUpTestModule('foo');
+		$this->router->routeModule('foo', 'prefix');
+		$names = array('prefix.secret' => '/prefix/secret');
+		$this->assertSame($names, $this->router->getNames());
+		$routes = $this->router->getRoutes();
+		$secret = $routes[1];
+		$this->router->match('/prefix/secret');
+		$action = array('foo_module_controller', 'secretArea', array());
+		$this->assertSame($action, $secret->getAction());
+	}
+
 }
