@@ -21,6 +21,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	public function testHomeMatch() {
 		$r = new Route('/', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/')));
+		$this->assertTrue($r->test($this->request('/.html')));
 		$this->assertTrue($r->test($this->request('')));
 		$this->assertFalse($r->test($this->request('/url')));
 	}
@@ -96,21 +97,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('foo', 'method', array('place' => 'earth')), $r->getAction());
 	}
 
-	public function testAutoRoute() {
-		$r = new Route('/:controller(/:method(/:args))');
-		$r->method('index');
-		$r->test($this->request('/home'));
-		$this->assertEquals(array('home', 'index', array()), $r->getAction());
-		$r->test($this->request('/home/hello'));
-		$this->assertEquals(array('home', 'hello', array()), $r->getAction());
-		$r->test($this->request('/home/hello/world'));
-		$this->assertEquals(array('home', 'hello', array('world')), $r->getAction());
-	}
-
-	public function testAutoArgsArray() {
+	public function testAutoArgs() {
 		$r = new Route('/url(/:args)');
-		$r->controller('test')->method('index');
-		$r->argsFormat(Route::ARGS_EXPLODE);
+		$r->controller('test')->method('index')->autoArgs();
 		$r->test($this->request('/url'));
 		$this->assertEquals(array('test', 'index', array()), $r->getAction());
 		$r->test($this->request('/url/one'));
@@ -121,14 +110,42 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test', 'index', array('one', 2, 'thr££')), $r->getAction());
 	}
 
-	public function testAutoArgsSingle() {
-		$r = new Route('/args(/:args)');
+	public function testAutoArgsThrowsExceptionWithNoArgs() {
+		$r = new Route('/url/without_args', 'foo', 'bar');
+		$r->autoArgs();
+		$msg = "A route with auto args must contain ':args' in the url";
+		$this->setExpectedException('\Neptune\Routing\RouteFailedException', $msg);
+		$r->test($this->request('something'));
+	}
+
+	public function testAutoRoute() {
+		$r = new Route('/:controller(/:method(/:args))');
+		$r->method('index')->autoArgs();
+		$r->test($this->request('/home'));
+		$this->assertEquals(array('home', 'index', array()), $r->getAction());
+		$r->test($this->request('/home/hello'));
+		$this->assertEquals(array('home', 'hello', array()), $r->getAction());
+		$r->test($this->request('/home/hello/world'));
+		$this->assertEquals(array('home', 'hello', array('world')), $r->getAction());
+		$r->test($this->request('/home/hello/world/bar'));
+		$this->assertEquals(array('home', 'hello', array('world', 'bar')), $r->getAction());
+	}
+
+	public function testNonAutoRouteCanUseArgsName() {
+		$r = new Route('/url/with/:args', 'controller', 'method');
+		$this->assertTrue($r->test($this->request('/url/with/foo')));
+		$expected = array('controller', 'method', array('args' => 'foo'));
+		$this->assertSame($expected, $r->getAction());
+	}
+
+	public function testArgsRegexNoDelimeter() {
+		$r = new Route('/website(/:site)');
 		$r->controller('test')->method('index');
-		$r->argsFormat(Route::ARGS_SINGLE);
-		$r->test($this->request('/args'));
+		$r->argsRegex('.*');
+		$r->test($this->request('/website'));
 		$this->assertEquals(array('test', 'index', array()), $r->getAction());
-		$r->test($this->request('/args/args/4/sd/£$/ds/sdv'));
-		$this->assertEquals(array('test', 'index', array('args/4/sd/£$/ds/sdv')), $r->getAction());
+		$r->test($this->request('/website/http://foo.com/bar/baz'));
+		$this->assertEquals(array('test', 'index', array('site' => 'http://foo.com/bar/baz')), $r->getAction());
 	}
 
 	public function testValidateController() {
@@ -148,16 +165,22 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testValidatedArgs() {
+		$r = new Route('/add/:first/:second/ok');
+		$r->controller('calculator')->method('add')->rules(
+			array('first' => 'int',
+			'second' => 'int'));
+		$this->assertFalse($r->test($this->request('/add/1/a/ok')));
+		$this->assertTrue($r->test($this->request('/add/4/4/ok')));
+	}
+
+	public function testValidatedArgsWithDot() {
 		$r = new Route('/email/:email/foo');
-		$r->controller('email')->method('verify')->rules(array('email' => 'email'));
+		$r->controller('email')
+		  ->method('verify')
+		  ->argsRegex('[^/]+')
+		  ->rules(array('email' => 'email'));
 		$this->assertFalse($r->test($this->request('/email/me@glynnforrest@com/foo')));
 		$this->assertTrue($r->test($this->request('/email/me@glynnforrest.com/foo')));
-		$r = new Route('/add/:first/:second/ok');
-		$r->controller('calculator')->method('add')->rules(array('first' =>
-			'int',
-			'second' => 'num'));
-		$this->assertFalse($r->test($this->request('/add/1/a/ok')));
-		$this->assertTrue($r->test($this->request('/add/4/4.3/ok')));
 	}
 
 	public function testTransforms() {
@@ -238,7 +261,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testArgWithDot() {
 		$r = new Route('/route/:arg/suffix/just/because');
-		$r->controller('Foo')->method('bar');
+		$r->controller('Foo')->method('bar')->argsRegex('[^/]+');
 		$this->assertTrue($r->test($this->request('/route/test.css/suffix/just/because')));
 		$this->assertEquals(array('Foo', 'bar', array('arg' => 'test.css')),
 							$r->getAction());
@@ -320,6 +343,24 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->controller('foo')->method('bar');
 		$r->rules(array('message' => 'alpha'));
 		$this->assertFalse($r->test($this->request('/foo/bar/baz1')));
+	}
+
+	public function testHiddenFormatIsNotInActionArray() {
+		$r = new Route('/foo/:bar/baz', 'foo', 'hello');
+		$this->assertTrue($r->test($this->request('/foo/hello/baz.html')));
+		$expected = array(
+			'foo', 'hello', array('bar' => 'hello')
+		);
+		$this->assertSame($expected, $r->getAction());
+	}
+
+	public function testHiddenFormatWorksWithVariable() {
+		$r = new Route('/foo/:bar/:baz', 'foo', 'hello');
+		$this->assertFalse($r->test($this->request('/foo/hello/world.json')));
+		$this->assertTrue($r->test($this->request('/foo/hello/world')));
+		$this->assertTrue($r->test($this->request('/foo/hello/world.html')));
+		$expected = array('foo', 'hello', array('bar' => 'hello', 'baz' => 'world'));
+		$this->assertSame($expected, $r->getAction());
 	}
 
 }

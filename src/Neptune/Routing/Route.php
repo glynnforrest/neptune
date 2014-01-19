@@ -15,12 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
  **/
 class Route {
 
-	const VARIABLE = '`:([a-zA-Z][a-zA-Z0-9]+)`';
-	const PATTERN_VARIABLE = '(?P<\1>[^/]+)';
-	const PATTERN_ARGS = '(?P<args>.+)';
-	const ARGS_EXPLODE = 0;
-	const ARGS_SINGLE = 1;
-
 	const PASSED = 1;
 	const UNTESTED = 2;
 	const FAILURE_REGEXP = 3;
@@ -30,14 +24,18 @@ class Route {
 	const FAILURE_METHOD = 7;
 	const FAILURE_VALIDATION = 8;
 
-	protected $regex, $controller, $method;
-	protected $format, $args_format, $url;
+	protected $url;
+	protected $controller;
+	protected $method;
 	protected $args = array();
+	protected $format;
 	protected $transforms = array();
 	protected $rules = array();
 	protected $default_args = array();
 	protected $http_methods = array();
 	protected $result;
+	protected $args_regex = '[^/.]+';
+	protected $auto_args;
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
 		$this->url($url);
@@ -47,16 +45,39 @@ class Route {
 		$this->result = self::UNTESTED;
 	}
 
-	protected function generateRegex($regex) {
-		$regex = str_replace('(', '(?:', $regex);
+	/**
+	 * Generate the regex that represents this route.
+	 */
+	public function getRegex() {
+		//add an optional, internal _format variable to the url, used
+		//for automatically checking the format at the end of the
+		//url. This will only be matched if args_regex does not allow
+		//for '.' .
+		$url = $this->url . '(\.:_format)';
+
+		//replace all optional variable definitions with the regex equivalents
+		$regex = str_replace('(', '(?:', $url);
 		$regex = str_replace(')', ')?', $regex);
-		$regex = preg_replace('`:args`', self::PATTERN_ARGS, $regex);
-		$regex = preg_replace(self::VARIABLE, self::PATTERN_VARIABLE, $regex);
+
+		//if using auto args for this route, replace :args with a
+		//regex capture group for them. Throw an exception if :args
+		//isn't in the url definition
+		if($this->auto_args) {
+			if(!strpos($regex, ':args')) {
+				throw new RouteFailedException("A route with auto args must contain ':args' in the url");
+			}
+			$regex = preg_replace('`:args`', '(?P<args>.+)', $regex);
+		}
+
+		//regex of args in the url defintion
+		$definition_args = '`:([a-zA-Z_][a-zA-Z0-9_]+)`';
+		//replace with regex of args in the url to be tested
+		$url_args = '(?P<\1>' . $this->args_regex . ')';
+		$regex = preg_replace($definition_args, $url_args, $regex);
 		return '`^' . $regex . '$`';
 	}
 
 	public function url($url) {
-		$this->regex = $this->generateRegex($url);
 		$this->url = $url;
 		return $this;
 	}
@@ -110,8 +131,13 @@ class Route {
 		return $this;
 	}
 
-	public function argsFormat($args_format) {
-		$this->args_format = $args_format;
+	public function argsRegex($regex) {
+		$this->args_regex = $regex;
+		return $this;
+	}
+
+	public function autoArgs() {
+		$this->auto_args = true;
 		return $this;
 	}
 
@@ -120,8 +146,11 @@ class Route {
 	}
 
 	public function test(Request $request) {
-		$helper = new RequestHelper($request);
-		if (!preg_match($this->regex, $helper->getBarePath(), $vars)) {
+		$path = $request->getPathInfo();
+		if(strlen($path) > 1) {
+			$path = rtrim($path, '/');
+		}
+		if (!preg_match($this->getRegex(), $path, $vars)) {
 			$this->result = self::FAILURE_REGEXP;
 			return false;
 		}
@@ -133,7 +162,7 @@ class Route {
 			}
 		}
 		//Check if the format requested is supported by this route.
-		$format = $helper->getBestFormat();
+		$format = isset($vars['_format']) ? $vars['_format'] : 'html';
 		if ($this->format) {
 			if (!in_array($format, $this->format) && !in_array('any', $this->format)) {
 					$this->result = self::FAILURE_FORMAT;
@@ -145,6 +174,7 @@ class Route {
 				return false;
 			}
 		}
+		unset($vars['_format']);
 		//get controller and method from either matches or supplied defaults.
 		if (!isset($vars['controller'])) {
 			$vars['controller'] = $this->controller;
@@ -177,7 +207,6 @@ class Route {
 		//gather named variables from regex
 		foreach ($vars as $k => $v) {
 			if (!is_numeric($k)) {
-				// unset($vars[$k]);
 				$args[$k] = $vars[$k];
 			}
 		}
@@ -188,19 +217,11 @@ class Route {
 			}
 		}
 
-		//Gather numerically indexed args for auto rules
-		if (isset($vars['args'])) {
-			switch ($this->args_format) {
-			case self::ARGS_EXPLODE:
-				$vars['args'] = explode('/', $vars['args']);
-				foreach ($vars['args'] as $k => $v) {
-					$args[$k] = $v;
-				}
-				break;
-			case self::ARGS_SINGLE:
-				$args[] = $vars['args'];
-			default:
-				break;
+		//gather numerically indexed args if auto_args is set
+		if ($this->auto_args && isset($vars['args'])) {
+			$vars['args'] = explode('/', $vars['args']);
+			foreach ($vars['args'] as $k => $v) {
+				$args[$k] = $v;
 			}
 			unset($args['args']);
 		}
