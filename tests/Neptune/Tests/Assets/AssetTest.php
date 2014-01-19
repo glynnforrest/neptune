@@ -54,4 +54,47 @@ class AssetTest extends \PHPUnit_Framework_TestCase {
 		$a = new Asset('not_a_file');
 	}
 
+	public function testGetMimeType() {
+		$a = new Asset($this->file);
+		$this->assertSame('text/plain', $a->getMimeType());
+	}
+
+	public function testGetMimeTypeNoContent() {
+		$a = new Asset();
+		$this->assertNull($a->getMimeType());
+	}
+
+	public function testOverrideMimeType() {
+		$a = new Asset($this->file);
+		$this->assertSame('text/plain', $a->getMimeType());
+		$a->setMimeType('text/css');
+		$this->assertSame('text/css', $a->getMimeType());
+	}
+
+	public function testGetMimeTypeCss() {
+		$css = 'styles.css';
+		$this->temp->create($css, '#Stylesheet');
+		$a = new Asset($this->temp->getPathname($css));
+		$this->assertSame('text/css', $a->getMimeType());
+	}
+
+	public function testGetMimeTypeJs() {
+		$js = 'app.js';
+		$this->temp->create($js, '//javascript');
+		$a = new Asset($this->temp->getPathname($js));
+		$this->assertSame('application/javascript', $a->getMimeType());
+	}
+
+	public function testGetContentLength() {
+		$a = new Asset($this->file);
+		$this->assertSame(7, $a->getContentLength());
+		$a->setContent('foo_bar_baz');
+		$this->assertSame(11, $a->getContentLength());
+	}
+
+	public function testGetEmptyContentLength() {
+		$a = new Asset();
+		$this->assertSame(0, $a->getContentLength());
+	}
+
 }
