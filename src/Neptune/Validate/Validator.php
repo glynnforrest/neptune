@@ -7,8 +7,6 @@
 
 namespace Neptune\Validate;
 
-use Neptune\Http\Session;
-
 class Validator {
 
 	protected $input_array;
@@ -342,10 +340,6 @@ class Validator {
 
 	protected function checkUrl($value) {
 		return filter_var($value, FILTER_VALIDATE_URL) !== false;
-	}
-
-	protected function checkToken($value) {
-		return $value == Session::token();
 	}
 
 	public function validate() {
