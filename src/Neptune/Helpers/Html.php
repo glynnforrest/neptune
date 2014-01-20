@@ -2,7 +2,6 @@
 
 namespace Neptune\Helpers;
 
-use Neptune\Http\Session;
 use Neptune\Helpers\Url;
 
 /**
@@ -70,10 +69,6 @@ class Html {
 			'value' => $value
 		), $options);
 		return self::selfTag('input', $options);
-	}
-
-	public static function inputToken() {
-		return self::input('hidden', 'csrf_token', Session::token());
 	}
 
 	/**

@@ -103,11 +103,6 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, Html::input('textarea', 'comment', 'Something', array('id' => 'other-id')));
 	}
 
-	public function testInputToken() {
-		$_SESSION['csrf_token'] = md5('token');
-		$this->assertSame('<input type="hidden" id="csrf_token" name="csrf_token" value="94a08da1fecbb6e8b46990538c7b50b2" />', Html::inputToken());
-	}
-
 	public function testOptionsThrowsExceptionForBadOptions() {
 		$this->setExpectedException('\Exception');
 		Html::options(null);
