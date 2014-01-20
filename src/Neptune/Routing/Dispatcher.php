@@ -81,12 +81,12 @@ class Dispatcher {
 		if(substr($url, -1, 1) !== '/') {
 			$url .= '/';
 		}
-		$url = $url . ':args';
+		$url = $url . ':asset';
 		$route = new Route($url);
 		$route->controller('Neptune\\Controller\\AssetsController')
 			  ->method('serveAsset')
 			  ->format('any')
-			  ->argsFormat(Route::ARGS_SINGLE);
+			  ->argsRegex('.+');
 		$this->routes[$url] = $route;
 		$this->names['neptune.assets'] = $url;
 		return $this->routes[$url];

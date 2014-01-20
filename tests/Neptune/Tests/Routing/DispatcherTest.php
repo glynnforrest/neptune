@@ -66,27 +66,27 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	public function testRouteAssets() {
 		$this->config->set('assets.url', '/assets/');
 		$r = $this->router->routeAssets();
-		$this->assertSame('/assets/:args', $r->getUrl());
+		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/css/test'));
 		$expected = array(
 			'Neptune\Controller\AssetsController',
 			'serveAsset',
-			array('css/test'));
+			array('asset' => 'css/test'));
 		$this->assertSame($expected, $r->getAction());
 		//assert the route is given a name
-		$names = array('neptune.assets' => '/assets/:args');
+		$names = array('neptune.assets' => '/assets/:asset');
 		$this->assertSame($names, $this->router->getNames());
 	}
 
 	public function testRouteAssetsMissingSlashes() {
 		$this->config->set('assets.url', 'assets');
 		$r = $this->router->routeAssets();
-		$this->assertSame('/assets/:args', $r->getUrl());
+		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/lib/js/test'));
 		$expected = array(
 			'Neptune\Controller\AssetsController',
 			'serveAsset',
-			array('lib/js/test')
+			array('asset' => 'lib/js/test')
 		);
 		$this->assertSame($expected, $r->getAction());
 	}
