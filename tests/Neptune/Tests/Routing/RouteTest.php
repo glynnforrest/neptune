@@ -110,6 +110,22 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test', 'index', array('one', 2, 'thr££')), $r->getAction());
 	}
 
+	public function testAutoArgsDifferentDelimeter() {
+		$r = new Route('/url/:args', 'controller', 'method');
+		$r->autoArgs('[a-z]+');
+		$this->assertTrue($r->test($this->request('/url/fooBbar5baz-qoz')));
+		$expected = array('controller', 'method', array('foo', 'bar', 'baz', 'qoz'));
+		$this->assertSame($expected, $r->getAction());
+	}
+
+	public function testAutoArgsBadRegexThrowsException() {
+		$r = new Route('/url/:args', 'controller', 'method');
+		$r->autoArgs('bad_regex');
+		$msg = 'Unable to parse auto args with regex `bad_regex`';
+		$this->setExpectedException('\Neptune\Routing\RouteFailedException', $msg);
+		$r->test($this->request('/url/foo/bar/baz'));
+	}
+
 	public function testAutoArgsThrowsExceptionWithNoArgs() {
 		$r = new Route('/url/without_args', 'foo', 'bar');
 		$r->autoArgs();

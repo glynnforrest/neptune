@@ -36,6 +36,7 @@ class Route {
 	protected $result;
 	protected $args_regex = '[^/.]+';
 	protected $auto_args;
+	protected $auto_args_regex = '[^/.]+';
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
 		$this->url($url);
@@ -136,7 +137,10 @@ class Route {
 		return $this;
 	}
 
-	public function autoArgs() {
+	public function autoArgs($regex = null) {
+		if($regex) {
+			$this->auto_args_regex = $regex;
+		}
 		$this->auto_args = true;
 		return $this;
 	}
@@ -219,8 +223,11 @@ class Route {
 
 		//gather numerically indexed args if auto_args is set
 		if ($this->auto_args && isset($vars['args'])) {
-			$vars['args'] = explode('/', $vars['args']);
-			foreach ($vars['args'] as $k => $v) {
+			$regex = '`' . $this->auto_args_regex . '`';
+			if(!preg_match_all($regex, $vars['args'], $auto_args)) {
+				throw new RouteFailedException(sprintf('Unable to parse auto args with regex %s', $regex));
+			}
+			foreach ($auto_args[0] as $k => $v) {
 				$args[$k] = $v;
 			}
 			unset($args['args']);
