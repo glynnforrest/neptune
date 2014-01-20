@@ -8,6 +8,7 @@ use Neptune\Assets\Assets;
 use Neptune\Core\Config;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * AssetsController
@@ -19,11 +20,10 @@ class AssetsController extends Controller {
 	//array of options that are passed to a filter on instantiation.
 	protected static $filter_options = array();
 	protected $current_prefix;
+	protected $request;
 
 	public function __construct(Request $request) {
-		//quick fix to keep tests passing, remove old neptune http classes!
-		$this->request = \Neptune\Http\Request::getInstance();
-		$this->response = \Neptune\Http\Response::getInstance();
+		$this->request = $request;
 	}
 
 	protected function _before() {
@@ -42,8 +42,7 @@ class AssetsController extends Controller {
 	 * $options is an array of options to pass to the filter on
 	 * instantiation, such as the path to a binary.
 	 */
-	public static function registerFilter($name, $class_name,
-										  array $options = array()) {
+	public static function registerFilter($name, $class_name, array $options = array()) {
 		self::$filters[$name] = $class_name;
 		self::$filter_options[$name] = $options;
 	}
@@ -59,12 +58,7 @@ class AssetsController extends Controller {
 		return true;
 	}
 
-
 	public function serveAsset($asset_name) {
-		//decode url characters, we need &23 to #
-		$asset_name = urldecode($asset_name) . '.' . $this->request->format();
-		//use the correct config file for this asset by looking at the
-		//prefix. This is in the form prefix#asset
 		$asset_name = $this->processPrefix($asset_name);
 		try {
 			$asset = new Asset($this->getAssetPath($asset_name));
@@ -75,15 +69,20 @@ class AssetsController extends Controller {
 					$this->applyFilter($asset, $f);
 				}
 			}
-			$this->response->setFormat($this->request->format());
-			return $asset->getContent();
+			$response = new Response();
+			$response->setContent($asset->getContent());
+			$response->headers->set('Content-Type', $asset->getMimeType());
+			$response->headers->set('X-Generated-By', get_class($this));
+			$response->headers->set('Content-Length', $asset->getContentLength());
+			return $response;
 		} catch (\Exception $e) {
-			$this->response->setStatusCode('404');
-			return false;
+			return new Response($e->getMessage(), 404);
 		}
 	}
 
 	protected function processPrefix($name) {
+		//all assets routed by this controller are in modules. the
+		//first segment of the asset name is the prefix
 		$pos = strpos($name, '/');
 		if($pos) {
 			$this->current_prefix = substr($name, 0, $pos);
@@ -95,7 +94,7 @@ class AssetsController extends Controller {
 	}
 
 	public function getAssetPath($filename) {
-		return Config::load($this->current_prefix)->get('assets.dir') . $filename;
+		return Config::load($this->current_prefix)->getModulePath('assets.dir') . $filename;
 	}
 
 	/**

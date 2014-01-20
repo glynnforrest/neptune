@@ -5,10 +5,9 @@ namespace Neptune\Tests\Controller;
 use Neptune\Controller\Controller;
 use Neptune\Controller\AssetsController;
 use Neptune\Core\Config;
-use Neptune\Http\Request;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Request;
 
 use Temping\Temping;
 
@@ -28,7 +27,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->temp = new Temping();
 		$this->dir = $this->temp->getDirectory();
 		$c->set('assets.dir', $this->dir);
-		$request = new SymfonyRequest();
+		$request = new Request();
 		$this->obj = new AssetsController($request);
 	}
 
@@ -65,9 +64,10 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeAsset() {
 		$this->temp->create('asset.css', 'css_content');
-		Request::getInstance()->setFormat('css');
-		$this->assertEquals('css_content', $this->obj->serveAsset('asset'));
-		Request::getInstance()->resetStoredVars();
+		$response = $this->obj->serveAsset('asset.css');
+		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
+		$this->assertSame('css_content', $response->getContent());
+		$this->assertEquals('text/css', $response->headers->get('content-type'));
 	}
 
 	public function testServeFilteredAsset() {
@@ -75,9 +75,10 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$conf = Config::load();
 		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
-		Request::getInstance()->setFormat('js');
-		$this->assertEquals('JS_CONTENT', $this->obj->serveAsset('filtered'));
-		Request::getInstance()->resetStoredVars();
+		$response = $this->obj->serveAsset('filtered.js');
+		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
+		$this->assertEquals('JS_CONTENT', $response->getContent());
+		$this->assertEquals('application/javascript', $response->headers->get('content-type'));
 	}
 
 }
