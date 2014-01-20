@@ -79,11 +79,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testParseLog() {
-		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-		Logger::setFormat('[:type] :date :ip :message');
+		Logger::setFormat('[:type] :date :message');
 		Logger::debug('test log');
 		$this->assertEquals(
-			array('[debug] ' . date('d/m/y') . ' 127.0.0.1 test log'),
+			array('[debug] ' . date('d/m/y') . ' test log'),
 			Logger::getLogs());
 	}
 
