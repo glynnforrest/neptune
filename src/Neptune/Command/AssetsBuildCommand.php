@@ -10,6 +10,8 @@ use Neptune\Assets\Asset;
 
 use Symfony\Component\Console\Input\InputArgument;
 
+use Symfony\Component\HttpFoundation\Request;
+
 use \DirectoryIterator;
 use \RecursiveIteratorIterator;
 use \RecursiveDirectoryIterator;
@@ -163,7 +165,7 @@ class AssetsBuildCommand extends Command {
 
 	protected function processAsset($src, $target, $regexps) {
 		$asset = new Asset($src);
-		$c = new AssetsController();
+		$c = new AssetsController(new Request());
 		//add filters if we have any
 		if(is_array($regexps)) {
 			foreach($c->getAssetFilters($src, $regexps) as $f) {
