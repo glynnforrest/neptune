@@ -7,6 +7,8 @@ use Neptune\Helpers\String;
 
 use Temping\Temping;
 
+use Symfony\Component\HttpFoundation\Request;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -31,13 +33,13 @@ class UploadHandlerTest extends \PHPUnit_Framework_TestCase {
 			'error' => 0,
 			'size' => 0
 		);
-		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$this->object = new UploadHandler($this->files_index);
+		$request = new Request();
+		$request->setMethod('post');
+		$this->object = new UploadHandler($request, $this->files_index);
 	}
 
 	public function tearDown() {
 		$this->temp->reset();
-		$_SERVER['REQUEST_METHOD'] = null;
 	}
 
 	public function testConstruct() {

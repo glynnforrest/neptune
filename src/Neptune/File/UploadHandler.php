@@ -4,7 +4,8 @@ namespace Neptune\File;
 
 use Neptune\Exceptions\FileException;
 use Neptune\Helpers\String;
-use Neptune\Http\Request;
+
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * UploadHandler
@@ -24,8 +25,8 @@ class UploadHandler {
 	const CHUNK_PARTIAL = 2;
 	const CHUNK_END = 3;
 
-	public function __construct($name, $scramble_files = true) {
-		$method = Request::getInstance()->method();
+	public function __construct(Request $request, $name, $scramble_files = true) {
+		$method = $request->getMethod();
 		if($method != 'POST') {
 			throw new \Exception("$method upload method not implemented.");
 		}
