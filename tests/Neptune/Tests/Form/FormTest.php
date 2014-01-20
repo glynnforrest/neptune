@@ -20,19 +20,19 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testInput() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('name');
 		$this->assertSame(Html::input('text', 'name'), $f->input('name'));
 	}
 
 	public function testLabel() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('username');
 		$this->assertSame(Html::label('username', 'Username'), $f->label('username'));
 	}
 
 	public function testError() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('email');
 		$this->assertNull($f->error('email'));
 		$error_msg = 'Email is invalid.';
@@ -58,27 +58,21 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('/login/somewhere/else', $f->getAction());
 	}
 
-	public function testCreateFormNoAction() {
-		$_SERVER['REQUEST_URI'] = '/some/url';
-		$f = new Form();
-		$this->assertSame('/some/url', $f->getAction());
-	}
-
 	public function testGetAndSetMethod() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->assertSame('POST', $f->getMethod());
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setMethod('get'));
 		$this->assertSame('GET', $f->getMethod());
 	}
 
 	public function testSetMethodThrowsException() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->setExpectedException('\Exception');
 		$f->setMethod('something-stupid');
 	}
 
 	public function testGetAndSetOptions() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->assertSame(array(), $f->getOptions());
 		$options = array('id' => 'my-form', 'class' => 'form');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setOptions($options));
@@ -86,7 +80,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAndSet() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('message');
 		$this->assertSame(null, $f->get('message'));
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('message', 'hello'));
@@ -94,20 +88,20 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSetThrowsExceptionUndefinedRow() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->setExpectedException('\Exception', "Attempting to assign value 'user42' to an unknown form row 'username'");
 		$f->set('username', 'user42');
 	}
 
 	public function testSetCreateNewRow() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('username', 'user42', true));
 		$this->assertSame('user42', $f->get('username'));
 		$this->assertSame('text', $f->getRow('username')->getType());
 	}
 
 	public function testGetAndSetValues() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('username', 'glynn');
 		$f->password('password', 'secret');
 		$expected = array('username' => 'glynn', 'password' => 'secret');
@@ -118,7 +112,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSetValuesThrowsExceptionUndefinedRow() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('username');
 		$f->password('password');
 		$expected = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
@@ -127,7 +121,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSetValuesCreateRows() {
-		$f = new Form();
+		$f = new Form('/url');
 		$new = array('foo' => 'bar', 'baz' => 'qux', 'fu bar' => 'foo bar');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValues($new, true));
 		foreach ($new as $name => $value) {
@@ -137,13 +131,13 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRow() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('username'));
 		$this->assertInstanceOf('\Neptune\Form\FormRow', $f->getRow('username'));
 	}
 
 	public function testRowIsReturnedByReference() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->text('username');
 		//check that the same FormRow instance is returned every time.
 		$first = $f->getRow('username');
@@ -201,7 +195,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testToStringCallsRender() {
-		$f = new Form();
+		$f = new Form('/url');
 		$this->assertSame($f->render(), $f->__toString());
 	}
 
@@ -236,7 +230,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFields() {
-		$f = new Form();
+		$f = new Form('/url');
 		$f->hidden('id');
 		$f->text('username');
 		$f->text('email');

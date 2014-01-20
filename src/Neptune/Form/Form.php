@@ -3,8 +3,6 @@
 namespace Neptune\Form;
 
 use Neptune\Helpers\Html;
-use Neptune\Http\Request;
-
 
 /**
  * Form
@@ -17,10 +15,7 @@ class Form {
 	protected $options = array();
 	protected $rows = array();
 
-	public function __construct($action = null, $method = 'post', $options = array()) {
-		if(!$action) {
-			$action = Request::getInstance()->uri();
-		}
+	public function __construct($action, $method = 'post', $options = array()) {
 		$this->setHeader($action, $method, $options);
 	}
 
