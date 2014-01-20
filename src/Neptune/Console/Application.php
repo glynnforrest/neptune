@@ -57,7 +57,7 @@ class Application extends SymfonyApplication {
 	 */
 	public function doRun(InputInterface $input, OutputInterface $output) {
 		if (!$this->commands_registered) {
-			$this->registerCommands();
+			$this->registerCommands($output);
 		}
 		if($input->hasParameterOption(array('--env', '-e'))) {
 			$env = $input->getParameterOption(array('--env', '-e'));
@@ -77,12 +77,17 @@ class Application extends SymfonyApplication {
 	 * Register Commands in the neptune 'Command' directory and from
 	 * the modules set in neptune.php
 	 */
-	protected function registerCommands() {
+	protected function registerCommands(OutputInterface $output) {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
 		$root = $this->config->getRequired('dir.root');
 		foreach ($this->config->get('modules') as $module => $path) {
 			$namespace = $this->getModuleNamespace($module);
-			$this->registerNamespace($namespace, $root . $path . 'Command/');
+			try {
+				$this->registerNamespace($namespace, $root . $path . 'Command/');
+			} catch (\Exception $e) {
+				$output->writeln(sprintf('Warning: %s', $e->getMessage()));
+			}
+
 		}
 		$this->commands_registered = true;
 	}
