@@ -36,7 +36,7 @@ abstract class CreateCommand extends Command {
 				 'm',
 				 InputOption::VALUE_REQUIRED,
 				 'The module of the new resource.',
-				 $this->getFirstModule()
+				 $this->getDefaultModule()
 			 )
 			 ->addOption(
 				 'with-test',
