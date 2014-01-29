@@ -5,6 +5,7 @@ namespace Neptune\Tests\Command;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 use Neptune\Tests\Command\EmptyCommand;
 use Neptune\Console\Application;
 
@@ -19,12 +20,14 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
 
 	protected $config;
 	protected $command;
+    protected $neptune;
 
 	public function setup() {
 		$this->config = Config::create('neptune');
 		$this->config->set('dir.root', '/path/to/root/');
+        $this->neptune = new Neptune($this->config);
 		$application = new Application($this->config);
-		$application->add(new EmptyCommand($this->config));
+		$application->add(new EmptyCommand($this->neptune, $this->config));
 		$this->command = $application->find('empty');
 	}
 
@@ -47,12 +50,12 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
 		//check it is an absolute path
 	}
 
-	public function testGetFirstModule() {
+	public function testGetDefaultModule() {
 		$modules = array(
 			'my-app' => 'app/MyApp/',
 			'other-module' => 'app/OtherModel/');
 		$this->config->set('modules', $modules);
-		$this->assertSame('my-app', $this->command->getFirstModule());
+		$this->assertSame('my-app', $this->command->getDefaultModule());
 	}
 
 	public function testGetModuleNamespace() {

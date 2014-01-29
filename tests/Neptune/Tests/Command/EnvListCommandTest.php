@@ -8,6 +8,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Application;
 
 use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 use Neptune\Command\EnvListCommand;
 use Neptune\Console\Console;
 
@@ -23,6 +24,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 	protected $tester;
 	protected $temping;
 	protected $config;
+    protected $neptune;
 
 	public function setup() {
 		$this->config = Config::create('neptune');
@@ -30,9 +32,10 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 		$this->temping = new Temping();
 		$this->temping->createDirectory('config/env');
 		$this->config->set('dir.root', $this->temping->getDirectory());
+        $this->neptune = new Neptune($this->config);
 
 		$application = new Application();
-		$application->add(new EnvListCommand($this->config));
+		$application->add(new EnvListCommand($this->neptune, $this->config));
 		$command = $application->find('env:list');
 		$this->tester = new CommandTester($command);
 	}

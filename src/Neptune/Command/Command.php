@@ -4,6 +4,7 @@ namespace Neptune\Command;
 
 use Neptune\Console\Console;
 use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  **/
 abstract class Command extends SymfonyCommand {
 
+    protected $neptune;
 	protected $config;
 	protected $input;
 	protected $output;
@@ -26,9 +28,10 @@ abstract class Command extends SymfonyCommand {
 	/**
 	 * Create a new Command instance. Neptune config must be loaded.
 	 */
-	public function __construct(Config $config) {
+	public function __construct(Neptune $neptune, Config $config) {
 		//make config instance available to configure()
 		$this->config = $config;
+        $this->neptune = $neptune;
 		parent::__construct();
 	}
 
@@ -53,39 +56,24 @@ abstract class Command extends SymfonyCommand {
 	 * $console ==> Console instance
 	 * $this->input ==> InputInterface
 	 * $this->output ==> OutputInterface
-	 * $this->console ==> Console instance
+	 * $this->console ==> Console
 	 * $this->config ==> 'neptune' Config instance
+     * $this->neptune ==> Neptune
 	 */
 	abstract public function go(Console $console);
 
-	public function getRootDirectory() {
-		$root = $this->config->getRequired('dir.root');
-		//make sure root has a trailing slash
-		if(substr($root, -1) !== '/') {
-			$root .= '/';
-		}
-		return $root;
-	}
+    public function getRootDirectory()
+    {
+        return $this->neptune->getRootDirectory();
+    }
 
 	/**
-	 * Get the name of the first module in the neptune config file.
-	 */
-	public function getFirstModule() {
-		$modules = $this->config->get('modules');
-		if(!$modules) {
-			return null;
-		}
-		$module_names = array_keys($modules);
-		return $module_names[0];
-	}
-
-	/**
-	 * Get the absolute path to a module directory.
+	 * Get the namespace of a module with no beginning slash.
 	 *
-	 * @param string $module The name of the module
+	 * @param string $module the name of the module
 	 */
 	public function getModuleDirectory($module) {
-		return $this->config->getPath('modules.' . $module);
+		return $this->neptune->getModuleDirectory($module);
 	}
 
 	/**
@@ -94,7 +82,14 @@ abstract class Command extends SymfonyCommand {
 	 * @param string $module the name of the module
 	 */
 	public function getModuleNamespace($module) {
-		return $this->getApplication()->getModuleNamespace($module);
+		return $this->neptune->getModuleNamespace($module);
+	}
+
+	/**
+	 * Get the name of the first module in the neptune config file.
+	 */
+	public function getDefaultModule() {
+        return $this->neptune->getDefaultModule();
 	}
 
 	/**
