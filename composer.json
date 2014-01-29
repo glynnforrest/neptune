@@ -6,7 +6,8 @@
         "danielstjules/stringy": "dev-master",
         "glynnforrest/crutches": "dev-master",
         "symfony/console": "2.4.*",
-        "symfony/http-foundation": "2.4.*"
+        "symfony/http-foundation": "2.4.*",
+        "symfony/http-kernel": "2.4.*"
     },
     "license": "MIT",
     "require-dev": {
