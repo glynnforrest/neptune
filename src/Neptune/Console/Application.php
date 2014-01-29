@@ -29,10 +29,12 @@ use Stringy\StaticStringy as S;
  **/
 class Application extends SymfonyApplication {
 
+    protected $neptune;
 	protected $config;
 	protected $commands_registered;
 
-	public function __construct(Config $config) {
+	public function __construct(Neptune $neptune, Config $config) {
+        $this->neptune = $neptune;
 		$this->config = $config;
 		parent::__construct('Neptune', '0.2.5');
 		$this->useNeptuneHelperSet();
@@ -65,7 +67,7 @@ class Application extends SymfonyApplication {
 			$env = $this->config->get('env');
 		}
 		if($env) {
-			Neptune::getInstance()->loadEnv($env);
+			$this->neptune->loadEnv($env);
 			if($output->isVeryVerbose()) {
 				$output->writeln("Using environment <info>$env</info>");
 			}
@@ -79,9 +81,9 @@ class Application extends SymfonyApplication {
 	 */
 	protected function registerCommands(OutputInterface $output) {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
-		$root = $this->config->getRequired('dir.root');
+		$root = $this->neptune->getRootDirectory();
 		foreach ($this->config->get('modules') as $module => $path) {
-			$namespace = $this->getModuleNamespace($module);
+			$namespace = $this->neptune->getModuleNamespace($module);
 			try {
 				$this->registerNamespace($namespace, $root . $path . 'Command/');
 			} catch (\Exception $e) {
@@ -112,25 +114,12 @@ class Application extends SymfonyApplication {
 			try {
 				$r = new ReflectionClass($class);
 				if ($r->isSubclassOf('Neptune\\Command\\Command') && !$r->isAbstract()) {
-					$this->add($r->newInstance($this->config));
+					$this->add($r->newInstance($this->neptune, $this->config));
 				}
 			} catch (\ReflectionException $e) {
 				continue;
 			}
 		}
-	}
-
-	/**
-	 * Get the namespace of a module with no beginning slash.
-	 *
-	 * @param string $module the name of the module
-	 */
-	public function getModuleNamespace($module) {
-		$namespace = Config::load($module)->getRequired('namespace');
-		if(substr($namespace, 0, 1) === '\\') {
-			$namespace = substr($namespace, 0, 1);
-		}
-		return $namespace;
 	}
 
 	protected function getDefaultInputDefinition() {
