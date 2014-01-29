@@ -3,7 +3,6 @@
 namespace Neptune\Tests\Core;
 
 use Neptune\Core\Config;
-use Neptune\Core\Neptune;
 
 use Temping\Temping;
 
@@ -293,11 +292,8 @@ END;
 		$restricted = '/root/config.php';
 		$c = Config::create('unlikely', $restricted);
 		$c->set('key', 'value');
-		Neptune::handleErrors();
-		$this->setExpectedException('\\Neptune\\Exceptions\\NeptuneError');
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigFileException');
 		$c->save();
-		restore_error_handler();
-		restore_exception_handler();
 	}
 
 	public function testSaveDoesNotWriteIfNotModified() {
