@@ -8,72 +8,11 @@ use Neptune\Core\ComponentException;
 
 class Neptune {
 
-	protected static $instance;
-	protected $components = array();
-	protected $singletons = array();
+    protected $config;
 	protected $env;
 
-	protected function __construct() {
-	}
-
-	public static function getInstance() {
-		if (!self::$instance) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
-	/**
-	 * Create a component of $name, instantiated with $function.
-	 */
-	public function set($name, $function) {
-		$this->components[$name] = $function;
-	}
-
-	/**
-	 * Create a component of $name, instantiated with $function. A
-	 * single instance of the function result will be returned every
-	 * time.
-	 */
-	public function setSingleton($name, $function) {
-		$this->components[$name] = $function;
-		$this->singletons[$name] = null;
-	}
-
-	/**
-	 * Get an instance of component $name. If $name was set as a
-	 * singleton the same instance will be returned, otherwise a new
-	 * instance will be created.
-	 */
-	public function get($name) {
-		if(!isset($this->components[$name])) {
-			throw new ComponentException(
-				"Component not registered: $name"
-			);
-		}
-		if(isset($this->singletons[$name])) {
-			return $this->singletons[$name];
-		}
-		if(!is_callable($this->components[$name])) {
-			throw new ComponentException(
-				"Registered component is not a callable function:
-				$name"
-			);
-		}
-		$component = $this->components[$name]();
-		if(array_key_exists($name, $this->singletons) && is_null($this->singletons[$name])) {
-			$this->singletons[$name] = $component;
-		}
-		return $component;
-	}
-
-	/**
-	 * Remove all registered components.
-	 */
-	public function reset() {
-		$this->components = array();
-		$this->singletons = array();
-		$this->env = null;
+	public function __construct(Config $config) {
+        $this->config = $config;
 	}
 
 	/**
@@ -100,17 +39,63 @@ class Neptune {
 		return $this->env;
 	}
 
-	public static function handleErrors() {
+    /**
+     * Get the absolute path of the root directory of the
+     * application.
+     *
+     * @return string The root directory, with a trailing slash.
+     */
+    public function getRootDirectory()
+    {
+		$root = $this->config->getRequired('dir.root');
+		//make sure root has a trailing slash
+		if(substr($root, -1) !== '/') {
+			$root .= '/';
+		}
+
+		return $root;
+    }
+
+	/**
+	 * Get the absolute path of a module directory.
+	 *
+	 * @param string $module The name of the module
+	 */
+	public function getModuleDirectory($module)
+    {
+		return $this->config->getPath('modules.' . $module);
+	}
+
+	/**
+	 * Get the namespace of a module with no beginning slash.
+	 *
+	 * @param string $module the name of the module
+	 */
+	public function getModuleNamespace($module)
+    {
+		$namespace = Config::load($module)->getRequired('namespace');
+		if(substr($namespace, 0, 1) === '\\') {
+			$namespace = substr($namespace, 0, 1);
+		}
+		return $namespace;
+	}
+
+    public function getDefaultModule()
+    {
+		$modules = $this->config->get('modules');
+		if(!$modules) {
+			return null;
+		}
+		$module_names = array_keys($modules);
+		return $module_names[0];
+    }
+
+	public function handleErrors() {
 		set_error_handler('\Neptune\Core\Neptune::dealWithError');
-		set_exception_handler('\Neptune\Core\Neptune::dealWithException');
 	}
 
 	public static function dealWithError($errno, $errstr, $errfile, $errline, $errcontext) {
 		throw new NeptuneError($errno, $errstr, $errfile, $errline, $errcontext);
-	}
-
-	public static function dealWithException($exception) {
-		Events::getInstance()->send($exception);
 	}
 
 }

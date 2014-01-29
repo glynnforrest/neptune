@@ -17,53 +17,17 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	protected $neptune;
 	protected $temp;
+    protected $config;
 
 	public function setUp() {
-		$this->neptune = Neptune::getInstance();
+		$this->config = Config::create('neptune');
+		$this->neptune = new Neptune($this->config);
 		$this->temp = new Temping();
 	}
 
 	public function tearDown() {
-		$this->neptune->reset();
 		$this->temp->reset();
 		Config::unload();
-	}
-
-	public function testGetAndSet() {
-		$this->neptune->set('my-component', function() {
-			return new \stdClass();
-		});
-		$component = $this->neptune->get('my-component');
-		$this->assertTrue($component instanceof \stdClass);
-	}
-
-	public function testGetThrowsExceptionNotRegistered() {
-		$this->setExpectedException('\Neptune\Core\ComponentException');
-		$this->neptune->get('my-component');
-	}
-
-	public function testGetThrowsExceptionNotCallable() {
-		$this->neptune->set('my-component', 'no-a-function');
-		$this->setExpectedException('\Neptune\Core\ComponentException');
-		$this->neptune->get('my-component');
-	}
-
-	public function testGetCreatesNewObjectEveryTime() {
-		$this->neptune->set('my-component', function() {
-			return new \stdClass();
-		});
-		$one = $this->neptune->get('my-component');
-		$two = $this->neptune->get('my-component');
-		$this->assertNotSame($one, $two);
-	}
-
-	public function testGetAndSetSingleton() {
-		$this->neptune->setSingleton('my-singleton', function() {
-			return new \stdClass();
-		});
-		$one = $this->neptune->get('my-singleton');
-		$two = $this->neptune->get('my-singleton');
-		$this->assertSame($one, $two);
 	}
 
 	public function testLoadAndGetEnv() {
@@ -114,6 +78,42 @@ END;
 
 	public function testGetEnvReturnsNullWithNoEnv() {
 		$this->assertNull($this->neptune->getEnv());
+	}
+
+	public function testGetRootDirectory() {
+		$this->config->set('dir.root', '/root/');
+		$this->assertSame('/root/', $this->neptune->getRootDirectory());
+	}
+
+	public function testGetRootDirectoryAppendsTrailingSlash() {
+		$this->config->set('dir.root', '/no/trailing/slash');
+		$this->assertSame('/no/trailing/slash/', $this->neptune->getRootDirectory());
+	}
+
+	public function testGetModuleDirectory() {
+		$modules = array(
+			'my-app' => 'app/MyApp/');
+		$this->config->set('dir.root', '/root/');
+		$this->config->set('modules', $modules);
+		$expected = '/root/app/MyApp/';
+		$this->assertSame($expected, $this->neptune->getModuleDirectory('my-app'));
+		//check it is an absolute path
+	}
+
+	public function testGetDefaultModule() {
+		$modules = array(
+			'my-app' => 'app/MyApp/',
+			'other-module' => 'app/OtherModel/');
+		$this->config->set('modules', $modules);
+		$this->assertSame('my-app', $this->neptune->getDefaultModule());
+	}
+
+	public function testGetModuleNamespace() {
+		$config = Config::create('my-app');
+		$config->set('namespace', 'MyApp');
+		$this->assertSame('MyApp', $this->neptune->getModuleNamespace('my-app'));
+		$config->set('namespace', 'Changed');
+		$this->assertSame('Changed', $this->neptune->getModuleNamespace('my-app'));
 	}
 
 }
