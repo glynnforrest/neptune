@@ -41,13 +41,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test($this->request('..23sd')));
 	}
 
-	public function testControllerMatch() {
-		$r = new Route('/url/:controller');
-		$r->method('index');
-		$this->assertTrue($r->test($this->request('/url/foo')));
-		$this->assertEquals(array('foo', 'index', array()), $r->getAction());
-	}
-
 	public function testArgsExplicitMatch() {
 		$r = new Route('/url_with_args');
 		$r->controller('foo')->method('index')->args(array(1));
@@ -134,19 +127,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->test($this->request('something'));
 	}
 
-	public function testAutoRoute() {
-		$r = new Route('/:controller(/:method(/:args))');
-		$r->method('index')->autoArgs();
-		$r->test($this->request('/home'));
-		$this->assertEquals(array('home', 'index', array()), $r->getAction());
-		$r->test($this->request('/home/hello'));
-		$this->assertEquals(array('home', 'hello', array()), $r->getAction());
-		$r->test($this->request('/home/hello/world'));
-		$this->assertEquals(array('home', 'hello', array('world')), $r->getAction());
-		$r->test($this->request('/home/hello/world/bar'));
-		$this->assertEquals(array('home', 'hello', array('world', 'bar')), $r->getAction());
-	}
-
 	public function testNonAutoRouteCanUseArgsName() {
 		$r = new Route('/url/with/:args', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/url/with/foo')));
@@ -162,22 +142,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('test', 'index', array()), $r->getAction());
 		$r->test($this->request('/website/http://foo.com/bar/baz'));
 		$this->assertEquals(array('test', 'index', array('site' => 'http://foo.com/bar/baz')), $r->getAction());
-	}
-
-	public function testValidateController() {
-		$r = new Route('/:controller');
-		$r->method('index');
-		$r->rules(array('controller' => 'alpha'));
-		$this->assertFalse($r->test($this->request('/f00')));
-		$this->assertTrue($r->test($this->request('/foo')));
-	}
-
-	public function testValidateMethod() {
-		$r = new Route('/:method');
-		$r->controller('foo');
-		$r->rules(array('method' => 'max:5'));
-		$this->assertFalse($r->test($this->request('/too_long')));
-		$this->assertTrue($r->test($this->request('/ok')));
 	}
 
 	public function testValidatedArgs() {
@@ -200,13 +164,31 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testTransforms() {
-		$r = new Route('/:controller');
-		$r->method('index')->transforms('controller', function($string) {
-			return strtoupper($string);
-		});
+		$r = new Route('/:var');
+		$r->controller('foo')
+          ->method('index')
+          ->transforms('var', function($string) {
+          return strtoupper($string);
+      });
 		$this->assertTrue($r->test($this->request('/foo')));
-		$this->assertEquals(array('FOO', 'index', array()), $r->getAction());
+		$this->assertEquals(array('foo', 'index', array('var' => 'FOO')), $r->getAction());
 	}
+
+    public function testTransformsCreatingObject()
+    {
+        $r = new Route('/user/:id', 'user', 'show');
+        $r->transforms('id', function($id) {
+            $user = new \stdClass();
+            $user->id = $id;
+            return $user;
+        });
+        $this->assertTrue($r->test($this->request('/user/3')));
+        $action = $r->getAction();
+        $this->assertSame('user', $action[0]);
+        $this->assertSame('show', $action[1]);
+        $this->assertInstanceOf('\stdClass', $action[2]['id']);
+        $this->assertSame('3', $action[2]['id']->id);
+    }
 
 	public function testOneFormat() {
 		$r = new Route('/foo', 'test', 'foo');
@@ -288,8 +270,8 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->controller(null);
 		$r->test($this->request('anything'));
 		$action = $r->getAction();
-		$controller = $action[0];
-		$this->assertEquals('controller', $controller);
+        $this->assertSame('controller', $action[0]);
+		$this->assertSame('method', $action[1]);
 	}
 
 	public function testMethodNullNotApplied() {
@@ -297,8 +279,8 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->method(null);
 		$r->test($this->request('anything'));
 		$action = $r->getAction();
-		$method = $action[1];
-		$this->assertEquals('method', $method);
+        $this->assertSame('controller', $action[0]);
+		$this->assertSame('method', $action[1]);
 	}
 
 	public function testArgsNullNotApplied() {
@@ -323,20 +305,20 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetResultFailedRegexp() {
-		$r = new Route('/some_url');
+		$r = new Route('/some_url', 'foo', 'bar');
 		$this->assertFalse($r->test($this->request('/something')));
 		$this->assertSame(Route::FAILURE_REGEXP, $r->getResult());
 	}
 
 	public function testGetResultFailedHttpMethod() {
-		$r = new Route('.*');
+		$r = new Route('.*', 'foo', 'bar');
 		$r->httpMethod('post');
 		$this->assertFalse($r->test($this->request('/something')));
 		$this->assertSame(Route::FAILURE_HTTP_METHOD, $r->getResult());
 	}
 
 	public function testGetResultFailedFormat() {
-		$r = new Route('.*');
+		$r = new Route('.*', 'foo', 'bar');
 		$r->format('json');
 		$this->assertFalse($r->test($this->request('/something')));
 		$this->assertSame(Route::FAILURE_FORMAT, $r->getResult());

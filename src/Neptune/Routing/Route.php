@@ -150,6 +150,16 @@ class Route {
 	}
 
 	public function test(Request $request) {
+        //check there is a controller and method before checking the
+        //regex
+		if (!$this->controller) {
+			$this->result = self::FAILURE_CONTROLLER;
+			return false;
+		}
+		if (!$this->method) {
+			$this->result = self::FAILURE_METHOD;
+			return false;
+		}
 		$path = $request->getPathInfo();
 		if(strlen($path) > 1) {
 			$path = rtrim($path, '/');
@@ -179,22 +189,6 @@ class Route {
 			}
 		}
 		unset($vars['_format']);
-		//get controller and method from either matches or supplied defaults.
-		if (!isset($vars['controller'])) {
-			$vars['controller'] = $this->controller;
-		}
-		if (!isset($vars['method'])) {
-			$vars['method'] = $this->method;
-		}
-		//should have a controller and function by now.
-		if (!$vars['controller']) {
-			$this->result = self::FAILURE_CONTROLLER;
-			return false;
-		}
-		if (!$vars['method']) {
-			$this->result = self::FAILURE_METHOD;
-			return false;
-		}
 		//process the transforms.
 		foreach ($this->transforms as $k => $v) {
 			if (isset($vars[$k])) {
@@ -202,10 +196,6 @@ class Route {
 			}
 		}
 
-		$this->controller = $vars['controller'];
-		unset($vars['controller']);
-		$this->method = $vars['method'];
-		unset($vars['method']);
 		//get args
 		$args = array();
 		//gather named variables from regex
