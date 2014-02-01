@@ -17,7 +17,6 @@ abstract class Controller {
 
 	protected $request;
 	protected $before_called;
-	protected $neptune;
 
 	public function __call($method, $args) {
 		throw new MethodNotFoundException('Method not found: ' . $method);
@@ -25,7 +24,6 @@ abstract class Controller {
 
 	public function __construct(Request $request) {
 		$this->request = $request;
-		$this->neptune = Neptune::getInstance();
 	}
 
 	public function runMethod($method, $args = array()) {
