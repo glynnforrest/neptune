@@ -104,6 +104,9 @@ class Application extends SymfonyApplication {
 	 * @param string $command_dir The directory containing the command classes.
 	 */
 	public function registerNamespace($namespace, $command_dir) {
+        if(!is_dir($command_dir)) {
+            return false;
+        }
 		$i = new DirectoryIterator($command_dir);
 		//Possible commands must be files that end in Command.php
 		$candidates = new CallbackFilterIterator($i, function ($current, $key, $iterator) {
