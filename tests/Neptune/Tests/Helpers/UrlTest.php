@@ -3,7 +3,6 @@
 namespace Neptune\Tests\Helpers;
 
 use Neptune\Helpers\Url;
-use Neptune\Routing\Dispatcher;
 use Neptune\Core\Config;
 
 require_once __DIR__ . '/../../../bootstrap.php';

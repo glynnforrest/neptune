@@ -3,7 +3,6 @@
 namespace Neptune\Helpers;
 
 use Neptune\Core\Config;
-use Neptune\Routing\Dispatcher;
 
 /**
  * Url
