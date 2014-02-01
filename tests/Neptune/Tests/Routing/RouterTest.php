@@ -3,7 +3,7 @@
 namespace Neptune\Tests\Routing;
 
 use Neptune\Core\Config;
-use Neptune\Routing\Dispatcher;
+use Neptune\Routing\Router;
 use Neptune\Routing\Route;
 use Neptune\Cache\Driver\DebugDriver;
 
@@ -12,15 +12,15 @@ use Symfony\Component\HttpFoundation\Request;
 include __DIR__ . ('/../../../bootstrap.php');
 
 /**
- * DispatcherTest
+ * RouterTest
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class DispatcherTest extends \PHPUnit_Framework_TestCase {
+class RouterTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->config = Config::create('neptune');
 		$this->config->set('root_url', 'myapp.local/');
-		$this->router = new Dispatcher($this->config);
+		$this->router = new Router($this->config);
 	}
 
 	public function tearDown() {
@@ -217,7 +217,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testName() {
-		$this->assertInstanceOf('\Neptune\Routing\Dispatcher', $this->router->name('route'));
+		$this->assertInstanceOf('\Neptune\Routing\Router', $this->router->name('route'));
 		$this->assertSame('route', $this->router->getName());
 	}
 
@@ -292,7 +292,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
 		$driver->expects($this->exactly(1))
 			   ->method('get')
-			   ->with(Dispatcher::CACHE_KEY_NAMES)
+			   ->with(Router::CACHE_KEY_NAMES)
 			   ->will($this->returnValue(array('get' => '/get/:id')));
 		$this->router->setCacheDriver($driver);
 		$this->assertSame('http://myapp.local/get/42', $this->router->url('get', array('id' => 42)));
@@ -302,7 +302,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
 		$driver->expects($this->exactly(1))
 			   ->method('get')
-			   ->with(Dispatcher::CACHE_KEY_NAMES)
+			   ->with(Router::CACHE_KEY_NAMES)
 			   ->will($this->returnValue('foo'));
 		$this->router->setCacheDriver($driver);
 		$this->setExpectedException('\Exception', 'Cache value \'Router.names\' is not an array');
@@ -313,7 +313,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
 		$driver->expects($this->exactly(1))
 			   ->method('get')
-			   ->with(Dispatcher::CACHE_KEY_NAMES);
+			   ->with(Router::CACHE_KEY_NAMES);
 		$this->router->setCacheDriver($driver);
 		$this->setExpectedException('\Exception', 'No named routes defined');
 		$this->router->url('get');

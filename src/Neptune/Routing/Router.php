@@ -11,10 +11,10 @@ use Neptune\Routing\RouteNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Dispatcher
+ * Router
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Dispatcher {
+class Router {
 
 	const CACHE_KEY_NAMES = 'Router.names';
 
@@ -40,7 +40,7 @@ class Dispatcher {
 	}
 
 	/**
-	 * Create a new Route for the Dispatcher to handle with $url.
+	 * Create a new Route for the Router to handle with $url.
 	 */
 	public function route($url, $controller = null, $method = null, $args = null) {
 		//substitute prefix as required
@@ -117,7 +117,7 @@ class Dispatcher {
 		$routes = include($routes_file);
 
 		//routes.php should have a returned a function that we can
-		//call with this Dispatcher instance as an argument. If not,
+		//call with this Router instance as an argument. If not,
 		//error out
 		if(!is_callable($routes)) {
 			throw new \Exception(
@@ -228,7 +228,7 @@ class Dispatcher {
 	 * $prefix in the route url.
      *
      * @param string $prefix The prefix
-     * @return Dispatcher This Dispatcher instance
+     * @return Router This Router instance
 	 */
 	public function setPrefix($prefix) {
 		//remove leading and trailing slashes if present
