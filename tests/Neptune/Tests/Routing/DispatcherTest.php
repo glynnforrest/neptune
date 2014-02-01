@@ -55,12 +55,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testRouteInheritsGlobals() {
-		$this->router->globals()->transforms('controller', function($controller) {
-		return ucfirst($controller) . 'Controller';
-	});
-		$r = $this->router->route('/foo', 'foo', 'index');
+		$this->router->globals()->controller('foo');
+		$r = $this->router->route('/foo', null, 'index');
 		$this->routeTest($r, '/foo');
-		$this->assertSame(array('FooController', 'index', array()), $r->getAction());
+		$this->assertSame(array('foo', 'index', array()), $r->getAction());
 	}
 
 	public function testRouteAssets() {
@@ -103,19 +101,27 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$this->router->match('foo');
 	}
 
+	public function testCatchAll() {
+		$this->router->route('/test', 'test', 'index');
+		$this->router->catchAll('foo');
+		$expected = array('foo', 'index', array());
+		$this->assertSame($expected, $this->router->match('/foo'));
+	}
+
 	public function testSetPrefix() {
-		$this->router->setPrefix('admin');
+		$this->assertSame($this->router, $this->router->setPrefix('admin'));
 		$this->assertSame('admin', $this->router->getPrefix());
 	}
 
-	public function testSetPrefixRemovesSlashes() {
-		$this->router->setPrefix('one/');
-		$this->assertSame('one', $this->router->getPrefix());
-		$this->router->setPrefix('/two');
-		$this->assertSame('two', $this->router->getPrefix());
-		$this->router->setPrefix('/three/');
-		$this->assertSame('three', $this->router->getPrefix());
-	}
+    public function testSetPrefixRemovesSlashes()
+    {
+        $this->router->setPrefix('one/');
+        $this->assertSame('one', $this->router->getPrefix());
+        $this->router->setPrefix('/two');
+        $this->assertSame('two', $this->router->getPrefix());
+        $this->router->setPrefix('/three/');
+        $this->assertSame('three', $this->router->getPrefix());
+    }
 
 	public function testPrefixIsAppliedToRoutes() {
 		$this->router->setPrefix('admin/');
@@ -322,12 +328,12 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	public function testNamedRouteInModuleUsesPrefix() {
 		//the second route in etc/routes.php sets a name of 'secret'
 		$this->setUpTestModule('foo');
-		$this->router->routeModule('foo', 'prefix');
-		$names = array('prefix.secret' => '/prefix/secret');
+		$this->router->routeModule('foo', 'my-module');
+		$names = array('my-module.secret' => '/my-module/secret');
 		$this->assertSame($names, $this->router->getNames());
 		$routes = $this->router->getRoutes();
 		$secret = $routes[1];
-		$this->router->match('/prefix/secret');
+		$this->router->match('/my-module/secret');
 		$action = array('foo_module_controller', 'secretArea', array());
 		$this->assertSame($action, $secret->getAction());
 	}

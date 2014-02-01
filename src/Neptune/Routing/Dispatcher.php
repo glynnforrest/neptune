@@ -52,6 +52,7 @@ class Dispatcher {
 			$url = '/' . $url;
 		}
 		$route = clone $this->globals();
+		$route->setPrefix($this->prefix);
 		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
 		if(!is_null($this->current_name)) {
@@ -223,8 +224,11 @@ class Dispatcher {
 	}
 
 	/**
-	 * Set the prefix on all future routes. :prefix is substituted with the
-	 * prefix string in the route url.
+	 * Set the prefix on all future routes. :prefix is replaced with
+	 * $prefix in the route url.
+     *
+     * @param string $prefix The prefix
+     * @return Dispatcher This Dispatcher instance
 	 */
 	public function setPrefix($prefix) {
 		//remove leading and trailing slashes if present
@@ -235,10 +239,13 @@ class Dispatcher {
 			$prefix = substr($prefix, 0, -1);
 		}
 		$this->prefix = $prefix;
+        return $this;
 	}
 
 	/**
 	 * Get the prefix for route urls.
+     *
+     * @return string The prefix
 	 **/
 	public function getPrefix() {
 		return $this->prefix;

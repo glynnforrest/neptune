@@ -361,4 +361,20 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $r->getAction());
 	}
 
+    public function testSetPrefix()
+    {
+        $r = new Route('/foo');
+        $this->assertSame($r, $r->setPrefix('admin'));
+        $this->assertSame('admin', $r->getPrefix());
+    }
+
+    public function testPrefixIsSubsitutedInUrl()
+    {
+        $r = new Route('/:prefix');
+        $r->setPrefix('foo');
+        $this->assertSame('/:prefix', $r->getUrl());
+        $r->url('/:prefix');
+        $this->assertSame('/foo', $r->getUrl());
+    }
+
 }
