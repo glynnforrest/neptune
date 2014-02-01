@@ -8,6 +8,7 @@ $root = __DIR__ . '/';
 include($root . 'vendor/autoload.php');
 
 use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 use Neptune\Console\Application;
 use Neptune\Console\OutputFormatter;
 
@@ -34,7 +35,9 @@ if(file_exists($config)) {
 
 $c->set('dir.root', $root);
 
+$neptune = new Neptune($c);
+
 //off we go
-$app = new Application($c);
+$app = new Application($neptune, $c);
 
 $app->run(null, $output);

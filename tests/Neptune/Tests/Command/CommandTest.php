@@ -26,7 +26,7 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
 		$this->config = Config::create('neptune');
 		$this->config->set('dir.root', '/path/to/root/');
         $this->neptune = new Neptune($this->config);
-		$application = new Application($this->config);
+		$application = new Application($this->neptune, $this->config);
 		$application->add(new EmptyCommand($this->neptune, $this->config));
 		$this->command = $application->find('empty');
 	}
