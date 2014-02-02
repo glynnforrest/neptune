@@ -24,6 +24,31 @@ class ControllerResolver implements ControllerResolverInterface
     public function getController(Request $request)
     {
         $controller = $request->attributes->get('_controller');
+        if(!$controller) {
+            throw new \Exception(sprintf(
+                'No _controller attribute set on Request with URI %s',
+                $request->getPathInfo()));
+        }
+
+        $method = $request->attributes->get('_method');
+        if(!$method) {
+            throw new \Exception(sprintf(
+                'No _method attribute set on Request with URI %s',
+                $request->getPathInfo()));
+        }
+        $method .= 'Action';
+
+        //check if controller is defined as a service (it begins with
+        //'::')
+        $prefix = '::';
+        if (substr($controller, 0, 2) === $prefix) {
+            $service = substr($controller, 2);
+            if(!$this->neptune->offsetExists($service)) {
+                throw new \Exception(sprintf('Undefined controller service %s', $service));
+            }
+            return array($this->neptune[$service], $method);
+        }
+
         //controller can be either a single name of a controller, or a
         //name prefixed with the module, e.g. 'foo' or 'my-module:foo'
         if (strpos($controller, ':')) {
@@ -34,7 +59,6 @@ class ControllerResolver implements ControllerResolverInterface
         }
         $module = $this->neptune->getModuleNamespace($module);
         $class = sprintf('%s\\Controller\\%sController', $module, ucfirst($controller_name));
-        $method = $request->attributes->get('_method') . 'Action';
         if (!class_exists($class)) {
             throw new \Exception(sprintf('Controller not found: %s', $class));
         }

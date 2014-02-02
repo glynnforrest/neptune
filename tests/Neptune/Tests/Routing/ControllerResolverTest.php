@@ -74,4 +74,24 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('barAction', $controller[1]);
     }
 
+    public function testGetControllerFromService()
+    {
+        $controller = new \stdClass();
+        $this->neptune->expects($this->once())
+                      ->method('offsetExists')
+                      ->with('controllers.foo')
+                      ->will($this->returnValue(true));
+        $this->neptune->expects($this->once())
+                      ->method('offsetGet')
+                      ->with('controllers.foo')
+                      ->will($this->returnValue($controller));
+        $req = $this->createRequest('::controllers.foo', 'bar');
+        $controller = $this->obj->getController($req);
+
+        $this->assertInternalType('array', $controller);
+        $this->assertTrue(count($controller) === 2);
+        $this->assertInstanceOf('\stdClass', $controller[0]);
+        $this->assertSame('barAction', $controller[1]);
+    }
+
 }
