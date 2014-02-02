@@ -111,8 +111,7 @@ class Router {
 		$this->setPrefix($prefix ? $prefix : $module_name);
 
 		//include routes.php file
-		$routes_file = $this->config->getRequired('dir.root')
-			. $this->config->getRequired('modules.' . $module_name)
+        $routes_file = $this->config->getPath('modules.' . $module_name)
 			. 'routes.php';
 		$routes = include($routes_file);
 
