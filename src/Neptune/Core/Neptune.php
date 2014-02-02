@@ -8,6 +8,7 @@ use Neptune\Core\ComponentException;
 use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
+use Neptune\EventListener\StringResponseListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -31,6 +32,7 @@ class Neptune extends Pimple implements HttpKernelInterface
         $this['dispatcher'] = $this->share(function () {
             $dispatcher = new EventDispatcher;
             $dispatcher->addSubscriber(new RouterListener($this['router']));
+            $dispatcher->addSubscriber(new StringResponseListener());
             return $dispatcher;
         });
 
