@@ -5,15 +5,49 @@ namespace Neptune\Core;
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Core\Events;
 use Neptune\Core\ComponentException;
+use Neptune\Routing\Router;
+use Neptune\Routing\ControllerResolver;
+use Neptune\EventListener\RouterListener;
 
-class Neptune {
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-    protected $config;
-	protected $env;
+use \Pimple;
 
-	public function __construct(Config $config) {
-        $this->config = $config;
-	}
+class Neptune extends Pimple implements HttpKernelInterface
+{
+
+    protected $env;
+
+    public function __construct(Config $config)
+    {
+        $this['config'] = $config;
+
+        $this['router'] = new Router($config);
+
+        $this['dispatcher'] = $this->share(function () {
+            $dispatcher = new EventDispatcher;
+            $dispatcher->addSubscriber(new RouterListener($this['router']));
+            return $dispatcher;
+        });
+
+        $this['resolver'] = $this->share(function() {
+            return new ControllerResolver($this);
+        });
+
+        $this['request_stack'] = $this->share(function () {
+            return new RequestStack();
+        });
+    }
+
+    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    {
+        $kernel = new HttpKernel($this['dispatcher'], $this['resolver'], $this['request_stack']);
+        return $kernel->handle($request, $type, $catch);
+    }
 
 	/**
 	 * Load the environment $env. This will include the file
@@ -22,12 +56,11 @@ class Neptune {
 	 * config/neptune.php will be used.
 	 */
 	public function loadEnv($env = null) {
-		$c = Config::load('neptune');
 		if(!$env) {
-			$env = $c->getRequired('env');
+			$env = $this['config']->getRequired('env');
 		}
 		$this->env = $env;
-		include $c->getRequired('dir.root') . 'app/env/' . $env . '.php';
+		include $this['config']->getRequired('dir.root') . 'app/env/' . $env . '.php';
 		Config::loadEnv($env);
 		return true;
 	}
@@ -47,13 +80,13 @@ class Neptune {
      */
     public function getRootDirectory()
     {
-		$root = $this->config->getRequired('dir.root');
-		//make sure root has a trailing slash
-		if(substr($root, -1) !== '/') {
-			$root .= '/';
-		}
+        $root = $this['config']->getRequired('dir.root');
+        //make sure root has a trailing slash
+        if(substr($root, -1) !== '/') {
+            $root .= '/';
+        }
 
-		return $root;
+        return $root;
     }
 
 	/**
@@ -63,7 +96,7 @@ class Neptune {
 	 */
 	public function getModuleDirectory($module)
     {
-		return $this->config->getPath('modules.' . $module);
+		return $this['config']->getPath('modules.' . $module);
 	}
 
 	/**
@@ -82,7 +115,7 @@ class Neptune {
 
     public function getDefaultModule()
     {
-		$modules = $this->config->get('modules');
+		$modules = $this['config']->get('modules');
 		if(!$modules) {
 			return null;
 		}
