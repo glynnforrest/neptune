@@ -82,7 +82,11 @@ class Application extends SymfonyApplication {
 	protected function registerCommands(OutputInterface $output) {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
 		$root = $this->neptune->getRootDirectory();
-		foreach ($this->config->get('modules') as $module => $path) {
+        $modules = $this->config->get('modules');
+        if (!is_array($modules)) {
+            return false;
+        }
+		foreach ($modules as $module => $path) {
 			$namespace = $this->neptune->getModuleNamespace($module);
 			try {
 				$this->registerNamespace($namespace, $root . $path . 'Command/');
