@@ -23,9 +23,9 @@ class Router {
 	protected $names = array();
 	protected $globals;
 	protected $matched_url;
-	protected $prefix;
 	protected $cache;
 	protected $current_name;
+    protected $current_module;
 
 	public function __construct(Config $config) {
 		$this->config = $config;
@@ -43,16 +43,11 @@ class Router {
 	 * Create a new Route for the Router to handle with $url.
 	 */
 	public function route($url, $controller = null, $method = null, $args = null) {
-		//substitute prefix as required
-		if($this->prefix) {
-			$url = str_replace(':prefix', $this->prefix, $url);
-		}
 		//add a slash if the given url doesn't start with one
 		if(substr($url, 0, 1) !== '/' && $url !== '.*') {
 			$url = '/' . $url;
 		}
 		$route = clone $this->globals();
-		$route->setPrefix($this->prefix);
 		$route->url($url)->controller($controller)->method($method)->args($args);
 		$this->routes[$url] = $route;
 		if(!is_null($this->current_name)) {
@@ -93,25 +88,29 @@ class Router {
 		return $this->routes[$url];
 	}
 
-	/**
-	 * Load all routes defined in the routes.php file in $module_name.
-	 * $prefix will be used as the url prefix if specified, otherwise
-	 * $module_name will be used.
-	 */
-	public function routeModule($module_name, $prefix = null) {
-		//store current globals and prefix so they aren't used in
+    /**
+     * Load all routes defined in the routes.php file in $module.
+     * $prefix will be used as the url prefix if specified, otherwise
+     * $module will be used.
+     *
+     * @param string $module The name of the module
+     * @param string $prefix The prefix to use for route urls
+     */
+    public function routeModule($module, $prefix = null)
+    {
+        //if no url prefix is given, use the module name
+        $prefix = $prefix ? $prefix : $module;
+
+		//store current globals so they aren't used in
 		//routes.php and can be restored later
 		$old_globals = $this->globals;
-		$old_prefix = $this->prefix;
 		//reset globals so the module can define them
 		$this->globals = null;
-
-		// set prefix as the one we've been given, or otherwise the
-		// name of the module
-		$this->setPrefix($prefix ? $prefix : $module_name);
+        //set the current module name so the name() method can use it
+        $this->current_module = $module;
 
 		//include routes.php file
-        $routes_file = $this->config->getPath('modules.' . $module_name)
+        $routes_file = $this->config->getPath('modules.' . $module)
 			. 'routes.php';
 		$routes = include($routes_file);
 
@@ -122,12 +121,14 @@ class Router {
 			throw new \Exception(
 				$routes_file . ' does not return a callable function.');
 		}
-		$routes($this);
-		//reset the prefix name and the globals as what they were before
-		$this->setPrefix($old_prefix);
-		$this->globals = $old_globals;
-		return true;
-	}
+        //call the function, passing in this Router, the module name
+        //and url prefix
+        $routes($this, $module, $prefix);
+        //reset the module name to null and the globals to what they were before
+        $this->current_module = null;
+        $this->globals = $old_globals;
+        return true;
+    }
 
 	public function catchAll($controller, $method ='index', $args = null) {
 		$url = '.*';
@@ -139,10 +140,10 @@ class Router {
 	 * Give the next defined route a name.
 	 */
 	public function name($name) {
-		if($this->prefix) {
-			$name = $this->prefix . '.' . $name;
-		}
-		$this->current_name = $name;
+        if($this->current_module) {
+            $name = $this->current_module . ':' . $name;
+        }
+        $this->current_name = $name;
 		return $this;
 	}
 
@@ -223,36 +224,9 @@ class Router {
 	}
 
 	/**
-	 * Set the prefix on all future routes. :prefix is replaced with
-	 * $prefix in the route url.
-     *
-     * @param string $prefix The prefix
-     * @return Router This Router instance
-	 */
-	public function setPrefix($prefix) {
-		//remove leading and trailing slashes if present
-		if(substr($prefix, 0, 1) == '/') {
-			$prefix = substr($prefix, 1);
-		}
-		if(substr($prefix, -1) == '/') {
-			$prefix = substr($prefix, 0, -1);
-		}
-		$this->prefix = $prefix;
-        return $this;
-	}
-
-	/**
-	 * Get the prefix for route urls.
-     *
-     * @return string The prefix
-	 **/
-	public function getPrefix() {
-		return $this->prefix;
-	}
-
-	/**
-	 * Make sure $this->names exists, perhaps by fetching it from the
-	 * cache.
+     * Get the url for a named route. If routing has been skipped due
+     * to caching, this method will attempt to fetch the route names
+     * from the cache.
 	 */
 	public function getNamedUrl($name) {
 		if(empty($this->names)) {

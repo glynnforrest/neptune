@@ -108,27 +108,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($expected, $this->router->match('/foo'));
 	}
 
-	public function testSetPrefix() {
-		$this->assertSame($this->router, $this->router->setPrefix('admin'));
-		$this->assertSame('admin', $this->router->getPrefix());
-	}
-
-    public function testSetPrefixRemovesSlashes()
-    {
-        $this->router->setPrefix('one/');
-        $this->assertSame('one', $this->router->getPrefix());
-        $this->router->setPrefix('/two');
-        $this->assertSame('two', $this->router->getPrefix());
-        $this->router->setPrefix('/three/');
-        $this->assertSame('three', $this->router->getPrefix());
-    }
-
-	public function testPrefixIsAppliedToRoutes() {
-		$this->router->setPrefix('admin/');
-		$route = $this->router->route(':prefix/login');
-		$this->assertSame('/admin/login', $route->getUrl());
-	}
-
 	public function testGetRoutes() {
 		$this->router->catchAll('foo');
 		$routes = $this->router->getRoutes();
@@ -166,7 +145,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$route = $routes[0];
 		$this->assertTrue($this->routeTest($route, '/foo/login'));
 		$action = $route->getAction();
-		$this->assertSame('foo_module_controller', $action[0]);
+		$this->assertSame('::foo.controller.bar', $action[0]);
 	}
 
 	public function testAddModuleDoesNotChangeGlobals() {
@@ -191,13 +170,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$action = $route->getAction();
 		$args = $action[2];
 		$this->assertSame(array(), $args);
-	}
-
-	public function testAddModuleDoesNotChangePrefix() {
-		$this->setUpTestModule('bar');
-		$this->router->setPrefix('prefix_before');
-		$this->router->routeModule('bar');
-		$this->assertSame('prefix_before', $this->router->getPrefix());
 	}
 
 	public function testGetAndSetCacheDriver() {
@@ -319,23 +291,27 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->router->url('get');
 	}
 
-	public function testNameUsesPrefix() {
-		$this->router->setPrefix('foo');
-		$this->router->name('name');
-		$this->assertSame('foo.name', $this->router->getName());
-	}
-
-	public function testNamedRouteInModuleUsesPrefix() {
+	public function testNamedRouteInModuleHasPrefix() {
 		//the second route in etc/routes.php sets a name of 'secret'
 		$this->setUpTestModule('foo');
 		$this->router->routeModule('foo', 'my-module');
-		$names = array('my-module.secret' => '/my-module/secret');
+		$names = array('foo:secret' => '/my-module/secret');
 		$this->assertSame($names, $this->router->getNames());
 		$routes = $this->router->getRoutes();
 		$secret = $routes[1];
-		$this->router->match('/my-module/secret');
-		$action = array('foo_module_controller', 'secretArea', array());
-		$this->assertSame($action, $secret->getAction());
+		$action = array('::foo.controller.bar', 'secretArea', array());
+		$this->assertSame($action, $this->router->match('/my-module/secret'));
 	}
+
+    public function testAddModuleDoesNotAffectFutureNames() {
+        $this->setUpTestModule('bar');
+        $this->router->routeModule('bar');
+        $this->router->name('hello')->route('foo');
+        $names = array(
+            'bar:secret' => '/bar/secret',
+            'hello' => '/foo',
+        );
+        $this->assertSame($names, $this->router->getNames());
+    }
 
 }

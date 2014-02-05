@@ -37,7 +37,6 @@ class Route {
 	protected $args_regex = '[^/.]+';
 	protected $auto_args;
 	protected $auto_args_regex = '[^/.]+';
-	protected $prefix;
 
 	public function __construct($url, $controller = null, $method = null, $args = null) {
 		$this->url($url);
@@ -80,10 +79,6 @@ class Route {
 	}
 
 	public function url($url) {
-		//substitute prefix as required
-		if($this->prefix) {
-			$url = str_replace(':prefix', $this->prefix, $url);
-		}
 		$this->url = $url;
 		return $this;
 	}
@@ -272,28 +267,5 @@ class Route {
 	public function getResult() {
 		return $this->result;
 	}
-
-    /**
-     * Set the prefix on this route. :prefix in the url for this route
-     * will be replaced with $prefix.
-     *
-     * @param string $prefix The prefix
-     * @return Route This Route instance
-     */
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
-        return $this;
-    }
-
-    /**
-     * Get the prefix on this route.
-     *
-     * @return string The prefix
-     */
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
 
 }
