@@ -6,6 +6,7 @@ use Neptune\Exceptions\MethodNotFoundException;
 use Neptune\Security\SecurityFactory;
 use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
+use Neptune\Form\Form;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -46,5 +47,13 @@ abstract class Controller {
 	protected function _assets() {
 		return Assets::getInstance();
 	}
+
+    public function createForm($action = null)
+    {
+        if(!$action) {
+            $action = $this->request->getUri();
+        }
+        return new Form($action);
+    }
 
 }

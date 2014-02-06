@@ -60,4 +60,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->obj->runMethod('actionUnknown');
 	}
 
+    public function testCreateForm()
+    {
+        $this->assertInstanceOf('\Neptune\Form\Form', $this->obj->createForm());
+    }
+
 }
