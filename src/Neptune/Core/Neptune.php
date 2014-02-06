@@ -4,6 +4,7 @@ namespace Neptune\Core;
 
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Core\Events;
+use Neptune\Service\ServiceInterface;
 use Neptune\Core\ComponentException;
 use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
@@ -22,6 +23,8 @@ class Neptune extends Pimple implements HttpKernelInterface
 {
 
     protected $env;
+    protected $booted;
+    protected $services = array();
 
     public function __construct(Config $config)
     {
@@ -45,8 +48,35 @@ class Neptune extends Pimple implements HttpKernelInterface
         });
     }
 
+    /**
+     * Add a service to this Neptune instance.
+     *
+     * @param ServiceInterface The service to add.
+     */
+    public function addService(ServiceInterface $service)
+    {
+        $this->services[] = $service;
+        return $service->register($this);
+    }
+
+    /**
+     * Boot up the application. This is called automatically by
+     * handle().
+     */
+    public function boot()
+    {
+        if(!$this->booted) {
+            foreach ($this->services as $service) {
+                $service->boot($this);
+            }
+        }
+        $this->booted = true;
+        return true;
+    }
+
     public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
+        $this->boot();
         $kernel = new HttpKernel($this['dispatcher'], $this['resolver'], $this['request_stack']);
         return $kernel->handle($request, $type, $catch);
     }

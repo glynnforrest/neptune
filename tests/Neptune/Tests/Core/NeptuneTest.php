@@ -116,4 +116,27 @@ END;
 		$this->assertSame('Changed', $this->neptune->getModuleNamespace('my-app'));
 	}
 
+    public function testAddService()
+    {
+        $service = $this->getMock('\Neptune\Service\ServiceInterface');
+        $service->expects($this->once())
+                ->method('register')
+                ->with($this->neptune);
+        $service->expects($this->never())
+                ->method('boot');
+        $this->neptune->addService($service);
+    }
+
+    public function testBootServices()
+    {
+        $service = $this->getMock('\Neptune\Service\ServiceInterface');
+        $service->expects($this->once())
+                ->method('boot')
+                ->with($this->neptune);
+        $this->neptune->addService($service);
+        $this->neptune->boot();
+        //check it is only called once
+        $this->neptune->boot();
+    }
+
 }
