@@ -187,15 +187,33 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($query, $this->lastQuery());
 	}
 
-	public function testBuildForm() {
-		$f = UpperCase::buildForm();
-		$this->assertInstanceOf('\Neptune\Form\Form', $f);
-	}
+    public function testBuildForm()
+    {
+        $form = UpperCase::buildForm(new Form('/url'));
+        $this->assertInstanceOf('\Neptune\Form\Form', $form);
+    }
 
-	public function testBuildFormDoesNotIncludePrimaryKey() {
-		$f = UpperCase::buildForm();
-		$expected = array('name', 'column', '_save');
-		$this->assertSame($expected, $f->getFields());
-	}
+    public function testBuildFormDoesNotIncludePrimaryKey()
+    {
+        $form = UpperCase::buildForm(new Form('/url'));
+        $expected = array('name', 'column', '_save');
+        $this->assertSame($expected, $form->getFields());
+    }
+
+    public function testBuildFormAddsValuesAndErrors()
+    {
+        $values = array(
+            'name' => 'foo',
+            'column' => 'bar'
+        );
+        $errors = array(
+            'name' => 'Some name error'
+        );
+        $form = UpperCase::buildForm(new Form('/url'), $values, $errors);
+        $this->assertSame('foo', $form->getValue('name'));
+        $this->assertSame('bar', $form->getValue('column'));
+        $this->assertSame('Some name error', $form->getError('name'));
+    }
+
 
 }

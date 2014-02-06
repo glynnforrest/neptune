@@ -52,7 +52,7 @@ class Thing {
 	}
 
 	/**
-	 * Convenience wrapper to set().
+	 * Convenience wrapper to get().
 	 */
 	public function __get($key) {
 		return $this->get($key);
@@ -412,19 +412,20 @@ class Thing {
 		return $v;
 	}
 
-	public static function buildForm($action = null, $values = array(), $errors = array(), $method = 'POST') {
-		$f = new Form($action, $method);
-		foreach(static::$fields as $field) {
-			if($field !== static::$primary_key) {
-				$f->text($field);
-			}
-		}
-		//Create a submit field, prefixed with an underscore to
-		//hopefully not conflict with any database columns
-		$f->submit('_save');
-		$f->setValues($values);
-		$f->addErrors($errors);
-		return $f;
-	}
+    public static function buildForm(Form $form, $values = array(), $errors = array())
+    {
+        foreach(static::$fields as $field) {
+            if($field !== static::$primary_key) {
+                $form->text($field);
+            }
+        }
+        //Create a submit field, prefixed with an underscore to
+        //hopefully not conflict with any database columns for
+        //convenience
+        $form->submit('_save');
+        $form->setValues($values);
+        $form->addErrors($errors);
+        return $form;
+    }
 
 }
