@@ -40,7 +40,6 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(Html::tag('p', $error_msg), $f->error('email'));
 	}
 
-
 	public function testCreateSimpleForm() {
 		$f = new Form('/post/url', 'get');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('name'));
@@ -79,24 +78,24 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($options, $f->getOptions());
 	}
 
-	public function testGetAndSet() {
+	public function testGetAndSetValue() {
 		$f = new Form('/url');
 		$f->text('message');
-		$this->assertSame(null, $f->get('message'));
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('message', 'hello'));
-		$this->assertSame('hello', $f->get('message'));
+		$this->assertSame(null, $f->getValue('message'));
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValue('message', 'hello'));
+		$this->assertSame('hello', $f->getValue('message'));
 	}
 
-	public function testSetThrowsExceptionUndefinedRow() {
+	public function testSetValueThrowsExceptionUndefinedRow() {
 		$f = new Form('/url');
 		$this->setExpectedException('\Exception', "Attempting to assign value 'user42' to an unknown form row 'username'");
-		$f->set('username', 'user42');
+		$f->setValue('username', 'user42');
 	}
 
 	public function testSetCreateNewRow() {
 		$f = new Form('/url');
-		$this->assertInstanceOf('\Neptune\Form\Form', $f->set('username', 'user42', true));
-		$this->assertSame('user42', $f->get('username'));
+		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValue('username', 'user42', true));
+		$this->assertSame('user42', $f->getValue('username'));
 		$this->assertSame('text', $f->getRow('username')->getType());
 	}
 
@@ -120,12 +119,43 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$f->setValues($expected);
 	}
 
+    public function testGetAndSetError()
+    {
+        $f = new Form('/url');
+        $f->text('username');
+        $f->addErrors(array('username' => 'Username error'));
+        $this->assertSame('Username error', $f->getError('username'));
+        $f->setError('username', 'A different error');
+        $this->assertSame('A different error', $f->getError('username'));
+    }
+
+    public function testSetErrorThrowsExceptionUndefinedRow()
+    {
+        $f = new Form('/url');
+        $this->setExpectedException('\Exception');
+        $f->setError('username', 'user42');
+    }
+
+    public function testGetErrors()
+    {
+        $f = new Form('/url');
+        $f->text('username');
+        $f->password('password');
+        $f->setError('password', 'Password error');
+        $f->setError('username', 'Username error');
+        $errors = array(
+            'username' => 'Username error',
+            'password' => 'Password error'
+        );
+        $this->assertSame($errors, $f->getErrors());
+    }
+
 	public function testSetValuesCreateRows() {
 		$f = new Form('/url');
 		$new = array('foo' => 'bar', 'baz' => 'qux', 'fu bar' => 'foo bar');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValues($new, true));
 		foreach ($new as $name => $value) {
-			$this->assertSame($value, $f->get($name));
+			$this->assertSame($value, $f->getValue($name));
 			$this->assertSame('text', $f->getRow($name)->getType());
 		}
 	}

@@ -163,7 +163,7 @@ class Form {
 	public function getRow($name) {
 		if(!array_key_exists($name, $this->rows)) {
 			throw new \Exception(
-				"Unknown form row '$name'"
+				"Attempting to access unknown form row '$name'"
 			);
 		}
 		return $this->rows[$name];
@@ -188,7 +188,7 @@ class Form {
 	 * @param string $value The value
 	 * @param bool $create_row Create a new FormRow if it doesn't exist
 	 */
-	public function set($name, $value, $create_row = false) {
+	public function setValue($name, $value, $create_row = false) {
 		if(!array_key_exists($name, $this->rows)) {
 			if(!$create_row) {
 				throw new \Exception(
@@ -204,7 +204,7 @@ class Form {
 	/**
 	 * Get the value of the input attached to FormRow $name.
 	 */
-	public function get($name) {
+	public function getValue($name) {
 		return $this->getRow($name)->getValue();
 	}
 
@@ -217,9 +217,9 @@ class Form {
 	 * @param array $values An array of keys and values to set
 	 * @param bool $create_row Create a new FormRow if it doesn't exist
 	 */
-	public function setValues(array $values=array(), $create_rows = false) {
+	public function setValues(array $values = array(), $create_rows = false) {
 		foreach ($values as $name => $value) {
-			$this->set($name, $value, $create_rows);
+			$this->setValue($name, $value, $create_rows);
 		}
 		return $this;
 	}
@@ -235,6 +235,27 @@ class Form {
 		return $values;
 	}
 
+    /**
+     * Set the error of FormRow $name.
+     *
+     * @param string $name The name of the FormRow
+     * @param string $error The error message
+     */
+    public function setError($name, $error)
+    {
+        return $this->getRow($name)->setError($error);
+    }
+
+    /**
+     * Get the error of FormRow $name.
+     *
+     * @param string $name The name of the FormRow
+     */
+    public function getError($name)
+    {
+        return $this->getRow($name)->getError();
+    }
+
 	/**
 	 * Add multiple errors to this Form. $errors should be an array of
 	 * keys and values, where a key is a name of a FormRow attached to
@@ -244,9 +265,21 @@ class Form {
 	 */
 	public function addErrors(array $errors = array()) {
 		foreach ($errors as $name => $msg) {
-			$this->getRow($name)->setError($msg);
+			$this->setError($name, $msg);
 		}
 	}
+
+    /**
+     * Get all of the errors attached to this Form.
+     *
+     * @return array An array of errors
+     */
+    public function getErrors()
+    {
+        return array_map(function($row) {
+                return $row->getError();
+            }, $this->rows);
+    }
 
 	/**
 	 * Add a text input to the form.
@@ -262,13 +295,13 @@ class Form {
 	/**
 	 * Add a password field to the form. $value will not be added to
 	 * the password input for security reasons, though it is available
-	 * through get('$name'). If you understand the security
+	 * through getValue('$name'). If you understand the security
 	 * implications and still want to create a password field with a
-	 * default value, you will need to construct the HTML manually
-	 * using the Html class, e.g.
+	 * default value, you could construct the HTML manually using the
+	 * Html class, e.g.
 	 *
 	 * <?=$f->label('pass');?>
-	 * <?=Html::input('password', 'pass', $f->get('pass'), array('id' => 'password')'?>
+	 * <?=Html::input('password', 'pass', $f->getValue('pass'), array('id' => 'password')'?>
 	 * <?=$f->error('pass');?>
 	 *
 	 * @param string $name The name of the input
@@ -321,7 +354,7 @@ class Form {
 	/**
 	 * Add a checkbox field to the form. By convention, the value of
 	 * the input tag will always be 'checked'. If required, the real
-	 * value is available from get(). If the $value is truthy, a
+	 * value is available from getValue(). If the $value is truthy, a
 	 * checked attribute will be added automatically.
 	 *
 	 * @param string $name The name of the input
