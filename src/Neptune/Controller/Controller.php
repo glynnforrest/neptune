@@ -8,6 +8,7 @@ use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 use Neptune\Form\Form;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -54,6 +55,12 @@ abstract class Controller {
             $action = $this->request->getUri();
         }
         return new Form($action);
+    }
+
+    public function redirect($to, $with = array())
+    {
+        //set session parameters here
+        return new RedirectResponse($to);
     }
 
 }
