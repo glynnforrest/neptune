@@ -28,6 +28,7 @@ class Neptune extends Pimple implements HttpKernelInterface
 
     public function __construct(Config $config)
     {
+        parent::__construct();
         $this['config'] = $config;
 
         $this['router'] = new Router($config);
