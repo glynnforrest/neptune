@@ -26,8 +26,7 @@ class SessionService implements ServiceInterface
     public function boot(Neptune $neptune)
     {
         //register a listener that will attach the session driver to the request
-        $dispatcher = $neptune['dispatcher'];
-        $dispatcher->addSubscriber(new SessionListener($neptune));
+        $neptune['dispatcher']->addSubscriber(new SessionListener($neptune));
     }
 
 }
