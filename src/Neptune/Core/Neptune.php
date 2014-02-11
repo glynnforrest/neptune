@@ -40,7 +40,7 @@ class Neptune extends Pimple implements HttpKernelInterface
             return $dispatcher;
         };
 
-        $this['resolver'] = function() {
+        $this['resolver'] = function () {
             return new ControllerResolver($this);
         };
 
@@ -93,8 +93,11 @@ class Neptune extends Pimple implements HttpKernelInterface
 			$env = $this['config']->getRequired('env');
 		}
 		$this->env = $env;
-		include $this['config']->getRequired('dir.root') . 'app/env/' . $env . '.php';
 		Config::loadEnv($env);
+		$file = $this['config']->getRequired('dir.root') . 'app/env/' . $env . '.php';
+        if(file_exists($file)) {
+            include $file;
+        }
 		return true;
 	}
 
