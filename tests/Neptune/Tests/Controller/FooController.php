@@ -9,10 +9,11 @@ use Neptune\Controller\Controller;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class FooController extends Controller {
-
-	public function fooAction() {
-		return 'Foo';
-	}
+class FooController extends Controller
+{
+    public function fooAction()
+    {
+        return 'Foo';
+    }
 
 }

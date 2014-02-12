@@ -2,10 +2,10 @@
 
 namespace Neptune\Controller;
 
-use Neptune\Exceptions\MethodNotFoundException;
-use Neptune\Security\SecurityFactory;
 use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
+use Neptune\Core\NeptuneAwareInterface;
+use Neptune\Core\RequestAwareInterface;
 use Neptune\Form\Form;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -15,45 +15,57 @@ use Symfony\Component\HttpFoundation\Request;
  * Controller
  * @author Glynn Forrest me@glynnforrest.com
  */
-abstract class Controller {
+abstract class Controller implements NeptuneAwareInterface, RequestAwareInterface
+{
 
-	protected $request;
-	protected $before_called;
+    protected $neptune;
+    protected $request;
 
-	public function __call($method, $args) {
-		throw new MethodNotFoundException('Method not found: ' . $method);
-	}
+    public function setNeptune(Neptune $neptune)
+    {
+        $this->neptune = $neptune;
+    }
 
-	public function __construct(Request $request) {
-		$this->request = $request;
-	}
+    public function getNeptune()
+    {
+        return $this->neptune;
+    }
 
-	public function runMethod($method, $args = array()) {
-		$method .= 'Action';
-		if(!$this->before_called) {
-			$this->before_called = true;
-			try {
-				if(!$this->before()) {
-					return false;
-				}
-			} catch (MethodNotFoundException $e) {}
-		}
-		return call_user_func_array(array($this, $method), $args);
-	}
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
 
-	protected function _security($name = null) {
-		return SecurityFactory::getDriver($name);
-	}
+    public function getRequest()
+    {
+        return $this->request;
+    }
 
-	protected function _assets() {
-		return Assets::getInstance();
-	}
+    public function assets()
+    {
+        return Assets::getInstance();
+    }
+
+    public function security()
+    {
+        if (!isset($this->neptune['security'])) {
+            throw new \Exception('Security service has not been registered');
+        }
+
+        return $this->neptune['security'];
+    }
+
+    public function database()
+    {
+        //return database service
+    }
 
     public function createForm($action = null)
     {
-        if(!$action) {
+        if (!$action) {
             $action = $this->request->getUri();
         }
+
         return new Form($action);
     }
 
