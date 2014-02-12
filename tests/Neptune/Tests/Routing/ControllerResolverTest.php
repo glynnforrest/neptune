@@ -3,6 +3,7 @@
 namespace Neptune\Tests\Routing;
 
 use Neptune\Routing\ControllerResolver;
+use Neptune\Tests\Routing\Controller\TestController;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,7 +21,6 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-
         $this->neptune = $this->getMockBuilder('\\Neptune\\Core\\Neptune')
                               ->disableOriginalConstructor()
                               ->getMock();
@@ -36,6 +36,7 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $req = new Request();
         $req->attributes->set('_controller', $controller);
         $req->attributes->set('_method', $method);
+
         return $req;
     }
 
@@ -52,6 +53,8 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(count($controller) === 2);
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
+        $this->assertSame($req, $controller[0]->getRequest());
+        $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
     public function testGetControllerWithNoModule()
@@ -72,11 +75,12 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(count($controller) === 2);
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
+        $this->assertSame($req, $controller[0]->getRequest());
+        $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
     public function testGetControllerFromService()
     {
-        $controller = new \stdClass();
         $this->neptune->expects($this->once())
                       ->method('offsetExists')
                       ->with('controllers.foo')
@@ -84,14 +88,16 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->neptune->expects($this->once())
                       ->method('offsetGet')
                       ->with('controllers.foo')
-                      ->will($this->returnValue($controller));
+                      ->will($this->returnValue(new TestController()));
         $req = $this->createRequest('::controllers.foo', 'bar');
         $controller = $this->obj->getController($req);
 
         $this->assertInternalType('array', $controller);
         $this->assertTrue(count($controller) === 2);
-        $this->assertInstanceOf('\stdClass', $controller[0]);
+        $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
+        $this->assertSame($req, $controller[0]->getRequest());
+        $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
 }

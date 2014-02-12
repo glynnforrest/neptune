@@ -3,6 +3,8 @@
 namespace Neptune\Routing;
 
 use Neptune\Core\Neptune;
+use Neptune\Core\NeptuneAwareInterface;
+use Neptune\Core\RequestAwareInterface;
 
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,14 +26,14 @@ class ControllerResolver implements ControllerResolverInterface
     public function getController(Request $request)
     {
         $controller = $request->attributes->get('_controller');
-        if(!$controller) {
+        if (!$controller) {
             throw new \Exception(sprintf(
                 'No _controller attribute set on Request with URI %s',
                 $request->getPathInfo()));
         }
 
         $method = $request->attributes->get('_method');
-        if(!$method) {
+        if (!$method) {
             throw new \Exception(sprintf(
                 'No _method attribute set on Request with URI %s',
                 $request->getPathInfo()));
@@ -43,10 +45,12 @@ class ControllerResolver implements ControllerResolverInterface
         $prefix = '::';
         if (substr($controller, 0, 2) === $prefix) {
             $service = substr($controller, 2);
-            if(!$this->neptune->offsetExists($service)) {
+            if (!$this->neptune->offsetExists($service)) {
                 throw new \Exception(sprintf('Undefined controller service %s', $service));
             }
-            return array($this->neptune[$service], $method);
+            $controller = $this->configureController($request, $this->neptune[$service]);
+
+            return array($controller, $method);
         }
 
         //controller can be either a single name of a controller, or a
@@ -63,7 +67,9 @@ class ControllerResolver implements ControllerResolverInterface
             throw new \Exception(sprintf('Controller not found: %s', $class));
         }
 
-        return array(new $class($request), $method);
+        $controller = $this->configureController($request, new $class());
+
+        return array($controller, $method);
     }
 
     public function getArguments(Request $request, $controller)
@@ -71,6 +77,22 @@ class ControllerResolver implements ControllerResolverInterface
         $args = $request->attributes->get('_args');
 
         return $args;
+    }
+
+    /**
+     * Inject the current request and neptune instance if the
+     * controller is able to accept them.
+     */
+    protected function configureController($request, $controller)
+    {
+        if ($controller instanceof RequestAwareInterface) {
+            $controller->setRequest($request);
+        }
+        if ($controller instanceof NeptuneAwareInterface) {
+            $controller->setNeptune($this->neptune);
+        }
+
+        return $controller;
     }
 
 }
