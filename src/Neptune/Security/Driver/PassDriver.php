@@ -9,17 +9,34 @@ namespace Neptune\Security\Driver;
 class PassDriver implements SecurityDriverInterface
 {
 
-    public function loggedIn()
+    protected $request;
+
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function authenticate()
     {
         return true;
     }
 
-    public function login($identifier, $password)
+    public function login($identifier)
     {
         return true;
     }
 
     public function logout()
+    {
+        return true;
+    }
+
+    public function isAuthenticated()
     {
         return true;
     }
