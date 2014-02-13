@@ -149,4 +149,9 @@ class Console {
 		return $this->getHelperSet()->get('dialog')->askAndValidate($this->output, $question, $validator, $attempts, $default, $autocomplete);
 	}
 
+    public function askHidden($question, $fallback = true)
+    {
+        return $this->getHelperSet()->get('dialog')->askHiddenResponse($this->output, $question, $fallback);
+    }
+
 }
