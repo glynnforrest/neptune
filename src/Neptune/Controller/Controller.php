@@ -46,13 +46,20 @@ abstract class Controller implements NeptuneAwareInterface, RequestAwareInterfac
         return Assets::getInstance();
     }
 
-    public function security()
+    public function isPost()
     {
-        if (!isset($this->neptune['security'])) {
+        return $this->request->getMethod() === 'POST';
+    }
+
+    public function security($driver = null)
+    {
+        if (!$this->neptune->offsetExists('security')) {
             throw new \Exception('Security service has not been registered');
         }
 
-        return $this->neptune['security'];
+        $security = $this->neptune['security'];
+        $security->setRequest($this->request);
+        return $security;
     }
 
     public function database()
@@ -60,7 +67,7 @@ abstract class Controller implements NeptuneAwareInterface, RequestAwareInterfac
         //return database service
     }
 
-    public function createForm($action = null)
+    public function form($action = null)
     {
         if (!$action) {
             $action = $this->request->getUri();

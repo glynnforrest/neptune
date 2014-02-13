@@ -23,9 +23,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
         $this->obj->setRequest($request);
     }
 
-    public function testCreateForm()
+    public function testForm()
     {
-        $this->assertInstanceOf('\Neptune\Form\Form', $this->obj->createForm());
+        $this->assertInstanceOf('\Neptune\Form\Form', $this->obj->form());
     }
 
     public function testRedirect()
