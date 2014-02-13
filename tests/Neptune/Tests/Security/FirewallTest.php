@@ -17,9 +17,13 @@ use Neptune\Security\Driver\FailDriver;
 class FirewallTest extends \PHPUnit_Framework_TestCase
 {
 
+    protected $driver;
+    protected $firewall;
+
     public function setUp()
     {
-        $this->firewall = new Firewall(new FailDriver());
+        $this->driver = $this->getMock('\Neptune\Security\Driver\SecurityDriverInterface');
+        $this->firewall = new Firewall($this->driver);
     }
 
     protected function createRequest($url)
@@ -42,8 +46,48 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
     {
         $matcher = $this->createMatcher('foo');
         $this->firewall->addRule($matcher, 'WHATEVER');
+        $this->driver->expects($this->once())
+                     ->method('hasPermission')
+                     ->with('WHATEVER')
+                     ->will($this->returnValue(false));
         $this->assertFalse($this->firewall->check($this->createRequest('foo')));
         $this->assertTrue($this->firewall->check($this->createRequest('something-else')));
+    }
+
+    public function testAnyAllowsLoginOnly()
+    {
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $matcher = $this->createMatcher('foo');
+        $this->firewall->addRule($matcher, 'ANY');
+        $this->assertTrue($this->firewall->check($this->createRequest('foo')));
+    }
+
+    public function testNoneBlocksAll()
+    {
+        $matcher = $this->createMatcher('foo');
+        $this->firewall->addRule($matcher, 'NONE');
+        $this->assertFalse($this->firewall->check($this->createRequest('foo')));
+    }
+
+    public function testAnyIsConfigurable()
+    {
+        $firewall = new Firewall($this->driver, 'GO_AHEAD');
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $matcher = $this->createMatcher('foo');
+        $firewall->addRule($matcher, 'GO_AHEAD');
+        $this->assertTrue($firewall->check($this->createRequest('foo')));
+    }
+
+    public function testNoneIsConfigurable()
+    {
+        $firewall = new Firewall($this->driver, 'ANY', 'NO_WAY');
+        $matcher = $this->createMatcher('foo');
+        $firewall->addRule($matcher, 'NO_WAY');
+        $this->assertFalse($firewall->check($this->createRequest('foo')));
     }
 
 }

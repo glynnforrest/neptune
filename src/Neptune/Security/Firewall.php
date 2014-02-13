@@ -17,9 +17,13 @@ class Firewall
 
     protected $security;
     protected $rules = array();
+    protected $any;
+    protected $none;
 
-    public function __construct(SecurityDriverInterface $security)
+    public function __construct(SecurityDriverInterface $security, $any = 'ANY', $none = 'NONE')
     {
+        $this->any = $any;
+        $this->none = $none;
         $this->security = $security;
     }
 
@@ -33,6 +37,14 @@ class Firewall
         foreach ($this->rules as $matcher) {
             if(!$matcher[0]->matches($request)) {
                 continue;
+            }
+            $this->security->setRequest($request);
+            $permission = $matcher[1];
+            if($permission === $this->any) {
+                return $this->security->isAuthenticated();
+            }
+            if($permission === $this->none) {
+                return false;
             }
             return $this->security->hasPermission($matcher[1]);
         }
