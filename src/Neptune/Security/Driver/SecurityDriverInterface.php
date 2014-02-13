@@ -2,18 +2,22 @@
 
 namespace Neptune\Security\Driver;
 
+use Neptune\Core\RequestAwareInterface;
+
 /**
- * SecurityDriver
+ * SecurityDriverInterface
  * @author Glynn Forrest me@glynnforrest.com
  **/
-interface SecurityDriverInterface
+interface SecurityDriverInterface extends RequestAwareInterface
 {
 
-    public function loggedIn();
+    public function authenticate();
 
-    public function login($identifier, $password);
+    public function login($identifier);
 
     public function logout();
+
+    public function isAuthenticated();
 
     public function hasPermission($permission);
 
