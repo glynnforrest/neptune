@@ -7,7 +7,6 @@ require_once __DIR__ . '/../../../bootstrap.php';
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 use Neptune\Security\Firewall;
-use Neptune\Security\Driver\FailDriver;
 
 /**
  * FirewallTest
@@ -38,20 +37,20 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
 
     public function testCheckWithNoRules()
     {
-        $request = $this->createRequest('foo');
-        $this->assertTrue($this->firewall->check($request));
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
     }
 
     public function testCheckWithUrlRule()
     {
-        $matcher = $this->createMatcher('foo');
+        $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'WHATEVER');
         $this->driver->expects($this->once())
                      ->method('hasPermission')
                      ->with('WHATEVER')
                      ->will($this->returnValue(false));
-        $this->assertFalse($this->firewall->check($this->createRequest('foo')));
-        $this->assertTrue($this->firewall->check($this->createRequest('something-else')));
+        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
     public function testAnyAllowsLoginOnly()
@@ -59,16 +58,18 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
-        $matcher = $this->createMatcher('foo');
+        $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'ANY');
-        $this->assertTrue($this->firewall->check($this->createRequest('foo')));
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
     }
 
     public function testNoneBlocksAll()
     {
-        $matcher = $this->createMatcher('foo');
+        $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'NONE');
-        $this->assertFalse($this->firewall->check($this->createRequest('foo')));
+        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
     public function testAnyIsConfigurable()
@@ -77,17 +78,18 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
-        $matcher = $this->createMatcher('foo');
+        $matcher = $this->createMatcher('/foo');
         $firewall->addRule($matcher, 'GO_AHEAD');
-        $this->assertTrue($firewall->check($this->createRequest('foo')));
+        $this->assertTrue($firewall->check($this->createRequest('/foo')));
     }
 
     public function testNoneIsConfigurable()
     {
         $firewall = new Firewall($this->driver, 'ANY', 'NO_WAY');
-        $matcher = $this->createMatcher('foo');
+        $matcher = $this->createMatcher('/foo');
         $firewall->addRule($matcher, 'NO_WAY');
-        $this->assertFalse($firewall->check($this->createRequest('foo')));
+        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $firewall->check($this->createRequest('/foo'));
     }
 
 }
