@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Driver;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * PassDriver
  * @author Glynn Forrest me@glynnforrest.com
