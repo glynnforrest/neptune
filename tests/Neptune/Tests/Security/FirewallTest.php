@@ -35,15 +35,32 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         return new RequestMatcher($path, $host, $method, $ip);
     }
 
-    public function testCheckWithNoRules()
+    public function testNoRules()
     {
         $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
     }
 
-    public function testCheckWithUrlRule()
+    public function testNotLoggedIn()
     {
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'WHATEVER');
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->with()
+                     ->will($this->returnValue(false));
+        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->setExpectedException('Neptune\Security\Exception\UnauthorizedException');
+        $this->firewall->check($this->createRequest('/foo'));
+    }
+
+    public function testLoggedIn()
+    {
+        $matcher = $this->createMatcher('/foo');
+        $this->firewall->addRule($matcher, 'WHATEVER');
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->with()
+                     ->will($this->returnValue(true));
         $this->driver->expects($this->once())
                      ->method('hasPermission')
                      ->with('WHATEVER')
@@ -62,6 +79,18 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->firewall->addRule($matcher, 'ANY');
         $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+    }
+
+    public function testAnyDenysUnAuthenticated()
+    {
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(false));
+        $matcher = $this->createMatcher('/foo');
+        $this->firewall->addRule($matcher, 'ANY');
+        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->setExpectedException('Neptune\Security\Exception\UnauthorizedException');
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
     public function testNoneBlocksAll()
@@ -88,6 +117,38 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $firewall = new Firewall($this->driver, 'ANY', 'NO_WAY');
         $matcher = $this->createMatcher('/foo');
         $firewall->addRule($matcher, 'NO_WAY');
+        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $firewall->check($this->createRequest('/foo'));
+    }
+
+    public function testMultipleRulesCanBeUsed()
+    {
+        $firewall = new Firewall($this->driver);
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $this->driver->expects($this->once())
+                     ->method('hasPermission')
+                     ->with('ADMIN')
+                     ->will($this->returnValue(false));
+        $firewall->addRule($this->createMatcher('/bar'), 'ANY');
+        $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
+        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $firewall->check($this->createRequest('/foo'));
+    }
+
+    public function testSameUrlCanBeUsedTwice()
+    {
+        $firewall = new Firewall($this->driver);
+        $this->driver->expects($this->exactly(2))
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $this->driver->expects($this->once())
+                     ->method('hasPermission')
+                     ->with('ADMIN')
+                     ->will($this->returnValue(false));
+        $firewall->addRule($this->createMatcher('/foo'), 'ANY');
+        $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
         $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
         $firewall->check($this->createRequest('/foo'));
     }

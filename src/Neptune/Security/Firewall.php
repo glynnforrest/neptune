@@ -4,6 +4,7 @@ namespace Neptune\Security;
 
 use Neptune\Security\Driver\SecurityDriverInterface;
 use Neptune\Security\Exception\AccessDeniedException;
+use Neptune\Security\Exception\UnauthorizedException;
 
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class Firewall
 {
 
+    protected $name;
     protected $security;
     protected $rules = array();
     protected $any;
@@ -23,6 +25,7 @@ class Firewall
 
     public function __construct(SecurityDriverInterface $security, $any = 'ANY', $none = 'NONE')
     {
+        $this->name = 'neptune';
         $this->any = $any;
         $this->none = $none;
         $this->security = $security;
@@ -33,6 +36,14 @@ class Firewall
         $this->rules[] = array($matcher, $permission);
     }
 
+    /**
+     * Check if a Request has permission to access a resource.
+     *
+     * @param Request $request The request to check
+     * @return true on success
+     * @throws UnauthorizedException if the request is not authenticated
+     * @throws AccessDeniedException if the request is not authorized
+     */
     public function check(Request $request)
     {
         foreach ($this->rules as $matcher) {
@@ -42,51 +53,51 @@ class Firewall
             $this->security->setRequest($request);
             $permission = $matcher[1];
 
+            //not allowed at all
+            if ($permission === $this->none) {
+                $this->failAuthorization($request, $permission . ' has blocked all');
+            }
+
             //any access
             if ($permission === $this->any) {
                 if (!$this->security->isAuthenticated()) {
-                    $message = sprintf(
-                        'Firewall %s blocked url %s - not logged in',
-                        $this->name,
-                        $request->getUri(),
-                        $permission
-                    );
-
-                    return $this->fail($message);
+                    $this->failAuthentication($request);
                 }
                 continue;
             }
 
-            //not allowed at all
-            if ($permission === $this->none) {
-                $message = sprintf(
-                    'Firewall %s blocked url %s',
-                    $this->name,
-                    $request->getUri(),
-                    $permission
-                );
-
-                return $this->fail($message);
+            //first check if authenticated at all
+            if (!$this->security->isAuthenticated($permission)) {
+                $this->failAuthentication($request);
             }
 
-            //permission required
+            //now check authorization
             if (!$this->security->hasPermission($permission)) {
-                $message = sprintf(
-                    'Firewall %s blocked url %s - permission %s required',
-                    $this->name,
-                    $request->getUri(),
-                    $permission
-                );
-
-                return $this->fail($message);
+                $this->failAuthorization($request, $permission);
             }
         }
 
         return true;
     }
 
-    protected function fail($message)
+    protected function failAuthentication(Request $request)
     {
+        $message = sprintf(
+            'Firewall %s blocked url %s - not authenticated',
+            $this->name,
+            $request->getUri()
+        );
+        throw new UnauthorizedException($this->security, $message);
+    }
+
+    protected function failAuthorization(Request $request, $permission)
+    {
+        $message = sprintf(
+            'Firewall %s blocked url %s - permission %s',
+            $this->name,
+            $request->getUri(),
+            $permission
+        );
         throw new AccessDeniedException($this->security, $message);
     }
 
