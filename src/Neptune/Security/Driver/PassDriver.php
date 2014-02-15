@@ -2,26 +2,14 @@
 
 namespace Neptune\Security\Driver;
 
-use Symfony\Component\HttpFoundation\Request;
+use Neptune\Security\Driver\AbstractSecurityDriver;
 
 /**
  * PassDriver
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class PassDriver implements SecurityDriverInterface
+class PassDriver extends AbstractSecurityDriver
 {
-
-    protected $request;
-
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-    }
-
-    public function getRequest()
-    {
-        return $this->request;
-    }
 
     public function authenticate()
     {

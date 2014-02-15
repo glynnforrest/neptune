@@ -2,28 +2,14 @@
 
 namespace Neptune\Security\Driver;
 
-use Neptune\Security\Driver\SecurityDriverInterface;
-
-use Symfony\Component\HttpFoundation\Request;
+use Neptune\Security\Driver\AbstractSecurityDriver;
 
 /**
  * FailDriver
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class FailDriver implements SecurityDriverInterface
+class FailDriver extends AbstractSecurityDriver
 {
-
-    protected $request;
-
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-    }
-
-    public function getRequest()
-    {
-        return $this->request;
-    }
 
     public function authenticate()
     {
