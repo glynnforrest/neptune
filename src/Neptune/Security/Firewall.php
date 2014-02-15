@@ -3,8 +3,8 @@
 namespace Neptune\Security;
 
 use Neptune\Security\Driver\SecurityDriverInterface;
-use Neptune\Security\Exception\AccessDeniedException;
-use Neptune\Security\Exception\UnauthorizedException;
+use Neptune\Security\Exception\AuthenticationException;
+use Neptune\Security\Exception\AuthorizationException;
 
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,8 +41,8 @@ class Firewall
      *
      * @param Request $request The request to check
      * @return true on success
-     * @throws UnauthorizedException if the request is not authenticated
-     * @throws AccessDeniedException if the request is not authorized
+     * @throws AuthenticationException if the request is not authenticated
+     * @throws AuthorizationException if the request is not authorized
      */
     public function check(Request $request)
     {
@@ -73,7 +73,7 @@ class Firewall
 
             //now check authorization
             if (!$this->security->hasPermission($permission)) {
-                $this->failAuthorization($request, $permission);
+                $this->failAuthorization($request, $permission . ' required');
             }
         }
 
@@ -87,7 +87,7 @@ class Firewall
             $this->name,
             $request->getUri()
         );
-        throw new UnauthorizedException($this->security, $message);
+        throw new AuthenticationException($this->security, $message);
     }
 
     protected function failAuthorization(Request $request, $permission)
@@ -98,7 +98,7 @@ class Firewall
             $request->getUri(),
             $permission
         );
-        throw new AccessDeniedException($this->security, $message);
+        throw new AuthorizationException($this->security, $message);
     }
 
 }

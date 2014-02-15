@@ -5,12 +5,12 @@ namespace Neptune\Security\Exception;
 use Neptune\Security\Driver\SecurityDriverInterface;
 
 /**
- * BadCredentialsException is thrown when authentication fails due to
+ * CredentialsException is thrown when authentication fails due to
  * incomplete or incorrect credentials.
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class BadCredentialsException extends SecurityException
+class CredentialsException extends SecurityException
 {
 
     public function __construct(SecurityDriverInterface $driver, $message = 'Bad credentials supplied', \Exception $previous = null)

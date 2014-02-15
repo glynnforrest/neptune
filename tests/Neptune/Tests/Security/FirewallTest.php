@@ -49,7 +49,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->with()
                      ->will($this->returnValue(false));
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
-        $this->setExpectedException('Neptune\Security\Exception\UnauthorizedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
@@ -66,7 +66,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->with('WHATEVER')
                      ->will($this->returnValue(false));
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
-        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
@@ -89,7 +89,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'ANY');
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
-        $this->setExpectedException('Neptune\Security\Exception\UnauthorizedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
@@ -97,7 +97,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
     {
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'NONE');
-        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
@@ -117,7 +117,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $firewall = new Firewall($this->driver, 'ANY', 'NO_WAY');
         $matcher = $this->createMatcher('/foo');
         $firewall->addRule($matcher, 'NO_WAY');
-        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $firewall->check($this->createRequest('/foo'));
     }
 
@@ -133,7 +133,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->will($this->returnValue(false));
         $firewall->addRule($this->createMatcher('/bar'), 'ANY');
         $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
-        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $firewall->check($this->createRequest('/foo'));
     }
 
@@ -149,7 +149,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->will($this->returnValue(false));
         $firewall->addRule($this->createMatcher('/foo'), 'ANY');
         $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
-        $this->setExpectedException('Neptune\Security\Exception\AccessDeniedException');
+        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $firewall->check($this->createRequest('/foo'));
     }
 
