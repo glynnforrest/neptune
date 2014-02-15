@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * BadSessionException is thrown when the session is invalid or has
  * expired.

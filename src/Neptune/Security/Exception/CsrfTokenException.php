@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * CsrfTokenException is thrown when the client supplies an incorrect
  * csrf token, or fails to supply one at all.

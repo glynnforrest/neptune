@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * BadCredentialsException is thrown when authentication fails due to
  * incomplete or incorrect credentials.

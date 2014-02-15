@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * UnauthorizedException is thrown when authentication is required.
  *

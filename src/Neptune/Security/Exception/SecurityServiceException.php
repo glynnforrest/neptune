@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * SecurityServiceException should be thrown when the security service
  * itself encounters an error.

@@ -2,6 +2,8 @@
 
 namespace Neptune\Security\Exception;
 
+use Neptune\Security\Driver\SecurityDriverInterface;
+
 /**
  * AccessDeniedException is thrown when the client does not
  * have permission to access a resource, even with authentication.
