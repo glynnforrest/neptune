@@ -189,19 +189,55 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->firewall->check($this->createRequest('/foo'));
     }
 
-    public function testSameUrlCanBeUsedTwice()
+    public function testSameUrlIsNotUsedTwice()
     {
-        $this->driver->expects($this->exactly(2))
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $this->driver->expects($this->never())
+                     ->method('hasPermission');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ALLOW');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+    }
+
+    public function testAnonRuleIsUsed()
+    {
+        //here is a typical 'protect all except the login page' setup
+        $this->firewall->addRule($this->createMatcher('/login'), 'ANON');
+        $this->firewall->addRule($this->createMatcher('/'), 'ALLOW');
+
+        // /login should pass
+        $this->assertTrue($this->firewall->check($this->createRequest('/login')));
+
+        // /home will fail - not authenticated
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(false));
+        $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
+        $this->firewall->check($this->createRequest('/home'));
+    }
+
+    public function testFirstMatchedRuleIsUsed()
+    {
+        //as soon as a rule matches the request it is used and
+        //matching stops. This is the same behaviour as symfony
+        //http://symfony.com/doc/current/book/security.html#security-book-access-control-matching-options
+
+        $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
         $this->driver->expects($this->once())
                      ->method('hasPermission')
-                     ->with('ADMIN')
-                     ->will($this->returnValue(false));
-        $this->firewall->addRule($this->createMatcher('/foo'), 'ALLOW');
-        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
-        $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
-        $this->firewall->check($this->createRequest('/foo'));
+                     ->with('USER')
+                     ->will($this->returnValue(true));
+
+        //in this case, even though ADMIN permission is not granted,
+        //the first rule has passed so the request passes.
+        $this->firewall->addRule($this->createMatcher('/account'), 'USER');
+        $this->firewall->addRule($this->createMatcher('/account'), 'ADMIN');
+
+        $this->assertTrue($this->firewall->check($this->createRequest('/account')));
     }
 
 }

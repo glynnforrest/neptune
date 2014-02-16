@@ -52,7 +52,7 @@ class Firewall
      *
      * @param string $allow The rule that allows any authentication
      * @param string $block The rule that blocks the request unconditionally
-     * @param string $anon The rule that allows anonymous access as
+     * @param string $anon  The rule that allows anonymous access as
      * well as any authentication
      */
     public function setPermissionNames($allow, $block, $anon)
@@ -83,10 +83,10 @@ class Firewall
     /**
      * Check if a Request has permission to access a resource.
      *
-     * @param Request $request The request to check
-     * @return true on success
+     * @param  Request                 $request The request to check
+     * @return true                    on success
      * @throws AuthenticationException if the request is not authenticated
-     * @throws AuthorizationException if the request is not authorized
+     * @throws AuthorizationException  if the request is not authorized
      */
     public function check(Request $request)
     {
@@ -113,7 +113,8 @@ class Firewall
                 if (!$this->security->isAuthenticated()) {
                     $this->failAuthentication($request);
                 }
-                continue;
+
+                return true;
             }
 
             //this is a regular permission - check for authentication
@@ -128,6 +129,10 @@ class Firewall
             if (!$this->security->hasPermission($permission)) {
                 $this->failAuthorization($request, $permission . ' required');
             }
+
+            //the request matched and the rule has passed - return
+            //true and stop iterating over rules
+            return true;
         }
 
         return true;
