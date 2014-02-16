@@ -5,8 +5,9 @@ namespace Neptune\Cache;
 use Neptune\Cache\Driver\DebugDriver;
 use Neptune\Cache\Driver\FileDriver;
 use Neptune\Cache\Driver\MemcachedDriver;
+use Neptune\Cache\Driver\CacheDriverInterface;
 
-use Neptune\Core\Config;
+use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
 
@@ -18,94 +19,71 @@ use Temping\Temping;
  * CacheFactory
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class CacheFactory {
+class CacheFactory extends AbstractFactory
+{
 
-	protected $config;
-	protected $drivers = array();
+    protected function create($name = null)
+    {
+        if (!$name) {
+            $names = array_keys($this->config->get('cache', array()));
+            if (empty($names)) {
+                throw new ConfigKeyException(
+                    'Cache configuration array is empty');
+            }
+            $name = $names[0];
+        }
+        //if the entry in the config is a string, load it as a service
+        $maybe_service = $this->config->getRequired("cache.$name");
+        if (is_string($maybe_service)) {
+            //check the service implements cache interface first
+            $service = $this->neptune[$maybe_service];
+            if ($service instanceof CacheDriverInterface) {
+                return $service;
+            }
+            throw new DriverNotFoundException(sprintf(
+                "Cache driver '%s' requested service '%s' which does not implement Neptune\Cache\Driver\CacheDriverInterface",
+                $name,
+                $maybe_service));
+        }
 
-	public function __construct(Config $config) {
-		$this->config = $config;
-	}
+        //cache driver and prefix are required for all instances
+        $driver = $this->config->getRequired("cache.$name.driver");
+        $prefix = $this->config->getRequired("cache.$name.prefix");
 
-	/**
-	 * Get the driver called $name in the config instance. If $name is
-	 * not specified, the first driver will be returned.
-	 *
-	 * @param string $name The name of the cache driver
-	 */
-	public function getDriver($name = null) {
-		if (!$name) {
-			if (!empty($this->drivers)) {
-				reset($this->drivers);
-				return current($this->drivers);
-			} else {
-				return $this->createDriver();
-			}
-		}
-		if (array_key_exists($name, $this->drivers)) {
-			return $this->drivers[$name];
-		}
-		return $this->createDriver($name);
-	}
+        $method = 'create' . ucfirst($driver) . 'Driver';
+        if (method_exists($this, $method)) {
+            $this->instances[$name] = $this->$method($name, $prefix);
 
-	protected function createDriver($name = null) {
-		if (!$name) {
-			$cache_names = array_keys($this->config->getRequired("cache"));
-			if(empty($cache_names)) {
-				throw new ConfigKeyException(
-					"Cache configuration array is empty");
-			}
-			$name = $cache_names[0];
-		}
-		$config_array = $this->config->getRequired("cache.$name");
+            return $this->instances[$name];
+        } else {
+            throw new DriverNotFoundException(
+                "Cache driver not implemented: $driver");
+        }
+    }
 
-		//cache driver and prefix are required for all drivers
-		if(!isset($config_array['driver'])) {
-			throw new ConfigKeyException(
-				"Cache configuration '$name' does not list a driver"
-			);
-		}
-		$driver = $config_array['driver'];
+    protected function createDebugDriver($name, $prefix)
+    {
+        return new DebugDriver($prefix);
+    }
 
-		if(!isset($config_array['prefix'])) {
-			throw new ConfigKeyException(
-				"Cache configuration '$name' does not list a prefix"
-			);
-		}
-		$prefix = $config_array['prefix'];
+    protected function createFileDriver($name, $prefix)
+    {
+        $dir = $this->config->get("cache.$name.dir");
+        if ($dir && substr($dir, 0, 1) !== '/') {
+            $dir = $this->config->getRequired('dir.root') . $dir;
+        }
 
-		$method = 'create' . ucfirst($driver) . 'Driver';
-		if (method_exists($this, $method)) {
-			$this->drivers[$name] = $this->$method($prefix, $config_array);
-			return $this->drivers[$name];
-		} else {
-			throw new DriverNotFoundException(
-				"Cache driver not implemented: $driver");
-		}
-	}
+        return new FileDriver($prefix, new Temping($dir));
+    }
 
-	protected function readArray(array $array, $name) {
-		return isset($array[$name]) ? $array[$name] : null;
-	}
+    protected function createMemcachedDriver($name, $prefix)
+    {
+        $host = $this->config->getRequired("cache.$name.host");
+        $port = $this->config->getRequired("cache.$name.port");
+        $memcached = new Memcached();
+        $memcached->addserver($host, $port);
 
-	public function createDebugDriver($prefix) {
-		return new DebugDriver($prefix);
-	}
-
-	public function createFileDriver($prefix, array $config) {
-		$dir = $this->readArray($config, 'dir');
-		if($dir && substr($dir, 0, 1) !== '/') {
-			$dir = $this->config->getRequired('dir.root') . $dir;
-		}
-		return new FileDriver($prefix, new Temping($dir));
-	}
-
-	public function createMemcachedDriver($prefix, array $config) {
-		$host = $this->readArray($config, 'host');
-		$port = $this->readArray($config, 'port');
-		$memcached = new Memcached();
-		$memcached->addserver($host, $port);
-		return new MemcachedDriver($prefix, $memcached);
-	}
+        return new MemcachedDriver($prefix, $memcached);
+    }
 
 }
