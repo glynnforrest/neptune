@@ -28,6 +28,7 @@ class FirewallListener implements EventSubscriberInterface
     public function add(Firewall $firewall)
     {
         $this->firewalls[] = $firewall;
+
         return $this;
     }
 
@@ -40,6 +41,7 @@ class FirewallListener implements EventSubscriberInterface
     public function push(Firewall $firewall)
     {
         array_unshift($this->firewalls, $firewall);
+
         return $this;
     }
 
@@ -47,8 +49,11 @@ class FirewallListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
         foreach ($this->firewalls as $firewall) {
-            $firewall->check($request);
+            if ($firewall->check($request)) {
+                return true;
+            }
         }
+
         return true;
     }
 
