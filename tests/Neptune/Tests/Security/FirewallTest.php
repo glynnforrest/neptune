@@ -22,7 +22,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->driver = $this->getMock('\Neptune\Security\Driver\SecurityDriverInterface');
-        $this->firewall = new Firewall($this->driver);
+        $this->firewall = new Firewall('testing', $this->driver);
     }
 
     protected function createRequest($url)
@@ -70,60 +70,112 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->firewall->check($this->createRequest('/foo'));
     }
 
-    public function testAnyAllowsLoginOnly()
+    public function testAnon()
+    {
+        $this->driver->expects($this->never())
+                     ->method('isAuthenticated');
+        $matcher = $this->createMatcher('/foo');
+        $this->firewall->addRule($matcher, 'ANON');
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+    }
+
+    public function testAllowLoginOnly()
     {
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
         $matcher = $this->createMatcher('/foo');
-        $this->firewall->addRule($matcher, 'ANY');
+        $this->firewall->addRule($matcher, 'ALLOW');
         $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
     }
 
-    public function testAnyDenysUnAuthenticated()
+    public function testAllowUnauthenticated()
     {
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(false));
         $matcher = $this->createMatcher('/foo');
-        $this->firewall->addRule($matcher, 'ANY');
+        $this->firewall->addRule($matcher, 'ALLOW');
         $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
         $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
-    public function testNoneBlocksAll()
+    public function testBlock()
     {
         $matcher = $this->createMatcher('/foo');
-        $this->firewall->addRule($matcher, 'NONE');
+        $this->firewall->addRule($matcher, 'BLOCK');
         $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
 
-    public function testAnyIsConfigurable()
+    public function namesProvider()
     {
-        $firewall = new Firewall($this->driver, 'GO_AHEAD');
+        return array(
+            array('AUTH', 'NOPE', 'WHOEVER', array('AUTH', 'NOPE', 'WHOEVER')),
+            array(null, 'NOPE', 'WHOEVER', array('ALLOW', 'NOPE', 'WHOEVER')),
+            array('AUTH', null, 'WHOEVER', array('AUTH', 'BLOCK', 'WHOEVER')),
+            array('AUTH', 'NOPE', null, array('AUTH', 'NOPE', 'ANON')),
+            array(null, null, null, array('ALLOW', 'BLOCK', 'ANON')),
+        );
+    }
+
+    /**
+     * @dataProvider namesProvider()
+     */
+    public function testGetAndSetPermissionNames($allow, $block, $anon, $expected)
+    {
+        $this->firewall->setPermissionNames($allow, $block, $anon);
+        $this->assertSame($expected, $this->firewall->getPermissionNames());
+    }
+
+    public function testSetPermissionNamesReusesOldNames()
+    {
+        $this->firewall->setPermissionNames(null, null, null);
+        $this->assertSame(array('ALLOW', 'BLOCK', 'ANON'), $this->firewall->getPermissionNames());
+
+        $this->firewall->setPermissionNames('ok', 'no', 'anyone');
+        $this->assertSame(array('ok', 'no', 'anyone'), $this->firewall->getPermissionNames());
+
+        $this->firewall->setPermissionNames(null, null, null);
+        //we want the names we've defined, not the default
+        $this->assertSame(array('ok', 'no', 'anyone'), $this->firewall->getPermissionNames());
+    }
+
+    public function testAnonIsConfigurable()
+    {
+        $this->firewall->setPermissionNames(null, null, 'WHOEVER');
+        $this->driver->expects($this->never())
+                     ->method('isAuthenticated');
+        $matcher = $this->createMatcher('/foo');
+        $this->firewall->addRule($matcher, 'WHOEVER');
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+    }
+
+    public function testAllowIsConfigurable()
+    {
+        $this->firewall->setPermissionNames('GO_AHEAD', null, null);
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
         $matcher = $this->createMatcher('/foo');
-        $firewall->addRule($matcher, 'GO_AHEAD');
-        $this->assertTrue($firewall->check($this->createRequest('/foo')));
+        $this->firewall->addRule($matcher, 'GO_AHEAD');
+        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
     }
 
-    public function testNoneIsConfigurable()
+    public function testBlockIsConfigurable()
     {
-        $firewall = new Firewall($this->driver, 'ANY', 'NO_WAY');
+        $this->firewall->setPermissionNames(null, 'NO_WAY', null);
         $matcher = $this->createMatcher('/foo');
-        $firewall->addRule($matcher, 'NO_WAY');
+        $this->firewall->addRule($matcher, 'NO_WAY');
         $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
-        $firewall->check($this->createRequest('/foo'));
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
     public function testMultipleRulesCanBeUsed()
     {
-        $firewall = new Firewall($this->driver);
         $this->driver->expects($this->once())
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
@@ -131,15 +183,14 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('hasPermission')
                      ->with('ADMIN')
                      ->will($this->returnValue(false));
-        $firewall->addRule($this->createMatcher('/bar'), 'ANY');
-        $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
+        $this->firewall->addRule($this->createMatcher('/bar'), 'ALLOW');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
         $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
-        $firewall->check($this->createRequest('/foo'));
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
     public function testSameUrlCanBeUsedTwice()
     {
-        $firewall = new Firewall($this->driver);
         $this->driver->expects($this->exactly(2))
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
@@ -147,10 +198,10 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('hasPermission')
                      ->with('ADMIN')
                      ->will($this->returnValue(false));
-        $firewall->addRule($this->createMatcher('/foo'), 'ANY');
-        $firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ALLOW');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
         $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
-        $firewall->check($this->createRequest('/foo'));
+        $this->firewall->check($this->createRequest('/foo'));
     }
 
 }

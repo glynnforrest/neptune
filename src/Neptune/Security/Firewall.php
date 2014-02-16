@@ -20,20 +20,64 @@ class Firewall
     protected $name;
     protected $security;
     protected $rules = array();
-    protected $any;
-    protected $none;
+    protected $allow;
+    protected $block;
+    protected $anon;
 
-    public function __construct(SecurityDriverInterface $security, $any = 'ANY', $none = 'NONE')
+    public function __construct($name, SecurityDriverInterface $security)
     {
-        $this->name = 'neptune';
-        $this->any = $any;
-        $this->none = $none;
+        $this->name = $name;
+        $this->allow = 'ALLOW';
+        $this->block = 'BLOCK';
+        $this->anon = 'ANON';
         $this->security = $security;
     }
 
+    /**
+     * Add a rule to this Firewall.
+     *
+     * @param RequestMatcherInterface $matcher The matcher to check
+     * the request with
+     * @param string $permission The name of the permission to enforce
+     */
     public function addRule(RequestMatcherInterface $matcher, $permission)
     {
         $this->rules[] = array($matcher, $permission);
+    }
+
+    /**
+     * Set the names of the permissions to use for allow, block and
+     * anonymous rules. Set any of these to null to continue using the
+     * current name.
+     *
+     * @param string $allow The rule that allows any authentication
+     * @param string $block The rule that blocks the request unconditionally
+     * @param string $anon The rule that allows anonymous access as
+     * well as any authentication
+     */
+    public function setPermissionNames($allow, $block, $anon)
+    {
+        if ($allow) {
+            $this->allow = $allow;
+        }
+        if ($block) {
+            $this->block = $block;
+        }
+        if ($anon) {
+            $this->anon = $anon;
+        }
+    }
+
+    /**
+     * Get the names of the permissions that are used for allow, block
+     * and anonymous access.
+     *
+     * @return array An array containing the permission names for
+     * allow, block and anonymous access.
+     */
+    public function getPermissionNames()
+    {
+        return array($this->allow, $this->block, $this->anon);
     }
 
     /**
@@ -46,28 +90,37 @@ class Firewall
      */
     public function check(Request $request)
     {
-        foreach ($this->rules as $matcher) {
-            if (!$matcher[0]->matches($request)) {
+        foreach ($this->rules as $rule) {
+            if (!$rule[0]->matches($request)) {
                 continue;
             }
-            $this->security->setRequest($request);
-            $permission = $matcher[1];
+            $permission = $rule[1];
 
-            //not allowed at all
-            if ($permission === $this->none) {
+            //anonymous access
+            if ($permission === $this->anon) {
+                return true;
+            }
+
+            $this->security->setRequest($request);
+
+            //block unconditionally
+            if ($permission === $this->block) {
                 $this->failAuthorization($request, $permission . ' has blocked all');
             }
 
-            //any access
-            if ($permission === $this->any) {
+            //allow any authentication
+            if ($permission === $this->allow) {
                 if (!$this->security->isAuthenticated()) {
                     $this->failAuthentication($request);
                 }
                 continue;
             }
 
+            //this is a regular permission - check for authentication
+            //and authorization
+
             //first check if authenticated at all
-            if (!$this->security->isAuthenticated($permission)) {
+            if (!$this->security->isAuthenticated()) {
                 $this->failAuthentication($request);
             }
 
