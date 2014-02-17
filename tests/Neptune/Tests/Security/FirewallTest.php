@@ -37,7 +37,9 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
 
     public function testNoRules()
     {
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+        //false means the request has passed - no exceptions were thrown
+        //true is reserved for explicit access - the request matching an exemption
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
     }
 
     public function testNotLoggedIn()
@@ -48,7 +50,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('isAuthenticated')
                      ->with()
                      ->will($this->returnValue(false));
-        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/bar')));
         $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
@@ -65,7 +67,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('hasPermission')
                      ->with('WHATEVER')
                      ->will($this->returnValue(false));
-        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/bar')));
         $this->setExpectedException('Neptune\Security\Exception\AuthorizationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
@@ -76,8 +78,8 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('isAuthenticated');
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'ANON');
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
-        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/bar')));
     }
 
     public function testAllowLoginOnly()
@@ -87,8 +89,8 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->will($this->returnValue(true));
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'ALLOW');
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
-        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/bar')));
     }
 
     public function testAllowUnauthenticated()
@@ -98,7 +100,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->will($this->returnValue(false));
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'ALLOW');
-        $this->assertTrue($this->firewall->check($this->createRequest('/bar')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/bar')));
         $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
         $this->firewall->check($this->createRequest('/foo'));
     }
@@ -151,7 +153,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->method('isAuthenticated');
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'WHOEVER');
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
     }
 
     public function testAllowIsConfigurable()
@@ -162,7 +164,7 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
                      ->will($this->returnValue(true));
         $matcher = $this->createMatcher('/foo');
         $this->firewall->addRule($matcher, 'GO_AHEAD');
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
     }
 
     public function testBlockIsConfigurable()
@@ -189,55 +191,68 @@ class FirewallTest extends \PHPUnit_Framework_TestCase
         $this->firewall->check($this->createRequest('/foo'));
     }
 
-    public function testSameUrlIsNotUsedTwice()
+    public function testSameUrlCanBeUsedTwice()
     {
-        $this->driver->expects($this->once())
-                     ->method('isAuthenticated')
-                     ->will($this->returnValue(true));
-        $this->driver->expects($this->never())
-                     ->method('hasPermission');
-        $this->firewall->addRule($this->createMatcher('/foo'), 'ALLOW');
-        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
-        $this->assertTrue($this->firewall->check($this->createRequest('/foo')));
-    }
-
-    public function testAnonRuleIsUsed()
-    {
-        //here is a typical 'protect all except the login page' setup
-        $this->firewall->addRule($this->createMatcher('/login'), 'ANON');
-        $this->firewall->addRule($this->createMatcher('/'), 'ALLOW');
-
-        // /login should pass
-        $this->assertTrue($this->firewall->check($this->createRequest('/login')));
-
-        // /home will fail - not authenticated
-        $this->driver->expects($this->once())
-                     ->method('isAuthenticated')
-                     ->will($this->returnValue(false));
-        $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
-        $this->firewall->check($this->createRequest('/home'));
-    }
-
-    public function testFirstMatchedRuleIsUsed()
-    {
-        //as soon as a rule matches the request it is used and
-        //matching stops. This is the same behaviour as symfony
-        //http://symfony.com/doc/current/book/security.html#security-book-access-control-matching-options
-
-        $this->driver->expects($this->once())
+        $this->driver->expects($this->exactly(2))
                      ->method('isAuthenticated')
                      ->will($this->returnValue(true));
         $this->driver->expects($this->once())
                      ->method('hasPermission')
-                     ->with('USER')
+                     ->with('ADMIN')
                      ->will($this->returnValue(true));
-
-        //in this case, even though ADMIN permission is not granted,
-        //the first rule has passed so the request passes.
-        $this->firewall->addRule($this->createMatcher('/account'), 'USER');
-        $this->firewall->addRule($this->createMatcher('/account'), 'ADMIN');
-
-        $this->assertTrue($this->firewall->check($this->createRequest('/account')));
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ALLOW');
+        $this->firewall->addRule($this->createMatcher('/foo'), 'ADMIN');
+        $this->assertFalse($this->firewall->check($this->createRequest('/foo')));
     }
+
+    public function testExemptions()
+    {
+        //here is a typical 'protect all except the login page' setup
+        $this->firewall->addRule($this->createMatcher('/'), 'ALLOW');
+        $this->firewall->addExemption($this->createMatcher('/login'), 'ANON');
+
+        // /login should pass and be exempt
+        $this->assertTrue($this->firewall->check($this->createRequest('/login')));
+
+        // /account will fail - not authenticated
+        $this->driver->expects($this->once())
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(false));
+        $this->setExpectedException('Neptune\Security\Exception\AuthenticationException');
+        $this->firewall->check($this->createRequest('/account'));
+    }
+
+    public function testFailedExemptionDoesNotFailFirewall()
+    {
+        // VIP permission may access /vip, but ADMIN permission also
+        // gets in, even without VIP permission
+        $this->firewall->addExemption($this->createMatcher('/'), 'ADMIN');
+        $this->firewall->addRule($this->createMatcher('/vip'), 'VIP');
+
+        // this request is not ADMIN, but it is VIP. the
+        // exemption shouldn't stop the rule from passing
+        $this->driver->expects($this->exactly(2))
+                     ->method('isAuthenticated')
+                     ->will($this->returnValue(true));
+        $this->driver->expects($this->exactly(2))
+                     ->method('hasPermission')
+                     ->will($this->onConsecutiveCalls(false, true));
+        //explanation of the indexes used in at() for the driver
+        // 0 setRequest()
+        // 1 isAuthenticated()
+        // 2 hasPermission('ADMIN')
+        // 3 setRequest()
+        // 4 isAuthenticated()
+        // 5 hasPermission('VIP')
+        $this->driver->expects($this->at(2))
+                     ->method('hasPermission')
+                     ->with('ADMIN');
+        $this->driver->expects($this->at(5))
+                     ->method('hasPermission')
+                     ->with('VIP');
+
+        $this->assertFalse($this->firewall->check($this->createRequest('/vip')));
+    }
+
 
 }

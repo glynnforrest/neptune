@@ -3,6 +3,7 @@
 namespace Neptune\Security;
 
 use Neptune\Security\Driver\SecurityDriverInterface;
+use Neptune\Security\Exception\SecurityException;
 use Neptune\Security\Exception\AuthenticationException;
 use Neptune\Security\Exception\AuthorizationException;
 
@@ -20,6 +21,7 @@ class Firewall
     protected $name;
     protected $security;
     protected $rules = array();
+    protected $exemptions = array();
     protected $allow;
     protected $block;
     protected $anon;
@@ -43,6 +45,20 @@ class Firewall
     public function addRule(RequestMatcherInterface $matcher, $permission)
     {
         $this->rules[] = array($matcher, $permission);
+    }
+
+    /**
+     * Add a exemption to this Firewall. If a request passes this
+     * exemption it will be granted explicit access, skipping any
+     * other firewall rules.
+     *
+     * @param RequestMatcherInterface $matcher The matcher to check
+     * the request with
+     * @param string $permission The name of the permission required
+     */
+    public function addExemption(RequestMatcherInterface $matcher, $permission)
+    {
+        $this->exemptions[] = array($matcher, $permission);
     }
 
     /**
@@ -83,58 +99,73 @@ class Firewall
     /**
      * Check if a Request has permission to access a resource.
      *
-     * @param  Request                 $request The request to check
-     * @return true                    on success
+     * @param  Request $request The request to check
+     * @return Boolean true if the request is granted explicit access
+     * via a exemption, false if the request passed but has not been
+     * granted explicit access (allowing other firewalls to check)
      * @throws AuthenticationException if the request is not authenticated
      * @throws AuthorizationException  if the request is not authorized
      */
     public function check(Request $request)
     {
-        foreach ($this->rules as $rule) {
-            if (!$rule[0]->matches($request)) {
-                continue;
-            }
-            $permission = $rule[1];
-
-            //anonymous access
-            if ($permission === $this->anon) {
-                return true;
-            }
-
-            $this->security->setRequest($request);
-
-            //block unconditionally
-            if ($permission === $this->block) {
-                $this->failAuthorization($request, $permission . ' has blocked all');
-            }
-
-            //allow any authentication
-            if ($permission === $this->allow) {
-                if (!$this->security->isAuthenticated()) {
-                    $this->failAuthentication($request);
+        //first check the exemptions. If the request passes any of
+        //these, skip all other rules and firewalls.
+        foreach ($this->exemptions as $exemption) {
+            try {
+                if (true === $this->checkRule($request, $exemption)) {
+                    return true;
                 }
+                //catch any security exceptions - we dont want
+                //to fail the firewall if an exemption fails
+            } catch (SecurityException $e) {}
+        }
 
-                return true;
-            }
+        //check the rules. If they fail they will throw exceptions.
+        foreach ($this->rules as $rule) {
+            $this->checkRule($request, $rule);
+        }
 
-            //this is a regular permission - check for authentication
-            //and authorization
+        //all rules have passed, but we can't be sure the request is
+        //good as there may be other firewalls. Returning false is
+        //this Firewall saying 'not sure' to the FirewallListener.
+        return false;
+    }
 
-            //first check if authenticated at all
-            if (!$this->security->isAuthenticated()) {
-                $this->failAuthentication($request);
-            }
+    protected function checkRule(Request $request, array $rule)
+    {
+        if (!$rule[0]->matches($request)) {
+            return false;
+        }
+        $permission = $rule[1];
 
-            //now check authorization
-            if (!$this->security->hasPermission($permission)) {
-                $this->failAuthorization($request, $permission . ' required');
-            }
-
-            //the request matched and the rule has passed - return
-            //true and stop iterating over rules
+        //anonymous access
+        if ($permission === $this->anon) {
             return true;
         }
 
+        //block unconditionally
+        if ($permission === $this->block) {
+            $this->failAuthorization($request, $permission . ' has blocked all');
+        }
+
+        $this->security->setRequest($request);
+
+        //from here on authentication is required
+        if (!$this->security->isAuthenticated()) {
+            $this->failAuthentication($request);
+        }
+
+        //allow any authentication
+        if ($permission === $this->allow) {
+            return true;
+        }
+
+        //check authorization
+        if (!$this->security->hasPermission($permission)) {
+            $this->failAuthorization($request, $permission . ' required');
+        }
+
+        //the request matched and the rule has passed
         return true;
     }
 
