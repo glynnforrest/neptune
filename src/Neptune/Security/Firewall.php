@@ -3,9 +3,10 @@
 namespace Neptune\Security;
 
 use Neptune\Security\Driver\SecurityDriverInterface;
-use Neptune\Security\Exception\SecurityException;
+use Neptune\Security\Exception\AnonymousException;
 use Neptune\Security\Exception\AuthenticationException;
 use Neptune\Security\Exception\AuthorizationException;
+use Neptune\Security\Exception\SecurityException;
 
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,15 +23,17 @@ class Firewall
     protected $security;
     protected $rules = array();
     protected $exemptions = array();
-    protected $allow;
-    protected $block;
+    protected $any;
+    protected $none;
+    protected $user;
     protected $anon;
 
     public function __construct($name, SecurityDriverInterface $security)
     {
         $this->name = $name;
-        $this->allow = 'ALLOW';
-        $this->block = 'BLOCK';
+        $this->any = 'ANY';
+        $this->none = 'NONE';
+        $this->user = 'USER';
         $this->anon = 'ANON';
         $this->security = $security;
     }
@@ -62,22 +65,25 @@ class Firewall
     }
 
     /**
-     * Set the names of the permissions to use for allow, block and
+     * Set the names of the permissions to use for any, none, user and
      * anonymous rules. Set any of these to null to continue using the
      * current name.
      *
-     * @param string $allow The rule that allows any authentication
-     * @param string $block The rule that blocks the request unconditionally
-     * @param string $anon  The rule that allows anonymous access as
-     * well as any authentication
+     * @param string $any  The rule that allows any request
+     * @param string $none The rule that blocks any request
+     * @param string $user The rule that allows any authentication
+     * @param string $anon The rule that allows anonymous access only
      */
-    public function setPermissionNames($allow, $block, $anon)
+    public function setPermissionNames($any, $none, $user, $anon)
     {
-        if ($allow) {
-            $this->allow = $allow;
+        if ($any) {
+            $this->any = $any;
         }
-        if ($block) {
-            $this->block = $block;
+        if ($none) {
+            $this->none = $none;
+        }
+        if ($user) {
+            $this->user = $user;
         }
         if ($anon) {
             $this->anon = $anon;
@@ -85,15 +91,15 @@ class Firewall
     }
 
     /**
-     * Get the names of the permissions that are used for allow, block
-     * and anonymous access.
+     * Get the names of the permissions that are used for any, none,
+     * user and anonymous rules.
      *
      * @return array An array containing the permission names for
-     * allow, block and anonymous access.
+     * any, none, user and anonymous access.
      */
     public function getPermissionNames()
     {
-        return array($this->allow, $this->block, $this->anon);
+        return array($this->any, $this->none, $this->user, $this->anon);
     }
 
     /**
@@ -138,25 +144,36 @@ class Firewall
         }
         $permission = $rule[1];
 
-        //anonymous access
-        if ($permission === $this->anon) {
+        //check for any access
+        if ($permission === $this->any) {
             return true;
         }
 
-        //block unconditionally
-        if ($permission === $this->block) {
+        //check for no access
+        if ($permission === $this->none) {
             $this->failAuthorization($request, $permission . ' has blocked all');
         }
 
         $this->security->setRequest($request);
 
-        //from here on authentication is required
-        if (!$this->security->isAuthenticated()) {
+        $authenticated = $this->security->isAuthenticated();
+
+        //check for anonymous rule
+        if ($permission === $this->anon) {
+            if ($authenticated) {
+                $this->failAnonymous($request);
+            }
+
+            return true;
+        }
+
+        //authentication is now required
+        if (!$authenticated) {
             $this->failAuthentication($request);
         }
 
-        //allow any authentication
-        if ($permission === $this->allow) {
+        //check for any authentication
+        if ($permission === $this->user) {
             return true;
         }
 
@@ -172,7 +189,7 @@ class Firewall
     protected function failAuthentication(Request $request)
     {
         $message = sprintf(
-            'Firewall %s blocked url %s - not authenticated',
+            'Firewall %s blocked url %s - authentication required',
             $this->name,
             $request->getUri()
         );
@@ -188,6 +205,16 @@ class Firewall
             $permission
         );
         throw new AuthorizationException($this->security, $message);
+    }
+
+    protected function failAnonymous(Request $request)
+    {
+        $message = sprintf(
+            'Firewall %s blocked url %s - anonymous, authentication forbidden',
+            $this->name,
+            $request->getUri()
+        );
+        throw new AnonymousException($this->security, $message);
     }
 
 }
