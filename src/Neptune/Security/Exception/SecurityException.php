@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class SecurityException extends \Exception
+abstract class SecurityException extends \Exception
 {
 
     protected $driver;
