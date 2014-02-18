@@ -10,12 +10,6 @@ use Neptune\Security\Driver\SecurityDriverInterface;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class SecurityServiceException extends SecurityException
+class SecurityServiceException extends \Exception
 {
-
-    public function __construct(SecurityDriverInterface $driver, $message = 'An error occurred', \Exception $previous = null)
-    {
-        parent::__construct($driver, $message, 500, $previous);
-    }
-
 }
