@@ -26,7 +26,10 @@ abstract class AbstractFormRow
     public function __construct($type, $name, $value = null, $options = array())
     {
         if (!in_array($type, static::getSupportedTypes())) {
-            throw new \Exception(__CLASS__ . ' does not support type ' . $type);
+            throw new \Exception(sprintf(
+                '%s does not support type "%s"',
+                get_class($this),
+                $type));
         }
         $this->type = $type;
         $this->name = $name;

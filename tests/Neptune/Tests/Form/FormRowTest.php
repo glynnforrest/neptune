@@ -165,9 +165,11 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$r->getChoices());
 	}
 
-	public function testInvalidInputTypeThrowsException() {
-		$this->setExpectedException('\Exception');
-		$r = new FormRow('foobar');
-	}
+    public function testInvalidInputTypeThrowsException()
+    {
+        $error = 'Neptune\Form\FormRow does not support type "strange"';
+        $this->setExpectedException('\Exception', $error);
+        $r = new FormRow('strange', 'foo');
+    }
 
 }
