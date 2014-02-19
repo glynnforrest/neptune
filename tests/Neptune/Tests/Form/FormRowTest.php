@@ -79,19 +79,6 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($msg, $r->getError());
 	}
 
-	public function testErrorHtml() {
-		$r = new FormRow('text', 'username');
-		$msg = 'username not found.';
-		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setError($msg));
-		$html = Html::tag('p', $msg);
-		$this->assertSame($html, $r->error());
-	}
-
-	public function testNoErrorHtml() {
-		$r = new FormRow('text', 'email');
-		$this->assertNull($r->error());
-	}
-
 	public function testGetAndSetOptions() {
 		$r = new FormRow('text', 'username', null, array('id' => 'username-input'));
 		$this->assertSame(array('id' => 'username-input'), $r->getOptions());
@@ -156,10 +143,18 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSetChoicesInvalidTypeThrowsException() {
 		$r = new FormRow('text', 'username');
-		$error = "Choices are only allowed with a FormRow of type 'select' or 'radio', 'username' has disallowed type 'text'";
+		$error = "Form row 'username' with type 'text' does not support choices";
 		$this->setExpectedException('\Exception', $error);
 		$r->setChoices(array());
 	}
+
+    public function testAddChoicesInvalidTypeThrowsException()
+    {
+        $r = new FormRow('text', 'username');
+        $error = "Form row 'username' with type 'text' does not support choices";
+        $this->setExpectedException('\Exception', $error);
+        $r->addChoices(array());
+    }
 
 	public function testAddChoices() {
 		$r = new FormRow('radio', 'decision');
