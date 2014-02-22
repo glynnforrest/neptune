@@ -34,7 +34,7 @@ abstract class AbstractSecurityDriver implements SecurityDriverInterface
         if (!$this->request->hasSession()) {
             throw new SecurityServiceException("No Session defined");
         }
-        //check for invalid session before returning
+        //check for invalid session
         return $this->request->getSession();
     }
 

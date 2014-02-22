@@ -19,10 +19,10 @@ class FailDriverTest extends \PHPUnit_Framework_TestCase
         $this->driver = new FailDriver();
     }
 
-    public function testInterface()
+    public function testInheritance()
     {
         $this->assertInstanceOf('\Neptune\Security\Driver\SecurityDriverInterface', $this->driver);
-        $this->assertInstanceOf('\Neptune\Core\RequestAwareInterface', $this->driver);
+        $this->assertInstanceOf('\Neptune\Security\Driver\AbstractSecurityDriver', $this->driver);
     }
 
     public function testAuthenticate()
