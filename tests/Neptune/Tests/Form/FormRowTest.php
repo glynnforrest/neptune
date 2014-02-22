@@ -74,10 +74,20 @@ class FormRowTest extends \PHPUnit_Framework_TestCase {
 	public function testGetAndSetError() {
 		$r = new FormRow('text', 'username');
 		$this->assertNull($r->getError());
-		$msg = 'Password is required.';
+		$msg = 'Username is required.';
 		$this->assertInstanceOf('\Neptune\Form\FormRow', $r->setError($msg));
 		$this->assertSame($msg, $r->getError());
 	}
+
+    public function testErrorHtml()
+    {
+        $r = new FormRow('text', 'username');
+        $this->assertNull($r->getError());
+        $msg = 'Username is required.';
+        $this->assertInstanceOf('\Neptune\Form\FormRow', $r->setError($msg));
+        $html = '<small class="error">Username is required.</small>';
+        $this->assertSame($html, $r->error());
+    }
 
 	public function testGetAndSetOptions() {
 		$r = new FormRow('text', 'username', null, array('id' => 'username-input'));

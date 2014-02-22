@@ -46,7 +46,7 @@ class FormRowTextareaTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('comment', 'Comment');
 		$expected .= Html::input('textarea', 'comment');
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 
@@ -57,7 +57,7 @@ class FormRowTextareaTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('comment', 'Comment');
 		$expected .= Html::input('textarea', 'comment', $comment);
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 

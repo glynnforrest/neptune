@@ -22,6 +22,7 @@ abstract class AbstractFormRow
     protected $label;
     protected $error;
     protected $row_string = ':label:input:error';
+    protected $error_string = '<small class="error">:error</small>';
 
     public function __construct($type, $name, $value = null, $options = array())
     {
@@ -64,6 +65,18 @@ abstract class AbstractFormRow
         $this->error = $error;
 
         return $this;
+    }
+
+    /**
+     * Render the error attached to this FormRow as Html.
+     */
+    public function error()
+    {
+        if ($this->error) {
+            return str_replace(':error', $this->error, $this->error_string);
+        }
+
+        return null;
     }
 
     /**
@@ -242,7 +255,8 @@ abstract class AbstractFormRow
 
     abstract public function render();
 
-    public static function getSupportedTypes() {
+    public static function getSupportedTypes()
+    {
         return array();
     }
 

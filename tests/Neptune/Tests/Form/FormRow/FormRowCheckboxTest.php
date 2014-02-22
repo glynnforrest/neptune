@@ -102,7 +102,7 @@ class FormRowCheckboxTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('agree', 'Agree');
 		$expected .= Html::input('checkbox', 'agree', 'checked');
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 
@@ -112,7 +112,7 @@ class FormRowCheckboxTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('agree', 'Agree');
 		$expected .= Html::input('checkbox', 'agree', 'checked', array('checked'));
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 

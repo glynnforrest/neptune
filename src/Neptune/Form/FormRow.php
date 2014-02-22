@@ -94,7 +94,8 @@ class FormRow extends AbstractFormRow
             'radio',
             'select',
             'submit',
-            'text'
+            'text',
+            'textarea',
         );
     }
 

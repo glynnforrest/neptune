@@ -46,18 +46,18 @@ class FormRowPasswordTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('password', 'Password');
 		$expected .= Html::input('password', 'password');
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 
 	public function testRowWithValueAndError() {
 		$password = 'super_secret';
 		$r = new FormRow('password', 'password', $password);
-		$password_error = 'Password is incorrect.';
-		$r->setError($password_error);
+		$error = 'Password is incorrect.';
+		$r->setError($error);
 		$expected = Html::label('password', 'Password');
 		$expected .= Html::input('password', 'password');
-		$expected .= Html::tag('p', $password_error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 

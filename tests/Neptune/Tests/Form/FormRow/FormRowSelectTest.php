@@ -76,7 +76,7 @@ class FormRowSelectTest extends \PHPUnit_Framework_TestCase {
 		$r->setError($error);
 		$expected = Html::label('decision', 'Decision');
 		$expected .= Html::select('decision', array());
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 
@@ -87,7 +87,7 @@ class FormRowSelectTest extends \PHPUnit_Framework_TestCase {
 		$r->setChoices(array('yes', 'no'));
 		$expected = Html::label('decision', 'Decision');
 		$expected .= Html::select('decision', array('Yes' => 'yes', 'No' => 'no'), 'no');
-		$expected .= Html::tag('p', $error);
+		$expected .= '<small class="error">' . $error . '</small>';
 		$this->assertSame($expected, $r->render());
 	}
 
