@@ -5,7 +5,6 @@ namespace Neptune\Controller;
 use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
-use Neptune\Core\RequestAwareInterface;
 use Neptune\Form\Form;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -15,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
  * Controller
  * @author Glynn Forrest me@glynnforrest.com
  */
-abstract class Controller implements NeptuneAwareInterface, RequestAwareInterface
+abstract class Controller implements NeptuneAwareInterface
 {
 
     protected $neptune;
@@ -31,34 +30,19 @@ abstract class Controller implements NeptuneAwareInterface, RequestAwareInterfac
         return $this->neptune;
     }
 
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-    }
-
-    public function getRequest()
-    {
-        return $this->request;
-    }
-
     public function assets()
     {
         return Assets::getInstance();
     }
 
-    public function isPost()
-    {
-        return $this->request->getMethod() === 'POST';
-    }
-
-    public function security($driver = null)
+    public function security(Request $request, $driver = null)
     {
         if (!$this->neptune->offsetExists('security')) {
             throw new \Exception('Security service has not been registered');
         }
 
-        $security = $this->neptune['security'];
-        $security->setRequest($this->request);
+        $security = $this->neptune['security']->get($driver);
+        $security->setRequest($request);
         return $security;
     }
 
@@ -67,13 +51,9 @@ abstract class Controller implements NeptuneAwareInterface, RequestAwareInterfac
         //return database service
     }
 
-    public function form($action = null)
+    public function form($name = null, $action = null)
     {
-        if (!$action) {
-            $action = $this->request->getUri();
-        }
-
-        return new Form($action);
+        return $this->neptune['form']->create($name, $action);
     }
 
     public function redirect($to, $with = array())

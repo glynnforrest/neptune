@@ -18,14 +18,11 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $request = new Request();
         $this->obj = new FooController();
-        $this->obj->setRequest($request);
     }
 
     public function testForm()
     {
-        $this->assertInstanceOf('\Neptune\Form\Form', $this->obj->form());
     }
 
     public function testRedirect()
