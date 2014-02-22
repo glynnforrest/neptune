@@ -4,7 +4,6 @@ namespace Neptune\Routing;
 
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
-use Neptune\Core\RequestAwareInterface;
 
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,7 +47,7 @@ class ControllerResolver implements ControllerResolverInterface
             if (!$this->neptune->offsetExists($service)) {
                 throw new \Exception(sprintf('Undefined controller service %s', $service));
             }
-            $controller = $this->configureController($request, $this->neptune[$service]);
+            $controller = $this->configureController($this->neptune[$service]);
 
             return array($controller, $method);
         }
@@ -67,7 +66,7 @@ class ControllerResolver implements ControllerResolverInterface
             throw new \Exception(sprintf('Controller not found: %s', $class));
         }
 
-        $controller = $this->configureController($request, new $class());
+        $controller = $this->configureController(new $class());
 
         return array($controller, $method);
     }
@@ -75,19 +74,20 @@ class ControllerResolver implements ControllerResolverInterface
     public function getArguments(Request $request, $controller)
     {
         $args = $request->attributes->get('_args');
+        if (!is_array($args)) {
+            throw new \RuntimeException('ControllerResolver::getArguments() expects the Request to have an _args attribute of type array');
+        }
+        array_unshift($args, $request);
 
         return $args;
     }
 
     /**
-     * Inject the current request and neptune instance if the
-     * controller is able to accept them.
+     * Inject the neptune instance if the controller is able to accept
+     * them.
      */
-    protected function configureController($request, $controller)
+    protected function configureController($controller)
     {
-        if ($controller instanceof RequestAwareInterface) {
-            $controller->setRequest($request);
-        }
         if ($controller instanceof NeptuneAwareInterface) {
             $controller->setNeptune($this->neptune);
         }

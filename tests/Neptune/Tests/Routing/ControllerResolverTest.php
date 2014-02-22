@@ -36,6 +36,7 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $req = new Request();
         $req->attributes->set('_controller', $controller);
         $req->attributes->set('_method', $method);
+        $req->attributes->set('_args', $args);
 
         return $req;
     }
@@ -53,7 +54,6 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(count($controller) === 2);
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
-        $this->assertSame($req, $controller[0]->getRequest());
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
@@ -75,7 +75,6 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(count($controller) === 2);
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
-        $this->assertSame($req, $controller[0]->getRequest());
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
@@ -96,8 +95,26 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(count($controller) === 2);
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
-        $this->assertSame($req, $controller[0]->getRequest());
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
+    }
+
+    public function testGetArguments()
+    {
+        $request = $this->createRequest('foo', 'bar', array('glynn'));
+        $args = $this->obj->getArguments($request, 'foo');
+        $this->assertInternalType('array', $args);
+        $this->assertTrue(count($args) === 2);
+        $this->assertSame($request, $args[0]);
+        $this->assertSame('glynn', $args[1]);
+    }
+
+    public function testGetArgumentsMalformedArgs()
+    {
+        $request = $this->createRequest('foo', 'bar');
+        $request->attributes->remove('_args');
+        $msg = 'ControllerResolver::getArguments() expects the Request to have an _args attribute of type array';
+        $this->setExpectedException('\RuntimeException', $msg);
+        $this->obj->getArguments($request, 'foo');
     }
 
 }
