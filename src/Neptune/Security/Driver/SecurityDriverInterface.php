@@ -2,14 +2,18 @@
 
 namespace Neptune\Security\Driver;
 
-use Neptune\Core\RequestAwareInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * SecurityDriverInterface
  * @author Glynn Forrest me@glynnforrest.com
  **/
-interface SecurityDriverInterface extends RequestAwareInterface
+interface SecurityDriverInterface
 {
+
+    public function setRequest(Request $request);
+
+    public function getRequest();
 
     public function authenticate();
 
