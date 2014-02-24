@@ -147,8 +147,8 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	public function testValidatedArgs() {
 		$r = new Route('/add/:first/:second/ok');
 		$r->controller('calculator')->method('add')->rules(
-			array('first' => 'int',
-			'second' => 'int'));
+			array('first' => '\d+',
+			'second' => '\d+'));
 		$this->assertFalse($r->test($this->request('/add/1/a/ok')));
 		$this->assertTrue($r->test($this->request('/add/4/4/ok')));
 	}
@@ -158,7 +158,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$r->controller('email')
 		  ->method('verify')
 		  ->argsRegex('[^/]+')
-		  ->rules(array('email' => 'email'));
+		  ->rules(array('email' => '\w+@\w+\.\w+'));
 		$this->assertFalse($r->test($this->request('/email/me@glynnforrest@com/foo')));
 		$this->assertTrue($r->test($this->request('/email/me@glynnforrest.com/foo')));
 	}

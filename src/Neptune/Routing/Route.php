@@ -2,7 +2,6 @@
 
 namespace Neptune\Routing;
 
-use Neptune\Validate\Validator;
 use Neptune\Routing\RouteUntestedException;
 use Neptune\Routing\RouteFailedException;
 use Neptune\Helpers\RequestHelper;
@@ -122,8 +121,8 @@ class Route {
 		return $this;
 	}
 
-	public function rules($rules) {
-		$this->rules = (array) $rules;
+	public function rules(array $rules) {
+		$this->rules = $rules;
 		return $this;
 	}
 
@@ -224,12 +223,11 @@ class Route {
 		}
 		//test the variables using validator
 		if (!empty($this->rules)) {
-			$v = new Validator($args, $this->rules);
-			$v->controller = $this->controller;
-			$v->method = $this->method;
-			if (!$v->validate()) {
-				return false;
-			}
+            foreach ($this->rules as $name => $regex) {
+                if (!preg_match('`' . $regex . '`', $args[$name])) {
+                    return false;
+                }
+            }
 		}
 		if(!empty($args)) {
 			$this->args = $args;
