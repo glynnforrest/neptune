@@ -111,12 +111,12 @@ class CsrfManager
     public function check($id, $token)
     {
         if (!$token) {
-            throw new CsrfTokenException($this->driver, "No Csrf token submitted");
+            throw new CsrfTokenException($this->driver, 'No Csrf token submitted');
         }
 
         $session_token = $this->get($id);
         if ($session_token !== $token) {
-            throw new CsrfTokenException($this->driver, "Invalid Csrf token");
+            throw new CsrfTokenException($this->driver, 'Invalid Csrf token');
         }
 
         //remove the token from the session after it has been used
