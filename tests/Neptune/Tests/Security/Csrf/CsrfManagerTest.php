@@ -5,6 +5,8 @@ namespace Neptune\Tests\Security\Csrf;
 require_once __DIR__ . '/../../../../bootstrap.php';
 
 use Neptune\Security\Csrf\CsrfManager;
+use Neptune\Security\Exception\CsrfTokenException;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -89,6 +91,15 @@ class CsrfManagerTest extends \PHPUnit_Framework_TestCase
         /* $this->driver->expects($this->once()) */
         /*              ->method('secureEquals') */
         /*              ->with(); */
+    }
+
+    public function testExceptionHasCsrfDriver()
+    {
+        try {
+            $this->manager->check('foo', 'bar');
+        } catch (CsrfTokenException $e) {
+            $this->assertInstanceOf('\Neptune\Security\Driver\CsrfDriver', $e->getSecurityDriver());
+        }
     }
 
 }

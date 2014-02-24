@@ -4,7 +4,7 @@ namespace Neptune\Security\Csrf;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Neptune\Security\Exception\CsrfTokenException;
-use Neptune\Security\Driver\FailDriver;
+use Neptune\Security\Driver\CsrfDriver;
 
 /**
  * CsrfManager
@@ -20,7 +20,7 @@ class CsrfManager
 
     public function __construct(SessionInterface $session, $driver = null)
     {
-        $this->driver = new FailDriver();
+        $this->driver = new CsrfDriver();
         $this->session = $session;
         $this->session_key = 'security.csrf.';
     }
