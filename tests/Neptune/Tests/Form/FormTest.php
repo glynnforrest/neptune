@@ -4,6 +4,9 @@ namespace Neptune\Tests\Form;
 
 use Neptune\Form\Form;
 use Neptune\Helpers\Html;
+use Neptune\Validate\Rule;
+
+use Symfony\Component\HttpFoundation\Request;
 
 require_once __DIR__ . '/../../../bootstrap.php';
 
@@ -13,35 +16,49 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class FormTest extends \PHPUnit_Framework_TestCase {
 
+    protected $dispatcher;
+
+    public function setup()
+    {
+        $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
+    }
+
+    protected function createForm($url, $method = 'POST', $options = array())
+    {
+        $form = new Form($this->dispatcher, $url, $method, $options);
+        return $form;
+    }
+
 	public function testCreateEmptyForm() {
-		$f = new Form('/post/url');
+		$f = $this->createForm('/post/url');
 		$expected = Html::tag('form', null, array('action' => '/post/url', 'method' => 'POST'));
 		$this->assertSame($expected, $f->render());
 	}
 
 	public function testInput() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('name');
 		$this->assertSame(Html::input('text', 'name'), $f->input('name'));
 	}
 
 	public function testLabel() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username');
 		$this->assertSame(Html::label('username', 'Username'), $f->label('username'));
 	}
 
 	public function testError() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('email');
 		$this->assertNull($f->error('email'));
 		$error_msg = 'Email is invalid.';
 		$f->getRow('email')->setError($error_msg);
-		$this->assertSame(Html::tag('p', $error_msg), $f->error('email'));
+        $expected = '<small class="error">Email is invalid.</small>';
+		$this->assertSame($expected, $f->error('email'));
 	}
 
 	public function testCreateSimpleForm() {
-		$f = new Form('/post/url', 'get');
+		$f = $this->createForm('/post/url', 'get');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('name'));
 		$expected = Html::openTag('form', array('action' => '/post/url', 'method' => 'GET'));
 		$expected .= Html::label('name', 'Name');
@@ -51,27 +68,27 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAndSetAction() {
-		$f = new Form('/login');
+		$f = $this->createForm('/login');
 		$this->assertSame('/login', $f->getAction());
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setAction('/login/somewhere/else'));
 		$this->assertSame('/login/somewhere/else', $f->getAction());
 	}
 
 	public function testGetAndSetMethod() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->assertSame('POST', $f->getMethod());
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setMethod('get'));
 		$this->assertSame('GET', $f->getMethod());
 	}
 
 	public function testSetMethodThrowsException() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->setExpectedException('\Exception');
 		$f->setMethod('something-stupid');
 	}
 
 	public function testGetAndSetOptions() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->assertSame(array(), $f->getOptions());
 		$options = array('id' => 'my-form', 'class' => 'form');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setOptions($options));
@@ -79,7 +96,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAndSetValue() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('message');
 		$this->assertSame(null, $f->getValue('message'));
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValue('message', 'hello'));
@@ -87,20 +104,20 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSetValueThrowsExceptionUndefinedRow() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->setExpectedException('\Exception', "Attempting to assign value 'user42' to an unknown form row 'username'");
 		$f->setValue('username', 'user42');
 	}
 
 	public function testSetCreateNewRow() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValue('username', 'user42', true));
 		$this->assertSame('user42', $f->getValue('username'));
 		$this->assertSame('text', $f->getRow('username')->getType());
 	}
 
 	public function testGetAndSetValues() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username', 'glynn');
 		$f->password('password', 'secret');
 		$expected = array('username' => 'glynn', 'password' => 'secret');
@@ -111,7 +128,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testSetValuesThrowsExceptionUndefinedRow() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username');
 		$f->password('password');
 		$expected = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
@@ -121,9 +138,9 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetAndSetError()
     {
-        $f = new Form('/url');
+        $f = $this->createForm('/url');
         $f->text('username');
-        $f->addErrors(array('username' => 'Username error'));
+        $f->setErrors(array('username' => 'Username error'));
         $this->assertSame('Username error', $f->getError('username'));
         $f->setError('username', 'A different error');
         $this->assertSame('A different error', $f->getError('username'));
@@ -131,14 +148,14 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 
     public function testSetErrorThrowsExceptionUndefinedRow()
     {
-        $f = new Form('/url');
+        $f = $this->createForm('/url');
         $this->setExpectedException('\Exception');
         $f->setError('username', 'user42');
     }
 
     public function testGetErrors()
     {
-        $f = new Form('/url');
+        $f = $this->createForm('/url');
         $f->text('username');
         $f->password('password');
         $f->setError('password', 'Password error');
@@ -151,7 +168,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
     }
 
 	public function testSetValuesCreateRows() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$new = array('foo' => 'bar', 'baz' => 'qux', 'fu bar' => 'foo bar');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->setValues($new, true));
 		foreach ($new as $name => $value) {
@@ -161,13 +178,13 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRow() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->assertInstanceOf('\Neptune\Form\Form', $f->text('username'));
 		$this->assertInstanceOf('\Neptune\Form\FormRow', $f->getRow('username'));
 	}
 
 	public function testRowIsReturnedByReference() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username');
 		//check that the same FormRow instance is returned every time.
 		$first = $f->getRow('username');
@@ -182,13 +199,13 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$html = Html::label($name, ucfirst($name));
 		$html .= Html::input($type, $name, $value, $options);
 		if($error) {
-			$html .= Html::tag('p', $error);
+            $html .= '<small class="error">' . $error . '</small>';
 		}
 		return $html;
 	}
 
 	public function testCreateFromArray() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$values = array('username' => 'glynn', 'age' => 100);
 		$f->setValues($values, true);
 		$expected = Html::openTag('form', array('action' => '/url', 'method' => 'POST'));
@@ -199,7 +216,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testCreateAndModify() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username', 'glynn');
 		$comment =  'Hello world';
 		$f->textarea('comment', $comment);
@@ -225,18 +242,18 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testToStringCallsRender() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$this->assertSame($f->render(), $f->__toString());
 	}
 
 	public function testAddErrors() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->text('username');
 		$f->text('email', 'foo');
 
 		$username_error = 'Username is required.';
 		$email_error = 'Email is invalid';
-		$f->addErrors(array(
+		$f->setErrors(array(
 			'username' => $username_error,
 			'email' => $email_error
 		));
@@ -246,9 +263,9 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($email_error, $f->getRow('email')->getError());
 
 		//test the error html is rendered
-		$username_error_html = Html::tag('p', $username_error);
+		$username_error_html = '<small class="error">' . $username_error . '</small>';
 		$this->assertSame($username_error_html, $f->error('username'));
-		$email_error_html = Html::tag('p', $email_error);
+		$email_error_html = '<small class="error">' . $email_error . '</small>';
 		$this->assertSame($email_error_html, $f->error('email'));
 
 		//test the completed form contains the errors
@@ -260,7 +277,7 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFields() {
-		$f = new Form('/url');
+		$f = $this->createForm('/url');
 		$f->hidden('id');
 		$f->text('username');
 		$f->text('email');
@@ -268,5 +285,86 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$expected = array('id', 'username', 'email', 'password');
 		$this->assertSame($expected, $f->getFields());
 	}
+
+    public function testCheck()
+    {
+        $f = $this->createForm('/url');
+        $f->text('foo');
+        $this->assertSame($f, $f->check('foo', new Rule\Required()));
+        $validator = $f->getValidator();
+    }
+
+    public function testIsValidDefaultsToFalse()
+    {
+        $f = $this->createForm('/url');
+        $this->assertFalse($f->isValid());
+    }
+
+    public function validateProvider()
+    {
+        return array(
+            array(array(), false),
+            array(array('username' => 'foo'), false),
+            array(array('password' => 'foo'), false),
+            array(array('username' => '', 'password' => ''), false),
+            array(array('username' => 'foo', 'password' => ''), false),
+            array(array('username' => '', 'password' => 'foo'), false),
+            array(array('username' => 'f-oo', 'password' => 'foo'), false),
+            array(array('username' => 'foo', 'password' => 'foo'), true),
+        );
+    }
+
+    /**
+     * @dataProvider validateProvider()
+     */
+    public function testValidate($values, $pass)
+    {
+        $f = $this->createForm('/url');
+        $f->text('username')
+          ->check('username', new Rule\Required())
+          ->check('username', new Rule\AlphaNumeric())
+          ->password('password')
+          ->check('password', new Rule\Required());
+
+        $f->validate($values);
+        if ($pass) {
+            $this->assertTrue($f->isValid());
+        } else {
+            $this->assertFalse($f->isValid());
+        }
+    }
+
+    public function testIsValidIsResetOnValidate()
+    {
+        $f = $this->createForm('/url');
+        $f->text('username')
+          ->check('username', new Rule\Required());
+        $f->validate(array('username' => 'foo'));
+        $this->assertTrue($f->isValid());
+        $f->validate(array('username' => ''));
+        $this->assertFalse($f->isValid());
+    }
+
+    /**
+     * @dataProvider validateProvider()
+     */
+    public function testHandle($values, $pass)
+    {
+        $f = $this->createForm('/url');
+        $f->text('username')
+          ->check('username', new Rule\Required())
+          ->check('username', new Rule\AlphaNumeric())
+          ->password('password')
+          ->check('password', new Rule\Required());
+
+        $request = Request::create('/url');
+        $request->request->add($values);
+        $f->handle($request);
+        if ($pass) {
+            $this->assertTrue($f->isValid());
+        } else {
+            $this->assertFalse($f->isValid());
+        }
+    }
 
 }
