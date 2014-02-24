@@ -20,14 +20,16 @@ abstract class AbstractRule
 
     /**
      * Add $this->message to $result, automatically substituting
-     * $name, $value and any additional paramaters supplied in
+     * $name, $value and any additional parameters supplied in
      * $context.
      */
     protected function fail(Result $result, $name, $value = null, array $context = array())
     {
-        $context[':name'] = $this->sensible($name);
+        if (!isset($context[':name'])) {
+            $context[':name'] = $this->sensible($name);
+        }
 
-        if (is_scalar($value)) {
+        if (is_scalar($value) && !isset($context[':value'])) {
             $context[':value'] = (string) $value;
         }
 
