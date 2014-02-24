@@ -7,13 +7,12 @@
 
 namespace Neptune\Validate;
 
-use Neptune\Validate\Result;
 use Neptune\Validate\Rule\AbstractRule;
 use Neptune\Validate\Rule\Required;
 
-class Validator {
-
-	protected $rules = array();
+class Validator
+{
+    protected $rules = array();
     protected $required = array();
 
     public function check($name, AbstractRule $rule)
@@ -27,6 +26,7 @@ class Validator {
         if ($rule instanceof Required) {
             $this->required[$name] = true;
         }
+
         return $this;
     }
 
@@ -35,6 +35,7 @@ class Validator {
         //first check if the value actually exists.
         if (!isset($input[$name])) {
             $result->addError($name, $name . ' is not in input.');
+
             return $result;
         }
         //now run the rules for this name
@@ -43,18 +44,21 @@ class Validator {
                 return $result;
             }
         }
+
         return $result;
     }
 
     /**
      * Validate an array of values.
      */
-    public function validate(array $input, $early_exit = false) {
+    public function validate(array $input, $early_exit = false)
+    {
         $result = new Result($input);
         //add custom messages that have been supplied
-        foreach($this->rules as $name => $rules) {
+        foreach ($this->rules as $name => $rules) {
             $this->doValidate($result, $input, $name, $rules, $early_exit);
         }
+
         return $result;
     }
 
@@ -70,24 +74,27 @@ class Validator {
         $result = new Result($input);
         foreach ($this->rules as $name => $rules) {
             //if a value is submitted but empty, and not required, skip it
-            if(!in_array($name, $this->required)) {
-                if(!$this->required($input[$name])) {
+            if (!in_array($name, $this->required)) {
+                if (!$this->required($input[$name])) {
                     continue;
                 }
             }
             $this->doValidate($result, $input, $name, $rules, $early_exit);
         }
+
         return $result;
     }
 
-	protected function required($value) {
+    protected function required($value)
+    {
         if (is_string($value)) {
             $value = trim($value);
         }
         if (empty($value) && !is_numeric($value)) {
             return false;
         }
+
         return true;
-	}
+    }
 
 }
