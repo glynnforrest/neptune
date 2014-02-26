@@ -60,6 +60,8 @@ class ControllerResolver implements ControllerResolverInterface
             $module = $this->neptune->getDefaultModule();
             $controller_name = $controller;
         }
+        //replace forward slashes with backwards for namespacing
+        $controller_name = str_replace('/', '\\', $controller_name);
         $module = $this->neptune->getModuleNamespace($module);
         $class = sprintf('%s\\Controller\\%sController', $module, ucfirst($controller_name));
         if (!class_exists($class)) {
