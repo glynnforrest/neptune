@@ -302,7 +302,34 @@ class Form
     {
         $values = array();
         foreach ($this->rows as $name => $row) {
-            $values[$name] = $row->getValue();
+            //some rows may need to be represented as arrays
+            $parts = explode('[', implode(explode(']', $name)));
+            //loop through each part of the name, making sure an array
+            //exists for each index.
+            $scope = &$values;
+            $count = count($parts) - 1;
+            for ($i = 0; $i < $count; $i++) {
+                if (!isset($scope[$parts[$i]])) {
+                    $scope[$parts[$i]] = array();
+                }
+                //if an index already exists that is not an array, a
+                //row has been specified on top of another row:
+                //data[foo] -> text field
+                //data[foo][bar] -> error! data[foo] is a form row,
+                //not an array
+                if (!is_array($scope[$parts[$i]])) {
+                    $parent_name = substr($name, 0, strrpos($name, '['));
+                    throw new \Exception(sprintf(
+                        'Unable to use form row "%s" as form row "%s" already exists',
+                        $name,
+                        $parent_name));
+                }
+
+                $scope = &$scope[$parts[$i]];
+            }
+            //after ensuring the array structure is made, assign the
+            //value of the form row to the correct key.
+            $scope[$parts[$i]] = $row->getValue();
         }
 
         return $values;
