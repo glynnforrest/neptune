@@ -119,6 +119,18 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
+    public function testGetControllerClassName()
+    {
+        $req = $this->createRequest('\Neptune\Tests\Routing\Controller\TestController', 'bar');
+        $controller = $this->obj->getController($req);
+
+        $this->assertInternalType('array', $controller);
+        $this->assertTrue(count($controller) === 2);
+        $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
+        $this->assertSame('barAction', $controller[1]);
+        $this->assertSame($this->neptune, $controller[0]->getNeptune());
+    }
+
     public function testGetArguments()
     {
         $request = $this->createRequest('foo', 'bar', array('glynn'));

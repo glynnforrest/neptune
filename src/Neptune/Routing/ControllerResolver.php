@@ -52,6 +52,22 @@ class ControllerResolver implements ControllerResolverInterface
             return array($controller, $method);
         }
 
+        //if $controller begins with a backslash, assume a class name
+        if (substr($controller, 0, 1) === '\\') {
+            $class = $controller;
+        } else {
+            $class = $this->getControllerClass($controller);
+        }
+        if (!class_exists($class)) {
+            throw new \Exception(sprintf('Controller not found: %s', $class));
+        }
+        $controller = $this->configureController(new $class());
+
+        return array($controller, $method);
+    }
+
+    protected function getControllerClass($controller)
+    {
         //controller can be either a single name of a controller, or a
         //name prefixed with the module, e.g. 'foo' or 'my-module:foo'
         if (strpos($controller, ':')) {
@@ -63,14 +79,8 @@ class ControllerResolver implements ControllerResolverInterface
         //replace forward slashes with backwards for namespacing
         $controller_name = str_replace('/', '\\', $controller_name);
         $module = $this->neptune->getModuleNamespace($module);
-        $class = sprintf('%s\\Controller\\%sController', $module, ucfirst($controller_name));
-        if (!class_exists($class)) {
-            throw new \Exception(sprintf('Controller not found: %s', $class));
-        }
 
-        $controller = $this->configureController(new $class());
-
-        return array($controller, $method);
+        return sprintf('%s\\Controller\\%sController', $module, ucfirst($controller_name));
     }
 
     public function getArguments(Request $request, $controller)
