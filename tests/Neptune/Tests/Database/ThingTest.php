@@ -5,7 +5,6 @@ namespace Neptune\Tests\Database;
 use Neptune\Database\Thing;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
-use Neptune\Form\Form;
 
 require_once __DIR__ . '/../../../bootstrap.php';
 
@@ -186,34 +185,5 @@ class ThingTest extends \PHPUnit_Framework_TestCase {
 		$query = 'INSERT INTO `table` (`id`, `column`) VALUES (`3`, `value`)';
 		$this->assertEquals($query, $this->lastQuery());
 	}
-
-    public function testBuildForm()
-    {
-        $form = UpperCase::buildForm(new Form('/url'));
-        $this->assertInstanceOf('\Neptune\Form\Form', $form);
-    }
-
-    public function testBuildFormDoesNotIncludePrimaryKey()
-    {
-        $form = UpperCase::buildForm(new Form('/url'));
-        $expected = array('name', 'column', '_save');
-        $this->assertSame($expected, $form->getFields());
-    }
-
-    public function testBuildFormAddsValuesAndErrors()
-    {
-        $values = array(
-            'name' => 'foo',
-            'column' => 'bar'
-        );
-        $errors = array(
-            'name' => 'Some name error'
-        );
-        $form = UpperCase::buildForm(new Form('/url'), $values, $errors);
-        $this->assertSame('foo', $form->getValue('name'));
-        $this->assertSame('bar', $form->getValue('column'));
-        $this->assertSame('Some name error', $form->getError('name'));
-    }
-
 
 }

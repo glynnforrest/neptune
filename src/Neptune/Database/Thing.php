@@ -7,8 +7,6 @@ use Neptune\Database\SQLQuery;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Database\Relations\Relation;
 use Neptune\Database\Relations\RelationsManager;
-use Neptune\Validate\Validator;
-use Neptune\Form\Form;
 
 /**
  * Thing
@@ -20,8 +18,6 @@ class Thing {
 	protected static $fields = array();
 	protected static $primary_key = 'id';
 	protected static $relations = array();
-	protected static $rules = array();
-	protected static $messages = array();
 	protected $database;
 	protected $current_index;
 	protected $values = array();
@@ -397,35 +393,5 @@ class Thing {
 	public function setDatabase($database) {
 		$this->database = $database;
 	}
-
-	public static function bindValidation($names, $input_array = 'POST') {
-		if (!is_array($names)) {
-			$names = array($names);
-		}
-		$rules = array();
-		foreach ($names as $name) {
-			if (isset(static::$rules[$name])) {
-				$rules[$name] = static::$rules[$name];
-			}
-		}
-		$v = new Validator($input_array, $rules, static::$messages);
-		return $v;
-	}
-
-    public static function buildForm(Form $form, $values = array(), $errors = array())
-    {
-        foreach(static::$fields as $field) {
-            if($field !== static::$primary_key) {
-                $form->text($field);
-            }
-        }
-        //Create a submit field, prefixed with an underscore to
-        //hopefully not conflict with any database columns for
-        //convenience
-        $form->submit('_save');
-        $form->setValues($values);
-        $form->addErrors($errors);
-        return $form;
-    }
 
 }
