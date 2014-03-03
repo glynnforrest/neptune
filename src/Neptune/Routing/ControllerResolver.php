@@ -76,11 +76,12 @@ class ControllerResolver implements ControllerResolverInterface
             $module = $this->neptune->getDefaultModule();
             $controller_name = $controller;
         }
-        //replace forward slashes with backwards for namespacing
-        $controller_name = str_replace('/', '\\', $controller_name);
+        //replace forward slashes with backwards and run ucfirst on
+        //each segment for namespacing
+        $controller_name = implode('\\', array_map('ucfirst', explode('/', $controller_name)));
         $module = $this->neptune->getModuleNamespace($module);
 
-        return sprintf('%s\\Controller\\%sController', $module, ucfirst($controller_name));
+        return sprintf('%s\\Controller\\%sController', $module, $controller_name);
     }
 
     public function getArguments(Request $request, $controller)
