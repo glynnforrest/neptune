@@ -420,17 +420,20 @@ class FormTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($expected, $f->getValues());
     }
 
-    public function testGetValuesThrowsExceptionOnArrayToRow()
+    public function testGetValuesOverwritesRows()
     {
-        $msg = 'Unable to use form row "data[bar]" as form row "data" already exists';
-        $this->setExpectedException('\Exception', $msg);
         $f = $this->createForm('/url');
         $f->text('data', 'bar')
           ->text('data[bar]', 'bar');
-        $f->getValues();
+        $expected = array(
+            'data' => array(
+                'bar' => 'bar'
+            )
+        );
+        $this->assertSame($expected, $f->getValues());
     }
 
-    public function testGetValuesThrowsOverwritesArraysNested()
+    public function testGetValuesOverwritesArraysNested()
     {
         $f = $this->createForm('/url');
         $f->text('data[foo][bar][baz]', 'foo')
@@ -445,14 +448,21 @@ class FormTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($expected, $f->getValues());
     }
 
-    public function testGetValuesThrowsExceptionOnArrayToRowNested()
+    public function testGetValuesOverwritesRowsNested()
     {
-        $msg = 'Unable to use form row "data[foo][bar][baz]" as form row "data[foo][bar]" already exists';
-        $this->setExpectedException('\Exception', $msg);
         $f = $this->createForm('/url');
         $f->text('data[foo][bar]', 'bar')
           ->text('data[foo][bar][baz]', 'baz');
-        $f->getValues();
+        $expected = array(
+            'data' => array(
+                'foo' => array(
+                    'bar' => array(
+                        'baz' => 'baz'
+                    )
+                )
+            )
+        );
+        $this->assertSame($expected, $f->getValues());
     }
 
 }
