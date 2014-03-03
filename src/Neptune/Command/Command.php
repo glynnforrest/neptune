@@ -103,7 +103,7 @@ abstract class Command extends SymfonyCommand {
 			return false;
 		}
 		//check to see if config settings required for neptune have been set
-		return $this->config->get('namespace', false);
+		return true;
 	}
 
 	/**
