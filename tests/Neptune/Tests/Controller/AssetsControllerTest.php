@@ -27,8 +27,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->temp = new Temping();
 		$this->dir = $this->temp->getDirectory();
 		$c->set('assets.dir', $this->dir);
-		$request = new Request();
-		$this->obj = new AssetsController($request);
+		$this->obj = new AssetsController();
 	}
 
 	public function tearDown() {
@@ -64,7 +63,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeAsset() {
 		$this->temp->create('asset.css', 'css_content');
-		$response = $this->obj->serveAsset('asset.css');
+		$response = $this->obj->serveAssetAction(new Request(), 'asset.css');
 		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
 		$this->assertSame('css_content', $response->getContent());
 		$this->assertEquals('text/css', $response->headers->get('content-type'));
@@ -75,7 +74,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 		$conf = Config::load();
 		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
-		$response = $this->obj->serveAsset('filtered.js');
+		$response = $this->obj->serveAssetAction(new Request(), 'filtered.js');
 		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
 		$this->assertEquals('JS_CONTENT', $response->getContent());
 		$this->assertEquals('application/javascript', $response->headers->get('content-type'));

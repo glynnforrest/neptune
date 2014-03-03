@@ -20,11 +20,6 @@ class AssetsController extends Controller {
 	//array of options that are passed to a filter on instantiation.
 	protected static $filter_options = array();
 	protected $current_prefix;
-	protected $request;
-
-	public function __construct(Request $request) {
-		$this->request = $request;
-	}
 
 	protected function _before() {
 		//register all of neptune's built in filters here.
@@ -58,7 +53,7 @@ class AssetsController extends Controller {
 		return true;
 	}
 
-	public function serveAsset($asset_name) {
+	public function serveAssetAction(Request $request, $asset_name) {
 		$asset_name = $this->processPrefix($asset_name);
 		try {
 			$asset = new Asset($this->getAssetPath($asset_name));

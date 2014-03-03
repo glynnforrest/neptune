@@ -67,7 +67,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/css/test'));
 		$expected = array(
-			'Neptune\Controller\AssetsController',
+			'\Neptune\Controller\AssetsController',
 			'serveAsset',
 			array('asset' => 'css/test'));
 		$this->assertSame($expected, $r->getAction());
@@ -82,7 +82,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/lib/js/test'));
 		$expected = array(
-			'Neptune\Controller\AssetsController',
+			'\Neptune\Controller\AssetsController',
 			'serveAsset',
 			array('asset' => 'lib/js/test')
 		);

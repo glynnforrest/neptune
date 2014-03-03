@@ -79,7 +79,7 @@ class Router {
 		}
 		$url = $url . ':asset';
 		$route = new Route($url);
-		$route->controller('Neptune\\Controller\\AssetsController')
+		$route->controller('\\Neptune\\Controller\\AssetsController')
 			  ->method('serveAsset')
 			  ->format('any')
 			  ->argsRegex('.+');
