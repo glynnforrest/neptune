@@ -284,11 +284,32 @@ class Form
      */
     public function setValues(array $values = array(), $create_rows = false)
     {
-        foreach ($values as $name => $value) {
+        foreach ($this->flattenArray($values) as $name => $value) {
             $this->setValue($name, $value, $create_rows);
         }
 
         return $this;
+    }
+
+    /**
+     * Flatten a multidimensional array into a one-dimensional array, using
+     * square brackets to show the structure of the original array.
+     */
+    protected function flattenArray(array $values, $previous = '')
+    {
+        $result = array();
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $result = $result + $this->flattenArray($value, $key);
+            } else {
+                if ($previous) {
+                    $key = $previous . '[' . $key .']';
+                }
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**

@@ -465,4 +465,21 @@ class FormTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($expected, $f->getValues());
     }
 
+    public function testSetValuesWithArrays()
+    {
+        $values = array(
+            'foo' => 'foo',
+            'bar' => array(
+                'one' => 'one',
+                'two' => 'two'
+            )
+        );
+        $f = $this->createForm('/url');
+        $f->setValues($values, true);
+        $this->assertSame('foo', $f->getValue('foo'));
+        $this->assertSame('one', $f->getValue('bar[one]'));
+        $this->assertSame('two', $f->getValue('bar[two]'));
+        $this->assertSame($values, $f->getValues());
+    }
+
 }
