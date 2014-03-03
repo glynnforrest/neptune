@@ -245,9 +245,8 @@ class Form
 
     /**
      * Set the value of the input attached to FormRow $name. If
-     * $create_row is true, a new FormRow of name $name will be
-     * created with type 'text'. Otherwise, an Exception will be
-     * thrown if the FormRow doesn't exist.
+     * the row doesn't exist and $create_row is true, a new FormRow
+     * will be created with type 'text'.
      *
      * @param string $name       The name of the FormRow
      * @param string $value      The value
@@ -256,13 +255,11 @@ class Form
     public function setValue($name, $value, $create_row = false)
     {
         if (!array_key_exists($name, $this->rows)) {
-            if (!$create_row) {
-                throw new \Exception(
-                    "Attempting to assign value '$value' to an unknown form row '$name'"
-                );
+            if ($create_row) {
+                return $this->text($name, $value);
             }
 
-            return $this->text($name, $value);
+            return $this;
         }
         $this->rows[$name]->setValue($value);
 
@@ -278,10 +275,9 @@ class Form
     }
 
     /**
-     * Set the value of the input in multiple FormRows. If
-     * $create_rows is true, new FormRows will be created with type
-     * 'text' if they don't exist. Otherwise, an Exception will be
-     * thrown if a FormRow doesn't exist.
+     * Set the value of the input in multiple FormRows. If any row
+     * doesn't exist and $create_rows is true, new FormRows will be
+     * created with type 'text'.
      *
      * @param array $values     An array of keys and values to set
      * @param bool  $create_row Create a new FormRow if it doesn't exist

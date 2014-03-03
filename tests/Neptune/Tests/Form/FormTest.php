@@ -103,11 +103,12 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('hello', $f->getValue('message'));
 	}
 
-	public function testSetValueThrowsExceptionUndefinedRow() {
-		$f = $this->createForm('/url');
-		$this->setExpectedException('\Exception', "Attempting to assign value 'user42' to an unknown form row 'username'");
-		$f->setValue('username', 'user42');
-	}
+    public function testSetValueIgnoresUndefinedRow()
+    {
+        $f = $this->createForm('/url');
+        $f->setValue('username', 'user42');
+        $this->assertSame(array(), $f->getValues());
+    }
 
 	public function testSetCreateNewRow() {
 		$f = $this->createForm('/url');
@@ -127,14 +128,16 @@ class FormTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($changed, $f->getValues());
 	}
 
-	public function testSetValuesThrowsExceptionUndefinedRow() {
-		$f = $this->createForm('/url');
-		$f->text('username');
-		$f->password('password');
-		$expected = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
-		$this->setExpectedException('\Exception', "Attempting to assign value 'bar' to an unknown form row 'foo'");
-		$f->setValues($expected);
-	}
+    public function testSetValuesIgnoresUndefinedRow()
+    {
+        $f = $this->createForm('/url');
+        $f->text('username');
+        $f->password('password');
+        $values = array('username' => 'glynn', 'password' => 'secret', 'foo' => 'bar');
+        $expected = array('username' => 'glynn', 'password' => 'secret');
+        $f->setValues($values);
+        $this->assertSame($expected, $f->getValues());
+    }
 
     public function testGetAndSetError()
     {
