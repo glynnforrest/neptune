@@ -73,6 +73,16 @@ abstract class CreateCommand extends Command {
 		$this->console->verbose(sprintf('Target module: <info>%s</info>', $module));
 	}
 
+    protected function getResourceName()
+    {
+		$name = $this->input->getArgument('name');
+		if(!$name) {
+			$dialog = $this->getHelper('dialog');
+			$name = $dialog->ask($this->output, $this->prompt, $this->default);
+		}
+        return $name;
+    }
+
 	public function go(Console $console) {
 		try {
 			$this->checkModule();
@@ -80,18 +90,18 @@ abstract class CreateCommand extends Command {
 			$console->writeln(sprintf("<error>%s</error>", $e->getMessage()));
 			return false;
 		}
-
-		$name = $this->input->getArgument('name');
-		if(!$name) {
-			$dialog = $this->getHelper('dialog');
-			$name = $dialog->ask($this->output, $this->prompt, $this->default);
-		}
+        $name = $this->getResourceName();
 		$skeleton = $this->getSkeleton($name);
 
 		$module = $this->input->getOption('module');
 		$skeleton->setNamespace($this->getModuleNamespace($module));
 		$target_file = $this->getModuleDirectory($module) .
 			$this->getTargetPath($name);
+        $directory = dirname($target_file);
+        if(!file_exists($directory)) {
+            mkdir($directory, true);
+            $console->verbose(sprintf('Created directory <info>%s</info>', $directory));
+        }
 		$this->saveSkeletonToFile($skeleton, $target_file);
 	}
 
