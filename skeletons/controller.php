@@ -5,9 +5,11 @@ use Neptune\Controller\Controller;
 use Neptune\View\View;
 
 <?=$this->class_info;?>
-class <?=$this->controller_name;?> extends Controller {
+class <?=$this->controller_name;?> extends Controller
+{
 
-    public function index() {
+    public function indexAction()
+    {
         return View::load('index');
     }
 
