@@ -10,8 +10,6 @@ namespace Neptune\Database\Drivers;
  */
 interface DatabaseDriver {
 
-	public function __construct($host, $port, $user, $pass, $db);
-
 	/**
 	 * @return DatabaseStatement
 	 */
