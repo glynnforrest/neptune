@@ -299,12 +299,12 @@ class Form
     {
         $result = array();
         foreach ($values as $key => $value) {
+            if ($previous) {
+                $key = $previous . '[' . $key .']';
+            }
             if (is_array($value)) {
                 $result = $result + $this->flattenArray($value, $key);
             } else {
-                if ($previous) {
-                    $key = $previous . '[' . $key .']';
-                }
                 $result[$key] = $value;
             }
         }
@@ -424,6 +424,7 @@ class Form
         } else {
             $values = $request->request->all();
         }
+        $values = $this->flattenArray($values);
 
         if (!$this->matchesRows($values)) {
             return true;

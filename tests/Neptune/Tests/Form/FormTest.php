@@ -482,4 +482,29 @@ class FormTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($values, $f->getValues());
     }
 
+    public function testMatchesRowsWithArrays()
+    {
+        $values = array(
+            'foo' => 'foo',
+            'bar' => array(
+                'one' => 'one',
+                'two' => 'two'
+            ),
+            'baz' => array(
+                'one' => array(
+                    'two' => 'foo'
+                )
+            )
+        );
+        $f = $this->createForm('/url');
+        $f->text('foo')
+          ->text('bar[one]')
+          ->text('bar[two]')
+          ->text('baz[one][two]');
+        $request = Request::create('/url');
+        $request->request->add($values);
+        $f->handle($request);
+        $this->assertTrue($f->isValid());
+    }
+
 }
