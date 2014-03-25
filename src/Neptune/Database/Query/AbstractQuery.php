@@ -1,29 +1,41 @@
 <?php
 
-namespace Neptune\Database;
+namespace Neptune\Database\Query;
 
-use Neptune\Database\DatabaseFactory;
-use Neptune\Database\Drivers\DatabaseDriver;
+use Neptune\Database\Driver\DatabaseDriverInterface;
 
 /**
- * SQLQuery
+ * AbstractQuery
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-abstract class SQLQuery {
+abstract class AbstractQuery {
 
 	protected $query = array();
 	protected $type;
-	protected $select_verbs = array('DISTINCT', 'FIELDS', 'FROM',
-		'JOIN', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET');
+	protected $select_verbs = array(
+        'DISTINCT',
+        'FIELDS',
+        'FROM',
+        'JOIN',
+        'WHERE',
+        'ORDER BY',
+        'LIMIT',
+        'OFFSET'
+    );
 	protected $insert_verbs = array('INTO', 'FIELDS');
 	protected $update_verbs = array('TABLES', 'FIELDS', 'WHERE');
 	protected $delete_verbs = array('FROM', 'WHERE');
-	protected $db;
+	protected $driver;
 
-	protected function __construct($type, DatabaseDriver $db) {
+	public function __construct(DatabaseDriverInterface $driver, $type) {
+		$this->driver = $driver;
 		$this->type = $type;
-		$this->db = $db;
 	}
+
+    public function getType()
+    {
+        return $this->type;
+    }
 
 	protected function formatQueryString() {
 		switch ($this->type) {
@@ -35,31 +47,9 @@ abstract class SQLQuery {
 				return $this->formatUpdateString();
 			case 'DELETE':
 				return $this->formatDeleteString();
+        default:
+            throw new \Exception("Unknown query type $this->type");
 		}
-	}
-
-	public static function select($db = null) {
-		$db = DatabaseFactory::getDriver($db);
-		$class = $db->getBuilderName();
-		return new $class('SELECT', $db);
-	}
-
-	public static function insert($db = null) {
-		$db = DatabaseFactory::getDriver($db);
-		$class = $db->getBuilderName();
-		return new $class('INSERT', $db);
-	}
-
-	public static function update($db = null) {
-		$db = DatabaseFactory::getDriver($db);
-		$class = $db->getBuilderName();
-		return new $class('UPDATE', $db);
-	}
-
-	public static function delete($db = null) {
-		$db = DatabaseFactory::getDriver($db);
-		$class = $db->getBuilderName();
-		return new $class('DELETE', $db);
 	}
 
 	protected abstract function formatDeleteString();
@@ -117,7 +107,7 @@ abstract class SQLQuery {
 				return $this;
 			}
 			if ($value !== '?') {
-				$value = $this->db->quote($value);
+				$value = $this->driver->quote($value);
 			}
 		}
 		$logic = strtoupper($logic);
@@ -139,7 +129,7 @@ abstract class SQLQuery {
 	public function whereIn($column, $values, $logic='AND') {
 		$values = (array) $values;
 		foreach($values as $v) {
-			$v = $this->db->quote($v);
+			$v = $this->driver->quote($v);
 		}
 		$string = $column . ' IN (' . implode(',', $values) . ')';
 		return $this->where($string, null, $logic);
@@ -208,12 +198,12 @@ abstract class SQLQuery {
 		return false;
 	}
 
-	public function setDatabase($db) {
-		$this->db = $db;
+	public function setDatabaseDriver(DatabaseDriverInterface $database) {
+		$this->driver = $database;
 	}
 
-	public function getDatabase() {
-		return $this->db;
+	public function getDatabaseDriver() {
+		return $this->driver;
 	}
 
 	public function prepare($override=false) {
@@ -222,7 +212,7 @@ abstract class SQLQuery {
 		} else {
 			$query = $this->formatQueryString();
 		}
-		return $this->db->prepare($query);
+		return $this->driver->prepare($query);
 	}
 
 	public function __toString() {
@@ -230,5 +220,3 @@ abstract class SQLQuery {
 	}
 
 }
-
-?>

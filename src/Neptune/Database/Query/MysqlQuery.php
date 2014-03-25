@@ -1,16 +1,16 @@
 <?php
 
-namespace Neptune\Database\Builders;
+namespace Neptune\Database\Query;
 
-use Neptune\Database\SQLQuery;
+use Neptune\Database\Query\AbstractQuery;
 
-use Crutches\ItemList as I;
+use Crutches\ItemList;
 
 /**
- * GenericSQLBuilder
+ * MysqlQuery
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class GenericSQLBuilder extends SQLQuery {
+class MysqlQuery extends AbstractQuery {
 
 	protected function formatSelectString() {
 		$query = 'SELECT';
@@ -164,7 +164,7 @@ class GenericSQLBuilder extends SQLQuery {
 	}
 
 	protected function createList($list, $suffix = '`') {
-		return I::create($list)->stringify(', ', '`', $suffix);
+		return Itemlist::create($list)->stringify(', ', '`', $suffix);
 	}
 
 }
