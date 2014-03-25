@@ -2,7 +2,13 @@
 
 namespace Neptune\Database;
 
+use Neptune\Database\Driver\PDODriver;
+use Neptune\Database\Driver\PDOCreator;
+use Neptune\Core\AbstractFactory;
+use Neptune\Core\Neptune;
 use Neptune\Core\Config;
+
+use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
 
 /**
@@ -10,65 +16,70 @@ use Neptune\Exceptions\DriverNotFoundException;
  * @author Glynn Forrest <me@glynnforrest.com>
  *
  */
-class DatabaseFactory {
+class DatabaseFactory extends AbstractFactory
+{
 
-	protected static $databases = array();
+    public function __construct(Config $config, Neptune $neptune, PDOCreator $creator)
+    {
+        $this->pdo_creator = $creator;
 
-	/**
-	 * @return DatabaseDriver
-	 * A neptune database driver.
-	 */
-	public static function getDriver($db = null) {
-		if (!$db) {
-			if (!empty(self::$databases)) {
-				reset(self::$databases);
-				return current(self::$databases);
-			} else {
-				return self::createDriver();
-			}
-		}
-		if (!array_key_exists($db, self::$databases)) {
-			return self::createDriver($db);
-		}
-		return self::$databases[$db];
-	}
+        return parent::__construct($config, $neptune);
+    }
 
-	protected static function createDriver($dbname = null) {
-		$pos = strpos($dbname, '#');
-		if($pos) {
-			$prefix = substr($dbname, 0, $pos);
-			$name = substr($dbname, $pos + 1);
-			$c = Config::load($prefix);
-		} else {
-			$name = $dbname;
-			$c = Config::load();
-		}
-		if (!$name) {
-			$array = $c->getRequired('database');
-			reset($array);
-			$name = key($array);
-			$dbname = isset($prefix)? $prefix . '#' . $name: $name;
-		}
-		$driver = 'Neptune\Database\Drivers\\' . ucfirst($c->getRequired("database.$name.driver")) . 'Driver';
-		$database = $c->getRequired("database.$name.database");
-		$host = $c->get("database.$name.host");
-		$port = $c->get("database.$name.port");
-		$user = $c->get("database.$name.user");
-		$pass = $c->get("database.$name.pass");
-		$builder = $c->get("database.$name.builder");
+    protected function create($name = null)
+    {
+        if (!$name) {
+            $names = array_keys($this->config->get('database', array()));
+            if (empty($names)) {
+                throw new ConfigKeyException(
+                    'Database configuration array is empty');
+            }
+            $name = $names[0];
+        }
+        //if the entry in the config is a string, load it as a service
+        $maybe_service = $this->config->getRequired("database.$name");
+        if (is_string($maybe_service)) {
+            //check the service implements database interface first
+            $service = $this->neptune[$maybe_service];
+            if ($service instanceof DatabaseDriverInterface) {
+                return $service;
+            }
+            throw new DriverNotFoundException(sprintf(
+                "Database driver '%s' requested service '%s' which does not implement Neptune\Database\Driver\DatabaseDriverInterface",
+                $name,
+                $maybe_service));
+        }
 
-		if (class_exists($driver)) {
-			self::$databases[$dbname] = new $driver
-			($host, $port, $user, $pass, $database);
-			if($builder) {
-				self::$databases[$dbname]->setBuilderName($builder);
-			}
-			return self::$databases[$dbname];
-		} else {
-			throw new DriverNotFoundException("Database driver not found: " . $driver);
-		}
-	}
+        //database driver and is required for all instances
+        $driver = $this->config->getRequired("database.$name.driver");
+
+        $method = 'create' . ucfirst($driver) . 'Driver';
+        if (method_exists($this, $method)) {
+            $this->instances[$name] = $this->$method($name);
+
+            return $this->instances[$name];
+        } else {
+            throw new DriverNotFoundException(
+                "Database driver not implemented: $driver");
+        }
+    }
+
+    protected function createMysqlDriver($name)
+    {
+        $host = $this->config->get("database.$name.host", 'localhost');
+        $port = $this->config->get("database.$name.port", '3306');
+        $user = $this->config->getRequired("database.$name.user");
+        $pass = $this->config->getRequired("database.$name.pass");
+        $database = $this->config->getRequired("database.$name.database");
+        $charset = $this->config->get("database.$name.charset", 'UTF8');
+        $dsn = "mysql:host=$host;port=$port;dbname=$database;charset=$charset";
+        $options = array(
+             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+        );
+        $driver = new PDODriver($this->pdo_creator->createPDO($dsn, $user, $pass, $options));
+        $driver->setQueryClass('\\Neptune\\Database\\Query\\MysqlQuery');
+
+        return $driver;
+    }
 
 }
-
-?>

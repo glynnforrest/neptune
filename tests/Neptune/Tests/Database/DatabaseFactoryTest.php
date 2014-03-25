@@ -6,88 +6,84 @@ require_once __DIR__ . '/../../../bootstrap.php';
 
 use Neptune\Database\DatabaseFactory;
 use Neptune\Core\Config;
-use Neptune\Database\Drivers\DebugDriver;
 
 /**
  * DatabaseFactoryTest
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase {
+class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
+{
 
-	public function setUp() {
-		$c = Config::create('unittest');
-		$c->set('database', array(
-			'unittest' => array(
-				'driver' => 'debug',
-				'database' => 'unittest'
-			),
-			'unittest2' => array(
-				'driver' => 'debug',
-				'database' => 'unittest',
-				'builder' => 'debug'
-			),
-			'incomplete' => array(
-				'driver' => 'debug',
-			),
-			'fake' => array(
-				'driver' => 'fake',
-				'database' => 'database'
-			)
-		));
-	}
+    public function setUp()
+    {
+        $this->config = Config::create('neptune');
 
-	public function tearDown() {
-		Config::unload();
-	}
+        $this->config->set('database.mysql', array(
+            'driver' => 'mysql',
+            'database' => 'testing',
+            'host' => 'example.org',
+            'port' => '100',
+            'user' => 'user',
+            'pass' => 'pass',
+            'charset' => 'utf8'
+        ));
 
-	public function testGetDriver() {
-		$this->assertTrue(DatabaseFactory::getDriver() instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver('unittest') instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver() === DatabaseFactory::getDriver('unittest'));
-		$this->assertFalse(DatabaseFactory::getDriver('unittest') === DatabaseFactory::getDriver('unittest2'));
-	}
+        $this->neptune = $this->getMockBuilder('\Neptune\Core\Neptune')
+                              ->disableOriginalConstructor()
+                              ->getMock();
 
-	public function testGetDriverPrefix() {
-		$c = Config::create('prefix');
-		$c->set('database', array(
-			'default' => array(
-				'driver' => 'debug',
-				'database' => 'default'
-			),
-			'second' => array(
-				'driver' => 'debug',
-				'database' => 'second'
-			),
-		));
-		$this->assertTrue(DatabaseFactory::getDriver('prefix#default') instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver('prefix#second') instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver('prefix#') instanceof DebugDriver);
-		$this->assertTrue(DatabaseFactory::getDriver('prefix#') === DatabaseFactory::getDriver('prefix#default'));
-	}
+        $this->creator = $this->getMock('\Neptune\Database\Driver\PDOCreator');
 
+        $this->factory = new DatabaseFactory($this->config, $this->neptune, $this->creator);
+    }
 
-	public function testGetDriverBadConfig() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		DatabaseFactory::getDriver('wrong');
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		DatabaseFactory::getDriver('incomplete');
-	}
+    public function tearDown()
+    {
+        Config::unload();
+    }
 
-	public function testGetDriverUndefinedDriver() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-		DatabaseFactory::getDriver('fake');
-	}
+    public function testGetDefaultDriver()
+    {
+        $pdo = new PDOStub();
+        $this->creator->expects($this->once())
+                      ->method('createPDO')
+                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
+                      ->will($this->returnValue($pdo));
+        $driver = $this->factory->get();
+        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
+        $this->assertSame($driver, $this->factory->get());
+    }
 
-	public function testGetBuilder() {
-		$db = DatabaseFactory::getDriver();
-		$this->assertEquals('\\Neptune\\Database\\Builders\\GenericSQLBuilder', $db->getBuilderName());
-	}
+    public function testGetMysqlDriver()
+    {
+        $pdo = new PDOStub();
+        $this->creator->expects($this->once())
+                      ->method('createPDO')
+                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
+                      ->will($this->returnValue($pdo));
+        $driver = $this->factory->get('mysql');
+        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
+        $this->assertSame($driver, $this->factory->get());
+    }
 
-	public function testGetBuilderOverride() {
-		$db = DatabaseFactory::getDriver('unittest2');
-		$this->assertEquals('debug', $db->getBuilderName());
-	}
+    public function testGetMysqlDriverDefaultValues()
+    {
+        //host, port and charset can be optional. They default to
+        //localhost, 3306 and UTF8.
+        $this->config->set('database.mysql', array(
+            'driver' => 'mysql',
+            'database' => 'testing',
+            'user' => 'user',
+            'pass' => 'pass',
+        ));
+        $pdo = new PDOStub();
+        $this->creator->expects($this->once())
+                      ->method('createPDO')
+                      ->with('mysql:host=localhost;port=3306;dbname=testing;charset=UTF8', 'user', 'pass')
+                      ->will($this->returnValue($pdo));
+        $driver = $this->factory->get('mysql');
+        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
+        $this->assertSame($driver, $this->factory->get());
+    }
 
 }
-
-?>
