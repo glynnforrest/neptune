@@ -22,7 +22,7 @@ class CreateModuleCommand extends Command {
 	protected $dirs = array(
 		'Controller',
 		'Model',
-		'Thing',
+		'Entity',
 		'Command',
 		'views',
 		'assets'

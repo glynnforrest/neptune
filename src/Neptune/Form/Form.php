@@ -4,7 +4,7 @@ namespace Neptune\Form;
 
 use Neptune\Helpers\Html;
 use Neptune\Validate\Validator;
-use Neptune\Database\Thing;
+use Neptune\Database\Entity\Entity;
 use Neptune\Validate\Rule\AbstractRule;
 
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -447,7 +447,7 @@ class Form
         return $this;
     }
 
-    public function bind(Thing $thing)
+    public function bind(Entity $thing)
     {
         //set the values of the form to the values of thing
         $this->bound[] = $thing;
