@@ -10,24 +10,24 @@ use Crutches\Inflector;
 use Stringy\StaticStringy as S;
 
 /**
- * CreateThingCommand
+ * CreateEntityCommand
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class CreateThingCommand extends CreateCommand {
+class CreateEntityCommand extends CreateCommand {
 
-	protected $name = 'create:thing';
-	protected $description = 'Create a new thing and test';
+	protected $name = 'create:entity';
+	protected $description = 'Create a new entity and test';
 	protected $prompt = 'Entity name (a singular noun): ';
 	protected $default = 'User';
 
 	protected function getTargetPath($name) {
-		return 'Thing/' . S::UpperCamelize($name) . '.php';
+		return 'Entity/' . S::UpperCamelize($name) . '.php';
 	}
 
 	protected function getSkeleton($name) {
-		$skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('thing'));
+		$skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('entity'));
 		$name = S::UpperCamelize($name);
-		$skeleton->thing_name = $name;
+		$skeleton->entity_name = $name;
 		$skeleton->table = Inflector::locale()->plural(S::slugify($name, '_'));
 		return $skeleton;
 	}

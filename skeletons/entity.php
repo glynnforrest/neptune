@@ -1,11 +1,11 @@
 
-namespace <?=$this->namespace;?>\Thing;
+namespace <?=$this->namespace;?>\Entity;
 
-use Neptune\Database\Thing;
+use Neptune\Database\Entity\Entity;
 use Neptune\Database\SQLQuery;
 
 <?=$this->class_info;?>
-class <?=$this->thing_name;?> extends Thing {
+class <?=$this->entity_name;?> extends Entity {
 
 	protected static $table = '<?=$this->table;?>';
 	protected static $fields = array();
