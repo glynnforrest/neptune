@@ -1,6 +1,6 @@
 <?php
 
-namespace Neptune\Database\Relations;
+namespace Neptune\Database\Relation;
 
 /**
  * OneToOne
@@ -10,13 +10,11 @@ class OneToOne extends Relation {
 
 	protected function left() {
 		if(!isset($this->left)) {
-			$model = $this->left_class;
+			$thing = $this->left_class;
 			$right_key = $this->right_key;
-			$this->left = $model::selectOne($this->left_key,
-				$this->right->$right_key);
+			$this->left = $thing::selectOne($this->database, $this->left_key, $this->right->$right_key);
 			if($this->left) {
-				$this->left->addRelation($model . $this->left_key,
-					$this->left_key, $this);
+				$this->left->addRelation($thing . $this->left_key, $this);
 			}
 		}
 		return $this->left;
@@ -26,15 +24,12 @@ class OneToOne extends Relation {
 		if(!isset($this->right)) {
 			$model = $this->right_class;
 			$left_key = $this->left_key;
-			$this->right = $model::selectOne($this->right_key,
-				$this->left->$left_key);
+			$this->right = $model::selectOne($this->database, $this->right_key, $this->left->$left_key);
 			if($this->right) {
-				$this->right->addRelation($model . $this->right_key,
-					$this->right_key, $this);
+				$this->right->addRelation($model . $this->right_key, $this);
 			}
 		}
 		return $this->right;
 
 	}
 }
-?>

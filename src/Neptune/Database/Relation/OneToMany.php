@@ -1,6 +1,6 @@
 <?php
 
-namespace Neptune\Database\Relations;
+namespace Neptune\Database\Relation;
 
 /**
  * OneToMany
@@ -37,4 +37,3 @@ class OneToMany extends Relation {
 
 	}
 }
-?>
