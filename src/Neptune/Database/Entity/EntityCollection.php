@@ -21,12 +21,22 @@ class EntityCollection extends AbstractEntity implements Iterator, ArrayAccess, 
 	protected $fields = array();
 	protected $objects = array();
 	protected $position = 0;
-	protected $thing_class;
+	protected $entity_class;
 
 	public function __construct(DatabaseDriverInterface $database, array $objects = array()) {
 		$this->database = $database;
         $this->objects = $objects;
 	}
+
+    public function setEntities(array $entities = array())
+    {
+        $this->objects = $entities;
+    }
+
+    public function getEntities()
+    {
+        return $this->objects;
+    }
 
 	public function __toString() {
 		return get_class($this) . ' with ' . count($this->objects) . ' objects.';
@@ -144,11 +154,11 @@ class EntityCollection extends AbstractEntity implements Iterator, ArrayAccess, 
 	}
 
 	public function setEntityClass($class) {
-		$this->thing_class = $class;
+		$this->entity_class = $class;
 	}
 
 	public function getEntityClass() {
-		return $this->thing_class;
+		return $this->entity_class;
 	}
 
 	public function getValues($iterate = false) {

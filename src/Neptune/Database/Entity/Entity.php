@@ -20,9 +20,7 @@ class Entity extends AbstractEntity {
 	protected static $fields = array();
 	protected static $primary_key = 'id';
 	protected static $relations = array();
-	protected $database;
 	protected $current_index;
-	protected $modified = array();
 	protected $relation_objects = array();
     protected $relation_keys = array();
 
@@ -42,6 +40,11 @@ class Entity extends AbstractEntity {
             $this->values[$key] = $value;
         }
 	}
+
+    public function __sleep()
+    {
+        return array('values', 'modified', 'stored', 'current_index', 'relation_objects', 'relation_keys');
+    }
 
     public function setRaw($key, $value)
     {
@@ -72,7 +75,7 @@ class Entity extends AbstractEntity {
     protected function initRelation($name)
     {
 		if(!isset($this->relation_objects[$name])) {
-            $relation = $this->database->getRelationManager->createRelation(get_class($this), static::$relations[$name]);
+            $relation = $this->database->getRelationManager()->createRelation(get_class($this), static::$relations[$name]);
             return $this->addRelation($name, $relation);
 		}
         return $this;
@@ -199,10 +202,13 @@ class Entity extends AbstractEntity {
     }
 
 	public static function collection(DatabaseDriverInterface $database, $count = 0) {
-		$set = static::newCollection($database);
+        $objects = array();
 		for ($i = 0; $i < (int) $count; $i++) {
-			$set[] = new static($database);
+            $obj = new static($database);
+            $obj->setStored();
+			$objects[] = $obj;
 		}
+		$set = static::newCollection($database, $objects);
 		$set->setTable(static::$table);
 		$set->setFields(static::$fields);
 		$set->setPrimaryKey(static::$primary_key);
@@ -217,9 +223,10 @@ class Entity extends AbstractEntity {
                       ->where("$column = '$value'");
 		$stmt = $q->prepare();
 		$stmt->execute();
-		$result = $stmt->fetch();
+		$result = $stmt->fetchAssoc();
 		if($result) {
 			$result = new static($database, $result);
+            $result->setStored();
 		}
 		return $result;
 	}
@@ -244,11 +251,12 @@ class Entity extends AbstractEntity {
 		$stmt->execute();
 		$results = array();
         $database = $query->getDatabaseDriver();
-		while ($result = $stmt->fetch()) {
+		while ($result = $stmt->fetchAssoc()) {
 			$obj = new static($database, $result);
 			$results[] = $obj;
 		}
 		$set = static::collection($database);
+        $set->setEntities($results);
 		//hydrate objects if we have a result set
 		if(count($set)) {
 			$rm = $database->getRelationManager();
@@ -279,10 +287,6 @@ class Entity extends AbstractEntity {
 			return true;
 		}
 		return false;
-	}
-
-	public function setDatabaseDriver(DatabaseDriverInterface $database) {
-		$this->database = $database;
 	}
 
 }

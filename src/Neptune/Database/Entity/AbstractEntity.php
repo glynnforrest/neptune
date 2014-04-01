@@ -2,6 +2,8 @@
 
 namespace Neptune\Database\Entity;
 
+use Neptune\Database\Driver\DatabaseDriverInterface;
+
 /**
  * AbstractEntity
  *
@@ -13,6 +15,17 @@ abstract class AbstractEntity
     protected $values = array();
     protected $modified = array();
     protected $stored;
+    protected $database;
+
+    public function setDatabase(DatabaseDriverInterface $database)
+    {
+        $this->database = $database;
+    }
+
+    public function getDatabase()
+    {
+        return $this->database;
+    }
 
     /**
      * Convenience wrapper to get().
