@@ -250,7 +250,7 @@ class Entity extends AbstractEntity {
 		$stmt = $query->prepare();
 		$stmt->execute();
 		$results = array();
-        $database = $query->getDatabaseDriver();
+        $database = $query->getDatabase();
 		while ($result = $stmt->fetchAssoc()) {
 			$obj = new static($database, $result);
 			$results[] = $obj;

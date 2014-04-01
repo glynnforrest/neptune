@@ -246,11 +246,12 @@ abstract class AbstractQuery {
 		return false;
 	}
 
-	public function setDatabaseDriver(DatabaseDriverInterface $database) {
+	public function setDatabase(DatabaseDriverInterface $database) {
 		$this->driver = $database;
+        return $this;
 	}
 
-	public function getDatabaseDriver() {
+	public function getDatabase() {
 		return $this->driver;
 	}
 
