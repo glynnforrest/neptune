@@ -12,7 +12,7 @@ use Crutches\ItemList;
  **/
 class MysqlQuery extends AbstractQuery {
 
-	protected function formatSelectString() {
+	protected function getSelectSQL() {
 		$query = 'SELECT';
 		if (!isset($this->query['FIELDS'])) {
 			$query .= ' *';
@@ -49,7 +49,7 @@ class MysqlQuery extends AbstractQuery {
 		return $query;
 	}
 
-	protected function formatInsertString() {
+	protected function getInsertSQL() {
 		$query = 'INSERT';
 		foreach ($this->insert_verbs as $verb) {
 			if (isset($this->query[$verb])) {
@@ -68,7 +68,7 @@ class MysqlQuery extends AbstractQuery {
 		return $query;
 	}
 
-	protected function formatUpdateString() {
+	protected function getUpdateSQL() {
 		$query = 'UPDATE';
 		foreach ($this->update_verbs as $verb) {
 			if (isset($this->query[$verb])) {
@@ -90,7 +90,7 @@ class MysqlQuery extends AbstractQuery {
 		return $query;
 	}
 
-	protected function formatDeleteString() {
+	protected function getDeleteSQL() {
 		$query = 'DELETE';
 		foreach ($this->delete_verbs as $verb) {
 			if (isset($this->query[$verb])) {
@@ -119,17 +119,29 @@ class MysqlQuery extends AbstractQuery {
 	}
 
 	protected function addWhere(&$query) {
+        /**
+         * $this->query['WHERE'] is of the form
+         * array(
+         *     array($expression, $has_value, $logic),
+         *     //etc
+         * )
+         * e.g. array('id = ', true, 'AND')
+         */
 		$query .= ' WHERE ';
+        //for the first where, there is no AND / OR logic
 		$query .= $this->query['WHERE'][0][0];
-		if($this->query['WHERE'][0][1]) {
-			$query .= ' ' . $this->query['WHERE'][0][1];
-		}
+        if ($this->query['WHERE'][0][1] === true) {
+            $query .= ' ?';
+        }
+        //for each of the subsequent expressions, add the logic
+        //(AND/OR), the expression and then a ? for the value, if
+        //there is one
 		for ($i = 1; $i < count($this->query['WHERE']); $i++) {
 			$query .= ' ' . $this->query['WHERE'][$i][2] . ' ';
-			$query .= $this->query['WHERE'][$i][0];
-			if($this->query['WHERE'][$i][1]) {
-				$query .= ' ' . $this->query['WHERE'][$i][1];
-			}
+            $query .= $this->query['WHERE'][$i][0];
+            if ($this->query['WHERE'][$i][1] === true) {
+                $query .= ' ?';
+            }
 		}
 	}
 

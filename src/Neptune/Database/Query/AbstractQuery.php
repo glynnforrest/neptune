@@ -26,9 +26,15 @@ abstract class AbstractQuery {
 	protected $update_verbs = array('TABLES', 'FIELDS', 'WHERE');
 	protected $delete_verbs = array('FROM', 'WHERE');
 	protected $driver;
+    protected $params = array();
+    protected $expected_params = array();
+    protected $param_count = 0;
 
 	public function __construct(DatabaseDriverInterface $driver, $type) {
 		$this->driver = $driver;
+        if (!in_array($type, array('SELECT', 'INSERT', 'UPDATE', 'DELETE'))) {
+            throw new \Exception("Unknown query type $this->type");
+        }
 		$this->type = $type;
 	}
 
@@ -37,28 +43,64 @@ abstract class AbstractQuery {
         return $this->type;
     }
 
-	protected function formatQueryString() {
+	public function getSQL() {
 		switch ($this->type) {
 			case 'SELECT':
-				return $this->formatSelectString();
+				return $this->getSelectSQL();
 			case 'INSERT':
-				return $this->formatInsertString();
+				return $this->getInsertSQL();
 			case 'UPDATE':
-				return $this->formatUpdateString();
+				return $this->getUpdateSQL();
 			case 'DELETE':
-				return $this->formatDeleteString();
+				return $this->getDeleteSQL();
         default:
-            throw new \Exception("Unknown query type $this->type");
+            return null;
 		}
 	}
 
-	protected abstract function formatDeleteString();
+    /**
+     * Add a value onto the array of parameters that will given when
+     * executing this query.
+     */
+    protected function addParameter($value)
+    {
+        $this->params[] = $value;
+        $this->param_count++;
+    }
 
-	protected abstract function formatSelectString();
+    public function getParameters()
+    {
+        return $this->params;
+    }
 
-	protected abstract function formatInsertString();
+    /**
+     * Look at a SQL expression for any ? placeholders. If so, take note
+     * of these and expect these parameters when the query is
+     * prepared.
+     * @param $expression The SQL expression to examine
+     */
+    protected function maybeAddExpected($expression)
+    {
+        $placeholders = substr_count($expression, '?');
+        for ($i = 0; $i < $placeholders; $i++) {
+            $this->params[] = null;
+            $this->expected_params[] = $this->param_count;
+            $this->param_count++;
+        }
+    }
 
-	protected abstract function formatUpdateString();
+    public function getExpectedParameters()
+    {
+        return $this->expected_params;
+    }
+
+	protected abstract function getSelectSQL();
+
+	protected abstract function getInsertSQL();
+
+	protected abstract function getUpdateSQL();
+
+	protected abstract function getDeleteSQL();
 
 	public function fields($fields) {
 		if (!is_array($fields)) {
@@ -102,21 +144,27 @@ abstract class AbstractQuery {
 	}
 
 	public function where($expression, $value = null, $logic='AND') {
-		if (isset($value)) {
-			if (empty($value) && strlen($value) === 0) {
-				return $this;
-			}
-			if ($value !== '?') {
-				$value = $this->driver->quote($value);
-			}
-		}
-		$logic = strtoupper($logic);
-		if (!isset($this->query['WHERE'])) {
-			$this->query['WHERE'] = array();
-		}
-		$this->query['WHERE'][] = array($expression, $value, $logic);
-		return $this;
+        $logic = strtoupper($logic);
+        //if value if null, there is a complete where expression supplied.
+        $this->maybeAddExpected($expression);
+        if (is_null($value)) {
+            return $this->addElement('WHERE', array($expression, false, $logic));
+        }
+        $this->addParameter($value);
+        return $this->addElement('WHERE', array($expression, true, $logic));
+        /* if ($value && empty($value) && strlen($value) === 0) { */
+        /*     return $this; */
+        /* } */
 	}
+
+    protected function addElement($type, $element)
+    {
+        if (!isset($this->query[$type])) {
+			$this->query[$type] = array();
+		}
+        $this->query[$type][] = $element;
+        return $this;
+    }
 
 	public function andWhere($comparison, $value) {
 		return $this->where($comparison, $value, 'AND');
@@ -206,17 +254,24 @@ abstract class AbstractQuery {
 		return $this->driver;
 	}
 
-	public function prepare($override=false) {
-		if ($override) {
-			$query = $override;
-		} else {
-			$query = $this->formatQueryString();
-		}
-		return $this->driver->prepare($query);
+	public function prepare() {
+        $query = $this->getSQL();
+        $statement = $this->driver->prepare($query);
+        $statement->setParameters($this->getParameters());
+        $statement->setExpectedParameters($this->expected_params);
+        return $statement;
 	}
 
+    /**
+     * Add a value to be bound to the statement when the query is prepared.
+     */
+    protected function addBind($value)
+    {
+
+    }
+
 	public function __toString() {
-		return $this->formatQueryString();
+		return $this->getSQL();
 	}
 
 }
