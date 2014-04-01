@@ -33,6 +33,7 @@ class EventDriver implements DatabaseDriverInterface
     public function prepare($query)
     {
         $this->sendEvent(DatabaseEvent::PREPARE, $query);
+
         return $this->driver->prepare($query);
     }
 
@@ -54,17 +55,17 @@ class EventDriver implements DatabaseDriverInterface
 
     public function insert()
     {
-        return $this->driver->insert();
+        return $this->driver->insert()->setDatabase($this);
     }
 
     public function update()
     {
-        return $this->driver->update();
+        return $this->driver->update()->setDatabase($this);
     }
 
     public function delete()
     {
-        return $this->driver->delete();
+        return $this->driver->delete()->setDatabase($this);
     }
 
     public function getRelationManager()

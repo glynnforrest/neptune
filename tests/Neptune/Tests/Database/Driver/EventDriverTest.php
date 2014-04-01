@@ -32,4 +32,32 @@ class EventDriverTest extends \PHPUnit_Framework_TestCase
         $this->driver->prepare('select * from foo');
     }
 
+    public function queryMethodsProvider()
+    {
+        return array(
+            array('select'),
+            array('insert'),
+            array('update'),
+            array('delete'),
+        );
+    }
+
+    /**
+     * @dataProvider queryMethodsProvider()
+     */
+    public function testQueryIsGivenCorrectDatabaseDriver($method)
+    {
+        $query = $this->getMockBuilder('Neptune\Database\Query\MysqlQuery')
+                      ->disableOriginalConstructor()
+                      ->getMock();
+        $this->mock_driver->expects($this->once())
+                          ->method($method)
+                          ->will($this->returnValue($query));
+        $query->expects($this->once())
+              ->method('setDatabase')
+              ->with($this->driver)
+              ->will($this->returnValue($query));
+        $this->assertSame($query, $this->driver->$method());
+    }
+
 }
