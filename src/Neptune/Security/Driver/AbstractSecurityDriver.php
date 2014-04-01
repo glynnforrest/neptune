@@ -19,6 +19,7 @@ abstract class AbstractSecurityDriver implements SecurityDriverInterface
     public function setRequest(Request $request)
     {
         $this->request = $request;
+        return $this;
     }
 
     public function getRequest()
