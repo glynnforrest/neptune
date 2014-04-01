@@ -2,21 +2,21 @@
 
 namespace Neptune\Tests\Database\Driver;
 
-use Neptune\Database\Driver\DebugDriver;
+use Neptune\Database\Driver\EventDriver;
 
 require_once __DIR__ . '/../../../../bootstrap.php';
 
 /**
- * DebugDriverTest
+ * EventDriverTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class DebugDriverTest extends \PHPUnit_Framework_TestCase
+class EventDriverTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
         $this->mock_driver = $this->getMock('Neptune\Database\Driver\DatabaseDriverInterface');
         $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $this->driver = new DebugDriver($this->mock_driver, $this->dispatcher);
+        $this->driver = new EventDriver($this->mock_driver, $this->dispatcher);
     }
 
     public function testPrepare()

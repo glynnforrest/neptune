@@ -7,10 +7,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Neptune\Database\DatabaseEvent;
 
 /**
- * DebugDriver
+ * EventDriver
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class DebugDriver implements DatabaseDriverInterface
+class EventDriver implements DatabaseDriverInterface
 {
 
     protected $dispatcher;
@@ -49,7 +49,7 @@ class DebugDriver implements DatabaseDriverInterface
 
     public function select()
     {
-        return $this->driver->select();
+        return $this->driver->select()->setDatabase($this);
     }
 
     public function insert()
@@ -70,6 +70,11 @@ class DebugDriver implements DatabaseDriverInterface
     public function getRelationManager()
     {
         return $this->driver->getRelationManager();
+    }
+
+    public function getPDO()
+    {
+        return $this->driver->getPDO();
     }
 
 }
