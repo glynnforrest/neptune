@@ -26,10 +26,13 @@ class PDODriverTest extends \PHPUnit_Framework_TestCase
 
     public function testPrepare()
     {
+        $mock = $this->getMock('\PDOStatement');
         $this->pdo->expects($this->once())
                   ->method('prepare')
-                  ->with('delete from foo');
-        $this->driver->prepare('delete from foo');
+                  ->with('select * from foo where id = ? or id = ?')
+                  ->will($this->returnValue($mock));
+        $statement = $this->driver->prepare('select * from foo where id = ? or id = ?');
+        $this->assertInstanceOf('\Neptune\Database\Statement\QueryStatement', $statement);
     }
 
     public function testQuote()

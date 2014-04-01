@@ -4,6 +4,7 @@ namespace Neptune\Database\Driver;
 
 use \PDO;
 use Neptune\Database\Relation\RelationManager;
+use Neptune\Database\Statement\QueryStatement;
 
 /**
  * PDODriver
@@ -21,9 +22,14 @@ class PDODriver implements DatabaseDriverInterface
         $this->pdo = $pdo;
     }
 
-    public function prepare($query, $options = array())
+    public function getPDO()
     {
-        return $this->pdo->prepare($query, $options);
+        return $this->pdo;
+    }
+
+    public function prepare($query, array $options = array())
+    {
+        return new QueryStatement($this->pdo->prepare($query, $options));
     }
 
     public function quote($string)
@@ -39,6 +45,7 @@ class PDODriver implements DatabaseDriverInterface
     public function setQueryClass($class)
     {
         $this->query_class = $class;
+
         return $this;
     }
 
