@@ -3,10 +3,7 @@
 namespace Neptune\Command;
 
 use Neptune\Console\Console;
-use Neptune\Core\Config;
 use Neptune\Console\ConsoleLogger;
-use Neptune\Database\DatabaseFactory;
-use Neptune\Database\Drivers\ConsoleDriver;
 use Neptune\Database\Migration\MigrationRunner;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -42,9 +39,7 @@ class DatabaseMigrateVersionCommand extends Command
 
     public function go(Console $console)
     {
-        $driver = new ConsoleDriver(DatabaseFactory::getDriver(), $this->output);
-        $runner = new MigrationRunner($driver, new ConsoleLogger($this->output));
-
+        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
         $version = $this->input->getArgument('version');
         $module = $this->input->getOption('module');
         $path = $this->getModuleDirectory($module) . 'Migrations/';

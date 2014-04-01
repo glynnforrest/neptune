@@ -4,9 +4,6 @@ namespace Neptune\Command;
 
 use Neptune\Console\Console;
 use Neptune\Console\ConsoleLogger;
-use Neptune\Core\Config;
-use Neptune\Database\DatabaseFactory;
-use Neptune\Database\Drivers\ConsoleDriver;
 use Neptune\Database\Migration\MigrationRunner;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -36,9 +33,7 @@ class DatabaseMigrateLatestCommand extends Command
 
     public function go(Console $console)
     {
-        $driver = new ConsoleDriver(DatabaseFactory::getDriver(), $this->output);
-        $runner = new MigrationRunner($driver, new ConsoleLogger($this->output));
-
+        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
         $module = $this->input->getOption('module');
         $path = $this->getModuleDirectory($module) . 'Migrations/';
         $namespace = $this->getModuleNamespace($module) . '\\Migrations\\';
