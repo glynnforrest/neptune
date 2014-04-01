@@ -2,7 +2,7 @@
 
 namespace Neptune\Database\Migration;
 
-use Neptune\Database\Drivers\DatabaseDriver;
+use Neptune\Database\Driver\DatabaseDriverInterface;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -20,7 +20,7 @@ class MigrationRunner
     protected $logger;
     protected $log_level;
 
-    public function __construct(DatabaseDriver $driver, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
+    public function __construct(DatabaseDriverInterface $driver, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
     {
         $this->driver = $driver;
         $this->logger = $logger;
@@ -138,7 +138,7 @@ class MigrationRunner
         $sql = 'SELECT version from neptune_migrations ORDER BY version DESC';
         $stmt = $this->driver->prepare($sql);
         $stmt->execute();
-        $res = $stmt->fetchAssoc();
+        $res = $stmt->fetch();
         if ($res) {
             return $res['version'];
         }
