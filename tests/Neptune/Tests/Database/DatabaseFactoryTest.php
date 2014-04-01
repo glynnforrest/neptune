@@ -86,4 +86,23 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($driver, $this->factory->get());
     }
 
+    public function testGetMysqlDriverWithEventDriver()
+    {
+        $pdo = new PDOStub();
+        $this->config->set('database.mysql.events', true);
+        $this->creator->expects($this->once())
+                      ->method('createPDO')
+                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
+                      ->will($this->returnValue($pdo));
+        $dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
+        $this->neptune->expects($this->once())
+                      ->method('offsetGet')
+                      ->with('dispatcher')
+                      ->will($this->returnValue($dispatcher));
+
+        $driver = $this->factory->get('mysql');
+        $this->assertInstanceOf('\Neptune\Database\Driver\EventDriver', $driver);
+        $this->assertSame($driver, $this->factory->get());
+    }
+
 }

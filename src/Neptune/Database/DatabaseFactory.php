@@ -3,6 +3,7 @@
 namespace Neptune\Database;
 
 use Neptune\Database\Driver\PDODriver;
+use Neptune\Database\Driver\EventDriver;
 use Neptune\Database\Driver\PDOCreator;
 use Neptune\Core\AbstractFactory;
 use Neptune\Core\Neptune;
@@ -78,6 +79,10 @@ class DatabaseFactory extends AbstractFactory
         );
         $driver = new PDODriver($this->pdo_creator->createPDO($dsn, $user, $pass, $options));
         $driver->setQueryClass('\\Neptune\\Database\\Query\\MysqlQuery');
+
+        if ($this->config->get("database.$name.events", false)) {
+            return new EventDriver($driver, $this->neptune['dispatcher']);
+        }
 
         return $driver;
     }
