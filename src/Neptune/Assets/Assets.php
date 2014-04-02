@@ -3,6 +3,7 @@
 namespace Neptune\Assets;
 
 use Reform\Helper\Html;
+use Neptune\Helpers\Url;
 use Neptune\Core\Config;
 
 /**
@@ -37,7 +38,6 @@ class Assets {
 		return str_replace('#', '/', $src);
 	}
 
-
 	public function addJs($name, $src, $dependencies = array(), $options = array()) {
 		$this->js[$name] = array(
 			'src' => $this->createSrc($src),
@@ -53,7 +53,7 @@ class Assets {
 		$content ='';
 		$me = self::getInstance();
 		foreach($me->sort($me->js) as $k => $v) {
-			$content .= Html::js($v, $me->js[$k]['opts']);
+			$content .= Html::js(Url::to($v), $me->js[$k]['opts']);
 		}
 		return $content;
 	}
@@ -73,7 +73,7 @@ class Assets {
 		$content = '';
 		$me = self::getInstance();
 		foreach($me->sort($me->css) as $k => $v) {
-			$content .= Html::css($v, $me->css[$k]['opts']);
+			$content .= Html::css(Url::to($v), $me->css[$k]['opts']);
 		}
 		return $content;
 	}
