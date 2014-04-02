@@ -4,8 +4,8 @@ namespace Neptune\View;
 
 use Neptune\View\View;
 use Neptune\Format\Xml;
-use Neptune\Database\Thing;
-use Neptune\Database\ThingCollection;
+use Neptune\Database\Entity\Entity;
+use Neptune\Database\EntityCollection;
 
 use Crutches\Inflector;
 
@@ -19,12 +19,12 @@ class XmlView extends View {
 		$vars = array();
 		$c = 0;
 		foreach($this->vars as $k => $v) {
-			if($v instanceof Thing) {
+			if($v instanceof Entity) {
 				$k = Inflector::locale()->single($v->getTable()) . '#' . $c;
 				$vars[$k] = $v->getValues();
 				$c++;
 			}
-			if($v instanceof ThingCollection) {
+			if($v instanceof EntityCollection) {
 				$k = $v->getTable() . '#' . $c;
 				$results = $v->getValues();
 				$data = array();

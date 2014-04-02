@@ -4,8 +4,8 @@ namespace Neptune\View;
 
 use Neptune\View\View;
 use Neptune\Format\Json;
-use Neptune\Database\Thing;
-use Neptune\Database\ThingCollection;
+use Neptune\Database\Entity\Entity;
+use Neptune\Database\EntityCollection;
 
 use Crutches\Inflector;
 
@@ -18,11 +18,11 @@ class JsonView extends View {
 	public function getPreferredVars() {
 		$vars = array();
 		foreach($this->vars as $k => $v) {
-			if($v instanceof Thing) {
+			if($v instanceof Entity) {
 				$v->_type = Inflector::locale()->single($v->getTable());
 				$vars[$k] = $v->getValues();
 			}
-			if($v instanceof ThingCollection) {
+			if($v instanceof EntityCollection) {
 				$vars[$k] = $v->getValues();
 			}
 		}
