@@ -2,7 +2,7 @@
 
 namespace Neptune\Form;
 
-use Neptune\Form\Form;
+use Reform\Form\Form;
 use Neptune\Core\Neptune;
 
 use Symfony\Component\HttpFoundation\Request;

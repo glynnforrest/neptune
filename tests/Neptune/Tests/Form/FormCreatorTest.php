@@ -32,13 +32,13 @@ class FormCreatorTest extends \PHPUnit_Framework_TestCase
     public function testCreateEmptyForm()
     {
         $form = $this->creator->create();
-        $this->assertInstanceOf('\Neptune\Form\Form', $form);
+        $this->assertInstanceOf('\Reform\Form\Form', $form);
     }
 
     public function testCreateEmptyFormWithAction()
     {
         $form = $this->creator->create(null, '/login');
-        $this->assertInstanceOf('\Neptune\Form\Form', $form);
+        $this->assertInstanceOf('\Reform\Form\Form', $form);
         $this->assertSame('/login', $form->getAction());
     }
 

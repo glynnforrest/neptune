@@ -2,7 +2,7 @@
 
 namespace Neptune\Tests\Form;
 
-use Neptune\Form\Form;
+use Reform\Form\Form;
 
 /**
  * FooForm
