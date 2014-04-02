@@ -5,7 +5,7 @@ namespace Neptune\Controller;
 use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
-use Neptune\Form\Form;
+use Reform\Form\Form;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;

@@ -4,7 +4,7 @@ namespace Neptune\EventListener;
 
 use Neptune\Core\Neptune;
 use Neptune\Security\Csrf\CsrfManager;
-use Neptune\Form\FormEvent;
+use Reform\Form\FormEvent;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
