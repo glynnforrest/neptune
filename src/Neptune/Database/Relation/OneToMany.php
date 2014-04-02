@@ -26,11 +26,9 @@ class OneToMany extends Relation {
 		if(!isset($this->right)) {
 			$model = $this->right_class;
 			$left_key = $this->left_key;
-			$this->right = $model::selectOne($this->right_key,
-				$this->left->$left_key);
+			$this->right = $model::select($this->database)->where($this->right_key . ' =', $this->left->$left_key)->execute();
 			if($this->right) {
-				$this->right->addRelation($model . $this->right_key,
-					$this->right_key, $this);
+				$this->right->addRelation($model . $this->right_key, $this);
 			}
 		}
 		return $this->right;

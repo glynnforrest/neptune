@@ -6,8 +6,6 @@ use Neptune\Database\Entity\EntityCollection;
 use Neptune\Database\Driver\DatabaseDriverInterface;
 use Neptune\Database\DatabaseFactory;
 use Neptune\Database\Entity\AbstractEntity;
-use Neptune\Database\Relation\Relation;
-use Neptune\Database\Relation\RelationManager;
 use Neptune\Database\Query\AbstractQuery;
 
 /**
@@ -21,8 +19,6 @@ class Entity extends AbstractEntity {
 	protected static $primary_key = 'id';
 	protected static $relations = array();
 	protected $current_index;
-	protected $relation_objects = array();
-    protected $relation_keys = array();
 
 	/**
 	 * Create a new Entity instance.
@@ -70,38 +66,6 @@ class Entity extends AbstractEntity {
 			return $this->values[$key];
 		}
 		return null;
-	}
-
-    protected function initRelation($name)
-    {
-		if(!isset($this->relation_objects[$name])) {
-            $relation = $this->database->getRelationManager()->createRelation(get_class($this), static::$relations[$name]);
-            return $this->addRelation($name, $relation);
-		}
-        return $this;
-    }
-
-    public function addRelation($name, Relation $relation)
-    {
-        $relation->setObject(get_class($this), $this);
-        $this->relation_objects[$name] = $relation;
-
-        //store a record of the key used to link the relation. If this
-        //attribute is ever changed we'll need to notify the relation
-        //to update the key in the related object.
-        $key = $relation->getKey(get_class($this));
-        $this->relation_keys[$key] = $name;
-        return $this;
-    }
-
-	protected function getRelation($name) {
-        $this->initRelation($name);
-		return $this->relation_objects[$name]->getRelatedObject(get_class($this));
-	}
-
-	protected function setRelation($name, AbstractEntity $object) {
-        $this->initRelation($name);
-		$this->relation_objects[$name]->setRelatedObject(get_class($this), $object);
 	}
 
 	public function save() {

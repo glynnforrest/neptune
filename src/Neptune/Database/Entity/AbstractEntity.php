@@ -3,6 +3,7 @@
 namespace Neptune\Database\Entity;
 
 use Neptune\Database\Driver\DatabaseDriverInterface;
+use Neptune\Database\Relation\Relation;
 
 /**
  * AbstractEntity
@@ -16,6 +17,8 @@ abstract class AbstractEntity
     protected $modified = array();
     protected $stored;
     protected $database;
+    protected $relation_objects = array();
+    protected $relation_keys = array();
 
     public function setDatabase(DatabaseDriverInterface $database)
     {
@@ -96,6 +99,44 @@ abstract class AbstractEntity
      * @param mixed  $value The value to set.
      */
     abstract public function setRaw($key, $value);
+
+    protected function initRelation($name)
+    {
+        if (!isset($this->relation_objects[$name])) {
+            $relation = $this->database->getRelationManager()->createRelation(get_class($this), static::$relations[$name]);
+
+            return $this->addRelation($name, $relation);
+        }
+
+        return $this;
+    }
+
+    public function addRelation($name, Relation $relation)
+    {
+        $relation->setObject(get_class($this), $this);
+        $this->relation_objects[$name] = $relation;
+
+        //store a record of the key used to link the relation. If this
+        //attribute is ever changed we'll need to notify the relation
+        //to update the key in the related object.
+        $key = $relation->getKey(get_class($this));
+        $this->relation_keys[$key] = $name;
+
+        return $this;
+    }
+
+    protected function getRelation($name)
+    {
+        $this->initRelation($name);
+
+        return $this->relation_objects[$name]->getRelatedObject(get_class($this));
+    }
+
+    protected function setRelation($name, AbstractEntity $object)
+    {
+        $this->initRelation($name);
+        $this->relation_objects[$name]->setRelatedObject(get_class($this), $object);
+    }
 
     public function has($name)
     {

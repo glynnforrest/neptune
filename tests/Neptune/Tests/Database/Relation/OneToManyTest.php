@@ -33,7 +33,6 @@ class OneToManyTest extends \PHPUnit_Framework_TestCase
         $books = new EntityCollection($this->database);
         $books->setFields(Book::getFields());
         $books->setPrimaryKey('id');
-        //change this to something better - what does it even do?
         $books->setEntityClass('Neptune\\Database\\Relation\\Book');
         return $books;
     }
