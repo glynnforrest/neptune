@@ -17,7 +17,7 @@ if (!is_writable($project_dir)) {
 
 $json = '{
     "require": {
-        "glynnforrest/neptune":"0.3.*"
+        "glynnforrest/neptune":"0.4.*"
     }
 }
 ';

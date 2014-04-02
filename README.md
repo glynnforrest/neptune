@@ -21,7 +21,7 @@ composer.json file:
 
 	{
 		"require": {
-			"glynnforrest/neptune": "0.3.*"
+			"glynnforrest/neptune": "0.4.*"
 		}
 	}
 
