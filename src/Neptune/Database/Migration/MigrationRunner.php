@@ -135,7 +135,7 @@ class MigrationRunner
 
     protected function getCurrentMigration()
     {
-        $sql = 'SELECT version from neptune_migrations ORDER BY version DESC';
+        $sql = 'SELECT version FROM neptune_migrations ORDER BY version DESC';
         $stmt = $this->driver->prepare($sql);
         $stmt->execute();
         $res = $stmt->fetch();
