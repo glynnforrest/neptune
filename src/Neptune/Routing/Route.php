@@ -4,7 +4,6 @@ namespace Neptune\Routing;
 
 use Neptune\Routing\RouteUntestedException;
 use Neptune\Routing\RouteFailedException;
-use Neptune\Helpers\RequestHelper;
 
 use Symfony\Component\HttpFoundation\Request;
 
