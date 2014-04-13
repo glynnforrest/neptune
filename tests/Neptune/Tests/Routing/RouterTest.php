@@ -5,7 +5,6 @@ namespace Neptune\Tests\Routing;
 use Neptune\Core\Config;
 use Neptune\Routing\Router;
 use Neptune\Routing\Route;
-use Neptune\Cache\Driver\DebugDriver;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -172,17 +171,17 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(array(), $args);
 	}
 
-	public function testGetAndSetCacheDriver() {
-		$driver = new DebugDriver('testing_');
-		$this->router->setCacheDriver($driver);
-		$this->assertSame($driver, $this->router->getCacheDriver());
+	public function testGetAndSetCache() {
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+		$this->router->setCache($driver);
+		$this->assertSame($driver, $this->router->getCache());
 	}
 
 	public function testRouteIsCachedOnSuccess() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->exactly(2))
-			   ->method('set');
-		$this->router->setCacheDriver($driver);
+			   ->method('save');
+		$this->router->setCache($driver);
 		$this->router->route('/test', 'module:controller', 'index');
 		$expected = array('module:controller', 'index', array());
 		$this->assertSame($expected, $this->router->match('/test'));
@@ -261,32 +260,32 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testUrlGetsNamesFromCache() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->exactly(1))
-			   ->method('get')
+			   ->method('fetch')
 			   ->with(Router::CACHE_KEY_NAMES)
 			   ->will($this->returnValue(array('get' => '/get/:id')));
-		$this->router->setCacheDriver($driver);
+		$this->router->setCache($driver);
 		$this->assertSame('http://myapp.local/get/42', $this->router->url('get', array('id' => 42)));
 	}
 
 	public function testUrlThrowsExceptionWithInvalidCache() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->exactly(1))
-			   ->method('get')
+			   ->method('fetch')
 			   ->with(Router::CACHE_KEY_NAMES)
 			   ->will($this->returnValue('foo'));
-		$this->router->setCacheDriver($driver);
+		$this->router->setCache($driver);
 		$this->setExpectedException('\Exception', 'Cache value \'Router.names\' is not an array');
 		$this->router->url('get');
 	}
 
 	public function testUrlThrowsExceptionWithCacheMiss() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->exactly(1))
-			   ->method('get')
+			   ->method('fetch')
 			   ->with(Router::CACHE_KEY_NAMES);
-		$this->router->setCacheDriver($driver);
+		$this->router->setCache($driver);
 		$this->setExpectedException('\Exception', 'No named routes defined');
 		$this->router->url('get');
 	}

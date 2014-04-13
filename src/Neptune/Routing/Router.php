@@ -4,9 +4,10 @@ namespace Neptune\Routing;
 
 use Neptune\Routing\Route;
 use Neptune\Core\Config;
-use Neptune\Cache\Driver\CacheDriverInterface;
 use Neptune\Helpers\Url;
 use Neptune\Routing\RouteNotFoundException;
+
+use Doctrine\Common\Cache\Cache;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -31,11 +32,11 @@ class Router {
 		$this->config = $config;
 	}
 
-	public function setCacheDriver(CacheDriverInterface $driver) {
+	public function setCache(Cache $driver) {
 		$this->cache = $driver;
 	}
 
-	public function getCacheDriver() {
+	public function getCache() {
 		return $this->cache;
 	}
 
@@ -180,7 +181,7 @@ class Router {
 
 	public function matchCached($path) {
 		$key = 'Router' . $path;
-		$cached = $this->cache->get($key);
+		$cached = $this->cache->fetch($key);
 		if($cached) {
 			return $this->cached;
 		}
@@ -211,8 +212,8 @@ class Router {
 			try {
 				$path = $request->getPathInfo();
 				$method = $request->getMethod();
-				$this->cache->set('Router.' . $path . $method, $actions);
-				$this->cache->set(self::CACHE_KEY_NAMES, $this->names);
+				$this->cache->save('Router.' . $path . $method, $actions);
+				$this->cache->save(self::CACHE_KEY_NAMES, $this->names);
 			} catch	(\Exception $e) {
 				//send failed cache event
 			}
@@ -232,7 +233,7 @@ class Router {
 		if(empty($this->names)) {
 			//no named routes have been defined
 			//attempt to fetch names from cache
-			if(!$this->cache || !$result = $this->cache->get(self::CACHE_KEY_NAMES)) {
+			if(!$this->cache || !$result = $this->cache->fetch(self::CACHE_KEY_NAMES)) {
 				throw new \Exception("No named routes defined");
 			}
 			if(!is_array($result)) {
