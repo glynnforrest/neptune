@@ -18,24 +18,25 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	protected $neptune;
 	protected $config;
 	protected $factory;
+    protected $temping;
 
 	public function setUp() {
 		$this->config = Config::create('neptune');
+        $this->temping = new Temping();
 
-		$this->config->set('cache.driver1', array(
+		$this->config->set('cache.array', array(
+			'driver' => 'array',
+		));
+
+		$this->config->set('cache.file', array(
 			'driver' => 'file',
-			'prefix' => 'testing_',
-			'dir' => __DIR__ . '/test_cache'
+			'namespace' => 'testing_',
+			'dir' => $this->temping->getDirectory()
 		));
 
-		$this->config->set('cache.driver2', array(
-			'driver' => 'debug',
-			'prefix' => 'testing_'
-		));
-
-		$this->config->set('cache.driver3', array(
+		$this->config->set('cache.memcached', array(
 			'driver' => 'memcached',
-			'prefix' => 'testing_',
+			'namespace' => 'testing_',
 			'host' => 'localhost',
 			'port' => '5000'
 		));
@@ -47,62 +48,93 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		Config::unload();
+        $this->temping->reset();
 	}
 
 	public function testGetDefaultDriver() {
 		$driver = $this->factory->get();
-		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
+		$this->assertInstanceOf('\Doctrine\Common\Cache\ArrayCache', $driver);
 		$this->assertSame($driver, $this->factory->get());
 	}
 
-	public function testGetFileDriver() {
-		$driver = $this->factory->get('driver1');
-		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
-		$this->assertSame($driver, $this->factory->get('driver1'));
+	public function testGetArrayDriver() {
+		$driver = $this->factory->get('array');
+		$this->assertInstanceOf('\Doctrine\Common\Cache\ArrayCache', $driver);
+		$this->assertSame($driver, $this->factory->get('array'));
+	}
 
-		$this->assertSame(__DIR__ . '/test_cache/', $driver->getDirectory());
-		//check that no directory has been made
-		$this->assertFileNotExists(__DIR__ . '/test_cache');
+	public function testGetFileDriver() {
+		$driver = $this->factory->get('file');
+		$this->assertInstanceOf('\Doctrine\Common\Cache\FilesystemCache', $driver);
+		$this->assertSame($driver, $this->factory->get('file'));
+
+		$this->assertSame($this->temping->getDirectory(), $driver->getDirectory() . '/');
+        $this->assertSame('testing_', $driver->getNamespace());
 	}
 
 	public function testGetFileDriverRelativeDir() {
 		//a dir without a leading slash should be appended to dir.root
-		$this->config->set('dir.root', '/path/to/app/root/');
-		$this->config->set('cache.driver1.dir', 'cache/');
-		$driver = $this->factory->get('driver1');
-		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
-		$this->assertSame('/path/to/app/root/cache/', $driver->getDirectory());
+		$this->config->set('dir.root', $this->temping->getDirectory() . 'foo/');
+		$this->config->set('cache.file.dir', 'cache/');
+		$driver = $this->factory->get('file');
+		$this->assertInstanceOf('\Doctrine\Common\Cache\FilesystemCache', $driver);
+		$this->assertSame($this->temping->getDirectory() . 'foo/cache' , $driver->getDirectory());
+        $this->assertSame('testing_', $driver->getNamespace());
 	}
 
-	public function testGetFileDriverRelativeDirThrowsExceptionOnNoRoot() {
-		$this->config->set('cache.driver1.dir', 'cache/');
+	public function testGetFileDriverNoRoot() {
+		$this->config->set('cache.file.dir', 'cache/');
 		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
-		$driver = $this->factory->get();
+		$driver = $this->factory->get('file');
 	}
 
 	public function testGetFileDriverNoDir() {
-		$this->config->set('cache.driver1.dir', null);
-		$driver = $this->factory->get('driver1');
-		$this->assertInstanceOf('\Neptune\Cache\Driver\FileDriver', $driver);
-		//when no dir is defined, FileDriver will use the system
-		//temporary directory that is provided by Temping, which will
-		//contain Temping::TEMPING_DIR_NAME
-		$this->assertContains(Temping::TEMPING_DIR_NAME, $driver->getDirectory());
+		$this->config->set('cache.file.dir', null);
+        $this->setExpectedException('\InvalidArgumentException');
+		$driver = $this->factory->get('file');
 	}
 
-	public function testGetDebugDriver() {
-		$driver = $this->factory->get('driver2');
-		$this->assertInstanceOf('\Neptune\Cache\Driver\DebugDriver', $driver);
-		$this->assertSame($driver, $this->factory->get('driver2'));
+	public function testGetFileDriverNoNamespace() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->config->set('cache.file.namespace', null);
+		$this->factory->get('file');
 	}
 
 	public function testGetMemcachedDriver() {
 		if(!class_exists('\\Memcached')) {
 			$this->markTestSkipped('Memcached extension not installed.');
 		}
-		$driver = $this->factory->get('driver3');
-		$this->assertInstanceOf('\Neptune\Cache\Driver\MemcachedDriver', $driver);
-		$this->assertSame($driver, $this->factory->get('driver3'));
+		$driver = $this->factory->get('memcached');
+		$this->assertInstanceOf('\Doctrine\Common\Cache\MemcachedCache', $driver);
+		$this->assertSame($driver, $this->factory->get('memcached'));
+        $this->assertSame('testing_', $driver->getNamespace());
+        $this->assertInstanceOf('\\Memcached', $driver->getMemcached());
+        $servers = $driver->getMemcached()->getServerList();
+        $this->assertSame('localhost', $servers[0]['host']);
+        $this->assertSame(5000, $servers[0]['port']);
+	}
+
+    public function testGetMemcachedDriverWithDefaults()
+    {
+        $this->config->set('cache.memcached', array(
+            'driver' => 'memcached',
+            'namespace' => 'testing_'
+            //no host or port
+        ));
+        $driver = $this->factory->get('memcached');
+        $this->assertInstanceOf('\Doctrine\Common\Cache\MemcachedCache', $driver);
+        $this->assertSame($driver, $this->factory->get('memcached'));
+        $this->assertSame('testing_', $driver->getNamespace());
+        $this->assertInstanceOf('\\Memcached', $driver->getMemcached());
+        $servers = $driver->getMemcached()->getServerList();
+        $this->assertSame('127.0.0.1', $servers[0]['host']);
+        $this->assertSame(11211, $servers[0]['port']);
+    }
+
+	public function testGetMemcachedDriverNoNamespace() {
+		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->config->set('cache.memcached.namespace', null);
+		$this->factory->get('memcached');
 	}
 
 	public function testGetNoConfig() {
@@ -119,30 +151,21 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function testGetNoDriver() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		$this->config->set('cache.wrong', array(
-			'prefix' => 'testing:'
+			'namespace' => 'testing:'
 			//no driver
-		));
-		$this->factory->get('wrong');
-	}
-
-	public function testGetNoPrefix() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		$this->config->set('cache.wrong', array(
-			'driver' => 'file'
-			//no prefix
 		));
 		$this->factory->get('wrong');
 	}
 
 	public function testGetUndefinedDriver() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-		$this->config->set('cache.unknown', array('driver' => 'unicorn', 'prefix' => 'testing_'));
+		$this->config->set('cache.unknown', array('driver' => 'unicorn', 'namespace' => 'testing_'));
 		$this->factory->get('unknown');
 	}
 
     public function testGetDriverAsAService()
     {
-        $driver = $this->getMock('\\Neptune\\Cache\\Driver\\CacheDriverInterface');
+        $driver = $this->getMock('\Doctrine\Common\Cache\Cache');
         $this->neptune->expects($this->once())
                       ->method('offsetGet')
                       ->with('service.foo')

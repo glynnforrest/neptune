@@ -2,18 +2,16 @@
 
 namespace Neptune\Cache;
 
-use Neptune\Cache\Driver\DebugDriver;
-use Neptune\Cache\Driver\FileDriver;
-use Neptune\Cache\Driver\MemcachedDriver;
-use Neptune\Cache\Driver\CacheDriverInterface;
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\FileSystemCache;
+use Doctrine\Common\Cache\MemcachedCache;
+use Doctrine\Common\Cache\Cache;
 
 use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
 
 use \Memcached;
-
-use Temping\Temping;
 
 /**
  * CacheFactory
@@ -37,22 +35,20 @@ class CacheFactory extends AbstractFactory
         if (is_string($maybe_service)) {
             //check the service implements cache interface first
             $service = $this->neptune[$maybe_service];
-            if ($service instanceof CacheDriverInterface) {
+            if ($service instanceof Cache) {
                 return $service;
             }
             throw new DriverNotFoundException(sprintf(
-                "Cache driver '%s' requested service '%s' which does not implement Neptune\Cache\Driver\CacheDriverInterface",
+                "Cache driver '%s' requested service '%s' which does not implement Doctrine\Common\Cache\Cache",
                 $name,
                 $maybe_service));
         }
 
-        //cache driver and prefix are required for all instances
         $driver = $this->config->getRequired("cache.$name.driver");
-        $prefix = $this->config->getRequired("cache.$name.prefix");
 
         $method = 'create' . ucfirst($driver) . 'Driver';
         if (method_exists($this, $method)) {
-            $this->instances[$name] = $this->$method($name, $prefix);
+            $this->instances[$name] = $this->$method($name);
 
             return $this->instances[$name];
         } else {
@@ -61,29 +57,37 @@ class CacheFactory extends AbstractFactory
         }
     }
 
-    protected function createDebugDriver($name, $prefix)
+    protected function createArrayDriver($name)
     {
-        return new DebugDriver($prefix);
+        return new ArrayCache();
     }
 
-    protected function createFileDriver($name, $prefix)
+    protected function createFileDriver($name)
     {
+        $namespace = $this->config->getRequired("cache.$name.namespace");
         $dir = $this->config->get("cache.$name.dir");
         if ($dir && substr($dir, 0, 1) !== '/') {
             $dir = $this->config->getRequired('dir.root') . $dir;
         }
 
-        return new FileDriver($prefix, new Temping($dir));
+        $driver = new FileSystemCache($dir);
+        $driver->setNamespace($namespace);
+
+        return $driver;
     }
 
-    protected function createMemcachedDriver($name, $prefix)
+    protected function createMemcachedDriver($name)
     {
-        $host = $this->config->getRequired("cache.$name.host");
-        $port = $this->config->getRequired("cache.$name.port");
+        $host = $this->config->get("cache.$name.host", '127.0.0.1');
+        $port = $this->config->get("cache.$name.port", '11211');
         $memcached = new Memcached();
         $memcached->addserver($host, $port);
 
-        return new MemcachedDriver($prefix, $memcached);
+        $driver = new MemcachedCache();
+        $driver->setNamespace($this->config->getRequired("cache.$name.namespace"));
+        $driver->setMemcached($memcached);
+
+        return $driver;
     }
 
 }
