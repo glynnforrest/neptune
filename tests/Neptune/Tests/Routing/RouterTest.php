@@ -347,8 +347,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
                ->method('save');
         $this->router->setCache($cache);
         $this->router->route('/test', 'module:controller', 'index');
-        $request = Request::create('/test');
-        $this->assertSame($expected, $this->router->matchCached($request));
+        $this->assertSame($expected, $this->match('/test'));
     }
 
 }

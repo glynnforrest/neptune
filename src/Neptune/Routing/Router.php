@@ -179,17 +179,33 @@ class Router {
 		return $this;
 	}
 
-	public function match(Request $request) {
-		foreach($this->routes as $url => $route) {
-			if(!$route->test($request)) {
-				continue;
-			}
-			$this->matched_url = $url;
-			return $route->getAction();
-		}
-		throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
-	}
+    /**
+     * Match a Request with a registered route and return a controller
+     * action. If no route is found a RouteNotFoundException will be
+     * thrown. If a cache has been defined the result will be cached.
+     *
+     * @param Request $request The Request to match
+     * @return array An array containing the controller, method, and
+     * an array of arguments.
+     */
+    public function match(Request $request)
+    {
+        foreach($this->routes as $url => $route) {
+            if(!$route->test($request)) {
+                continue;
+            }
+            $this->matched_url = $url;
+            $action =  $route->getAction();
+            $this->cacheAction($request, $action);
+            return $action;
+        }
+        throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
+    }
 
+    /**
+     * Get a key used to identify a request uniquely by it's path info
+     * and http method.
+     */
     protected function getRequestCacheKey(Request $request)
     {
         $path = $request->getPathInfo();
@@ -197,12 +213,26 @@ class Router {
         return 'Router.' . $path . $method;
     }
 
+    /**
+     * Cache the action used for a particular request.
+     */
     protected function cacheAction(Request $request, array $action)
     {
-        $this->cache->save($this->getRequestCacheKey($request), $action);
-        $this->cache->save(self::CACHE_KEY_NAMES, $this->names);
+        if ($this->cache) {
+            $this->cache->save($this->getRequestCacheKey($request), $action);
+            $this->cache->save(self::CACHE_KEY_NAMES, $this->names);
+        }
     }
 
+    /**
+     * Match a Request with a registered route and return a controller
+     * action by looking in the cache. False will be returned if no
+     * route is found.
+     *
+     * @param Request $request The Request to match
+     * @return array An array containing the controller, method, and
+     * an array of arguments, or false on failure.
+     */
     public function matchCached(Request $request)
     {
         $cached = $this->cache->fetch($key = $this->getRequestCacheKey($request));
@@ -212,9 +242,7 @@ class Router {
             }
             return $cached;
         }
-        $action = $this->match($request);
-        $this->cacheAction($request, $action);
-        return $action;
+        return false;
     }
 
 	public function getMatchedUrl() {
