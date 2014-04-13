@@ -31,6 +31,13 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		return $route->test($req);
 	}
 
+    protected function match($pathinfo, $method = 'GET')
+    {
+        $request = Request::create($pathinfo);
+        $request->setMethod($method);
+        return $this->router->match($request);
+    }
+
 	public function testRouteReturnsRoute() {
 		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->route('/url'));
 	}
@@ -91,20 +98,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 	public function testMatch() {
 		$this->router->route('/test', 'test', 'index');
 		$expected = array('test', 'index', array());
-		$this->assertSame($expected, $this->router->match('/test'));
+		$this->assertSame($expected, $this->match('/test'));
 	}
 
 	public function testMatchThrowsExceptionNoAction() {
 		$msg = 'No route found that matches "foo"';
 		$this->setExpectedException('\Neptune\Routing\RouteNotFoundException', $msg);
-		$this->router->match('foo');
+		$this->match('foo');
 	}
 
 	public function testCatchAll() {
 		$this->router->route('/test', 'test', 'index');
 		$this->router->catchAll('foo');
 		$expected = array('foo', 'index', array());
-		$this->assertSame($expected, $this->router->match('/foo'));
+		$this->assertSame($expected, $this->match('/foo'));
 	}
 
 	public function testGetRoutes() {
@@ -175,16 +182,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$this->router->setCache($driver);
 		$this->assertSame($driver, $this->router->getCache());
-	}
-
-	public function testRouteIsCachedOnSuccess() {
-		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
-		$driver->expects($this->exactly(2))
-			   ->method('save');
-		$this->router->setCache($driver);
-		$this->router->route('/test', 'module:controller', 'index');
-		$expected = array('module:controller', 'index', array());
-		$this->assertSame($expected, $this->router->match('/test'));
 	}
 
 	public function testName() {
@@ -299,7 +296,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$routes = $this->router->getRoutes();
 		$secret = $routes[1];
 		$action = array('::foo.controller.bar', 'secretArea', array());
-		$this->assertSame($action, $this->router->match('/my-module/secret'));
+		$this->assertSame($action, $this->match('/my-module/secret'));
 	}
 
     public function testAddModuleDoesNotAffectFutureNames() {
@@ -311,6 +308,47 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             'hello' => '/foo',
         );
         $this->assertSame($names, $this->router->getNames());
+    }
+
+    public function testMatchCached()
+    {
+        $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $route = array('::controller.foo', 'index', array());
+        $cache->expects($this->once())
+              ->method('fetch')
+              ->with('Router./fooGET')
+              ->will($this->returnValue($route));
+        $cache->expects($this->never())
+              ->method('save');
+        $this->router->setCache($cache);
+        $request = Request::create('/foo');
+        $this->assertSame($route, $this->router->matchCached($request));
+    }
+
+    public function testMatchCachedThrowsExceptionOnInvalidCache()
+    {
+        $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $route = array('::controller.foo', 'index', array());
+        $cache->expects($this->once())
+              ->method('fetch')
+              ->with('Router./fooGET')
+              ->will($this->returnValue('foo'));
+        $this->router->setCache($cache);
+        $request = Request::create('/foo');
+        $this->setExpectedException('\Exception');
+        $this->router->matchCached($request);
+    }
+
+    public function testRouteIsCachedOnSuccess()
+    {
+        $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $expected = array('module:controller', 'index', array());
+        $cache->expects($this->exactly(2))
+               ->method('save');
+        $this->router->setCache($cache);
+        $this->router->route('/test', 'module:controller', 'index');
+        $request = Request::create('/test');
+        $this->assertSame($expected, $this->router->matchCached($request));
     }
 
 }

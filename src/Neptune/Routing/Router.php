@@ -179,46 +179,43 @@ class Router {
 		return $this;
 	}
 
-	public function matchCached($path) {
-		$key = 'Router' . $path;
-		$cached = $this->cache->fetch($key);
-		if($cached) {
-			return $this->cached;
-		}
-		return $this->match($path);
-	}
-
-	public function match($pathinfo, $method = 'GET') {
-		$request = Request::create($pathinfo);
-		$request->setMethod($method);
-		return $this->matchRequest($request);
-	}
-
-	public function matchRequest(Request $request) {
+	public function match(Request $request) {
 		foreach($this->routes as $url => $route) {
 			if(!$route->test($request)) {
 				continue;
 			}
-			$actions = $route->getAction();
 			$this->matched_url = $url;
-			$this->cacheResults($request, $actions);
-			return $actions;
+			return $route->getAction();
 		}
 		throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
 	}
 
-	protected function cacheResults(Request $request, $actions) {
-		if($this->cache) {
-			try {
-				$path = $request->getPathInfo();
-				$method = $request->getMethod();
-				$this->cache->save('Router.' . $path . $method, $actions);
-				$this->cache->save(self::CACHE_KEY_NAMES, $this->names);
-			} catch	(\Exception $e) {
-				//send failed cache event
-			}
-		}
-	}
+    protected function getRequestCacheKey(Request $request)
+    {
+        $path = $request->getPathInfo();
+        $method = $request->getMethod();
+        return 'Router.' . $path . $method;
+    }
+
+    protected function cacheAction(Request $request, array $action)
+    {
+        $this->cache->save($this->getRequestCacheKey($request), $action);
+        $this->cache->save(self::CACHE_KEY_NAMES, $this->names);
+    }
+
+    public function matchCached(Request $request)
+    {
+        $cached = $this->cache->fetch($key = $this->getRequestCacheKey($request));
+        if ($cached) {
+            if (!is_array($cached)) {
+                throw new \Exception("Cache value $key is not an array");
+            }
+            return $cached;
+        }
+        $action = $this->match($request);
+        $this->cacheAction($request, $action);
+        return $action;
+    }
 
 	public function getMatchedUrl() {
 		return $this->matched_url;
