@@ -235,6 +235,9 @@ class Router {
      */
     public function matchCached(Request $request)
     {
+        if (!$this->cache) {
+            return false;
+        }
         $cached = $this->cache->fetch($key = $this->getRequestCacheKey($request));
         if ($cached) {
             if (!is_array($cached)) {

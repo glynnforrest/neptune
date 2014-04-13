@@ -350,4 +350,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($expected, $this->match('/test'));
     }
 
+    public function testMatchCachedReturnsFalseWithNoCache()
+    {
+        $request = Request::create('/foo');
+        $this->assertFalse($this->router->matchCached($request));
+    }
+
 }
