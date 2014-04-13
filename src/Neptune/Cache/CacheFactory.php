@@ -65,8 +65,8 @@ class CacheFactory extends AbstractFactory
     protected function createFileDriver($name)
     {
         $namespace = $this->config->getRequired("cache.$name.namespace");
-        $dir = $this->config->get("cache.$name.dir");
-        if ($dir && substr($dir, 0, 1) !== '/') {
+        $dir = $this->config->get("cache.$name.dir", sys_get_temp_dir());
+        if (substr($dir, 0, 1) !== '/') {
             $dir = $this->config->getRequired('dir.root') . $dir;
         }
 

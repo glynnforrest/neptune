@@ -90,12 +90,12 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetFileDriverNoDir() {
 		$this->config->set('cache.file.dir', null);
-        $this->setExpectedException('\InvalidArgumentException');
 		$driver = $this->factory->get('file');
+        $this->assertSame(sys_get_temp_dir(), $driver->getDirectory());
 	}
 
 	public function testGetFileDriverNoNamespace() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
 		$this->config->set('cache.file.namespace', null);
 		$this->factory->get('file');
 	}
