@@ -25,10 +25,10 @@ class CacheableTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('\Neptune\Cache\Cacheable', $this->obj);
 	}
 
-	public function testSetAndGetCacheDriver() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
-		$this->obj->setCacheDriver($driver);
-		$this->assertEquals($driver, $this->obj->getCacheDriver());
+	public function testSetAndGetCache() {
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+		$this->obj->setCache($driver);
+		$this->assertEquals($driver, $this->obj->getCache());
 	}
 
 	public function testCallMethodWithoutCache() {
@@ -36,15 +36,15 @@ class CacheableTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testCallMethod() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$key = md5('Neptune\Tests\Cache\FooCacheable:foo');
 		$driver->expects($this->once())
-			   ->method('get')
+			   ->method('fetch')
 			   ->with($key);
 		$driver->expects($this->once())
-			   ->method('set')
+			   ->method('save')
 			   ->with($key, 'Foo');
-		$this->obj->setCacheDriver($driver);
+		$this->obj->setCache($driver);
 		$this->assertSame('Foo', $this->obj->fooCached());
 	}
 
@@ -69,14 +69,14 @@ class CacheableTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testCallMethodWithArguments($arg1 = null, $arg2 = null, $arg3 = null) {
 		$key = $this->createKey(array($arg1, $arg2, $arg3));
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->once())
-			   ->method('get')
+			   ->method('fetch')
 			   ->with($key);
 		$driver->expects($this->once())
-			   ->method('set')
+			   ->method('save')
 			   ->with($key, 'Foo');
-		$this->obj->setCacheDriver($driver);
+		$this->obj->setCache($driver);
 		$this->assertSame('Foo', $this->obj->fooCached($arg1, $arg2, $arg3));
 	}
 
@@ -91,32 +91,32 @@ class CacheableTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testMethodIsNotCalledWhenCacheIsHit() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->once())
-			   ->method('get')
+			   ->method('fetch')
 			   ->with(md5('Neptune\Tests\Cache\FooCacheable:bar'))
 			   ->will($this->returnValue('Output of bar()'));
 		$driver->expects($this->never())
-			   ->method('set');
+			   ->method('save');
 		//mock a class that is called inside bar(). If it isn't
 		//called, then the bar() has not run
 		$bar = $this->getMock('stdClass');
 		$bar->expects($this->never())
 			->method('baz');
 		$this->obj->setBar($bar);
-		$this->obj->setCacheDriver($driver);
+		$this->obj->setCache($driver);
 		$this->assertEquals('Output of bar()', $this->obj->barCached());
 	}
 
 	public function testMethodIsNotCalledWhenCacheReturnsFalse() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$driver->expects($this->once())
-			   ->method('get')
+			   ->method('fetch')
 			   ->with(md5('Neptune\Tests\Cache\FooCacheable:bar'))
 			   ->will($this->returnValue(false));
 		$driver->expects($this->never())
-			   ->method('set');
-		$this->obj->setCacheDriver($driver);
+			   ->method('save');
+		$this->obj->setCache($driver);
 		//mock a class that is called inside bar(). If it isn't
 		//called, then the bar() has not run
 		$bar = $this->getMock('stdClass');
@@ -127,19 +127,19 @@ class CacheableTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testDifferentArgsDifferentResults() {
-		$driver = $this->getMock('\Neptune\Cache\Driver\CacheDriverInterface');
+		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
 		$key1 = $this->createKey(array(1));
 		$key2 = $this->createKey(array(2));
 		$map = array(
-			array($key1, true, 'Foo1'),
-			array($key2, true, 'Foo2')
+			array($key1, 'Foo1'),
+			array($key2, 'Foo2')
 		);
 		$driver->expects($this->exactly(2))
-			   ->method('get')
+			   ->method('fetch')
 			   ->will($this->returnValueMap($map));
 		$driver->expects($this->never())
-			   ->method('set');
-		$this->obj->setCacheDriver($driver);
+			   ->method('save');
+		$this->obj->setCache($driver);
 		$this->assertSame('Foo1', $this->obj->fooCached(1));
 		$this->assertSame('Foo2', $this->obj->fooCached(2));
 	}

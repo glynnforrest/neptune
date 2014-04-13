@@ -3,7 +3,7 @@
 namespace Neptune\Cache;
 
 use Neptune\Exceptions\MethodNotFoundException;
-use Neptune\Cache\Driver\CacheDriverInterface;
+use Doctrine\Common\Cache\Cache;
 
 /**
  * Cacheable
@@ -11,7 +11,7 @@ use Neptune\Cache\Driver\CacheDriverInterface;
  */
 abstract class Cacheable {
 
-	private $cache_driver;
+	private $cache;
 
 	public function __call($method, $args) {
 		if (substr($method, -6) === 'Cached') {
@@ -24,7 +24,7 @@ abstract class Cacheable {
 	protected function getCachedResult($method, $args) {
 		if (method_exists($this, $method)) {
 			//if there is no cache available, just call the method
-			if(!$this->cache_driver) {
+			if(!$this->cache) {
 				return call_user_func_array(array($this, $method), $args);
 			}
 			//build key
@@ -36,25 +36,25 @@ abstract class Cacheable {
 			//make sure the key isn't too long
 			$key = md5($key);
 			//check for a cached version. if it does, return the value
-			$result = $this->cache_driver->get($key);
+			$result = $this->cache->fetch($key);
 			if(!is_null($result)) {
 				return $result;
 			}
 			//doesn't, lets call the function and cache it
 			$result = call_user_func_array(array($this, $method), $args);
-			$this->cache_driver->set($key, $result);
+			$this->cache->save($key, $result);
 			return $result;
 		} else {
 			throw new MethodNotFoundException('Function not found: ' . $method);
 		}
 	}
 
-	public function setCacheDriver(CacheDriverInterface $driver) {
-		$this->cache_driver = $driver;
+	public function setCache(Cache $cache) {
+		$this->cache = $cache;
 	}
 
-	public function getCacheDriver() {
-		return $this->cache_driver;
+	public function getCache() {
+		return $this->cache;
 	}
 
 }
