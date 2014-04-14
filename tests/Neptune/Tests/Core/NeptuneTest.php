@@ -139,4 +139,38 @@ END;
         $this->neptune->boot();
     }
 
+    public function testAddModule()
+    {
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $module->expects($this->once())
+                ->method('register')
+                ->with($this->neptune);
+        $module->expects($this->never())
+                ->method('boot');
+        $this->neptune->addModule('test', $module);
+    }
+
+    public function testGetModule()
+    {
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $this->neptune->addModule('test', $module);
+        $this->assertSame($module, $this->neptune->getModule('test'));
+    }
+
+    public function testGetUndefinedModule()
+    {
+        $this->setExpectedException('\InvalidArgumentException', 'Module "foo" not registered');
+        $this->neptune->getModule('foo');
+    }
+
+    public function testGetModules()
+    {
+        $this->assertSame(array(), $this->neptune->getModules());
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $this->neptune->addModule('foo', $module);
+        $this->neptune->addModule('bar', $module);
+        $expected = array('foo' => $module, 'bar' => $module);
+        $this->assertSame($expected, $this->neptune->getModules());
+    }
+
 }

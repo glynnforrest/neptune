@@ -5,6 +5,7 @@ namespace Neptune\Core;
 use Neptune\Exceptions\NeptuneError;
 use Neptune\Core\Events;
 use Neptune\Service\ServiceInterface;
+use Neptune\Service\AbstractModule;
 use Neptune\Core\ComponentException;
 use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
@@ -25,6 +26,7 @@ class Neptune extends Pimple implements HttpKernelInterface
     protected $env;
     protected $booted;
     protected $services = array();
+    protected $modules = array();
 
     public function __construct(Config $config)
     {
@@ -58,6 +60,26 @@ class Neptune extends Pimple implements HttpKernelInterface
     {
         $this->services[] = $service;
         return $service->register($this);
+    }
+
+    public function addModule($name, AbstractModule $module)
+    {
+        $this->addService($module);
+        $this->modules[$name] = $module;
+    }
+
+    public function getModule($name)
+    {
+        if (!isset($this->modules[$name])) {
+            throw new \InvalidArgumentException(sprintf('Module "%s" not registered', $name));
+        }
+
+        return $this->modules[$name];
+    }
+
+    public function getModules()
+    {
+        return $this->modules;
     }
 
     /**
