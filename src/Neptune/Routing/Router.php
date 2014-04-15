@@ -4,8 +4,10 @@ namespace Neptune\Routing;
 
 use Neptune\Routing\Route;
 use Neptune\Core\Config;
+use Neptune\Core\Neptune;
 use Neptune\Helpers\Url;
 use Neptune\Routing\RouteNotFoundException;
+use Neptune\Service\AbstractModule;
 
 use Doctrine\Common\Cache\Cache;
 
@@ -90,45 +92,40 @@ class Router {
 	}
 
     /**
-     * Load all routes defined in the routes.php file in $module.
-     * $prefix will be used as the url prefix if specified, otherwise
-     * $module will be used.
+     * Load the routes for a module.
      *
-     * @param string $module The name of the module
-     * @param string $prefix The prefix to use for route urls
+     * @param AbstractModule $module The module
+     * @param string $prefix The routing prefix
+     * @param string $name The name of the module
      */
-    public function routeModule($module, $prefix = null)
+    public function routeModule(AbstractModule $module, $prefix, $name)
     {
-        //if no url prefix is given, use the module name
-        $prefix = $prefix ? $prefix : $module;
-
 		//store current globals so they aren't used in
-		//routes.php and can be restored later
+		//the module and can be restored later
 		$old_globals = $this->globals;
 		//reset globals so the module can define them
 		$this->globals = null;
         //set the current module name so the name() method can use it
-        $this->current_module = $module;
+        $this->current_module = $name;
 
-		//include routes.php file
-        $routes_file = $this->config->getPath('modules.' . $module)
-			. 'routes.php';
-		$routes = include($routes_file);
+        //call the function, passing in this Router and the module name
+        $module->routes($this, $prefix, $name);
 
-		//routes.php should have a returned a function that we can
-		//call with this Router instance as an argument. If not,
-		//error out
-		if(!is_callable($routes)) {
-			throw new \Exception(
-				$routes_file . ' does not return a callable function.');
-		}
-        //call the function, passing in this Router, the module name
-        //and url prefix
-        $routes($this, $module, $prefix);
         //reset the module name to null and the globals to what they were before
         $this->current_module = null;
         $this->globals = $old_globals;
+
         return true;
+    }
+
+    public function routeModules(Neptune $neptune)
+    {
+        foreach ($neptune->getModules() as $name => $module) {
+            if (!$prefix = $neptune->getRoutePrefix($name)) {
+                continue;
+            }
+            $this->routeModule($module, $prefix, $name);
+        }
     }
 
 	public function catchAll($controller, $method ='index', $args = null) {
