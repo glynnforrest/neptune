@@ -33,9 +33,9 @@ class Application extends SymfonyApplication {
 	protected $config;
 	protected $commands_registered;
 
-	public function __construct(Neptune $neptune, Config $config) {
+	public function __construct(Neptune $neptune) {
         $this->neptune = $neptune;
-		$this->config = $config;
+		$this->config = $neptune['config'];
 		parent::__construct('Neptune', '0.2.5');
 		$this->useNeptuneHelperSet();
 	}
@@ -81,15 +81,11 @@ class Application extends SymfonyApplication {
 	 */
 	protected function registerCommands(OutputInterface $output) {
 		$this->registerNamespace('Neptune', $this->config->get('dir.neptune') . 'src/Neptune/Command/');
-		$root = $this->neptune->getRootDirectory();
-        $modules = $this->config->get('modules');
-        if (!is_array($modules)) {
-            return false;
-        }
-		foreach ($modules as $module => $path) {
-			$namespace = $this->neptune->getModuleNamespace($module);
+		foreach ($this->neptune->getModules() as $module) {
+			$namespace = $module->getNamespace();
+            $path = $module->getDirectory();
 			try {
-				$this->registerNamespace($namespace, $root . $path . 'Command/');
+				$this->registerNamespace($namespace, $path . 'Command/');
 			} catch (\Exception $e) {
 				$output->writeln(sprintf('Warning: %s', $e->getMessage()));
 			}
@@ -120,8 +116,12 @@ class Application extends SymfonyApplication {
 			$class = $namespace . '\\Command\\' . $file->getBasename('.php');
 			try {
 				$r = new ReflectionClass($class);
-				if ($r->isSubclassOf('Neptune\\Command\\Command') && !$r->isAbstract()) {
-					$this->add($r->newInstance($this->neptune, $this->config));
+				if ($r->isSubclassOf('\Symfony\Component\Console\Command\Command') && !$r->isAbstract()) {
+                    if ($r->isSubclassOf('\Neptune\Command\Command')) {
+                        $this->add($r->newInstance($this->neptune));
+                    } else {
+                        $this->add($r->newInstance());
+                    }
 				}
 			} catch (\ReflectionException $e) {
 				continue;
