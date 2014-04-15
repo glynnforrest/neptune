@@ -38,7 +38,7 @@ class Neptune extends Pimple implements HttpKernelInterface
 
         $this['dispatcher'] = function () {
             $dispatcher = new EventDispatcher;
-            $dispatcher->addSubscriber(new RouterListener($this['router']));
+            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
             $dispatcher->addSubscriber(new StringResponseListener());
             return $dispatcher;
         };
