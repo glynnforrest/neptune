@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-abstract class Command extends SymfonyCommand implements NeptuneAwareInterface {
+abstract class Command extends SymfonyCommand {
 
     protected $neptune;
 	protected $config;
@@ -26,21 +26,17 @@ abstract class Command extends SymfonyCommand implements NeptuneAwareInterface {
 	protected $name;
 	protected $description;
 
+    public function __construct(Neptune $neptune)
+    {
+        $this->neptune = $neptune;
+        $this->config = $neptune['config'];
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->setName($this->name)
              ->setDescription($this->description);
-    }
-
-    public function setNeptune(Neptune $neptune)
-    {
-        $this->neptune = $neptune;
-        $this->config = $neptune['config'];
-    }
-
-    public function getNeptune()
-    {
-        return $this->neptune;
     }
 
 	public function execute(InputInterface $input, OutputInterface $output) {

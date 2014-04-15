@@ -21,8 +21,7 @@ class CommandTest extends \PHPUnit_Framework_TestCase
         $this->neptune = $this->getMockBuilder('Neptune\Core\Neptune')
                               ->disableOriginalConstructor()
                               ->getMock();
-        $this->command = new EmptyCommand();
-        $this->command->setNeptune($this->neptune);
+        $this->command = new EmptyCommand($this->neptune);
     }
 
     public function testGetRootDirectory()
