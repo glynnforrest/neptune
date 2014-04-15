@@ -23,9 +23,11 @@ abstract class AbstractModule implements ServiceInterface
         return substr($class, 0, strrpos($class, '\\'));
     }
 
-    public function getRootDirectory()
+    public function getDirectory()
     {
-        return __DIR__ . '/';
+        $self = new \ReflectionObject($this);
+
+        return dirname($self->getFileName()) . '/';
     }
 
 }
