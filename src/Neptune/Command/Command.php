@@ -5,6 +5,7 @@ namespace Neptune\Command;
 use Neptune\Console\Console;
 use Neptune\Core\Config;
 use Neptune\Core\Neptune;
+use Neptune\Core\NeptuneAwareInterface;
 
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-abstract class Command extends SymfonyCommand {
+abstract class Command extends SymfonyCommand implements NeptuneAwareInterface {
 
     protected $neptune;
 	protected $config;
@@ -25,20 +26,22 @@ abstract class Command extends SymfonyCommand {
 	protected $name;
 	protected $description;
 
-	/**
-	 * Create a new Command instance. Neptune config must be loaded.
-	 */
-	public function __construct(Neptune $neptune, Config $config) {
-		//make config instance available to configure()
-		$this->config = $config;
-        $this->neptune = $neptune;
-		parent::__construct();
-	}
+    protected function configure()
+    {
+        $this->setName($this->name)
+             ->setDescription($this->description);
+    }
 
-	protected function configure() {
-		$this->setName($this->name)
-			 ->setDescription($this->description);
-	}
+    public function setNeptune(Neptune $neptune)
+    {
+        $this->neptune = $neptune;
+        $this->config = $neptune['config'];
+    }
+
+    public function getNeptune()
+    {
+        return $this->neptune;
+    }
 
 	public function execute(InputInterface $input, OutputInterface $output) {
 		$this->input = $input;
