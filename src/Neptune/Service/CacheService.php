@@ -26,6 +26,8 @@ class CacheService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
+        //add the default cache to the router for quicker route matching
+        $neptune['router']->setCache($neptune['cache']);
     }
 
 }
