@@ -121,6 +121,12 @@ class Neptune extends Pimple implements HttpKernelInterface
         return $kernel->handle($request, $type, $catch);
     }
 
+    public function go()
+    {
+        $response = $this->handle(Request::createFromGlobals());
+        $response->send();
+    }
+
 	/**
 	 * Load the environment $env. This will include the file
 	 * app/env/$env.php and call Config::loadEnv($env). If $env is not
