@@ -157,19 +157,15 @@ class Neptune extends Pimple implements HttpKernelInterface
 		return $this->getModule($module)->getDirectory();
 	}
 
-	/**
-	 * Get the namespace of a module with no beginning slash.
-	 *
-	 * @param string $module the name of the module
-	 */
-	public function getModuleNamespace($module)
+    /**
+     * Get the namespace of a module with no beginning slash.
+     *
+     * @param string $module the name of the module
+     */
+    public function getModuleNamespace($module)
     {
-		$namespace = Config::load($module)->getRequired('namespace');
-		if(substr($namespace, 0, 1) === '\\') {
-			$namespace = substr($namespace, 0, 1);
-		}
-		return $namespace;
-	}
+        return $this->getModule($module)->getNamespace();
+    }
 
     /**
      * Get the name of the first registered module.

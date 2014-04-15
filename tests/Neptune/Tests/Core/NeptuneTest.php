@@ -106,13 +106,15 @@ END;
         $this->assertSame('my-app', $this->neptune->getDefaultModule());
     }
 
-	public function testGetModuleNamespace() {
-		$config = Config::create('my-app');
-		$config->set('namespace', 'MyApp');
-		$this->assertSame('MyApp', $this->neptune->getModuleNamespace('my-app'));
-		$config->set('namespace', 'Changed');
-		$this->assertSame('Changed', $this->neptune->getModuleNamespace('my-app'));
-	}
+    public function testGetModuleNamespace()
+    {
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $module->expects($this->once())
+         ->method('getNamespace')
+         ->will($this->returnValue($namespace = 'MyApp'));
+        $this->neptune->addModule('my-app', $module);
+        $this->assertSame($namespace, $this->neptune->getModuleNamespace('my-app'));
+    }
 
     public function testAddService()
     {
