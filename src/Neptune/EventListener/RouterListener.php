@@ -7,6 +7,9 @@ use Neptune\Routing\Router;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpFoundation\Request;
+
+use Neptune\Core\Neptune;
 
 /**
  * RouterListener
@@ -17,16 +20,25 @@ class RouterListener implements EventSubscriberInterface
 {
 
     protected $router;
+    protected $neptune;
 
-    public function __construct(Router $router)
+    public function __construct(Router $router, Neptune $neptune)
     {
         $this->router = $router;
+        $this->neptune = $neptune;
     }
 
     public function onKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
-        $action = $this->router->matchRequest($request);
+
+        //attempt to fetch a matched route from the cache. If this
+        //isn't successful, load routes from all registered modules.
+        if (!$action = $this->router->matchCached($request)) {
+            $this->router->routeModules($this->neptune);
+            $action = $this->router->match($request);
+        }
+
         $request->attributes->set('_controller', $action[0]);
         $request->attributes->set('_method', $action[1]);
         $request->attributes->set('_args', $action[2]);
