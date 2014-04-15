@@ -3,7 +3,7 @@
 namespace Neptune\Cache;
 
 use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\Common\Cache\FileSystemCache;
+use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\Cache;
 
@@ -70,7 +70,7 @@ class CacheFactory extends AbstractFactory
             $dir = $this->config->getRequired('dir.root') . $dir;
         }
 
-        $driver = new FileSystemCache($dir);
+        $driver = new FilesystemCache($dir);
         $driver->setNamespace($namespace);
 
         return $driver;
