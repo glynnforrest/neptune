@@ -2,21 +2,19 @@
 
 namespace Neptune\Command;
 
-use Neptune\Command\Command;
 use Neptune\Console\Console;
-use Neptune\Cache\CacheFactory;
 
-class CacheFlushCommand extends Command {
+class CacheFlushCommand extends Command
+{
+    protected $name = 'cache:flush';
+    protected $description = 'Empty the cache';
 
-	protected $name = 'cache:flush';
-	protected $description = 'Empty the cache';
-
-	public function go(Console $console) {
-		$factory = new CacheFactory($this->config);
-		$driver = $factory->getDriver();
-		$console->verbose("Using cache driver <info>" . get_class($driver) . "</info>");
-		$driver->flush();
-		$console->write('Emptied the cache.');
-	}
+    public function go(Console $console)
+    {
+        $cache = $this->neptune['cache'];
+        $console->verbose("Using cache driver <info>" . get_class($cache) . "</info>");
+        $cache->flushAll();
+        $console->writeln('Emptied the cache.');
+    }
 
 }
