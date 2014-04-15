@@ -154,7 +154,7 @@ class Neptune extends Pimple implements HttpKernelInterface
 	 */
 	public function getModuleDirectory($module)
     {
-		return $this['config']->getPath('modules.' . $module);
+		return $this->getModule($module)->getDirectory();
 	}
 
 	/**

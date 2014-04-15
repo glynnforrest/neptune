@@ -90,15 +90,14 @@ END;
 		$this->assertSame('/no/trailing/slash/', $this->neptune->getRootDirectory());
 	}
 
-	public function testGetModuleDirectory() {
-		$modules = array(
-			'my-app' => 'app/MyApp/');
-		$this->config->set('dir.root', '/root/');
-		$this->config->set('modules', $modules);
-		$expected = '/root/app/MyApp/';
-		$this->assertSame($expected, $this->neptune->getModuleDirectory('my-app'));
-		//check it is an absolute path
-	}
+    public function testGetModuleDirectory() {
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $module->expects($this->once())
+         ->method('getDirectory')
+         ->will($this->returnValue($path = '/path/to/MyApp'));
+        $this->neptune->addModule('my-app', $module);
+        $this->assertSame($path, $this->neptune->getModuleDirectory('my-app'));
+    }
 
 	public function testGetDefaultModule() {
 		$modules = array(
