@@ -351,4 +351,22 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($this->router->matchCached($request));
     }
 
+    public function testRouteModuleToMultiplePrefixes()
+    {
+        //TestModule defines a route with '/$prefix/login
+        $this->setUpTestModule(array('foo', 'admin', 'mobile'));
+        $routes = $this->router->getRoutes();
+
+        //TestModule defines 2 routes. If this ever changes the
+        //following will need updating
+        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
+        $this->assertSame('/foo/login', $routes[0]->getUrl());
+
+        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[2]);
+        $this->assertSame('/admin/login', $routes[2]->getUrl());
+
+        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[4]);
+        $this->assertSame('/mobile/login', $routes[4]->getUrl());
+    }
+
 }
