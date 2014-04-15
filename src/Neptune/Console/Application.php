@@ -59,9 +59,6 @@ class Application extends SymfonyApplication
      */
     public function doRun(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->commands_registered) {
-            $this->registerCommands($output);
-        }
         if ($input->hasParameterOption(array('--env', '-e'))) {
             $env = $input->getParameterOption(array('--env', '-e'));
         } else {
@@ -72,6 +69,9 @@ class Application extends SymfonyApplication
             if ($output->isVeryVerbose()) {
                 $output->writeln("Using environment <info>$env</info>");
             }
+        }
+        if (!$this->commands_registered) {
+            $this->registerCommands($output);
         }
 
         return parent::doRun($input, $output);
