@@ -171,14 +171,16 @@ class Neptune extends Pimple implements HttpKernelInterface
 		return $namespace;
 	}
 
+    /**
+     * Get the name of the first registered module.
+     *
+     * @return string The name of the module
+     */
     public function getDefaultModule()
     {
-		$modules = $this['config']->get('modules');
-		if(!$modules) {
-			return null;
-		}
-		$module_names = array_keys($modules);
-		return $module_names[0];
+        reset($this->modules);
+
+        return key($this->modules);
     }
 
 	public function handleErrors() {

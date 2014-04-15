@@ -99,13 +99,12 @@ END;
         $this->assertSame($path, $this->neptune->getModuleDirectory('my-app'));
     }
 
-	public function testGetDefaultModule() {
-		$modules = array(
-			'my-app' => 'app/MyApp/',
-			'other-module' => 'app/OtherModel/');
-		$this->config->set('modules', $modules);
-		$this->assertSame('my-app', $this->neptune->getDefaultModule());
-	}
+    public function testGetDefaultModule() {
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $this->neptune->addModule('my-app', $module);
+        $this->neptune->addModule('my-other-app', $module);
+        $this->assertSame('my-app', $this->neptune->getDefaultModule());
+    }
 
 	public function testGetModuleNamespace() {
 		$config = Config::create('my-app');
