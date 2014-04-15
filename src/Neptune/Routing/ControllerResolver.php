@@ -68,14 +68,14 @@ class ControllerResolver implements ControllerResolverInterface
 
     protected function getControllerClass($controller)
     {
-        //controller can be either a single name of a controller, or a
-        //name prefixed with the module, e.g. 'foo' or 'my-module:foo'
-        if (strpos($controller, ':')) {
-            list($module, $controller_name) = explode(':', $controller, 2);
-        } else {
-            $module = $this->neptune->getDefaultModule();
-            $controller_name = $controller;
+        //controller is the name prefixed with the module,
+        //e.g. 'my-module:foo'. Throw an exception if not
+        if (!strpos($controller, ':')) {
+            throw new \InvalidArgumentException(
+                sprintf('Controller "%s" is not a valid controller name (module:controller)',
+                $controller));
         }
+        list($module, $controller_name) = explode(':', $controller, 2);
         //replace forward slashes with backwards and run ucfirst on
         //each segment for namespacing
         $controller_name = implode('\\', array_map('ucfirst', explode('/', $controller_name)));

@@ -41,7 +41,7 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         return $req;
     }
 
-    public function testGetControllerWithModule()
+    public function testGetController()
     {
         $this->neptune->expects($this->once())
                       ->method('getModuleNamespace')
@@ -57,39 +57,14 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
-    public function testGetControllerWithNoModule()
-    {
-        $this->neptune->expects($this->once())
-                      ->method('getDefaultModule')
-                      ->with()
-                      ->will($this->returnValue('test-module'));
-        $this->neptune->expects($this->once())
-                      ->method('getModuleNamespace')
-                      ->with('test-module')
-                      ->will($this->returnValue('\\Neptune\\Tests\Routing'));
-
-        $req = $this->createRequest('test', 'bar');
-        $controller = $this->obj->getController($req);
-
-        $this->assertInternalType('array', $controller);
-        $this->assertTrue(count($controller) === 2);
-        $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\TestController', $controller[0]);
-        $this->assertSame('barAction', $controller[1]);
-        $this->assertSame($this->neptune, $controller[0]->getNeptune());
-    }
-
     public function testGetControllerInDirectory()
     {
         $this->neptune->expects($this->once())
-                      ->method('getDefaultModule')
-                      ->with()
-                      ->will($this->returnValue('test-module'));
-        $this->neptune->expects($this->once())
                       ->method('getModuleNamespace')
                       ->with('test-module')
                       ->will($this->returnValue('\\Neptune\\Tests\Routing'));
 
-        $req = $this->createRequest('example/example', 'bar');
+        $req = $this->createRequest('test-module:example/example', 'bar');
         $controller = $this->obj->getController($req);
 
         $this->assertInternalType('array', $controller);
@@ -97,6 +72,15 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Neptune\Tests\Routing\Controller\Example\ExampleController', $controller[0]);
         $this->assertSame('barAction', $controller[1]);
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
+    }
+
+
+    public function testGetControllerWithNoModule()
+    {
+        $req = $this->createRequest('test', 'bar');
+        $msg = 'Controller "test" is not a valid controller name (module:controller)';
+        $this->setExpectedException('\InvalidArgumentException', $msg);
+        $controller = $this->obj->getController($req);
     }
 
     public function testGetControllerFromService()
