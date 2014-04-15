@@ -14,7 +14,9 @@ use Neptune\Core\Neptune;
 abstract class AbstractModule implements ServiceInterface
 {
 
-    abstract public function routes(Router $router, $prefix, $module);
+    abstract public function routes(Router $router, $prefix);
+
+    abstract public function getName();
 
     public function getNamespace()
     {

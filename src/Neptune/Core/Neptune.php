@@ -63,9 +63,10 @@ class Neptune extends Pimple implements HttpKernelInterface
         return $service->register($this);
     }
 
-    public function addModule($name, AbstractModule $module, $route_prefix = false)
+    public function addModule(AbstractModule $module, $route_prefix = false)
     {
         $this->addService($module);
+        $name = $module->getName();
         $this->modules[$name] = $module;
         if ($route_prefix) {
             $this->module_routes[$name] = $route_prefix;

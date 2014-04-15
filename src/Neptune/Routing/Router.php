@@ -92,16 +92,14 @@ class Router {
 	}
 
     /**
-     * Load the routes for a module, using $prefix for urls and
-     * $name for the name of module to use for controller naming. A
-     * module may be routed to multiple prefixes by supplying an array
-     * instead of a string.
+     * Load the routes for a module, using $prefix to namespace to
+     * urls. A module may be routed to multiple prefixes by supplying
+     * an array instead of a string.
      *
      * @param AbstractModule $module The module
      * @param mixed $prefix The routing prefix or prefixes
-     * @param string $name The name of the module
      */
-    public function routeModule(AbstractModule $module, $prefix, $name)
+    public function routeModule(AbstractModule $module, $prefix)
     {
 		//store current globals so they aren't used in
 		//the module and can be restored later
@@ -109,13 +107,13 @@ class Router {
 		//reset globals so the module can define them
 		$this->globals = null;
         //set the current module name so the name() method can use it
-        $this->current_module = $name;
+        $this->current_module = $module->getName();
 
         $prefixes = (array) $prefix;
         //create the routes for every prefix, passing in this Router
         //and the module name
         foreach ($prefixes as $prefix) {
-            $module->routes($this, $prefix, $name);
+            $module->routes($this, $prefix);
         }
 
         //reset the module name to null and the globals to what they were before

@@ -14,11 +14,17 @@ use Neptune\Core\Neptune;
 class TestModule extends AbstractModule
 {
 
-    public function routes(Router $router, $prefix, $module)
+    public function routes(Router $router, $prefix)
     {
+        $module = $this->getName();
         $router->globals()->controller("::$module.controller.bar");
         $router->route("$prefix/login")->method("{$module}_module_method");
         $router->name('secret')->route("$prefix/secret")->method('secretArea');
+    }
+
+    public function getName()
+    {
+        return 'test-module';
     }
 
     public function register(Neptune $neptune)

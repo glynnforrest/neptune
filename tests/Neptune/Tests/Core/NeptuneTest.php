@@ -4,6 +4,7 @@ namespace Neptune\Tests\Core;
 
 use Neptune\Core\Neptune;
 use Neptune\Core\Config;
+use Neptune\Tests\Routing\TestModule;
 
 use Temping\Temping;
 
@@ -91,29 +92,25 @@ END;
 	}
 
     public function testGetModuleDirectory() {
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $module->expects($this->once())
-         ->method('getDirectory')
-         ->will($this->returnValue($path = '/path/to/MyApp'));
-        $this->neptune->addModule('my-app', $module);
-        $this->assertSame($path, $this->neptune->getModuleDirectory('my-app'));
+        $module = new TestModule();
+        $this->neptune->addModule($module);
+        $path = $module->getDirectory();
+        $this->assertSame($path, $this->neptune->getModuleDirectory('test-module'));
     }
 
     public function testGetDefaultModule() {
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $this->neptune->addModule('my-app', $module);
-        $this->neptune->addModule('my-other-app', $module);
-        $this->assertSame('my-app', $this->neptune->getDefaultModule());
+        $first = new TestModule();
+        $second = $this->getMock('\Neptune\Service\AbstractModule');
+        $this->neptune->addModule($first);
+        $this->neptune->addModule($second);
+        $this->assertSame('test-module', $this->neptune->getDefaultModule());
     }
 
     public function testGetModuleNamespace()
     {
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $module->expects($this->once())
-         ->method('getNamespace')
-         ->will($this->returnValue($namespace = 'MyApp'));
-        $this->neptune->addModule('my-app', $module);
-        $this->assertSame($namespace, $this->neptune->getModuleNamespace('my-app'));
+        $module = new TestModule();
+        $this->neptune->addModule($module);
+        $this->assertSame('Neptune\Tests\Routing', $this->neptune->getModuleNamespace('test-module'));
     }
 
     public function testAddService()
@@ -147,13 +144,17 @@ END;
                 ->with($this->neptune);
         $module->expects($this->never())
                 ->method('boot');
-        $this->neptune->addModule('test', $module);
+        $this->neptune->addModule($module);
     }
 
     public function testGetModule()
     {
         $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $this->neptune->addModule('test', $module);
+        $module->expects($this->once())
+               ->method('getName')
+               ->will($this->returnValue('test'));
+
+        $this->neptune->addModule($module);
         $this->assertSame($module, $this->neptune->getModule('test'));
     }
 
@@ -166,19 +167,29 @@ END;
     public function testGetModules()
     {
         $this->assertSame(array(), $this->neptune->getModules());
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $this->neptune->addModule('foo', $module);
-        $this->neptune->addModule('bar', $module);
-        $expected = array('foo' => $module, 'bar' => $module);
+
+        $foo = $this->getMock('\Neptune\Service\AbstractModule');
+        $foo->expects($this->once())
+               ->method('getName')
+               ->will($this->returnValue('foo'));
+        $this->neptune->addModule($foo);
+
+        $bar = $this->getMock('\Neptune\Service\AbstractModule');
+        $bar->expects($this->once())
+               ->method('getName')
+               ->will($this->returnValue('bar'));
+        $this->neptune->addModule($bar);
+
+        $expected = array('foo' => $foo, 'bar' => $bar);
         $this->assertSame($expected, $this->neptune->getModules());
     }
 
     public function testGetRoutePrefix()
     {
-        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        $this->neptune->addModule('foo', $module, 'admin/');
-        $this->assertSame('admin/', $this->neptune->getRoutePrefix('foo'));
+        $this->assertFalse($this->neptune->getRoutePrefix('test-module'));
+        $module = new TestModule();
+        $this->neptune->addModule($module, 'admin/');
+        $this->assertSame('admin/', $this->neptune->getRoutePrefix('test-module'));
     }
 
     public function testGetRoutePrefixNoRouting()
@@ -186,7 +197,7 @@ END;
         $this->assertFalse($this->neptune->getRoutePrefix('foo'));
         $module = $this->getMock('\Neptune\Service\AbstractModule');
         //no routing prefix set, so the module won't be routed.
-        $this->neptune->addModule('foo', $module);
+        $this->neptune->addModule($module);
         $this->assertFalse($this->neptune->getRoutePrefix('foo'));
     }
 

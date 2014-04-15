@@ -126,7 +126,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     protected function setUpTestModule($prefix)
     {
         $module = new TestModule();
-        $this->router->routeModule($module, $prefix, 'test-module');
+        $this->router->routeModule($module, $prefix);
     }
 
     public function testAddModuleSetsPrefix()
