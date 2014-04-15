@@ -27,6 +27,7 @@ class Neptune extends Pimple implements HttpKernelInterface
     protected $booted;
     protected $services = array();
     protected $modules = array();
+    protected $module_routes = array();
 
     public function __construct(Config $config)
     {
@@ -62,10 +63,13 @@ class Neptune extends Pimple implements HttpKernelInterface
         return $service->register($this);
     }
 
-    public function addModule($name, AbstractModule $module)
+    public function addModule($name, AbstractModule $module, $route_prefix = false)
     {
         $this->addService($module);
         $this->modules[$name] = $module;
+        if ($route_prefix) {
+            $this->module_routes[$name] = $route_prefix;
+        }
     }
 
     public function getModule($name)
@@ -80,6 +84,19 @@ class Neptune extends Pimple implements HttpKernelInterface
     public function getModules()
     {
         return $this->modules;
+    }
+
+    /**
+     * Get the route prefix of a registered module. False will be
+     * returned if the module isn't registered or routing is disabled
+     * for that module.
+     *
+     * @param string $module The name of the module
+     * @return string The route prefix, or false on failure.
+     */
+    public function getRoutePrefix($module)
+    {
+        return isset($this->module_routes[$module]) ? $this->module_routes[$module] : false;
     }
 
     /**

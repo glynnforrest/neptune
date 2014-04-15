@@ -173,4 +173,21 @@ END;
         $this->assertSame($expected, $this->neptune->getModules());
     }
 
+    public function testGetRoutePrefix()
+    {
+        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        $this->neptune->addModule('foo', $module, 'admin/');
+        $this->assertSame('admin/', $this->neptune->getRoutePrefix('foo'));
+    }
+
+    public function testGetRoutePrefixNoRouting()
+    {
+        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
+        $module = $this->getMock('\Neptune\Service\AbstractModule');
+        //no routing prefix set, so the module won't be routed.
+        $this->neptune->addModule('foo', $module);
+        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
+    }
+
 }
