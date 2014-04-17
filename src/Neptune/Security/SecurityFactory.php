@@ -5,6 +5,7 @@ namespace Neptune\Security;
 use Neptune\Security\Driver\SecurityDriverInterface;
 use Neptune\Security\Driver\PassDriver;
 use Neptune\Security\Driver\FailDriver;
+use Neptune\Security\Driver\ConfigDriver;
 
 use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
@@ -60,6 +61,14 @@ class SecurityFactory extends AbstractFactory
     public function createFailDriver($name)
     {
         return new FailDriver();
+    }
+
+    public function createConfigDriver($name)
+    {
+        $user_key = "security.drivers.$name.user";
+        $pass_key = "security.drivers.$name.pass";
+
+        return new ConfigDriver($this->config, $user_key, $pass_key);
     }
 
 }
