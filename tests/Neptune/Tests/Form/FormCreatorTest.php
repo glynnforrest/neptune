@@ -56,20 +56,43 @@ class FormCreatorTest extends \PHPUnit_Framework_TestCase
         $this->creator->create('foo');
     }
 
-    public function testCreateCustomService()
+    public function testCreateWithService()
     {
-        $function = function($dispatcher, $action) {
-            return new \Neptune\Tests\Form\FooForm($dispatcher, $action);
-        };
-
         $this->creator->register('foo', '::form.foo');
+        $foo_form = $this->getMockBuilder('\Reform\Form\Form')
+                         ->disableOriginalConstructor()
+                         ->getMock();
+        $foo_form->expects($this->once())
+                 ->method('setEventDispatcher')
+                 ->with($this->dispatcher);
+        $foo_form->expects($this->never())
+                 ->method('setAction');
         $this->neptune->expects($this->once())
-                      ->method('raw')
+                      ->method('offsetGet')
                       ->with('form.foo')
-                      ->will($this->returnValue($function));
+                      ->will($this->returnValue($foo_form));
         $form = $this->creator->create('foo');
-        $this->assertInstanceOf( '\Neptune\Tests\Form\FooForm', $form);
+        $this->assertSame($foo_form, $form);
     }
 
+    public function testCreateWithServiceDifferentAction()
+    {
+        $this->creator->register('foo', '::form.foo');
+        $foo_form = $this->getMockBuilder('\Reform\Form\Form')
+                         ->disableOriginalConstructor()
+                         ->getMock();
+        $foo_form->expects($this->once())
+                 ->method('setEventDispatcher')
+                 ->with($this->dispatcher);
+        $foo_form->expects($this->once())
+                 ->method('setAction')
+                 ->with('/url');
+        $this->neptune->expects($this->once())
+                      ->method('offsetGet')
+                      ->with('form.foo')
+                      ->will($this->returnValue($foo_form));
+        $form = $this->creator->create('foo', '/url');
+        $this->assertSame($foo_form, $form);
+    }
 
 }

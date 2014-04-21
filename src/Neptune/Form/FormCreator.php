@@ -5,7 +5,6 @@ namespace Neptune\Form;
 use Reform\Form\Form;
 use Neptune\Core\Neptune;
 
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -33,8 +32,16 @@ class FormCreator
 
     public function create($name = null, $action = null)
     {
+        $form = $this->doCreate($name, $action);
+        $form->setEventDispatcher($this->dispatcher);
+
+        return $form;
+    }
+
+    protected function doCreate($name, $action)
+    {
         if (!$name) {
-            return new Form($this->dispatcher, $action);
+            return new Form($action);
         }
 
         if (!isset($this->registered[$name])) {
@@ -44,14 +51,18 @@ class FormCreator
         $form = $this->registered[$name];
 
         //the form may be a service - check for ::
-        if (substr($form, 0, 2) === '::') {
-            $service = substr($form, 2);
-            $function = $this->neptune->raw($service);
-            return $function($this->dispatcher, $action);
+        //if not, assume a class name
+        if (substr($form, 0, 2) !== '::') {
+            return new $form($action);
         }
 
-        //check for service and resolve from neptune
-        return new $form($this->dispatcher, $action);
+        $service = substr($form, 2);
+        $form = $this->neptune[$service];
+        if ($action) {
+            $form->setAction($action);
+        }
+
+        return $form;
     }
 
 }
