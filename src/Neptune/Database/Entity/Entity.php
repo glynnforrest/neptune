@@ -161,8 +161,8 @@ class Entity extends AbstractEntity {
         return static::$fields;
     }
 
-    protected static function newCollection(DatabaseDriverInterface $database) {
-        return new EntityCollection($database);
+    protected static function newCollection(DatabaseDriverInterface $database, array $objects) {
+        return new EntityCollection($database, $objects);
     }
 
 	public static function collection(DatabaseDriverInterface $database, $count = 0) {
