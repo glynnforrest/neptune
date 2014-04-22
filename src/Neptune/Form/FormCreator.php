@@ -57,12 +57,8 @@ class FormCreator
         }
 
         $service = substr($form, 2);
-        $form = $this->neptune[$service];
-        if ($action) {
-            $form->setAction($action);
-        }
-
-        return $form;
+        $function = $this->neptune->raw($service);
+        return $function($action);
     }
 
 }

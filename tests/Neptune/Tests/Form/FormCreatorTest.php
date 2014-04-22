@@ -59,40 +59,15 @@ class FormCreatorTest extends \PHPUnit_Framework_TestCase
     public function testCreateWithService()
     {
         $this->creator->register('foo', '::form.foo');
-        $foo_form = $this->getMockBuilder('\Reform\Form\Form')
-                         ->disableOriginalConstructor()
-                         ->getMock();
-        $foo_form->expects($this->once())
-                 ->method('setEventDispatcher')
-                 ->with($this->dispatcher);
-        $foo_form->expects($this->never())
-                 ->method('setAction');
+        $function = function($action) {
+            return new FooForm($action);
+        };
         $this->neptune->expects($this->once())
-                      ->method('offsetGet')
+                      ->method('raw')
                       ->with('form.foo')
-                      ->will($this->returnValue($foo_form));
+                      ->will($this->returnValue($function));
         $form = $this->creator->create('foo');
-        $this->assertSame($foo_form, $form);
-    }
-
-    public function testCreateWithServiceDifferentAction()
-    {
-        $this->creator->register('foo', '::form.foo');
-        $foo_form = $this->getMockBuilder('\Reform\Form\Form')
-                         ->disableOriginalConstructor()
-                         ->getMock();
-        $foo_form->expects($this->once())
-                 ->method('setEventDispatcher')
-                 ->with($this->dispatcher);
-        $foo_form->expects($this->once())
-                 ->method('setAction')
-                 ->with('/url');
-        $this->neptune->expects($this->once())
-                      ->method('offsetGet')
-                      ->with('form.foo')
-                      ->will($this->returnValue($foo_form));
-        $form = $this->creator->create('foo', '/url');
-        $this->assertSame($foo_form, $form);
+        $this->assertInstanceOf('Neptune\Tests\Form\FooForm', $form);
     }
 
 }
