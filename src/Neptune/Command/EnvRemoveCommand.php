@@ -42,24 +42,19 @@ class EnvRemoveCommand extends EnvListCommand {
 		}
 	}
 
-	protected function removeEnv($name) {
-		$config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
-		$env = $this->getRootDirectory() . 'app/env/' . $name . '.php';
-		$this->deleteFile($config);
-		$this->deleteFile($env);
-	}
-
-	protected function deleteFile($file) {
-		if(!file_exists($file)) {
-			$this->output->writeln("<error>$file not found</error>");
-			return false;
-		}
-		if(unlink($file)) {
-			$this->output->writeln("Deleted <info>$file</info>");
-			return true;
-		}
-		$this->output->writeln("<error>Unable to delete <info>$file</info>");
-		return false;
-	}
+    protected function removeEnv($name)
+    {
+        $config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
+        if(!file_exists($config)) {
+            $this->output->writeln("<error>$config not found</error>");
+            return false;
+        }
+        if(unlink($config)) {
+            $this->output->writeln("Deleted <info>$config</info>");
+            return true;
+        }
+        $this->output->writeln("<error>Unable to delete <info>$config</info>");
+        return false;
+    }
 
 }

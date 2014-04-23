@@ -129,8 +129,7 @@ class Neptune extends Pimple implements HttpKernelInterface
     }
 
 	/**
-	 * Load the environment $env. This will include the file
-	 * app/env/$env.php and call Config::loadEnv($env). If $env is not
+	 * Load the environment config $env. If $env is not
 	 * defined, the value of the config key 'env' in
 	 * config/neptune.php will be used.
 	 */
@@ -140,10 +139,6 @@ class Neptune extends Pimple implements HttpKernelInterface
 		}
 		$this->env = $env;
 		Config::loadEnv($env);
-		$file = $this['config']->getRequired('dir.root') . 'app/env/' . $env . '.php';
-        if(file_exists($file)) {
-            include $file;
-        }
 		return true;
 	}
 

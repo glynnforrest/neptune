@@ -47,21 +47,19 @@ class EnvCreateCommand extends Command {
 		}
 	}
 
-	protected function newEnv($name, $overwrite = false) {
-		$name = strtolower($name);
-		$config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
-		$env = $this->getRootDirectory() . 'app/env/' . $name . '.php';
-		if(file_exists($name) || file_exists($config)) {
-			if(!$overwrite) {
-				throw new FileException("Environment $name already exists");
-			}
-		}
-		touch($env);
-		$this->output->writeln("Created <info>$env</info>");
-		$c = Config::create($name, $config);
-		$c->set('root_url', '');
-		$c->save();
-		$this->output->writeln("Created <info>$config</info>");
-	}
+    protected function newEnv($name, $overwrite = false)
+    {
+        $name = strtolower($name);
+        $config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
+        if(file_exists($config)) {
+            if(!$overwrite) {
+                throw new FileException("Environment $name already exists");
+            }
+        }
+        $c = Config::create($name, $config);
+        $c->set('root_url', '');
+        $c->save();
+        $this->output->writeln("Created <info>$config</info>");
+    }
 
 }

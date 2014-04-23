@@ -39,15 +39,11 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 		);
 END;
 		$this->temp->create('config/env/production.php', $config_file);
-		$this->temp->create('app/env/production.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
 		$c = Config::create('neptune');
 		$c->set('foo', 'default');
 		$c->set('dir.root', $this->temp->getDirectory());
 		$this->assertEquals('default', $c->get('foo'));
-		$this->assertFalse(defined('SOME_CONSTANT'));
-		//loadEnv should call Config::loadEnv and include app/env/<env>.php
 		$this->neptune->loadEnv('production');
-		$this->assertTrue(defined('SOME_CONSTANT'));
 		$this->assertEquals('override', $c->get('foo'));
 		$this->assertSame('production', $this->neptune->getEnv());
 	}
@@ -60,7 +56,6 @@ END;
 		);
 END;
 		$this->temp->create('config/env/development.php', $config_file);
-		$this->temp->create('app/env/development.php', file_get_contents(__DIR__ . '/etc/sample_env.php'));
 		$c = Config::create('neptune');
 		$c->set('foo', 'default');
 		$c->set('dir.root', $this->temp->getDirectory());
