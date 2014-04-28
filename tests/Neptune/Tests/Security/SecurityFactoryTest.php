@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
 {
+
     protected $neptune;
     protected $config;
     protected $factory;
@@ -45,21 +46,21 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetDefaultDriver()
     {
         $driver = $this->factory->get();
-        $this->assertInstanceOf('\Neptune\Security\Driver\PassDriver', $driver);
+        $this->assertInstanceOf('Blockade\Driver\PassDriver', $driver);
         $this->assertSame($driver, $this->factory->get());
     }
 
     public function testGetPassDriver()
     {
         $driver = $this->factory->get('driver1');
-        $this->assertInstanceOf('\Neptune\Security\Driver\PassDriver', $driver);
+        $this->assertInstanceOf('Blockade\Driver\PassDriver', $driver);
         $this->assertSame($driver, $this->factory->get('driver1'));
     }
 
     public function testGetFailDriver()
     {
         $driver = $this->factory->get('driver2');
-        $this->assertInstanceOf('\Neptune\Security\Driver\FailDriver', $driver);
+        $this->assertInstanceOf('Blockade\Driver\FailDriver', $driver);
         $this->assertSame($driver, $this->factory->get('driver2'));
     }
 
@@ -94,7 +95,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDriverAsAService()
     {
-        $driver = $this->getMock('\\Neptune\\Security\\Driver\\SecurityDriverInterface');
+        $driver = $this->getMock('Blockade\Driver\DriverInterface');
         $this->neptune->expects($this->once())
                       ->method('offsetGet')
                       ->with('service.foo')
@@ -111,8 +112,8 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
         $this->config->set('security.drivers.foo', 'service.foo');
-        $msg = "Security driver 'foo' requested service 'service.foo' which does not implement Neptune\Security\Driver\SecurityDriverInterface";
-        $this->setExpectedException('\Neptune\Exceptions\DriverNotFoundException');
+        $msg = "Security driver 'foo' requested service 'service.foo' which does not implement Blockade\Driver\DriverInterface";
+        $this->setExpectedException('\Neptune\Exceptions\DriverNotFoundException', $msg);
         $this->factory->get('foo');
     }
 
