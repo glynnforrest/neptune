@@ -91,7 +91,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function testGetFileDriverNoDir() {
 		$this->config->set('cache.file.dir', null);
 		$driver = $this->factory->get('file');
-        $this->assertSame(sys_get_temp_dir(), $driver->getDirectory());
+        $this->assertSame(realpath(sys_get_temp_dir()), $driver->getDirectory());
 	}
 
 	public function testGetFileDriverNoNamespace() {
@@ -116,6 +116,9 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetMemcachedDriverWithDefaults()
     {
+		if(!class_exists('\\Memcached')) {
+			$this->markTestSkipped('Memcached extension not installed.');
+		}
         $this->config->set('cache.memcached', array(
             'driver' => 'memcached',
             'namespace' => 'testing_'
@@ -132,6 +135,9 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
     }
 
 	public function testGetMemcachedDriverNoNamespace() {
+		if(!class_exists('\\Memcached')) {
+			$this->markTestSkipped('Memcached extension not installed.');
+		}
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
 		$this->config->set('cache.memcached.namespace', null);
 		$this->factory->get('memcached');
