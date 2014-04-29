@@ -183,6 +183,13 @@ END;
 		$c->getRequired('fake');
 	}
 
+    public function testGetRequiredEmptyString()
+    {
+        $c = Config::create('testing');
+        $c->set('string', '');
+        $this->assertSame('', $c->getRequired('string'));
+    }
+
 	public function testGetFirstRequired() {
 		$c = Config::load('testing', $this->temp->getPathname(self::file));
 		$this->assertEquals('two-one', $c->getFirstRequired('two'));

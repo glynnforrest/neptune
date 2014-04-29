@@ -69,7 +69,7 @@ class Config {
 	 */
 	public function getRequired($key) {
 		$value = $this->get($key);
-		if ($value) {
+		if (null !== $value) {
 			return $value;
 		}
 		throw new ConfigKeyException("Required value not found in Config instance '$this->name': $key");
