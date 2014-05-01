@@ -270,6 +270,17 @@ class Config {
 		}
 	}
 
+    /**
+     * Get the current configuration as a string, as it would appear
+     * when saved to a file.
+     *
+     * @return string The current configuration
+     */
+    public function toString()
+    {
+        return '<?php return ' . var_export($this->dot_array->get(), true) . '?>';
+    }
+
 	/**
 	 * Save the current configuration instance.
 	 * A ConfigFileException will be thrown if filename is not set or
@@ -299,7 +310,7 @@ class Config {
 						are correct."
 			);
 		}
-		$content = '<?php return ' . var_export($values, true) . '?>';
+		$content = $this->toString();
 		file_put_contents($this->filename, $content);
 		return true;
 	}

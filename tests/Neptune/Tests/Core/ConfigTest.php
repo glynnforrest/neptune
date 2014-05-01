@@ -488,4 +488,12 @@ END;
 		$this->assertEquals('/path/to/root/assets/', $neptune->getModulePath('assets.dir'));
 	}
 
+    public function testToString()
+    {
+        $c = Config::create('testing');
+        $c->set('foo', 'baz');
+        $expected =  '<?php return ' . var_export($c->get(), true) . '?>';
+        $this->assertSame($expected, $c->toString());
+    }
+
 }
