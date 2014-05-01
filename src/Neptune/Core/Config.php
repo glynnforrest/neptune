@@ -18,6 +18,7 @@ class Config {
 	protected $filename;
 	protected $modified = false;
 	protected $dot_array;
+    protected $original;
 
 	protected function __construct($name, $filename = null) {
 		if($filename) {
@@ -36,6 +37,7 @@ class Config {
 		}
 		$this->name = $name;
 		$this->dot_array = new DotArray($values);
+        $this->original = new DotArray($values);
 		return true;
 	}
 
@@ -138,6 +140,7 @@ class Config {
 	 */
 	public function set($key, $value) {
 		$this->dot_array->set($key, $value);
+		$this->original->set($key, $value);
 		$this->modified = true;
 	}
 
@@ -206,7 +209,7 @@ class Config {
 
 	/**
 	 * Override values in this Config instance with values from
-	 * $array.
+	 * $array. They will not be included in toString() or save().
 	 */
 	public function override(array $array) {
 		$this->dot_array->merge($array);
@@ -278,7 +281,7 @@ class Config {
      */
     public function toString()
     {
-        return '<?php return ' . var_export($this->dot_array->get(), true) . '?>';
+        return '<?php return ' . var_export($this->original->get(), true) . '?>';
     }
 
 	/**
@@ -288,7 +291,7 @@ class Config {
 	 */
 	public function save() {
 		$values = $this->dot_array->get();
-		if (!$this->modified || empty($values)) {
+		if (false === $this->modified) {
 			return true;
 		}
 		if(!$this->filename) {

@@ -491,8 +491,19 @@ END;
     public function testToString()
     {
         $c = Config::create('testing');
-        $c->set('foo', 'baz');
+        $c->set('foo', 'bar');
         $expected =  '<?php return ' . var_export($c->get(), true) . '?>';
+        $this->assertSame($expected, $c->toString());
+    }
+
+    public function testToStringDoesNotIncludeMerged()
+    {
+        $c = Config::create('testing');
+        $c->set('foo', 'bar');
+        $c->override(array('bar' => 'baz'));
+        $both = array('foo' => 'bar', 'bar' => 'baz');
+        $this->assertSame($both, $c->get());
+        $expected = '<?php return ' . var_export(array('foo' => 'bar'), true) . '?>';
         $this->assertSame($expected, $c->toString());
     }
 
