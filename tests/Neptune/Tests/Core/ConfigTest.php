@@ -19,6 +19,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->temp = new Temping();
+        $this->temp->init();
+
         $this->config = new Config('testing');
         $this->config->set('one', 'one');
         $this->config->set('two', array(
@@ -135,22 +137,38 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 	public function testSave() {
 		$this->config->set('foo', 'bar');
         $filename = $this->temp->getPathname('foo.php');
-        $this->config->setFilename($filename);
-        $this->temp->init();
-		$this->config->save();
+		$this->config->save($filename);
 		$this->assertSame($this->removeWhitespace($this->config->toString()),
 							$this->removeWhitespace($this->temp->getContents('foo.php')));
 	}
 
-    public function testSaveDefaultFile()
+    public function testSaveNoFilename()
     {
+		$this->config->set('foo', 'bar');
+        $this->config->setFilename($this->temp->getPathname('bar.php'));
+		$this->config->save();
+		$this->assertSame($this->removeWhitespace($this->config->toString()),
+							$this->removeWhitespace($this->temp->getContents('bar.php')));
+    }
 
+    public function testSaveUsesFilename()
+    {
+        $file1 = $this->temp->getPathname('here.php');
+        $file2 = $this->temp->getPathname('actually-here.php');
+        $c = new Config('testing');
+        $c->setFilename($file1);
+        $c->set('foo', 'bar');
+        $c->save($file2);
+        //the first file shouldn't have been written
+        $this->assertFalse($this->temp->exists('here.php'));
+        //the second file should have been written instead
+        $this->assertTrue($this->temp->exists('actually-here.php'));
     }
 
 	public function testSaveThrowsExceptionWithNoFile() {
 		$c = new Config('ad-hoc');
 		$c->set('key', 'value');
-		$msg = 'Unable to save Config instance \'ad-hoc\', $filename is not set';
+		$msg = "Unable to save Config instance 'ad-hoc', no filename supplied";
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigFileException', $msg);
 		$c->save();
 	}
@@ -162,15 +180,18 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
         new Config('unlikely', $not_here);
     }
 
-	public function testSaveThrowsExceptionWhenFileWriteFails() {
-		$file = $this->temp->getDirectory() . 'not_here';
+    public function testSaveThrowsExceptionWhenFileWriteFails()
+    {
+        $file = $this->temp->getPathname('not-here');
+
+        //this removes the temporary directory, preventing a write
         $this->temp->reset();
-		$c = new Config('unlikely');
-        $c->setFilename($file);
-		$c->set('key', 'value');
-		$this->setExpectedException('Neptune\Exceptions\ConfigFileException');
-		$c->save();
-	}
+
+        $c = new Config('unlikely');
+        $c->set('key', 'value');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException');
+        $c->save($file);
+    }
 
 	public function testSaveDoesNotWriteIfNotModified() {
 		$file = $this->temp->getPathname('do-not-write.php');
@@ -185,19 +206,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
         $c->setFilename('test');
 		$this->assertSame('test', $c->getFileName());
 	}
-
-    public function testSaveUsesFilename() {
-        $file1 = $this->temp->getPathname('here.php');
-        $file2 = $this->temp->getPathname('actually-here.php');
-        $c = new Config('testing', $file1);
-        $c->set('foo', 'bar');
-		$c->setFilename($file2);
-		$c->save();
-        //the first file shouldn't have been written
-        $this->assertFalse($this->temp->exists('here.php'));
-        //the second file should have been written instead
-        $this->assertTrue($this->temp->exists('actually-here.php'));
-    }
 
 	public function testOverride() {
         $this->assertSame('one', $this->config->get('one'));
@@ -226,7 +234,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRelativePath() {
-		$module = new Config('module', '/some/path/to/module/config.php');
+		$module = new Config('module');
+        $module->setFilename('/some/path/to/module/config.php');
 		$module->set('assets.dir', 'assets/');
 		$this->assertSame('/some/path/to/module/assets/', $module->getRelativePath('assets.dir'));
 	}

@@ -167,32 +167,34 @@ class Config {
 	 * A ConfigFileException will be thrown if filename is not set or
 	 * if php can't write to the file.
 	 */
-	public function save() {
-		$values = $this->dot_array->get();
+	public function save($filename = null) {
 		if (false === $this->modified) {
 			return true;
 		}
-		if(!$this->filename) {
+        if (null === $filename) {
+            $filename = $this->filename;
+        }
+
+		if(!$filename) {
 			throw new ConfigFileException(
-				"Unable to save Config instance '$this->name', \$filename is not set"
+				"Unable to save Config instance '$this->name', no filename supplied"
 			);
 		}
-		if(!file_exists($this->filename) && !@touch($this->filename)){
+		if(!file_exists($filename) && !@touch($filename)){
 			throw new ConfigFileException(
 				"Unable to create configuration file
-						$this->filename. Check file paths and permissions
+						$filename. Check file paths and permissions
 						are correct."
 			);
 		};
-		if(!is_writable($this->filename)) {
+		if(!is_writable($filename)) {
 			throw new ConfigFileException(
 				"Unable to write to configuration file
-						$this->filename. Check file paths and permissions
+						$filename. Check file paths and permissions
 						are correct."
 			);
 		}
-		$content = $this->toString();
-		file_put_contents($this->filename, $content);
+		file_put_contents($filename, $this->toString());
 		return true;
 	}
 
