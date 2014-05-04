@@ -63,6 +63,15 @@ class Neptune extends Pimple implements HttpKernelInterface
         return $service->register($this);
     }
 
+    /**
+     * Add a module to this Neptune instance. If $route_prefix is a
+     * string, the module will be routed using the string as a prefix.
+     * If true, the module will be routed without a prefix. If false,
+     * the module will not be routed.
+     *
+     * @param AbstractModule The module to add
+     * @param mixed $route_prefix The prefix to use in routes for the module
+     */
     public function addModule(AbstractModule $module, $route_prefix = false)
     {
         $this->addService($module);
@@ -73,6 +82,12 @@ class Neptune extends Pimple implements HttpKernelInterface
         }
     }
 
+    /**
+     * Get a registered module.
+     *
+     * @param $name The name of the registered module
+     * @return AbstractModule The module
+     */
     public function getModule($name)
     {
         if (!isset($this->modules[$name])) {
@@ -82,6 +97,12 @@ class Neptune extends Pimple implements HttpKernelInterface
         return $this->modules[$name];
     }
 
+    /**
+     * Get all registered modules as an associative array of names and
+     * instances.
+     *
+     * @return array An array of registered modules.
+     */
     public function getModules()
     {
         return $this->modules;
@@ -101,8 +122,8 @@ class Neptune extends Pimple implements HttpKernelInterface
     }
 
     /**
-     * Boot up the application. This is called automatically by
-     * handle().
+     * Boot up the application services. This is called automatically
+     * by handle().
      */
     public function boot()
     {
