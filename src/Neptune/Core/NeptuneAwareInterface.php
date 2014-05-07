@@ -12,8 +12,18 @@ use Neptune\Core\Neptune;
 interface NeptuneAwareInterface
 {
 
+    /**
+     * Set the Neptune instance of this object.
+     *
+     * @param Neptune $neptune The neptune instance
+     */
     public function setNeptune(Neptune $neptune);
 
+    /**
+     * Get the Neptune instance of this object, if set.
+     *
+     * @return Neptune The neptune instance
+     */
     public function getNeptune();
 
 }
