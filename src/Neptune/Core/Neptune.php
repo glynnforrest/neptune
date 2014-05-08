@@ -11,6 +11,8 @@ use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
 use Neptune\EventListener\StringResponseListener;
+use Neptune\Config\NeptuneConfig;
+use Neptune\Config\ConfigManager;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -28,11 +30,20 @@ class Neptune extends Pimple implements HttpKernelInterface
     protected $services = array();
     protected $modules = array();
     protected $module_routes = array();
+    protected $root_directory;
 
-    public function __construct(Config $config)
+    public function __construct(NeptuneConfig $config)
     {
         parent::__construct();
+
         $this['config'] = $config;
+        $this->root_directory = $config->getRootDirectory();
+
+        $this['config.manager'] = function() {
+            $manager = new ConfigManager($this);
+            $manager->add($this['config']);
+            return $manager;
+        };
 
         $this['router'] = new Router($config);
 
@@ -137,8 +148,11 @@ class Neptune extends Pimple implements HttpKernelInterface
 		if(!$env) {
 			$env = $this['config']->getRequired('env');
 		}
+        $file = $this->root_directory . 'config/env/' . $env . '.php';
+        //load $env as a config file, merging into neptune
+        $this['config.manager']->load($env, $file, 'neptune');
 		$this->env = $env;
-		Config::loadEnv($env);
+
 		return true;
 	}
 
@@ -157,13 +171,7 @@ class Neptune extends Pimple implements HttpKernelInterface
      */
     public function getRootDirectory()
     {
-        $root = $this['config']->getRequired('dir.root');
-        //make sure root has a trailing slash
-        if(substr($root, -1) !== '/') {
-            $root .= '/';
-        }
-
-        return $root;
+        return $this->root_directory;
     }
 
 	/**
