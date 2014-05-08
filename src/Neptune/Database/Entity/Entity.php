@@ -253,4 +253,17 @@ class Entity extends AbstractEntity {
 		return false;
 	}
 
+    /**
+     * Delete all records from the Entity table.
+     *
+     * @param DatabaseDriverInterface $database
+     */
+    public static function deleteAll(DatabaseDriverInterface $database)
+    {
+        $q = $database->delete()->from(static::$table);
+        $stmt = $q->prepare();
+
+        return $stmt->execute();
+    }
+
 }

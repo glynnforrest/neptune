@@ -255,4 +255,17 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $this->obj->save();
     }
 
+    public function testDeleteAll()
+    {
+        $query = $this->expectQuery('delete');
+        $this->queryExpects($query, 'from', 'table');
+        $statement = $this->queryExpectsPrepare($query);
+        $statement->expects($this->once())
+                  ->method('execute')
+                  ->with()
+                  ->will($this->returnValue(true));
+        /* DELETE FROM table */
+        $this->assertTrue(UpperCase::deleteAll($this->database));
+    }
+
 }
