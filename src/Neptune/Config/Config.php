@@ -18,6 +18,7 @@ class Config
     protected $modified = false;
     protected $dot_array;
     protected $original;
+    protected $root_dir;
 
     public function __construct($name, $filename = null)
     {
@@ -230,11 +231,27 @@ class Config
         return $this->filename;
     }
 
+    /**
+     * Set the path of the root directory of the application. The
+     * directory is used in the getPath() method.
+     *
+     * @return string The root directory, with a trailing slash
+     */
     public function setRootDirectory($directory)
     {
         $this->root_dir = $directory;
 
         return $this;
+    }
+
+    /**
+     * Get the path of the root directory of the application.
+     *
+     * @return string The root directory, with a trailing slash.
+     */
+    public function getRootDirectory()
+    {
+        return $this->root_dir;
     }
 
 }
