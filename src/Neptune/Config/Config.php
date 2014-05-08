@@ -44,6 +44,16 @@ class Config
     }
 
     /**
+     * Get the name of this Config instance.
+     *
+     * @return string The name of this Config instance
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
      * Get a configuration value that matches $key.
      * $key uses the dot array syntax: parent.child.child
      * If the key matches an array the whole array will be returned.
