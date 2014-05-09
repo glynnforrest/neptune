@@ -32,6 +32,7 @@ class ConfigManager
     {
         $this->configs[$name] = new Config($name);
         $this->configs[$name]->setFilename($filename);
+        $this->configs[$name]->setRootDirectory($this->root_directory);
 
         return $this->configs[$name];
     }
@@ -79,6 +80,7 @@ class ConfigManager
         if ($override_name && isset($this->configs[$override_name])) {
             $this->configs[$override_name]->override($config->get());
         }
+        $config->setRootDirectory($this->root_directory);
         $this->configs[$name] = $config;
 
         return $this->configs[$name];

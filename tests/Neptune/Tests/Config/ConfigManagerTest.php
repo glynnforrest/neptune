@@ -228,4 +228,22 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(), $this->manager->getNames());
     }
 
+    public function testNewConfigIsGivenRootDirectory()
+    {
+        $config = $this->manager->create('foo');
+        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+
+        $config->set('img_dir', 'public/images/');
+        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
+    }
+
+    public function testLoadedConfigIsGivenRootDirectory()
+    {
+        $config = $this->manager->load('foo', __DIR__ . '/fixtures/config.php');
+        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+
+        $config->set('img_dir', 'public/images/');
+        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
+    }
+
 }
