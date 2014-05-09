@@ -2,6 +2,8 @@
 
 namespace Neptune\Core;
 
+use Neptune\Config\Config;
+
 /**
  * AbstractFactory
  *
