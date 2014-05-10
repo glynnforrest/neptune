@@ -3,16 +3,16 @@
 namespace Neptune\View;
 
 use Neptune\Exceptions\ViewNotFoundException;
-use Neptune\Core\Config;
 
 class View {
-	const EXTENSION = '.php';
 
 	protected $vars = array();
 	//complete file path to the view template.
 	protected $view;
 
-	protected function __construct() {
+	public function __construct($view, array $vars = array()) {
+        $this->view = $view;
+        $this->vars = $vars;
 	}
 
 	public function __set($key, $value) {
@@ -21,6 +21,8 @@ class View {
 
 	public function set($key, $value) {
 		$this->vars[$key] = $value;
+
+        return $this;
 	}
 
 	public function __get($key) {
@@ -35,12 +37,18 @@ class View {
 		return isset($this->vars[$key]) ? true : false;
 	}
 
-	public function setValues(array $values=array()) {
-		foreach ($values as $k => $v) {
-			$this->vars[$k] = $v;
-		}
+	public function addValues(array $values = array()) {
+        $this->values = array_merge($this->values, $values);
+
 		return $this;
 	}
+
+    public function setValues(array $values = array())
+    {
+        $this->vars = $values;
+
+        return $this;
+    }
 
 	public function getValues() {
 		return $this->vars;
@@ -55,42 +63,12 @@ class View {
 		return $content;
 	}
 
-	/**
-	 * @return View
-	 */
-	public static function load($view, $vars = array(), $absolute = false) {
-		$class = get_called_class();
-		$me = new $class();
-		$me->setView($view, $absolute);
-		$me->setValues($vars);
-		return $me;
-	}
+    public function setView($view)
+    {
+        $this->view = $view;
 
-	public static function loadAbsolute($view, $vars = array()) {
-		return self::load($view, $vars, true);
-	}
-
-	/**
-	 * Set the template file to use for this View instance. If
-	 * $absolute is true, $view will be treated as an absolute
-	 * path. Otherwise, $view will be appended to the values of
-	 * `dir.root` and `view.dir` in the neptune config file. If $view
-	 * contains a prefix (content before a #) then the config file
-	 * with that name will be used instead.
-	 */
-	public function setView($view, $absolute = false) {
-		if(!$absolute) {
-			$pos = strpos($view, '#');
-			if($pos) {
-				$name = substr($view, 0, $pos);
-				$view = Config::load($name)->getPath('view.dir') . substr($view, $pos + 1);
-			} else {
-				$view = Config::load()->getPath('view.dir') . $view;
-			}
-		}
-		$view = $view . self::EXTENSION;
-		$this->view = $view;
-	}
+        return $this;
+    }
 
 	/**
 	 * Get the file path of the template for this View instance.
