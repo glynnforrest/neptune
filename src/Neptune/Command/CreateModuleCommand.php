@@ -4,7 +4,7 @@ namespace Neptune\Command;
 
 use Neptune\Command\Command;
 use Neptune\Console\Console;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -59,7 +59,7 @@ class CreateModuleCommand extends Command {
 		//create config.php
 		$file = $this->createModuleDirectory($namespace) . 'config.php';
 		$console->verbose("Creating <info>$file</info>");
-		$config = Config::create('new-module', $file);
+		$config = new Config('new-module', $file);
 		$config->set('namespace', $namespace);
 		$config->set('assets.dir', 'assets/');
 		$config->save();
