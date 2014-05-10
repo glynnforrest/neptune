@@ -45,7 +45,9 @@ class Neptune extends Pimple implements HttpKernelInterface
             return $manager;
         };
 
-        $this['router'] = new Router($config);
+        $this['router'] = function() use ($config) {
+            new Router($config);
+        };
 
         $this['dispatcher'] = function () {
             $dispatcher = new EventDispatcher;
