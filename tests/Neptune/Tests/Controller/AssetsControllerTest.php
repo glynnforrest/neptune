@@ -4,7 +4,8 @@ namespace Neptune\Tests\Controller;
 
 use Neptune\Controller\Controller;
 use Neptune\Controller\AssetsController;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
+use Neptune\Config\ConfigManager;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -23,15 +24,19 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 	protected $temp;
 
 	public function setUp() {
-		$c = Config::create('temp');
 		$this->temp = new Temping();
 		$this->dir = $this->temp->getDirectory();
-		$c->set('assets.dir', $this->dir);
-		$this->obj = new AssetsController();
+		$this->config = new Config('temp');
+		$this->config->set('assets.dir', $this->dir);
+        $neptune = $this->getMockBuilder('Neptune\Core\Neptune')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+        $manager = new ConfigManager($neptune);
+        $manager->add($this->config);
+		$this->obj = new AssetsController($manager);
 	}
 
 	public function tearDown() {
-		Config::unload();
 		$this->temp->reset();
 	}
 
@@ -45,14 +50,12 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAssetFiltersSingle() {
-		$conf = Config::load();
 		$filters = array('`.*foo.*`' => 'foo_filter');
 		$this->assertEquals(array('foo_filter'), $this->obj->getAssetFilters('asset_with_foo_in', $filters));
 		$this->assertEquals(array(), $this->obj->getAssetFilters('asset_without_f00_in', $filters));
 	}
 
 	public function testGetAssetFiltersMany() {
-		$conf = Config::load();
 		$filters = array('`.*\.js`' => 'js_filter',
 			'`.*\.css`' => 'css_filter|upper');
 		$this->assertEquals(array('js_filter'), $this->obj->getAssetFilters('javascript.js', $filters));
@@ -71,8 +74,7 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testServeFilteredAsset() {
 		$this->temp->create('filtered.js', 'js_content');
-		$conf = Config::load();
-		$conf->set('assets.filters', array('`.*\.js$`' => 'upper'));
+		$this->config->set('assets.filters', array('`.*\.js$`' => 'upper'));
 		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
 		$response = $this->obj->serveAssetAction(new Request(), 'filtered.js');
 		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
