@@ -3,7 +3,6 @@
 namespace Neptune\Routing;
 
 use Neptune\Routing\Route;
-use Neptune\Core\Config;
 use Neptune\Core\Neptune;
 use Neptune\Helpers\Url;
 use Neptune\Routing\RouteNotFoundException;
@@ -21,7 +20,6 @@ class Router {
 
 	const CACHE_KEY_NAMES = 'Router.names';
 
-	protected $config;
 	protected $routes = array();
 	protected $names = array();
 	protected $globals;
@@ -29,9 +27,10 @@ class Router {
 	protected $cache;
 	protected $current_name;
     protected $current_module;
+    protected $url;
 
-	public function __construct(Config $config) {
-		$this->config = $config;
+	public function __construct(Url $url) {
+        $this->url = $url;
 	}
 
 	public function setCache(Cache $driver) {
@@ -69,10 +68,9 @@ class Router {
 
 	/**
 	 * Serve assets with Neptune\Controller\AssetsController at the
-	 * config key assets.url.
+	 * given url.
 	 */
-	public function routeAssets() {
-		$url = $this->config->getRequired('assets.url');
+	public function routeAssets($url) {
 		//add a slash if the given url doesn't start or end with one
 		if(substr($url, 0, 1) !== '/') {
 			$url = '/' . $url;
@@ -310,7 +308,7 @@ class Router {
 		if(!empty($args)) {
 			$url .= '?' . http_build_query($args);
 		}
-		return Url::to($url, $protocol);
+		return $this->url->to($url, $protocol);
 	}
 
 }
