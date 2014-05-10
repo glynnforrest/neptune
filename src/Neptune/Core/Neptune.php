@@ -13,6 +13,7 @@ use Neptune\EventListener\RouterListener;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\NeptuneConfig;
 use Neptune\Config\ConfigManager;
+use Neptune\Helpers\Url;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -45,8 +46,12 @@ class Neptune extends Pimple implements HttpKernelInterface
             return $manager;
         };
 
-        $this['router'] = function() use ($config) {
-            new Router($config);
+        $this['url'] = function() use ($config) {
+            return new Url($config->getRequired('root_url'));
+        };
+
+        $this['router'] = function() {
+            return new Router($this['url']);
         };
 
         $this['dispatcher'] = function () {
