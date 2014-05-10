@@ -50,10 +50,7 @@ class Neptune extends Pimple implements HttpKernelInterface
         };
 
         $this['dispatcher'] = function () {
-            $dispatcher = new EventDispatcher;
-            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
-            $dispatcher->addSubscriber(new StringResponseListener());
-            return $dispatcher;
+            return new EventDispatcher;
         };
 
         $this['resolver'] = function () {
@@ -120,6 +117,10 @@ class Neptune extends Pimple implements HttpKernelInterface
     public function boot()
     {
         if(!$this->booted) {
+            $dispatcher = $this['dispatcher'];
+            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
+            $dispatcher->addSubscriber(new StringResponseListener());
+
             foreach ($this->services as $service) {
                 $service->boot($this);
             }
