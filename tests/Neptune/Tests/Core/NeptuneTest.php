@@ -23,11 +23,13 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->temp = new Temping();
-        $this->config = new NeptuneConfig($this->temp->getDirectory(), null);
+		$this->neptune = new Neptune($this->temp->getDirectory());
+        //override config for testing
+        $this->config = new Config('neptune');
+        $this->neptune['config'] = $this->config;
         //this is an ugly hack to make sure the router works. When the
         //router is decoupled into a service this won't be needed
-        $this->config->set('root_url', 'myapp.local/');
-		$this->neptune = new Neptune($this->config);
+        $this->neptune['config']->set('root_url', 'myapp.local/');
 	}
 
 	public function tearDown() {
@@ -72,7 +74,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRootDirectoryAppendsTrailingSlash() {
-		$neptune = new Neptune(new NeptuneConfig('/no/trailing/slash', null));
+		$neptune = new Neptune('/no/trailing/slash');
 		$this->assertSame('/no/trailing/slash/', $neptune->getRootDirectory());
 	}
 

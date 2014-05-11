@@ -11,7 +11,7 @@ use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
 use Neptune\EventListener\StringResponseListener;
-use Neptune\Config\NeptuneConfig;
+use Neptune\Config\Config;
 use Neptune\Config\ConfigManager;
 use Neptune\Helpers\Url;
 
@@ -33,12 +33,20 @@ class Neptune extends Pimple implements HttpKernelInterface
     protected $module_routes = array();
     protected $root_directory;
 
-    public function __construct(NeptuneConfig $config)
+    public function __construct($root_directory)
     {
+        //init Pimple
         parent::__construct();
 
-        $this['config'] = $config;
-        $this->root_directory = $config->getRootDirectory();
+        //make sure root has a trailing slash
+        if (substr($root_directory, -1) !== '/') {
+            $root_directory .= '/';
+        }
+        $this->root_directory = $root_directory;
+
+        $this['config'] = function() {
+            return new Config('neptune', $this->root_directory . 'config/neptune.php');
+        };
 
         $this['config.manager'] = function() {
             $manager = new ConfigManager($this);
@@ -46,8 +54,8 @@ class Neptune extends Pimple implements HttpKernelInterface
             return $manager;
         };
 
-        $this['url'] = function() use ($config) {
-            return new Url($config->getRequired('root_url'));
+        $this['url'] = function() {
+            return new Url($this['config']->getRequired('root_url'));
         };
 
         $this['router'] = function() {
