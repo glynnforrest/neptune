@@ -5,7 +5,7 @@ namespace Neptune\Tests\Database;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 use Neptune\Database\DatabaseFactory;
-use Neptune\Config\NeptuneConfig;
+use Neptune\Config\Config;
 use Neptune\Core\Neptune;
 
 /**
@@ -17,7 +17,7 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = new NeptuneConfig('/app/root', false);
+        $this->config = new Config('neptune');
 
         $this->config->set('database.mysql', array(
             'driver' => 'mysql',
@@ -29,7 +29,8 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
             'charset' => 'utf8'
         ));
 
-        $this->neptune = new Neptune($this->config);
+        $this->neptune = new Neptune('/root/app');
+        $this->neptune['config'] = $this->config;
 
         $this->creator = $this->getMock('\Neptune\Database\Driver\PDOCreator');
 
