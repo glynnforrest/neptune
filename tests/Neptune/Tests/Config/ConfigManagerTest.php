@@ -31,8 +31,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->temp = new Temping();
         $this->temp->init();
-        $config = new NeptuneConfig($this->temp->getDirectory(), null);
-        $this->neptune = new Neptune($config);
+        $this->neptune = new Neptune($this->temp->getDirectory());
         $this->manager = new ConfigManager($this->neptune);
         $this->file =  __DIR__ . '/fixtures/config.php';
         $this->file2 = __DIR__ . '/fixtures/config2.php';
