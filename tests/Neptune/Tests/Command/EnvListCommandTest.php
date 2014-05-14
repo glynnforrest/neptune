@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../bootstrap.php';
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Application;
 
-use Neptune\Config\NeptuneConfig;
+use Neptune\Config\Config;
 use Neptune\Core\Neptune;
 use Neptune\Command\EnvListCommand;
 use Neptune\Console\Console;
@@ -30,8 +30,9 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 
 		$this->temping = new Temping();
 		$this->temping->createDirectory('config/env');
-		$this->config = new NeptuneConfig($this->temping->getDirectory(), false);
-        $this->neptune = new Neptune($this->config);
+        $this->neptune = new Neptune($this->temping->getDirectory());
+        $this->config = new Config('neptune');
+        $this->neptune['config'] = $this->config;
 
 		$application = new Application();
 		$application->add(new EnvListCommand($this->neptune, $this->config));
