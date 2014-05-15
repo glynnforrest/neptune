@@ -108,7 +108,7 @@ class Config
             return $path;
         }
         if (!$this->root_dir) {
-            throw new \Exception('Root directory has not been set');
+            throw new \Exception("Root directory has not been set for Config instance '$this->name'");
         }
 
         return $this->root_dir . $path;
