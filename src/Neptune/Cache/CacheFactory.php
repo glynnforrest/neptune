@@ -67,7 +67,7 @@ class CacheFactory extends AbstractFactory
         $namespace = $this->config->getRequired("cache.$name.namespace");
         $dir = $this->config->get("cache.$name.dir", sys_get_temp_dir());
         if (substr($dir, 0, 1) !== '/') {
-            $dir = $this->config->getRequired('dir.root') . $dir;
+            $dir = $this->neptune->getRootDirectory() . $dir;
         }
 
         $driver = new FilesystemCache($dir);

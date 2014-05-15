@@ -73,18 +73,15 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetFileDriverRelativeDir() {
 		//a dir without a leading slash should be appended to dir.root
-		$this->config->set('dir.root', $this->temping->getDirectory() . 'foo/');
 		$this->config->set('cache.file.dir', 'cache/');
+        $this->neptune->expects($this->once())
+                      ->method('getRootDirectory')
+                      ->will($this->returnValue($this->temping->getDirectory() . 'foo/'));
+
 		$driver = $this->factory->get('file');
 		$this->assertInstanceOf('\Doctrine\Common\Cache\FilesystemCache', $driver);
 		$this->assertSame($this->temping->getDirectory() . 'foo/cache' , $driver->getDirectory());
         $this->assertSame('testing_', $driver->getNamespace());
-	}
-
-	public function testGetFileDriverNoRoot() {
-		$this->config->set('cache.file.dir', 'cache/');
-		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
-		$driver = $this->factory->get('file');
 	}
 
 	public function testGetFileDriverNoDir() {
