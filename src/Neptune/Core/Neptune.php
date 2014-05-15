@@ -45,7 +45,9 @@ class Neptune extends Pimple implements HttpKernelInterface
         $this->root_directory = $root_directory;
 
         $this['config'] = function() {
-            return new Config('neptune', $this->root_directory . 'config/neptune.php');
+            $config = new Config('neptune', $this->root_directory . 'config/neptune.php');
+            $config->setRootDirectory($this->root_directory);
+            return $config;
         };
 
         $this['config.manager'] = function() {

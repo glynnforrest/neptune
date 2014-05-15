@@ -188,4 +188,15 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($this->neptune->getRoutePrefix('foo'));
     }
 
+    public function testConfigSetup()
+    {
+        $stub = new Config('testing');
+        $this->temp->create('config/neptune.php', $stub->toString());
+
+        $neptune = new Neptune($this->temp->getDirectory());
+        $config = $neptune['config'];
+        $this->assertInstanceOf('Neptune\Config\Config', $config);
+        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+    }
+
 }
