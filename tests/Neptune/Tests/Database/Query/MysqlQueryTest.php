@@ -2,7 +2,6 @@
 
 namespace Neptune\Tests\Database;
 
-use Neptune\Core\Config;
 use Neptune\Database\Query\MysqlQuery;
 
 include __DIR__ . ('/../../../../bootstrap.php');
@@ -15,9 +14,6 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
         $this->driver = $this->getMock('Neptune\Database\Driver\DatabaseDriverInterface');
-	}
-
-	public function tearDown() {
 	}
 
 	public function testSimpleSelect() {

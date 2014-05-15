@@ -5,7 +5,7 @@ namespace Neptune\Tests\Security\Driver;
 require_once __DIR__ . '/../../../../bootstrap.php';
 
 use Neptune\Security\Driver\ConfigDriver;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -22,7 +22,7 @@ class ConfigDriverTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = Config::create('testing');
+        $this->config = new Config('testing');
         $this->driver = new ConfigDriver($this->config);
 
         $this->request = Request::create('testing');

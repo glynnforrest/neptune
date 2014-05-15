@@ -3,7 +3,6 @@
 namespace Neptune\Command;
 
 use Neptune\Console\Console;
-use Neptune\Core\Config;
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
 

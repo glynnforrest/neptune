@@ -2,7 +2,7 @@
 
 namespace Neptune\Security\Driver;
 
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 use Neptune\Exception\ConfigKeyException;
 use Neptune\Security\Exception\CredentialsException;
 use Neptune\Security\Exception\SecurityServiceException;

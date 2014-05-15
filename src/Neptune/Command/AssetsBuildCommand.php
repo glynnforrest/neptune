@@ -4,7 +4,6 @@ namespace Neptune\Command;
 
 use Neptune\Command\Command;
 use Neptune\Console\Console;
-use Neptune\Core\Config;
 use Neptune\Controller\AssetsController;
 use Neptune\Assets\Asset;
 
@@ -124,7 +123,7 @@ class AssetsBuildCommand extends Command {
 	protected function getAssets(array $modules) {
 		$assets = array();
 		foreach ($modules as $module => $src) {
-			$config = Config::loadModule($module);
+			$config = $this->neptune['config.manager']->loadModule($module);
 			$src_dir = $config->getModulePath('assets.dir');
 
 			//identify the target build dir for this module. Create if

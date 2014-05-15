@@ -5,7 +5,7 @@ namespace Neptune\Command;
 use Neptune\Command\Command;
 use Neptune\Console\Console;
 use Neptune\Exceptions\FileException;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -56,7 +56,7 @@ class EnvCreateCommand extends Command {
                 throw new FileException("Environment $name already exists");
             }
         }
-        $c = Config::create($name, $config);
+        $c = new Config($name, $config);
         $c->set('root_url', '');
         $c->save();
         $this->output->writeln("Created <info>$config</info>");

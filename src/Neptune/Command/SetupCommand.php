@@ -4,7 +4,6 @@ namespace Neptune\Command;
 
 use Neptune\Command\Command;
 use Neptune\Console\Console;
-use Neptune\Core\Config;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;

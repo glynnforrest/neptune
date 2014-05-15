@@ -4,7 +4,7 @@ namespace Neptune\Assets;
 
 use Reform\Helper\Html;
 use Neptune\Helpers\Url;
-use Neptune\Core\Config;
+use Neptune\Config\ConfigManager;
 
 /**
  * Assets
@@ -12,18 +12,14 @@ use Neptune\Core\Config;
  **/
 class Assets {
 
-	protected static $instance;
+    protected $config;
+    protected $url;
 	protected $js = array();
 	protected $css = array();
 
-	public static function getInstance() {
-		if(!self::$instance) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
-	protected function __construct() {
+	public function __construct(ConfigManager $manager, Url $url) {
+        $this->config = $manager;
+        $this->url = $url;
 	}
 
 	/**
@@ -32,7 +28,7 @@ class Assets {
 	 * url.
 	 */
 	protected function createSrc($src) {
-		if(Config::load()->get('assets.cache_bust') && !strpos($src, '://')) {
+		if($this->config->load()->get('assets.cache_bust') && !strpos($src, '://')) {
 			return str_replace('#', '/', $src) . '?' . md5(uniqid());
 		}
 		return str_replace('#', '/', $src);
@@ -49,11 +45,10 @@ class Assets {
 		unset($this->js[$name]);
 	}
 
-	public static function js() {
+	public function js() {
 		$content ='';
-		$me = self::getInstance();
-		foreach($me->sort($me->js) as $k => $v) {
-			$content .= Html::js(Url::to($v), $me->js[$k]['opts']);
+		foreach($this->sort($this->js) as $k => $v) {
+			$content .= Html::js($this->url->to($v), $this->js[$k]['opts']);
 		}
 		return $content;
 	}
@@ -69,11 +64,10 @@ class Assets {
 		unset($this->css[$name]);
 	}
 
-	public static function css() {
+	public function css() {
 		$content = '';
-		$me = self::getInstance();
-		foreach($me->sort($me->css) as $k => $v) {
-			$content .= Html::css(Url::to($v), $me->css[$k]['opts']);
+		foreach($this->sort($this->css) as $k => $v) {
+			$content .= Html::css($this->url->to($v), $this->css[$k]['opts']);
 		}
 		return $content;
 	}
@@ -116,7 +110,7 @@ class Assets {
 		if(substr($src, 0, 1) === '/' || strpos($src, '://')) {
 			return $src;
 		} else {
-			return Config::load()->get('assets.url') . $src;
+			return $this->config->load()->get('assets.url') . $src;
 		}
 	}
 

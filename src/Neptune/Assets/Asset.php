@@ -2,7 +2,6 @@
 
 namespace Neptune\Assets;
 
-use Neptune\Core\Config;
 use Neptune\Exceptions\FileException;
 
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;

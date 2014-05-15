@@ -3,7 +3,8 @@
 namespace Neptune\Tests\Core;
 
 use Neptune\Core\Neptune;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
+use Neptune\Config\NeptuneConfig;
 use Neptune\Tests\Routing\TestModule;
 
 use Temping\Temping;
@@ -21,53 +22,45 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
     protected $config;
 
 	public function setUp() {
-		$this->config = Config::create('neptune');
-		$this->neptune = new Neptune($this->config);
 		$this->temp = new Temping();
+		$this->neptune = new Neptune($this->temp->getDirectory());
+        //override config for testing
+        $this->config = new Config('neptune');
+        $this->neptune['config'] = $this->config;
+        //this is an ugly hack to make sure the router works. When the
+        //router is decoupled into a service this won't be needed
+        $this->neptune['config']->set('root_url', 'myapp.local/');
 	}
 
 	public function tearDown() {
 		$this->temp->reset();
-		Config::unload();
 	}
 
+    protected function stubEnvConfig()
+    {
+        $config = new Config('production');
+        $config->set('foo', 'override');
+        $this->temp->create('config/env/production.php', $config->toString());
+    }
+
 	public function testLoadAndGetEnv() {
-		$config_file = '<?php';
-		$config_file .= <<<END
-		return array(
-			'foo' => 'override',
-		);
-END;
-		$this->temp->create('config/env/production.php', $config_file);
-		$c = Config::create('neptune');
-		$c->set('foo', 'default');
-		$c->set('dir.root', $this->temp->getDirectory());
-		$this->assertEquals('default', $c->get('foo'));
+        $this->stubEnvConfig();
+		$this->config->set('foo', 'default');
+		$this->assertSame('default', $this->config->get('foo'));
 		$this->neptune->loadEnv('production');
-		$this->assertEquals('override', $c->get('foo'));
+		$this->assertEquals('override', $this->config->get('foo'));
 		$this->assertSame('production', $this->neptune->getEnv());
 	}
 
-	public function testLoadAndGetEnvDefaultNoArg() {
-		$config_file = '<?php';
-		$config_file .= <<<END
-		return array(
-			'foo' => 'override',
-		);
-END;
-		$this->temp->create('config/env/development.php', $config_file);
-		$c = Config::create('neptune');
-		$c->set('foo', 'default');
-		$c->set('dir.root', $this->temp->getDirectory());
-		$this->assertEquals('default', $c->get('foo'));
-		$c->set('env', 'development');
+	public function testLoadAndGetDefaultEnv() {
+        $this->stubEnvConfig();
+		$this->config->set('env', 'production');
 		$this->neptune->loadEnv();
-		$this->assertEquals('override', $c->get('foo'));
-		$this->assertSame('development', $this->neptune->getEnv());
+		$this->assertSame('production', $this->neptune->getEnv());
 	}
 
 	public function testLoadEnvNoArgThrowsException() {
-		$c = Config::create('neptune');
+		$c = new Config('neptune');
 		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
 		$this->neptune->loadEnv();
 	}
@@ -77,13 +70,12 @@ END;
 	}
 
 	public function testGetRootDirectory() {
-		$this->config->set('dir.root', '/root/');
-		$this->assertSame('/root/', $this->neptune->getRootDirectory());
+		$this->assertSame($this->temp->getDirectory(), $this->neptune->getRootDirectory());
 	}
 
 	public function testGetRootDirectoryAppendsTrailingSlash() {
-		$this->config->set('dir.root', '/no/trailing/slash');
-		$this->assertSame('/no/trailing/slash/', $this->neptune->getRootDirectory());
+		$neptune = new Neptune('/no/trailing/slash');
+		$this->assertSame('/no/trailing/slash/', $neptune->getRootDirectory());
 	}
 
     public function testGetModuleDirectory() {

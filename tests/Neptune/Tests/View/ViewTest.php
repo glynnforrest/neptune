@@ -3,7 +3,6 @@
 namespace Neptune\Tests\View;
 
 use Neptune\View\View;
-use Neptune\Core\Config;
 
 use Temping\Temping;
 
@@ -15,87 +14,80 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class ViewTest extends \PHPUnit_Framework_TestCase {
 
-	protected $file = 'viewtest.php';
-	protected $view = 'viewtest';
 	protected $temp;
 
 	public function setUp() {
-		$content = '<?php';
-		$content .= <<<END
-		echo 'testing';
-END;
-		$content .= '?>';
 		$this->temp = new Temping();
-		$this->temp->create($this->file, $content);
-		$neptune = Config::create('neptune');
-		$neptune->set('dir.root', $this->temp->getDirectory());
-		$neptune->set('view.dir', 'views/');
-		$d = Config::create('prefix');
-		$d->set('view.dir', 'folder_prefix/');
-	}
-
-	protected function getMockPath($view_name, $view_dir = 'views/') {
-		return $this->temp->getDirectory() . $view_dir . $view_name;
 	}
 
 	public function tearDown() {
 		$this->temp->reset();
-		Config::unload();
 	}
 
-	public function testConstruct() {
-		$v = View::load('some/file');
-		$this->assertTrue($v instanceof View);
-	}
+    public function dataProvider()
+    {
+        return array(
+            array('string'),
+            array(array()),
+            array(new \stdClass),
+            array(0),
+            array(true),
+            array(false)
+        );
+    }
 
-	public function testLoad() {
-		$v = View::load('some/file');
-		$expected = $this->getMockPath('some/file.php');
-		$this->assertEquals($expected, $v->getView());
-	}
+    /**
+     * @dataProvider dataProvider()
+     */
+    public function testSetAndGet($value) {
+        $v = new View('some/file');
+        $this->assertSame($v, $v->set('key', $value));
+        $this->assertSame($value, $v->get('key'));
+    }
 
-	public function testLoadPrefix() {
-		$v = View::load('prefix#view');
-		$expected = $this->getMockPath('view.php', 'folder_prefix/');
-		$this->assertEquals($expected, $v->getView());
-	}
-
-	public function testSetAndGet() {
-		$v = View::load('some/file');
-		$v->set('key', 'value');
-		$this->assertEquals('value', $v->get('key'));
-		$v->set('arr', array());
-		$this->assertEquals(array(), $v->get('arr'));
-		$obj = new \stdClass();
-		$v->set('obj', $obj);
-		$this->assertEquals($obj, $v->get('obj'));
-	}
+    /**
+     * @dataProvider dataProvider()
+     */
+    public function testMagicSetAndGet($value)
+    {
+        $v = new View('some/file');
+        $v->key = $value;
+        $this->assertSame($value, $v->key);
+    }
 
 	public function testIsset() {
-		$v = View::load('some/file');
+		$v = new View('some/file');
 		$v->key = 'value';
 		$this->assertTrue(isset($v->key));
 		$this->assertFalse(isset($v->not_set));
 	}
 
-	public function testRenderException() {
-		$v = View::load('some/file');
-		$this->setExpectedException('Neptune\\Exceptions\\ViewNotFoundException');
-		$v->render();
-	}
+    public function testGetView()
+    {
+        $v = new View('some/file');
+        $this->assertSame('some/file', $v->getView());
+    }
 
-	public function testRenderAbsolutePath() {
-		$view = $this->temp->getDirectory() . $this->view;
-		$v = View::loadAbsolute($view);
-		$this->assertEquals('testing', $v->render());
-	}
+    public function testSetView()
+    {
+        $v = new View('some/file');
+        $this->assertSame('some/file', $v->getView());
+        $this->assertSame($v, $v->setView('some/other/file'));
+        $this->assertSame('some/other/file', $v->getView());
+    }
 
-	public function testViewVarIsNotOverridden() {
-		$view = $this->temp->getDirectory() . $this->view;
-		$v = View::loadAbsolute($view);
-		$v->file = 'foo';
-		$this->assertEquals('foo', $v->file);
-		$this->assertEquals('testing', $v->render());
-	}
+    public function testRender()
+    {
+        $this->temp->create('foo.php', 'testing');
+        $view = new View($this->temp->getPathname('foo.php'));
+        $this->assertSame('testing', $view->render());
+    }
+
+    public function testRenderInvalidView()
+    {
+        $v = new View('some/file');
+        $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
+        $v->render();
+    }
 
 }

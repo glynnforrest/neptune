@@ -2,7 +2,7 @@
 
 namespace Neptune\Console;
 
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 use Neptune\Console\DialogHelper as NeptuneDialogHelper;
 use Neptune\Core\Neptune;
 

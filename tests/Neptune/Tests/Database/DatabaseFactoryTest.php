@@ -5,7 +5,8 @@ namespace Neptune\Tests\Database;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 use Neptune\Database\DatabaseFactory;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
+use Neptune\Core\Neptune;
 
 /**
  * DatabaseFactoryTest
@@ -16,7 +17,7 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = Config::create('neptune');
+        $this->config = new Config('neptune');
 
         $this->config->set('database.mysql', array(
             'driver' => 'mysql',
@@ -28,18 +29,12 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
             'charset' => 'utf8'
         ));
 
-        $this->neptune = $this->getMockBuilder('\Neptune\Core\Neptune')
-                              ->disableOriginalConstructor()
-                              ->getMock();
+        $this->neptune = new Neptune('/root/app');
+        $this->neptune['config'] = $this->config;
 
         $this->creator = $this->getMock('\Neptune\Database\Driver\PDOCreator');
 
         $this->factory = new DatabaseFactory($this->config, $this->neptune, $this->creator);
-    }
-
-    public function tearDown()
-    {
-        Config::unload();
     }
 
     public function testGetDefaultDriver()
@@ -94,11 +89,6 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
                       ->method('createPDO')
                       ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
                       ->will($this->returnValue($pdo));
-        $dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $this->neptune->expects($this->once())
-                      ->method('offsetGet')
-                      ->with('dispatcher')
-                      ->will($this->returnValue($dispatcher));
 
         $driver = $this->factory->get('mysql');
         $this->assertInstanceOf('\Neptune\Database\Driver\EventDriver', $driver);

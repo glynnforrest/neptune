@@ -2,7 +2,7 @@
 
 namespace Neptune\Tests\Routing;
 
-use Neptune\Core\Config;
+use Neptune\Helpers\Url;
 use Neptune\Routing\Router;
 use Neptune\Routing\Route;
 
@@ -19,13 +19,7 @@ include __DIR__ . ('/../../../bootstrap.php');
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
-		$this->config = Config::create('neptune');
-		$this->config->set('root_url', 'myapp.local/');
-		$this->router = new Router($this->config);
-	}
-
-	public function tearDown() {
-		Config::unload();
+		$this->router = new Router(new Url('myapp.local/'));
 	}
 
 	protected function routeTest($route, $url) {
@@ -70,8 +64,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testRouteAssets() {
-		$this->config->set('assets.url', '/assets/');
-		$r = $this->router->routeAssets();
+		$r = $this->router->routeAssets('/assets/');
 		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/css/test'));
 		$expected = array(
@@ -85,8 +78,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testRouteAssetsMissingSlashes() {
-		$this->config->set('assets.url', 'assets');
-		$r = $this->router->routeAssets();
+		$r = $this->router->routeAssets('assets');
 		$this->assertSame('/assets/:asset', $r->getUrl());
 		$this->assertTrue($this->routeTest($r, '/assets/lib/js/test'));
 		$expected = array(

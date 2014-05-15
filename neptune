@@ -7,7 +7,7 @@ $root = __DIR__ . '/';
 
 include($root . 'vendor/autoload.php');
 
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 use Neptune\Core\Neptune;
 use Neptune\Console\Application;
 use Neptune\Console\OutputFormatter;

@@ -7,7 +7,7 @@ use Neptune\Database\Driver\EventDriver;
 use Neptune\Database\Driver\PDOCreator;
 use Neptune\Core\AbstractFactory;
 use Neptune\Core\Neptune;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;

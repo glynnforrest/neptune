@@ -11,6 +11,9 @@ use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
 use Neptune\EventListener\StringResponseListener;
+use Neptune\Config\Config;
+use Neptune\Config\ConfigManager;
+use Neptune\Helpers\Url;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -28,19 +31,39 @@ class Neptune extends Pimple implements HttpKernelInterface
     protected $services = array();
     protected $modules = array();
     protected $module_routes = array();
+    protected $root_directory;
 
-    public function __construct(Config $config)
+    public function __construct($root_directory)
     {
+        //init Pimple
         parent::__construct();
-        $this['config'] = $config;
 
-        $this['router'] = new Router($config);
+        //make sure root has a trailing slash
+        if (substr($root_directory, -1) !== '/') {
+            $root_directory .= '/';
+        }
+        $this->root_directory = $root_directory;
+
+        $this['config'] = function() {
+            return new Config('neptune', $this->root_directory . 'config/neptune.php');
+        };
+
+        $this['config.manager'] = function() {
+            $manager = new ConfigManager($this);
+            $manager->add($this['config']);
+            return $manager;
+        };
+
+        $this['url'] = function() {
+            return new Url($this['config']->getRequired('root_url'));
+        };
+
+        $this['router'] = function() {
+            return new Router($this['url']);
+        };
 
         $this['dispatcher'] = function () {
-            $dispatcher = new EventDispatcher;
-            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
-            $dispatcher->addSubscriber(new StringResponseListener());
-            return $dispatcher;
+            return new EventDispatcher;
         };
 
         $this['resolver'] = function () {
@@ -128,6 +151,10 @@ class Neptune extends Pimple implements HttpKernelInterface
     public function boot()
     {
         if(!$this->booted) {
+            $dispatcher = $this['dispatcher'];
+            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
+            $dispatcher->addSubscriber(new StringResponseListener());
+
             foreach ($this->services as $service) {
                 $service->boot($this);
             }
@@ -158,8 +185,11 @@ class Neptune extends Pimple implements HttpKernelInterface
 		if(!$env) {
 			$env = $this['config']->getRequired('env');
 		}
+        $file = $this->root_directory . 'config/env/' . $env . '.php';
+        //load $env as a config file, merging into neptune
+        $this['config.manager']->load($env, $file, 'neptune');
 		$this->env = $env;
-		Config::loadEnv($env);
+
 		return true;
 	}
 
@@ -178,13 +208,7 @@ class Neptune extends Pimple implements HttpKernelInterface
      */
     public function getRootDirectory()
     {
-        $root = $this['config']->getRequired('dir.root');
-        //make sure root has a trailing slash
-        if(substr($root, -1) !== '/') {
-            $root .= '/';
-        }
-
-        return $root;
+        return $this->root_directory;
     }
 
 	/**

@@ -5,7 +5,7 @@ use Neptune\Controller\Controller;
 use Neptune\Assets\Asset;
 use Neptune\Assets\Filter;
 use Neptune\Assets\Assets;
-use Neptune\Core\Config;
+use Neptune\Config\ConfigManager;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,12 +20,12 @@ class AssetsController extends Controller {
 	//array of options that are passed to a filter on instantiation.
 	protected static $filter_options = array();
 	protected $current_prefix;
+    protected $config;
 
-	protected function _before() {
-		//register all of neptune's built in filters here.
-		// self::registerFilter('filter', 'Neptune\\FilterName');
-		return true;
-	}
+    public function __construct(ConfigManager $manager)
+    {
+        $this->config = $manager;
+    }
 
 	/**
 	 * Make an asset filter available to AssetsController.
@@ -58,7 +58,7 @@ class AssetsController extends Controller {
 		try {
 			$asset = new Asset($this->getAssetPath($asset_name));
 			//grab the regexps to test against from the config file for this asset
-			$regexps = Config::load($this->current_prefix)->get('assets.filters');
+			$regexps = $this->config->load($this->current_prefix)->get('assets.filters');
 			if(is_array($regexps) && !empty($regexps)) {
 				foreach($this->getAssetFilters($asset_name, $regexps) as $f) {
 					$this->applyFilter($asset, $f);
@@ -89,7 +89,7 @@ class AssetsController extends Controller {
 	}
 
 	public function getAssetPath($filename) {
-		return Config::load($this->current_prefix)->getModulePath('assets.dir') . $filename;
+		return $this->config->load($this->current_prefix)->getRelativePath('assets.dir') . $filename;
 	}
 
 	/**

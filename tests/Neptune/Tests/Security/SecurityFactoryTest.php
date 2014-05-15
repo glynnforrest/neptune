@@ -3,7 +3,7 @@
 namespace Neptune\Tests\Security;
 
 use Neptune\Security\SecurityFactory;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 
 use Temping\Temping;
 
@@ -21,7 +21,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = Config::create('neptune');
+        $this->config = new Config('neptune');
 
         $this->config->set('security.drivers.driver1', array(
             'driver' => 'pass',
@@ -35,11 +35,6 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                               ->disableOriginalConstructor()
                               ->getMock();
         $this->factory = new SecurityFactory($this->config, $this->neptune);
-    }
-
-    public function tearDown()
-    {
-        Config::unload();
     }
 
     public function testGetDefaultDriver()
@@ -72,7 +67,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetDefaultNoConfig()
     {
         $this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-        $factory = new SecurityFactory(Config::create('empty'), $this->neptune);
+        $factory = new SecurityFactory(new Config('empty'), $this->neptune);
         $factory->get();
     }
 

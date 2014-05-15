@@ -3,7 +3,7 @@
 namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
-use Neptune\Core\Config;
+use Neptune\Config\Config;
 use Neptune\Form\FormCreator;
 
 /**
