@@ -4,12 +4,13 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Config\Config;
-use Neptune\Security\Firewall;
 use Neptune\Security\SecurityFactory;
-use Neptune\Security\Csrf\CsrfManager;
-use Neptune\EventListener\FirewallListener;
-use Neptune\EventListener\CsrfListener;
-use Neptune\EventListener\SecurityExceptionListener;
+
+use Blockade\Firewall;
+use Blockade\Csrf\CsrfManager;
+use Blockade\EventListener\FirewallListener;
+use Blockade\EventListener\CsrfListener;
+use Blockade\EventListener\BlockadeExceptionListener;
 
 use Symfony\Component\HttpFoundation\RequestMatcher;
 
@@ -50,7 +51,7 @@ class SecurityService implements ServiceInterface
         }
 
         $neptune['security.resolver'] = function () {
-            return new SecurityExceptionListener();
+            return new BlockadeExceptionListener();
             //add resolvers automatically
         };
 
@@ -61,7 +62,7 @@ class SecurityService implements ServiceInterface
         $neptune['security.firewall'] = function () use ($neptune, $config) {
             $listener = new FirewallListener();
             foreach ($config->get('security.firewalls', array()) as $name => $firewall) {
-                $listener->add($this->createFirewall($neptune, $config, $name));
+                $listener->addFirewall($this->createFirewall($neptune, $config, $name));
             }
 
             return $listener;
