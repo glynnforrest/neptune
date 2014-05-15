@@ -3,16 +3,18 @@
 namespace Neptune\Security\Driver;
 
 use Neptune\Config\Config;
-use Neptune\Exception\ConfigKeyException;
-use Neptune\Security\Exception\CredentialsException;
-use Neptune\Security\Exception\SecurityServiceException;
+use Neptune\Exceptions\ConfigKeyException;
+
+use Blockade\Exception\CredentialsException;
+use Blockade\Exception\BlockadeFailureException;
+use Blockade\Driver\AbstractDriver;
 
 /**
  * ConfigDriver
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class ConfigDriver extends AbstractSecurityDriver
+class ConfigDriver extends AbstractDriver
 {
 
     protected $config;
@@ -48,7 +50,7 @@ class ConfigDriver extends AbstractSecurityDriver
             $config_username = $this->config->getRequired($this->user_key);
             $hash = $this->config->getRequired($this->pass_key);
         } catch (ConfigKeyException $e) {
-            throw new SecurityServiceException('Invalid security configuration', $e);
+            throw new BlockadeFailureException('Invalid security configuration: ' . $e->getMessage());
         }
 
         //safe compare required

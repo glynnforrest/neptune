@@ -56,9 +56,18 @@ class ConfigDriverTest extends \PHPUnit_Framework_TestCase
         if ($pass) {
             $this->assertTrue($this->driver->authenticate());
         } else {
-            $this->setExpectedException('\Neptune\Security\Exception\CredentialsException');
+            $this->setExpectedException('\Blockade\Exception\CredentialsException');
             $this->driver->authenticate();
         }
+    }
+
+    public function testInvalidConfigThrowsException()
+    {
+        $this->config->set('security', null);
+        $this->request->request->set('username', 'foo');
+        $this->request->request->set('password', 'bar');
+        $this->setExpectedException('\Blockade\Exception\BlockadeFailureException');
+        $this->driver->authenticate();
     }
 
 }

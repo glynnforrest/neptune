@@ -2,10 +2,10 @@
 
 namespace Neptune\Security;
 
-use Neptune\Security\Driver\SecurityDriverInterface;
-use Neptune\Security\Driver\PassDriver;
-use Neptune\Security\Driver\FailDriver;
-use Neptune\Security\Driver\ConfigDriver;
+use Blockade\Driver\DriverInterface;
+use Blockade\Driver\PassDriver;
+use Blockade\Driver\FailDriver;
+use Blockade\Driver\ConfigDriver;
 
 use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
@@ -33,11 +33,11 @@ class SecurityFactory extends AbstractFactory
         if (is_string($maybe_service)) {
             //check the service implements security interface first
             $service = $this->neptune[$maybe_service];
-            if ($service instanceof SecurityDriverInterface) {
+            if ($service instanceof DriverInterface) {
                 return $service;
             }
             throw new DriverNotFoundException(sprintf(
-                "Security driver '%s' requested service '%s' which does not implement Neptune\Security\Driver\SecurityDriverInterface",
+                "Security driver '%s' requested service '%s' which does not implement Blockade\Driver\DriverInterface",
                 $name,
                 $maybe_service));
         }
