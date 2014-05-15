@@ -12,7 +12,7 @@ Small, internal release - improving testing and versioning.
 
 ### 0.2.0 2013-11-26
 
-Big improvement on forms - alomst a complete rewrite - and form
+Big improvement on forms - almost a complete rewrite - and form
 related html.
 
 * Cleaning up the Html helper class and test.
