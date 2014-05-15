@@ -1,5 +1,5 @@
 # Neptune
-### A PHP 5.3+ application library
+### A PHP application library
 ### By Glynn Forrest
 
 [![Build Status](https://travis-ci.org/glynnforrest/neptune.png)](https://travis-ci.org/glynnforrest/neptune)
