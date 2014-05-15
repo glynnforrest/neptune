@@ -3,13 +3,12 @@
 
 //this script needs to be in the root directory of your app to work properly.
 //Make sure that you have run `composer install` if the autoloader isn't working.
-$root = __DIR__ . '/';
 
-include($root . 'vendor/autoload.php');
+include('vendor/autoload.php');
 
 use Neptune\Config\Config;
 use Neptune\Core\Neptune;
-use Neptune\Console\Application;
+use Neptune\Console\Application as ConsoleApplication;
 use Neptune\Console\OutputFormatter;
 
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -21,23 +20,29 @@ $output->setFormatter(new OutputFormatter());
 $config = 'config/neptune.php';
 
 if(file_exists($config)) {
-	$c = Config::load('neptune', $config);
+    $c = new Config('neptune', $config);
 } else {
-	//write a warning if no neptune config is present and this isn't the setup command
-	if(!isset($_SERVER['argv'][1]) || $_SERVER['argv'][1] !== 'setup') {
-		$output->writeln('<error>No neptune config file found!</error>');
-		$output->writeln('<error>You should run create:config to create config/neptune.php</error>');
-		$output->writeln('<info>Creating temporary neptune config...</info>');
-	}
-	$c = Config::create('neptune', $config);
-	$c->set('dir.neptune', $root . 'vendor/glynnforrest/neptune/');
+//write a warning if no neptune config is present and this isn't the setup command
+    if(!isset($_SERVER['argv'][1]) || $_SERVER['argv'][1] !== 'setup') {
+        $output->writeln('<error>No neptune config file found!</error>');
+        $output->writeln('<error>You should run create:config to create config/neptune.php</error>');
+        $output->writeln('<info>Creating temporary neptune config...</info>');
+    }
+    $c = new Config('neptune');
 }
 
-$c->set('dir.root', $root);
+$neptune = new Neptune(__DIR__);
+$neptune['config'] = $c;
+//register all the application services
 
-$neptune = new Neptune($c);
+if (file_exists('app/Application.php')) {
+    include('app/Application.php');
+    $app = new \Application();
+    $app->start($neptune);
+    $app->console($neptune, $output);
+}
 
 //off we go
-$app = new Application($neptune, $c);
+$app = new ConsoleApplication($neptune);
 
 $app->run(null, $output);
