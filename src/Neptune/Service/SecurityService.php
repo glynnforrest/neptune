@@ -7,7 +7,7 @@ use Neptune\Config\Config;
 use Neptune\Security\SecurityFactory;
 
 use Blockade\Firewall;
-use Blockade\Csrf\CsrfManager;
+use Blockade\CsrfManager;
 use Blockade\EventListener\FirewallListener;
 use Blockade\EventListener\CsrfListener;
 use Blockade\EventListener\BlockadeExceptionListener;
