@@ -140,6 +140,7 @@ class ConfigManager
      */
     public function add(Config $config)
     {
+        $config->setRootDirectory($this->root_directory);
         $this->configs[$config->getName()] = $config;
     }
 
