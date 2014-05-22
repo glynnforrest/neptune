@@ -189,6 +189,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadDefaultModule()
     {
+        $this->createModuleConfigs();
         $config = $this->manager->loadModule();
         $this->assertSame('bar-override', $config->get('foo'));
     }
