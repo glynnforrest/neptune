@@ -31,6 +31,8 @@ if(file_exists($config)) {
     $c = new Config('neptune');
 }
 
+$c->setRootDirectory(__DIR__ . '/');
+
 $neptune = new Neptune(__DIR__);
 $neptune['config'] = $c;
 //register all the application services
