@@ -93,6 +93,12 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('test-module', $this->neptune->getDefaultModule());
     }
 
+    public function testGetDefaultModuleNoneRegistered()
+    {
+        $this->setExpectedException('\Exception');
+        $this->neptune->getDefaultModule();
+    }
+
     public function testGetModuleNamespace()
     {
         $module = new TestModule();

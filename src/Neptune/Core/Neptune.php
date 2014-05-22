@@ -240,6 +240,9 @@ class Neptune extends Pimple implements HttpKernelInterface
      */
     public function getDefaultModule()
     {
+        if (empty($this->modules)) {
+            throw new \Exception('Unable to get default module, none registered');
+        }
         reset($this->modules);
 
         return key($this->modules);

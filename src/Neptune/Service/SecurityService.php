@@ -9,9 +9,9 @@ use Neptune\Security\SecurityFactory;
 use Blockade\Firewall;
 use Blockade\CsrfManager;
 use Blockade\EventListener\FirewallListener;
-use Blockade\EventListener\CsrfListener;
 use Blockade\EventListener\BlockadeExceptionListener;
 
+use Reform\EventListener\CsrfListener;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 
 /**

@@ -26,8 +26,11 @@ if (!file_exists('config/neptune.php')) {
         $output->writeln('Please run `<info>php neptune setup</info>`');
         exit(1);
     } else {
-        $neptune['config'] = new Config('neptune');
-        $neptune['config']->setFilename(__DIR__ . '/config/neptune.php');
+        $config = new Config('neptune');
+        $config->setFilename(__DIR__ . '/config/neptune.php');
+        $config->setRootDirectory(__DIR__ . '/');
+
+        $neptune['config'] = $config;
     }
 }
 
