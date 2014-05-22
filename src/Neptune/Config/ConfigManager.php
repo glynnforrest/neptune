@@ -92,10 +92,14 @@ class ConfigManager
      * override that configuration with anything found in
      * config/modules/<module_name>.php
      */
-    public function loadModule($name)
+    public function loadModule($name = null)
     {
         if (isset($this->configs[$name])) {
             return $this->configs[$name];
+        }
+
+        if ($name === null) {
+            $name = $this->neptune->getDefaultModule();
         }
 
         $module = $this->neptune->getModule($name);
