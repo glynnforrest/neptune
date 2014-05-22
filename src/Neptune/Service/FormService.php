@@ -25,13 +25,13 @@ class FormService implements ServiceInterface
     {
         //if no config was supplied, grab the default
         if (!$this->config) {
-            $config = $neptune['config'];
+            $this->config = $neptune['config'];
         }
 
-        $neptune['form'] = function($neptune) use ($config) {
+        $neptune['form'] = function($neptune) {
             $creator = new FormCreator($neptune, $neptune['dispatcher']);
 
-            foreach ($config->get('forms', array()) as $name => $class) {
+            foreach ($this->config->get('forms', array()) as $name => $class) {
                 $creator->register($name, $class);
             }
             return $creator;
