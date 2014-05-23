@@ -9,11 +9,17 @@ class View {
 	protected $vars = array();
 	//complete file path to the view template.
 	protected $view;
+    protected $creator;
 
 	public function __construct($view, array $vars = array()) {
         $this->view = $view;
         $this->vars = $vars;
 	}
+
+    public function setCreator(ViewCreator $creator)
+    {
+        $this->creator = $creator;
+    }
 
 	public function __set($key, $value) {
 		return $this->set($key, $value);
@@ -85,5 +91,10 @@ class View {
 		include $this->view;
 		return ob_get_clean();
 	}
+
+    public function load($view, array $values = array())
+    {
+        return $this->creator->load($view, $values);
+    }
 
 }
