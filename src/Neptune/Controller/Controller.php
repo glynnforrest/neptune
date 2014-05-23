@@ -51,6 +51,15 @@ abstract class Controller implements NeptuneAwareInterface
         //return database service
     }
 
+    public function view($view, array $values = array())
+    {
+        if (!$this->neptune->offsetExists('view')) {
+            throw new \Exception('View service has not been registered');
+        }
+
+        return $this->neptune['view']->load($view, $values);
+    }
+
     public function form($name = null, $action = null)
     {
         return $this->neptune['form']->create($name, $action);
