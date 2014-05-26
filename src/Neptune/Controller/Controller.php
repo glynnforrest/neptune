@@ -32,7 +32,7 @@ abstract class Controller implements NeptuneAwareInterface
 
     public function assets()
     {
-        return Assets::getInstance();
+        return $this->neptune['assets'];
     }
 
     public function security(Request $request, $driver = null)
