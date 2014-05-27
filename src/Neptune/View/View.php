@@ -97,4 +97,9 @@ class View {
         return $this->creator->load($view, $values);
     }
 
+    public function __call($method, $args)
+    {
+        return $this->creator->callHelper($method, $args);
+    }
+
 }
