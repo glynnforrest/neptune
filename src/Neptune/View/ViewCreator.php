@@ -16,6 +16,7 @@ class ViewCreator
      * @var Neptune
      */
     protected $neptune;
+    protected $helpers = array();
 
     public function __construct(Neptune $neptune)
     {
@@ -37,6 +38,42 @@ class ViewCreator
         $view->setCreator($this);
 
         return $view;
+    }
+
+    /**
+     * Add a function as a helper to use inside of views.
+     *
+     * @param  string      $name     The name of the helper
+     * @param  callable    $function The function
+     * @return ViewCreator This ViewCreator
+     */
+    public function addHelper($name, $function)
+    {
+        $this->helpers[$name] = $function;
+
+        return $this;
+    }
+
+    /**
+     * Get an array of all helper functions.
+     *
+     * @return array An array of callable helpers
+     */
+    public function getHelpers()
+    {
+        return $this->helpers;
+    }
+
+    /**
+     * Call a registered view helper.
+     *
+     * @param  string $name The name of the helper
+     * @param  array  $args The arguments to the function
+     * @return mixed  The return value from the helper function
+     */
+    public function callHelper($name, array $args)
+    {
+        return call_user_func_array($this->helpers[$name], $args);
     }
 
 }

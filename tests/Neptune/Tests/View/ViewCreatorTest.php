@@ -62,5 +62,22 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($filename, $view->getView());
     }
 
+    public function testAddAndGetHelper()
+    {
+        $function = function($string) {
+            return strtoupper($string);
+        };
+        $this->assertSame($this->creator, $this->creator->addHelper('foo', $function));
+        $this->assertSame(array('foo' => $function), $this->creator->getHelpers());
+    }
+
+    public function testAddAndCallHelper()
+    {
+        $function = function($string) {
+            return strtoupper($string);
+        };
+        $this->assertSame($this->creator, $this->creator->addHelper('foo', $function));
+        $this->assertSame('STRING', $this->creator->callHelper('foo', array('string')));
+    }
 
 }
