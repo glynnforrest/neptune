@@ -32,7 +32,7 @@ abstract class Controller implements NeptuneAwareInterface
 
     public function assets()
     {
-        return Assets::getInstance();
+        return $this->neptune['assets'];
     }
 
     public function security(Request $request, $driver = null)
@@ -49,6 +49,15 @@ abstract class Controller implements NeptuneAwareInterface
     public function database()
     {
         //return database service
+    }
+
+    public function view($view, array $values = array())
+    {
+        if (!$this->neptune->offsetExists('view')) {
+            throw new \Exception('View service has not been registered');
+        }
+
+        return $this->neptune['view']->load($view, $values);
     }
 
     public function form($name = null, $action = null)

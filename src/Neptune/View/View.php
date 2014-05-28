@@ -9,11 +9,26 @@ class View {
 	protected $vars = array();
 	//complete file path to the view template.
 	protected $view;
+    protected $creator;
 
 	public function __construct($view, array $vars = array()) {
         $this->view = $view;
         $this->vars = $vars;
 	}
+
+    public function setCreator(ViewCreator $creator)
+    {
+        $this->creator = $creator;
+    }
+
+    public function getCreator()
+    {
+        if (!isset($this->creator)) {
+            throw new \Exception('ViewCreator not set');
+        }
+
+        return $this->creator;
+    }
 
 	public function __set($key, $value) {
 		return $this->set($key, $value);
@@ -85,5 +100,20 @@ class View {
 		include $this->view;
 		return ob_get_clean();
 	}
+
+    public function load($view, array $values = array())
+    {
+        return $this->getCreator()->load($view, $values);
+    }
+
+    public function insert($view, array $values = array())
+    {
+        echo $this->load($view, $values)->render();
+    }
+
+    public function __call($method, $args)
+    {
+        return $this->getCreator()->callHelper($method, $args);
+    }
 
 }

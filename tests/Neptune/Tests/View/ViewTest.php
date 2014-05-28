@@ -90,4 +90,17 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         $v->render();
     }
 
+    public function testCallHelper()
+    {
+        $creator = $this->getMockBuilder('Neptune\View\ViewCreator')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+        $creator->expects($this->once())
+                ->method('callHelper')
+                ->with('foo', array('bar', 'baz'));
+        $v = new View('template.php');
+        $v->setCreator($creator);
+        $v->foo('bar', 'baz');
+    }
+
 }
