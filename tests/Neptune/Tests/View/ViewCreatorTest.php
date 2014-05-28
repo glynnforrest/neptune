@@ -80,4 +80,24 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('STRING', $this->creator->callHelper('foo', array('string')));
     }
 
+    public function testAddExtensionAndGetHelpers()
+    {
+        $ext = $this->getMock('Neptune\View\Extension\ExtensionInterface');
+        $ext->expects($this->once())
+            ->method('getHelpers')
+            ->will($this->returnValue(array('foo' => 'fooMethod')));
+        $this->assertSame($this->creator, $this->creator->addExtension($ext));
+        $functions = array(
+            'foo' => array($ext, 'fooMethod')
+        );
+        $this->assertSame($functions, $this->creator->getHelpers());
+    }
+
+    public function testAddAndCallHelperFromExtension()
+    {
+        $ext = new FooExtension();
+        $this->assertSame($this->creator, $this->creator->addExtension($ext));
+        $this->assertSame('Foo: hello', $this->creator->callHelper('foo', array('hello')));
+    }
+
 }

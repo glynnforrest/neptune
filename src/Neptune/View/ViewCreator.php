@@ -3,6 +3,7 @@
 namespace Neptune\View;
 
 use Neptune\Core\Neptune;
+use Neptune\View\Extension\ExtensionInterface;
 
 /**
  * ViewCreator
@@ -76,4 +77,15 @@ class ViewCreator
         return call_user_func_array($this->helpers[$name], $args);
     }
 
+    public function addExtension(ExtensionInterface $extension)
+    {
+        //grab all the helpers from the extension and add to the
+        //helpers array
+        $helpers = (array) $extension->getHelpers();
+        foreach ($helpers as $name => $method) {
+            $this->helpers[$name] = array($extension, $method);
+        }
+
+        return $this;
+    }
 }
