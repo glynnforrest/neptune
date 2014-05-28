@@ -74,6 +74,10 @@ class ViewCreator
      */
     public function callHelper($name, array $args)
     {
+        if (!isset($this->helpers[$name])) {
+            throw new \Exception("View helper not found: $name");
+        }
+
         return call_user_func_array($this->helpers[$name], $args);
     }
 
