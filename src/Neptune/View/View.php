@@ -21,6 +21,15 @@ class View {
         $this->creator = $creator;
     }
 
+    public function getCreator()
+    {
+        if (!isset($this->creator)) {
+            throw new \Exception('ViewCreator not set');
+        }
+
+        return $this->creator;
+    }
+
 	public function __set($key, $value) {
 		return $this->set($key, $value);
 	}
@@ -94,12 +103,17 @@ class View {
 
     public function load($view, array $values = array())
     {
-        return $this->creator->load($view, $values);
+        return $this->getCreator()->load($view, $values);
+    }
+
+    public function insert($view, array $values = array())
+    {
+        echo $this->load($view, $values)->render();
     }
 
     public function __call($method, $args)
     {
-        return $this->creator->callHelper($method, $args);
+        return $this->getCreator()->callHelper($method, $args);
     }
 
 }
