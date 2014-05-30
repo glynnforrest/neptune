@@ -64,10 +64,10 @@ abstract class CreateCommand extends Command {
 	abstract protected function getSkeleton($name);
 
 	protected function getSkeletonPath($skeleton) {
-		return $this->config->getRequired('dir.neptune') . 'skeletons/' . $skeleton;
+		return $this->neptune->getRootDirectory() . 'vendor/glynnforrest/neptune/' . 'skeletons/' . $skeleton . '.php';
 	}
 
-	protected function checkModule() {
+	protected function getModule() {
 		$module = $this->input->getOption('module');
 		$this->config->getRequired('modules.' . $module);
 		$this->console->verbose(sprintf('Target module: <info>%s</info>', $module));
@@ -84,19 +84,12 @@ abstract class CreateCommand extends Command {
     }
 
 	public function go(Console $console) {
-		try {
-			$this->checkModule();
-		} catch (ConfigKeyException $e) {
-			$console->writeln(sprintf("<error>%s</error>", $e->getMessage()));
-			return false;
-		}
         $name = $this->getResourceName();
 		$skeleton = $this->getSkeleton($name);
 
-		$module = $this->input->getOption('module');
+		$module = $this->getModule();
 		$skeleton->setNamespace($this->getModuleNamespace($module));
-		$target_file = $this->getModuleDirectory($module) .
-			$this->getTargetPath($name);
+		$target_file = $this->getModuleDirectory($module) . $this->getTargetPath($name);
         $directory = dirname($target_file);
         if(!file_exists($directory)) {
             mkdir($directory, true);
@@ -112,13 +105,13 @@ abstract class CreateCommand extends Command {
 	protected function saveSkeletonToFile(Skeleton $skeleton, $file) {
 		$create_msg = "Created <info>$file</info>";
 		try {
-			$skeleton->saveSkeleton($file);
+			$skeleton->save($file);
 			$this->output->writeln($create_msg);
 		} catch (FileException $e){
 			//ask to overwrite the file
 			$overwrite = $this->getHelper('dialog')->askConfirmation($this->output, "<info>$file</info> exists. Overwrite? ", false);
 			if($overwrite) {
-				$skeleton->saveSkeleton($file, true);
+				$skeleton->save($file, true);
 				$this->output->writeln($create_msg);
 			}
 		}
