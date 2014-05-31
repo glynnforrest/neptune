@@ -27,7 +27,7 @@ class CreateCommandCommand extends CreateCommand {
 	}
 
 	protected function getSkeleton($name) {
-		$skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('command'));
+        $skeleton = new Skeleton($this->getSkeletonPath('command'));
 		$skeleton->class_name = $this->createClassName($name);
 		$skeleton->name = $name;
 		$skeleton->description = 'Description for ' . $name;
