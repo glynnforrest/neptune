@@ -23,7 +23,7 @@ class CreateControllerCommand extends CreateCommand {
 	}
 
 	protected function getSkeleton($name) {
-		$skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('controller'));
+        $skeleton = new Skeleton($this->getSkeletonPath('controller'));
 		$name = S::UpperCamelize($name) . 'Controller';
 		$skeleton->controller_name = $name;
 		return $skeleton;
