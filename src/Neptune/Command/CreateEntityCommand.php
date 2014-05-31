@@ -25,7 +25,7 @@ class CreateEntityCommand extends CreateCommand {
 	}
 
 	protected function getSkeleton($name) {
-		$skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('entity'));
+        $skeleton = new Skeleton($this->getSkeletonPath('entity'));
 		$name = S::UpperCamelize($name);
 		$skeleton->entity_name = $name;
 		$skeleton->table = Inflector::locale()->plural(S::slugify($name, '_'));
