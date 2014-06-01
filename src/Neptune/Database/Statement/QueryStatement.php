@@ -19,6 +19,11 @@ class QueryStatement
         $this->statement = $statement;
     }
 
+    public function __call($method, $args)
+    {
+        return call_user_func_array(array($this->statement, $method), $args);
+    }
+
     public function setParameters(array $params = array())
     {
         $this->params = $params;
