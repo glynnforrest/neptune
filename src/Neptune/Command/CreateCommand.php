@@ -67,12 +67,6 @@ abstract class CreateCommand extends Command {
 		return $this->neptune->getRootDirectory() . 'vendor/glynnforrest/neptune/' . 'skeletons/' . $skeleton . '.php';
 	}
 
-	protected function getModule() {
-		$module = $this->input->getOption('module');
-		$this->config->getRequired('modules.' . $module);
-		$this->console->verbose(sprintf('Target module: <info>%s</info>', $module));
-	}
-
     protected function getResourceName()
     {
 		$name = $this->input->getArgument('name');
@@ -85,9 +79,11 @@ abstract class CreateCommand extends Command {
 
 	public function go(Console $console) {
         $name = $this->getResourceName();
-		$skeleton = $this->getSkeleton($name);
+        $skeleton = $this->getSkeleton($name);
 
-		$module = $this->getModule();
+        $module = $this->input->getOption('module');
+        $this->console->verbose(sprintf('Target module: <info>%s</info>', $module));
+
 		$skeleton->setNamespace($this->getModuleNamespace($module));
 		$target_file = $this->getModuleDirectory($module) . $this->getTargetPath($name);
         $directory = dirname($target_file);
