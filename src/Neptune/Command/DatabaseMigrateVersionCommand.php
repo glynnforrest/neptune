@@ -42,9 +42,7 @@ class DatabaseMigrateVersionCommand extends Command
         $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
         $version = $this->input->getArgument('version');
         $module = $this->input->getOption('module');
-        $path = $this->getModuleDirectory($module) . 'Migrations/';
-        $namespace = $this->getModuleNamespace($module) . '\\Migrations\\';
-        $runner->migrate($path, $namespace, $version);
+        $runner->migrate($this->neptune->getModule($module), $version);
     }
 
 }

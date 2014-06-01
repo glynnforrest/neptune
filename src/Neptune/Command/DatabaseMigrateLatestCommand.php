@@ -35,9 +35,7 @@ class DatabaseMigrateLatestCommand extends Command
     {
         $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
         $module = $this->input->getOption('module');
-        $path = $this->getModuleDirectory($module) . 'Migrations/';
-        $namespace = $this->getModuleNamespace($module) . '\\Migrations\\';
-        $runner->migrateLatest($path, $namespace);
+        $runner->migrateLatest($this->neptune->getModule($module));
     }
 
 }

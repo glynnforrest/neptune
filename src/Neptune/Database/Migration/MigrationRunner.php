@@ -3,6 +3,7 @@
 namespace Neptune\Database\Migration;
 
 use Neptune\Database\Driver\DatabaseDriverInterface;
+use Neptune\Service\AbstractModule;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -43,13 +44,16 @@ class MigrationRunner
         $stmt->execute();
     }
 
-    public function migrate($migrations_directory, $namespace, $version)
+    public function migrate(AbstractModule $module, $version)
     {
         $this->initMigrationsTable();
+        $migrations_directory = $module->getDirectory() . 'Migrations/';
         if (!is_dir($migrations_directory)) {
             throw new \Exception($migrations_directory . ' does not exist');
         }
         $this->dir = $migrations_directory;
+
+        $namespace = $module->getNamespace() . '\\Migrations\\';
         $this->namespace = $namespace;
 
         $file = $migrations_directory . 'Migration' . $version . '.php';
@@ -75,15 +79,16 @@ class MigrationRunner
         //end transaction
     }
 
-    public function migrateLatest($migrations_directory, $namespace)
+    public function migrateLatest(AbstractModule $module)
     {
+        $migrations_directory = $module->getDirectory() . 'Migrations/';
         if (!is_dir($migrations_directory)) {
             throw new \Exception($migrations_directory . ' does not exist');
         }
         $files = scandir($migrations_directory, 1);
         $version = substr($files[0], -18, -4);
 
-        return $this->migrate($migrations_directory, $namespace, $version);
+        return $this->migrate($module, $version);
     }
 
     protected function isValidFile($file)
