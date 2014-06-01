@@ -27,14 +27,26 @@ class MigrationRunner
         $this->log_level = $log_level;
     }
 
-    public function createTable()
+    public function initMigrationsTable()
     {
-        //create sql for migrations
+        $stmt = $this->driver->prepare('show tables');
+        $stmt->execute();
+        $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+        if (in_array('neptune_migrations', $tables)) {
+            return true;
+        }
+
+        $sql = 'create table neptune_migrations (';
+        $sql .= 'version varchar(255) not null,';
+        $sql .= 'module varchar(255) not null)';
+        $stmt = $this->driver->prepare($sql);
+        $stmt->execute();
     }
 
     public function migrate($migrations_directory, $namespace, $version)
     {
-        if(!is_dir($migrations_directory)) {
+        $this->initMigrationsTable();
+        if (!is_dir($migrations_directory)) {
             throw new \Exception($migrations_directory . ' does not exist');
         }
         $this->dir = $migrations_directory;
@@ -51,6 +63,7 @@ class MigrationRunner
         $current = $this->getCurrentMigration();
         if ($version == $current) {
             $this->log("Database is already at version $version");
+
             return true;
         }
         $direction = ($current < $version) ? true : false;
@@ -64,7 +77,7 @@ class MigrationRunner
 
     public function migrateLatest($migrations_directory, $namespace)
     {
-        if(!is_dir($migrations_directory)) {
+        if (!is_dir($migrations_directory)) {
             throw new \Exception($migrations_directory . ' does not exist');
         }
         $files = scandir($migrations_directory, 1);
@@ -80,6 +93,7 @@ class MigrationRunner
         if ($file->isFile() || preg_match('`Migration\d{14}.php`', $filename)) {
             return true;
         }
+
         return false;
     }
 
@@ -110,6 +124,7 @@ class MigrationRunner
             }
             $migrations[] = $migration;
         }
+
         return $migrations;
     }
 
@@ -142,12 +157,13 @@ class MigrationRunner
         if ($res) {
             return $res['version'];
         }
+
         return 0;
     }
 
     protected function logVersionUp($version)
     {
-        $sql = sprintf('INSERT INTO neptune_migrations values ("%s")', $version);
+        $sql = sprintf('INSERT INTO neptune_migrations values ("%s", "%s")', $version, 'module-name');
         $stmt = $this->driver->prepare($sql);
         $stmt->execute();
     }
