@@ -2,7 +2,6 @@
 namespace <?=$this->namespace;?>\Controller;
 
 use Neptune\Controller\Controller;
-use Neptune\View\View;
 
 use Symfony\Component\HttpFoundation\Request;
 
