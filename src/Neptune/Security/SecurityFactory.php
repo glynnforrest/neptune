@@ -5,7 +5,8 @@ namespace Neptune\Security;
 use Blockade\Driver\DriverInterface;
 use Blockade\Driver\PassDriver;
 use Blockade\Driver\FailDriver;
-use Blockade\Driver\ConfigDriver;
+
+use Neptune\Security\Driver\ConfigDriver;
 
 use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
