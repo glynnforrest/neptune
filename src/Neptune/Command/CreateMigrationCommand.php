@@ -26,7 +26,7 @@ class CreateMigrationCommand extends CreateCommand
 
     protected function getSkeleton($name)
     {
-        $skeleton = Skeleton::loadAbsolute($this->getSkeletonPath('migration'));
+        $skeleton = new Skeleton($this->getSkeletonPath('migration'));
         $skeleton->class_name = $name;
 
         return $skeleton;
