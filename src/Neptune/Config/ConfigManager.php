@@ -123,6 +123,26 @@ class ConfigManager
     }
 
     /**
+     * Load the configuration for all loaded modules, if available,
+     * and return the Config instances as an array.
+     *
+     * @return array The module Config instances
+     */
+    public function loadAllModules()
+    {
+        $configs = array();
+        foreach (array_keys($this->neptune->getModules()) as $name) {
+            try {
+                $configs[] = $this->loadModule($name);
+            } catch (ConfigFileException $e) {
+                continue;
+            }
+        }
+
+        return $configs;
+    }
+
+    /**
      * Unload configuration settings with $name, requiring them to be
      * reloaded if they are to be used again.
      * If $name is not specified, all configuration files will be
