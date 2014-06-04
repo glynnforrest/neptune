@@ -157,7 +157,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function createModuleConfigs()
     {
-        //neptune will look in for config/modules/<modulename>.php and
+        //neptune will look for config/modules/<modulename>.php and
         //override any values in the module config. Set these files up here.
         $config = new Config('module');
         $config->set('foo', 'bar');
@@ -191,6 +191,17 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->createModuleConfigs();
         $config = $this->manager->loadModule();
+        $this->assertSame('bar-override', $config->get('foo'));
+    }
+
+    public function testLoadAllModules()
+    {
+        $this->createModuleConfigs();
+        $configs = $this->manager->loadAllModules();
+        $this->assertInternalType('array', $configs);
+        $this->assertTrue(count($configs) === 1);
+        $config = $configs[0];
+        $this->assertInstanceOf('Neptune\Config\Config', $config);
         $this->assertSame('bar-override', $config->get('foo'));
     }
 
