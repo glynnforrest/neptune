@@ -44,9 +44,10 @@ class View {
 		return $this->get($key);
 	}
 
-	public function get($key) {
-		return isset($this->vars[$key]) ? $this->vars[$key] : null;
-	}
+    public function get($key, $default = null)
+    {
+        return isset($this->vars[$key]) ? $this->vars[$key] : $default;
+    }
 
 	public function __isset($key) {
 		return isset($this->vars[$key]) ? true : false;

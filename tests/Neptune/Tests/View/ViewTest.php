@@ -55,6 +55,17 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($value, $v->key);
     }
 
+    /**
+     * @dataProvider dataProvider()
+     */
+    public function testGetWithDefault($value)
+    {
+        $v = new View('some/template.php');
+        $this->assertSame('default', $v->get('key', 'default'));
+        $v->key = $value;
+        $this->assertSame($value, $v->get('key', 'default'));
+    }
+
 	public function testIsset() {
 		$v = new View('some/file');
 		$v->key = 'value';
