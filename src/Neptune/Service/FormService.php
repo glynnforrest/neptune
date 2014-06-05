@@ -31,9 +31,12 @@ class FormService implements ServiceInterface
         $neptune['form'] = function($neptune) {
             $creator = new FormCreator($neptune, $neptune['dispatcher']);
 
-            foreach ($this->config->get('forms', array()) as $name => $class) {
-                $creator->register($name, $class);
+            foreach ($neptune['config.manager']->loadAllModules() as $config) {
+                foreach ($config->get('forms', array()) as $name => $class) {
+                    $creator->register($name, $class);
+                }
             }
+
             return $creator;
         };
     }
