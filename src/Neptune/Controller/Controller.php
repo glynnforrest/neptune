@@ -18,7 +18,6 @@ abstract class Controller implements NeptuneAwareInterface
 {
 
     protected $neptune;
-    protected $request;
 
     public function setNeptune(Neptune $neptune)
     {
