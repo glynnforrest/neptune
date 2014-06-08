@@ -11,6 +11,7 @@ use Neptune\Security\Driver\ConfigDriver;
 use Neptune\Core\AbstractFactory;
 use Neptune\Exceptions\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * SecurityFactory
@@ -18,6 +19,19 @@ use Neptune\Exceptions\DriverNotFoundException;
  */
 class SecurityFactory extends AbstractFactory
 {
+
+    protected $request;
+
+    /**
+     * Assign a Request to all drivers when they are retrieved using
+     * get(), but only if they don't have a request currently set.
+     *
+     * @param Request $request The request instance
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
 
     protected function create($name = null)
     {
@@ -52,6 +66,16 @@ class SecurityFactory extends AbstractFactory
             return $this->instances[$name];
         }
         throw new DriverNotFoundException("Security driver not implemented: $driver");
+    }
+
+    public function get($name = null)
+    {
+        $driver = parent::get($name);
+        if ($this->request && !$driver->hasRequest()) {
+            $driver->setRequest($this->request);
+        }
+
+        return $driver;
     }
 
     public function createPassDriver($name)

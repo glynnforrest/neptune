@@ -5,8 +5,6 @@ namespace Neptune\Tests\Security;
 use Neptune\Security\SecurityFactory;
 use Neptune\Config\Config;
 
-use Temping\Temping;
-
 require_once __DIR__ . '/../../../bootstrap.php';
 
 /**
@@ -109,6 +107,47 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
         $this->config->set('security.drivers.foo', 'service.foo');
         $msg = "Security driver 'foo' requested service 'service.foo' which does not implement Blockade\Driver\DriverInterface";
         $this->setExpectedException('\Neptune\Exceptions\DriverNotFoundException', $msg);
+        $this->factory->get('foo');
+    }
+
+    public function testRequestIsAssignedToDriver()
+    {
+        $driver = $this->getMock('Blockade\Driver\DriverInterface');
+        $this->neptune->expects($this->once())
+                      ->method('offsetGet')
+                      ->with('service.foo')
+                      ->will($this->returnValue($driver));
+        $this->config->set('security.drivers.foo', 'service.foo');
+
+        $request = $this->getMock('Symfony\Component\HttpFoundation\Request');
+        $this->factory->setRequest($request);
+
+        $driver->expects($this->once())
+               ->method('setRequest')
+               ->with($request);
+
+        $this->factory->get('foo');
+    }
+
+    public function testRequestIsNotAssignedToDriverWhenAlreadySet()
+    {
+        $driver = $this->getMock('Blockade\Driver\DriverInterface');
+        $this->neptune->expects($this->once())
+                      ->method('offsetGet')
+                      ->with('service.foo')
+                      ->will($this->returnValue($driver));
+        $this->config->set('security.drivers.foo', 'service.foo');
+
+        $request = $this->getMock('Symfony\Component\HttpFoundation\Request');
+        $this->factory->setRequest($request);
+
+        $driver->expects($this->once())
+               ->method('hasRequest')
+               ->will($this->returnValue(true));
+
+        $driver->expects($this->never())
+               ->method('setRequest');
+
         $this->factory->get('foo');
     }
 
