@@ -5,6 +5,7 @@ namespace Neptune\Service;
 use Neptune\Core\Neptune;
 use Neptune\Config\Config;
 use Neptune\Security\SecurityFactory;
+use Neptune\Security\SecurityRequestListener;
 
 use Blockade\Firewall;
 use Blockade\CsrfManager;
@@ -55,6 +56,9 @@ class SecurityService implements ServiceInterface
             //add resolvers automatically
         };
 
+        $neptune['security.request'] = function ($neptune) {
+            return new SecurityRequestListener($neptune['security']);
+        };
     }
 
     protected function registerFirewall(Neptune $neptune, Config $config)
@@ -105,7 +109,10 @@ class SecurityService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
-        $neptune['dispatcher']->addSubscriber($neptune['security.resolver']);
+        $dispatcher = $neptune['dispatcher'];
+
+        $dispatcher->addSubscriber($neptune['security.resolver']);
+        $dispatcher->addSubscriber($neptune['security.request']);
 
         //add the firewall if set up
         if ($neptune->offsetExists('security.firewall')) {
