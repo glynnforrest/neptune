@@ -33,9 +33,7 @@ class SecurityService implements ServiceInterface
     public function register(Neptune $neptune)
     {
         //if no config was supplied, grab the default
-        if (!$this->config) {
-            $config = $neptune['config'];
-        }
+        $config = $this->config ? $this->config : $neptune['config'];
 
         $neptune['security'] = function () use ($neptune, $config) {
             return new SecurityFactory($config, $neptune);
