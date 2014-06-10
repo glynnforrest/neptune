@@ -34,6 +34,9 @@ class SecurityRequestListenerTest extends \PHPUnit_Framework_TestCase
                       ->getMock();
 
         $event->expects($this->once())
+              ->method('isMasterRequest')
+              ->will($this->returnValue(true));
+        $event->expects($this->once())
               ->method('getRequest')
               ->will($this->returnValue($request));
 
