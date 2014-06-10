@@ -25,6 +25,10 @@ class SecurityRequestListener implements EventSubscriberInterface
 
     public function onKernelRequest(GetResponseEvent $event)
     {
+        if (!$event->isMasterRequest()) {
+            return;
+        }
+
         $this->factory->setRequest($event->getRequest());
 
         return true;
