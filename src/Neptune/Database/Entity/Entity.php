@@ -105,9 +105,9 @@ class Entity extends AbstractEntity {
             throw new \Exception('Can\'t update with no index key');
         }
         $q = $this->database->update();
-        $q->tables(static::$table);
-        $q->fields($this->modified);
-        $q->where(static::$primary_key . " =", '?');
+        $q->tables(static::$table)
+          ->fields($this->modified)
+          ->where(static::$primary_key . ' = ?');
         $stmt = $q->prepare();
         $values = array();
         foreach ($this->modified as $modified) {
@@ -123,8 +123,8 @@ class Entity extends AbstractEntity {
             $this->modified = array();
             return true;
         }
-    return false;
-}
+        return false;
+    }
 
 	public function insert() {
 		if (empty($this->modified)) {
