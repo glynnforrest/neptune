@@ -84,7 +84,7 @@ class Entity extends AbstractEntity {
 		if (!isset($this->values[static::$primary_key])) {
 			throw new \Exception('Can\'t delete with no index key');
 		}
-		$q->where(static::$primary_key. " =", '?');
+		$q->where(static::$primary_key. " = ?");
 		$stmt = $q->prepare();
 		if($this->current_index) {
 			$index = $this->current_index;
