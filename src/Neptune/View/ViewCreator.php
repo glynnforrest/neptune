@@ -42,7 +42,7 @@ class ViewCreator
     }
 
     /**
-     * Add a function as a helper to use inside of views.
+     * Add a function as a helper to use inside of templates.
      *
      * @param  string      $name     The name of the helper
      * @param  callable    $function The function
@@ -81,6 +81,12 @@ class ViewCreator
         return call_user_func_array($this->helpers[$name], $args);
     }
 
+    /**
+     * Add an Extension to use inside of templates.
+     *
+     * @param  ExtensionInterface $extension The Extension
+     * @return ViewCreator        This ViewCreator
+     */
     public function addExtension(ExtensionInterface $extension)
     {
         //grab all the helpers from the extension and add to the
