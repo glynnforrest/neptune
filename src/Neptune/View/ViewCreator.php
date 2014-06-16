@@ -24,7 +24,7 @@ class ViewCreator
         $this->neptune = $neptune;
     }
 
-    public function load($view, array $values = array())
+    protected function getViewFilename($view)
     {
         $pos = strpos($view, ':');
         if ($pos) {
@@ -33,12 +33,45 @@ class ViewCreator
         } else {
             $module = $this->neptune->getDefaultModule();
         }
-        $template = sprintf('%sviews/%s.php', $this->neptune->getModuleDirectory($module), $view);
-        $view = new View($template);
+
+        return sprintf('%sviews/%s.php', $this->neptune->getModuleDirectory($module), $view);
+    }
+
+    /**
+     * Load a view template. The view may be of the form <view> or
+     * <module>:<view>.
+     *
+     * @param  string $view The name of the view template
+     * @return View   The View instance
+     */
+    public function load($view, array $values = array())
+    {
+        $view = new View($this->getViewFilename($view));
         $view->setValues($values);
         $view->setCreator($this);
 
         return $view;
+    }
+
+    /**
+     * Check if a view template is available. The view may be of the
+     * form <view> or <module>:<view>.
+     *
+     * @param  string $view The name of the view template
+     * @return bool   If the template is available or not
+     */
+    public function has($view)
+    {
+        try {
+            $template = $this->getViewFilename($view);
+
+            return file_exists($template);
+        } catch (\Exception $e) {
+            //perhaps loading a module failed, but all we care about
+            //is the existence of the template and whether we can
+            //access it
+            return false;
+        }
     }
 
     /**

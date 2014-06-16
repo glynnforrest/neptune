@@ -100,4 +100,15 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Foo: hello', $this->creator->callHelper('foo', array('hello')));
     }
 
+    public function testHas()
+    {
+        $this->assertFalse($this->creator->has('test'));
+        $this->assertFalse($this->creator->has('foo:test'));
+
+        $this->temping->create('views/test.php');
+        $module = $this->setupModule('foo');
+        $this->moduleExpectsDirectory($module);
+        $this->assertTrue($this->creator->has('foo:test'));
+    }
+
 }
