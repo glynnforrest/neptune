@@ -32,8 +32,16 @@ class RouterListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
+        //if the request already has controller, method and args set,
+        //don't run the router
+        $attr = $request->attributes;
+        if ($attr->has('_controller') && $attr->has('_method') && $attr->has('_args')) {
+            return;
+        }
+
         //attempt to fetch a matched route from the cache. If this
-        //isn't successful, load routes from all registered modules.
+        //isn't successful, load routes from all registered modules
+        //and match.
         if (!$action = $this->router->matchCached($request)) {
             $this->router->routeModules($this->neptune);
             $action = $this->router->match($request);

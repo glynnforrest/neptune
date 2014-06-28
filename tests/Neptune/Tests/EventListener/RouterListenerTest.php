@@ -90,4 +90,34 @@ class RouterListenerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, RouterListener::getSubscribedEvents());
     }
 
+    public function testRouterNotRunWhenRequestAlreadyHasController()
+    {
+        $request = new Request();
+        $request->attributes->set('_controller', 'test_controller');
+        $request->attributes->set('_method', 'test_method');
+        $request->attributes->set('_args', 'test_args');
+
+        $event = $this->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseEvent')
+                      ->disableOriginalConstructor()
+                      ->getMock();
+
+        $event->expects($this->once())
+              ->method('getRequest')
+              ->will($this->returnValue($request));
+
+        $this->router->expects($this->never())
+                     ->method('matchCached');
+        $this->router->expects($this->never())
+                     ->method('routeModules');
+        $this->router->expects($this->never())
+                     ->method('match');
+
+        $this->listener->onKernelRequest($event);
+
+        //check that the listener hasn't changed the request
+        $this->assertSame('test_controller', $request->attributes->get('_controller'));
+        $this->assertSame('test_method', $request->attributes->get('_method'));
+        $this->assertSame('test_args', $request->attributes->get('_args'));
+    }
+
 }
