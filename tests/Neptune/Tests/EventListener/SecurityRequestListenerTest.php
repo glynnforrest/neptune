@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\Request;
 class SecurityRequestListenerTest extends \PHPUnit_Framework_TestCase
 {
 
+    protected $factory;
+    protected $listener;
+
     public function setUp()
     {
         $this->factory = $this->getMockBuilder('Neptune\Security\SecurityFactory')
