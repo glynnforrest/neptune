@@ -70,14 +70,15 @@ class View {
 		return $this->vars;
 	}
 
-	public function __toString() {
-		try {
-			$content = $this->render();
-		} catch (\Exception $e) {
-			return $e->getMessage();
-		}
-		return $content;
-	}
+    public function __toString()
+    {
+        try {
+            $content = $this->render();
+        } catch (\Exception $e) {
+            return null;
+        }
+        return $content;
+    }
 
     public function setView($view)
     {
@@ -93,14 +94,21 @@ class View {
 		return $this->view;
 	}
 
-	public function render() {
-		if (!file_exists($this->view)) {
-			throw new ViewNotFoundException("Could not load view $this->view");
-		}
-		ob_start();
-		include $this->view;
-		return ob_get_clean();
-	}
+    /**
+     * Render the view template with variables replaced by their
+     * values.
+     *
+     * @return string The contents of the view template
+     */
+    public function render()
+    {
+        if (!file_exists($this->view)) {
+            throw new ViewNotFoundException("View template not found: $this->view");
+        }
+        ob_start();
+        include $this->view;
+        return ob_get_clean();
+    }
 
     public function load($view, array $values = array())
     {
