@@ -75,7 +75,7 @@ class View {
         try {
             $content = $this->render();
         } catch (\Exception $e) {
-            return null;
+            return '';
         }
         return $content;
     }

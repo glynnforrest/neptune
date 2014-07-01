@@ -120,7 +120,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         //template name. Ensure __toString() does not return this
         //message, as it may leak information about the filesystem.
         $view = new View('some/non-existent-view.php');
-        $this->assertNull($view->__toString());
+        $this->assertSame('', (string) $view);
     }
 
 }
