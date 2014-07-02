@@ -31,6 +31,7 @@ class ConsoleListener implements EventSubscriberInterface
         'select',
         'table',
         'update',
+        'where'
     );
 
     public function __construct(OutputInterface $output, $verbosity = OutputInterface::VERBOSITY_VERBOSE)
@@ -42,7 +43,7 @@ class ConsoleListener implements EventSubscriberInterface
     public function onPrepare(DatabaseEvent $query)
     {
         if ($this->output->getVerbosity() >= $this->verbosity) {
-            $sql = $query->getData() . ' selection';
+            $sql = $query->getData();
             foreach ($this->sql_verbs as $verb) {
                 $sql = preg_replace("`\b($verb)\b`i", '<info>\1</info>', $sql);
             }
