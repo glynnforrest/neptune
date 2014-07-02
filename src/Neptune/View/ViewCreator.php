@@ -34,12 +34,20 @@ class ViewCreator
             $module = $this->neptune->getDefaultModule();
         }
 
+        //check for an overriding template in the app/ folder
+        $override = sprintf('%sapp/views/%s/%s.php', $this->neptune->getRootDirectory(), $module, $view);
+        if (file_exists($override)) {
+            return $override;
+        }
+
         return sprintf('%sviews/%s.php', $this->neptune->getModuleDirectory($module), $view);
     }
 
     /**
      * Load a view template. The view may be of the form <view> or
-     * <module>:<view>.
+     * <module>:<view>. A template inside a module is by overridden by
+     * a template with the same name inside the app/views/<module>
+     * directory.
      *
      * @param  string $view The name of the view template
      * @return View   The View instance
