@@ -27,12 +27,14 @@ class ViewCreator
     protected function getViewFilename($view)
     {
         $pos = strpos($view, ':');
-        if ($pos) {
-            $module = substr($view, 0, $pos);
-            $view = substr($view, $pos + 1);
-        } else {
-            $module = $this->neptune->getDefaultModule();
+        if (!$pos) {
+            //no module has been supplied, so use the app directory
+            return sprintf('%sapp/views/%s.php', $this->neptune->getRootDirectory(), $view);
         }
+
+        //the template is in a module
+        $module = substr($view, 0, $pos);
+        $view = substr($view, $pos + 1);
 
         //check for an overriding template in the app/ folder
         $override = sprintf('%sapp/views/%s/%s.php', $this->neptune->getRootDirectory(), $module, $view);

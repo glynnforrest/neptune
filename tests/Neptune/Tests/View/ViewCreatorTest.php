@@ -52,16 +52,6 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($filename, $view->getView());
     }
 
-    public function testLoadDefaultModule()
-    {
-        $module = $this->setupModule('test');
-        $this->moduleExpectsDirectory($module);
-        $view = $this->creator->load('test');
-        $this->assertInstanceOf('Neptune\View\View', $view);
-        $filename = $this->temping->getPathname('views/test.php');
-        $this->assertSame($filename, $view->getView());
-    }
-
     public function testAddAndGetHelper()
     {
         $function = function($string) {
@@ -124,17 +114,12 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('FOO', $view->render());
     }
 
-    public function testLoadWithOverrideDefaultModule()
+    public function testLoadWithNoModule()
     {
-        $module = $this->setupModule('test-module');
-        //create a view in the stubbed app/ directory that overrides
-        //the module template
-        $this->temping->create('app/views/test-module/test.php', 'FOO');
         $view = $this->creator->load('test');
         $this->assertInstanceOf('Neptune\View\View', $view);
-        $filename = $this->temping->getPathname('app/views/test-module/test.php');
+        $filename = $this->temping->getPathname('app/views/test.php');
         $this->assertSame($filename, $view->getView());
-        $this->assertSame('FOO', $view->render());
     }
 
 }
