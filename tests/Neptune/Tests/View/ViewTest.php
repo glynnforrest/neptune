@@ -12,17 +12,22 @@ require_once __DIR__ . '/../../../bootstrap.php';
  * ViewTest
  * @author Glynn Forrest me@glynnforrest.com
  **/
-class ViewTest extends \PHPUnit_Framework_TestCase {
+class ViewTest extends \PHPUnit_Framework_TestCase
+{
+    protected $temp;
+    protected $view;
 
-	protected $temp;
+    public function setUp()
+    {
+        $this->temp = new Temping();
+        $this->temp->create('test-view.php', 'TESTING');
+        $this->view = new View($this->temp->getPathname('test-view.php'));
+    }
 
-	public function setUp() {
-		$this->temp = new Temping();
-	}
-
-	public function tearDown() {
-		$this->temp->reset();
-	}
+    public function tearDown()
+    {
+        $this->temp->reset();
+    }
 
     public function dataProvider()
     {
@@ -39,10 +44,10 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
     /**
      * @dataProvider dataProvider()
      */
-    public function testSetAndGet($value) {
-        $v = new View('some/file');
-        $this->assertSame($v, $v->set('key', $value));
-        $this->assertSame($value, $v->get('key'));
+    public function testSetAndGet($value)
+    {
+        $this->assertSame($this->view, $this->view->set('key', $value));
+        $this->assertSame($value, $this->view->get('key'));
     }
 
     /**
@@ -50,9 +55,8 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
      */
     public function testMagicSetAndGet($value)
     {
-        $v = new View('some/file');
-        $v->key = $value;
-        $this->assertSame($value, $v->key);
+        $this->view->key = $value;
+        $this->assertSame($value, $this->view->key);
     }
 
     /**
@@ -60,45 +64,39 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetWithDefault($value)
     {
-        $v = new View('some/template.php');
-        $this->assertSame('default', $v->get('key', 'default'));
-        $v->key = $value;
-        $this->assertSame($value, $v->get('key', 'default'));
+        $this->assertSame('default', $this->view->get('key', 'default'));
+        $this->view->key = $value;
+        $this->assertSame($value, $this->view->get('key', 'default'));
     }
 
-	public function testIsset() {
-		$v = new View('some/file');
-		$v->key = 'value';
-		$this->assertTrue(isset($v->key));
-		$this->assertFalse(isset($v->not_set));
-	}
+    public function testIsset()
+    {
+        $this->view->key = 'value';
+        $this->assertTrue(isset($this->view->key));
+        $this->assertFalse(isset($this->view->not_set));
+    }
 
     public function testGetView()
     {
-        $v = new View('some/file');
-        $this->assertSame('some/file', $v->getView());
+        $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getView());
     }
 
     public function testSetView()
     {
-        $v = new View('some/file');
-        $this->assertSame('some/file', $v->getView());
-        $this->assertSame($v, $v->setView('some/other/file'));
-        $this->assertSame('some/other/file', $v->getView());
+        $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getView());
+        $this->assertSame($this->view, $this->view->setView('some/other/file'));
+        $this->assertSame('some/other/file', $this->view->getView());
     }
 
     public function testRender()
     {
-        $this->temp->create('foo.php', 'testing');
-        $view = new View($this->temp->getPathname('foo.php'));
-        $this->assertSame('testing', $view->render());
+        $this->assertSame('TESTING', $this->view->render());
     }
 
-    public function testRenderInvalidView()
+    public function testInvalidViewThrowsException()
     {
-        $v = new View('some/file');
         $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
-        $v->render();
+        new View('foo');
     }
 
     public function testCallHelper()
@@ -109,9 +107,15 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         $creator->expects($this->once())
                 ->method('callHelper')
                 ->with('foo', array('bar', 'baz'));
-        $v = new View('template.php');
-        $v->setCreator($creator);
-        $v->foo('bar', 'baz');
+        $this->view->setCreator($creator);
+        $this->view->foo('bar', 'baz');
+    }
+
+    public function testRenderThrowsExceptionIfTemplateIfDeleted()
+    {
+        $this->temp->delete('test-view.php');
+        $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
+        $this->view->render();
     }
 
     public function testToStringDoesNotLeakInformation()
@@ -119,8 +123,8 @@ class ViewTest extends \PHPUnit_Framework_TestCase {
         //The exception message thrown by render() contains the view
         //template name. Ensure __toString() does not return this
         //message, as it may leak information about the filesystem.
-        $view = new View('some/non-existent-view.php');
-        $this->assertSame('', (string) $view);
+        $this->temp->delete('test-view.php');
+        $this->assertSame('', (string) $this->view);
     }
 
 }

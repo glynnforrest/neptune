@@ -18,11 +18,20 @@ require_once __DIR__ . '/../../../bootstrap.php';
 class ViewCreatorTest extends \PHPUnit_Framework_TestCase
 {
 
+    protected $temping;
+    protected $neptune;
+    protected $creator;
+
     public function setUp()
     {
         $this->temping = new Temping();
         $this->neptune = new Neptune($this->temping->getDirectory());
         $this->creator = new ViewCreator($this->neptune);
+    }
+
+    public function tearDown()
+    {
+        $this->temping->reset();
     }
 
     protected function setupModule($name)
@@ -32,6 +41,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
                ->method('getName')
                ->will($this->returnValue($name));
         $this->neptune->addModule($module);
+        $this->temping->create('views/test-view.php');
         return $module;
     }
 
@@ -46,10 +56,9 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
     {
         $module = $this->setupModule('test');
         $this->moduleExpectsDirectory($module);
-        $view = $this->creator->load('test:test');
+        $view = $this->creator->load('test:test-view');
         $this->assertInstanceOf('Neptune\View\View', $view);
-        $filename = $this->temping->getPathname('views/test.php');
-        $this->assertSame($filename, $view->getView());
+        $this->assertSame($this->temping->getPathname('views/test-view.php'), $view->getView());
     }
 
     public function testAddAndGetHelper()
@@ -116,10 +125,11 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadWithNoModule()
     {
+        $this->temping->create('app/views/test.php', 'FOO');
         $view = $this->creator->load('test');
         $this->assertInstanceOf('Neptune\View\View', $view);
-        $filename = $this->temping->getPathname('app/views/test.php');
-        $this->assertSame($filename, $view->getView());
+        $this->assertSame($this->temping->getPathname('app/views/test.php'), $view->getView());
+        $this->assertSame('FOO', $view->render());
     }
 
 }

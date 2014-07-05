@@ -12,6 +12,9 @@ class View {
     protected $creator;
 
 	public function __construct($view, array $vars = array()) {
+        if (!file_exists($view)) {
+            throw new ViewNotFoundException("$view not found");
+        }
         $this->view = $view;
         $this->vars = $vars;
 	}
