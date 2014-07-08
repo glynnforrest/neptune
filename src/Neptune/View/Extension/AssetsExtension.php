@@ -2,7 +2,7 @@
 
 namespace Neptune\View\Extension;
 
-use Neptune\Assets\Assets;
+use Neptune\Assets\AssetManager;
 use Neptune\View\Extension\ExtensionInterface;
 
 /**
@@ -13,11 +13,11 @@ use Neptune\View\Extension\ExtensionInterface;
 class AssetsExtension implements ExtensionInterface
 {
 
-    protected $assets;
+    protected $manager;
 
-    public function __construct(Assets $assets)
+    public function __construct(AssetManager $manager)
     {
-        $this->assets = $assets;
+        $this->manager = $manager;
     }
 
     public function getHelpers()
@@ -31,17 +31,17 @@ class AssetsExtension implements ExtensionInterface
 
     public function assets()
     {
-        return $this->assets;
+        return $this->manager;
     }
 
-    public function js()
+    public function js($group = AssetManager::DEFAULT_GROUP)
     {
-        return $this->assets->js();
+        return $this->manager->js($group);
     }
 
-    public function css()
+    public function css($group = AssetManager::DEFAULT_GROUP)
     {
-        return $this->assets->css();
+        return $this->manager->css($group);
     }
 
 }
