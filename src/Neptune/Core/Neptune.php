@@ -16,14 +16,16 @@ use Neptune\Config\ConfigManager;
 use Neptune\Helpers\Url;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 use \Pimple;
 
-class Neptune extends Pimple implements HttpKernelInterface
+class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
 {
 
     protected $env;
@@ -180,6 +182,11 @@ class Neptune extends Pimple implements HttpKernelInterface
     {
         $response = $this->handle(Request::createFromGlobals());
         $response->send();
+    }
+
+    public function terminate(Request $request, Response $response)
+    {
+        $this->kernel->terminate($request, $response);
     }
 
 	/**
