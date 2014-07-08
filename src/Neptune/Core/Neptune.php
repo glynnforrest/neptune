@@ -75,6 +75,10 @@ class Neptune extends Pimple implements HttpKernelInterface
         $this['request_stack'] = function () {
             return new RequestStack();
         };
+
+        $this['kernel'] = function() {
+            return new HttpKernel($this['dispatcher'], $this['resolver'], $this['request_stack']);
+        };
     }
 
     /**
@@ -168,8 +172,8 @@ class Neptune extends Pimple implements HttpKernelInterface
     public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
         $this->boot();
-        $kernel = new HttpKernel($this['dispatcher'], $this['resolver'], $this['request_stack']);
-        return $kernel->handle($request, $type, $catch);
+
+        return $this['kernel']->handle($request, $type, $catch);
     }
 
     public function go()
