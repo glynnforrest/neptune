@@ -13,6 +13,8 @@ require_once __DIR__ . '/../../../bootstrap.php';
  **/
 class AssetManagerTest extends \PHPUnit_Framework_TestCase
 {
+    protected $generator;
+    protected $config;
     protected $assets;
 
     public function setUp()
@@ -20,7 +22,10 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->generator = $this->getMockBuilder('Neptune\Assets\TagGenerator')
                                 ->disableOriginalConstructor()
                                 ->getMock();
-        $this->assets = new AssetManager($this->generator);
+        $this->config = $this->getMockBuilder('Neptune\Config\ConfigManager')
+                             ->disableOriginalConstructor()
+                             ->getMock();
+        $this->assets = new AssetManager($this->config, $this->generator);
     }
 
     public function testCss()
@@ -29,16 +34,6 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->generator->expects($this->once())
                         ->method('css')
                         ->with('css/style.css')
-                        ->will($this->returnValue('foo'));
-        $this->assertSame('foo', $this->assets->css());
-    }
-
-    public function testCssOptions()
-    {
-        $this->assets->addCss('css/style.css', ['id' => 'stylesheet']);
-        $this->generator->expects($this->once())
-                        ->method('css')
-                        ->with('css/style.css', ['id' => 'stylesheet'])
                         ->will($this->returnValue('foo'));
         $this->assertSame('foo', $this->assets->css());
     }
@@ -75,7 +70,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCssGroupWithConcat()
     {
-        $assets = new AssetManager($this->generator, true);
+        $assets = new AssetManager($this->config, $this->generator, true);
         $assets->addCssGroup('login', [
             'main.css', 'styles.css', 'layout.css', 'form.css'
         ]);
@@ -91,16 +86,6 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->generator->expects($this->once())
                         ->method('js')
                         ->with('js/main.js')
-                        ->will($this->returnValue('foo'));
-        $this->assertSame('foo', $this->assets->js());
-    }
-
-    public function testJsOptions()
-    {
-        $this->assets->addJs('js/main.js', ['id' => 'my_script']);
-        $this->generator->expects($this->once())
-                        ->method('js')
-                        ->with('js/main.js', ['id' => 'my_script'])
                         ->will($this->returnValue('foo'));
         $this->assertSame('foo', $this->assets->js());
     }
@@ -135,7 +120,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsGroupWithConcat()
     {
-        $assets = new AssetManager($this->generator, true);
+        $assets = new AssetManager($this->config, $this->generator, true);
         $assets->addJsGroup('login', [
             'js/validation.js', 'js/forms.js'
         ]);
