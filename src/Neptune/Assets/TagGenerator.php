@@ -36,50 +36,23 @@ class TagGenerator
     }
 
     /**
-     * Create a list of html attributes from an associative array.
-     *
-     * @param  array  $attributes The attributes
-     * @return string The html attributes
-     */
-    protected function attributes(array $attributes)
-    {
-        $text = '';
-        foreach ($attributes as $key => $value) {
-            $text .=  sprintf(' %s="%s"', $key, $value);
-        }
-
-        return $text;
-    }
-
-    /**
      * Create a css tag.
      *
-     * @param string $src        The source
-     * @param array  $attributes The html attributes
+     * @param string $src The source
      */
-    public function css($src, array $attributes = array())
+    public function css($src)
     {
-        $attributes = array_merge(array(
-            'rel' => 'stylesheet',
-            'type' => 'text/css',
-            'href' => $this->createUrl($src)), $attributes);
-
-        return sprintf('<link%s />', $this->attributes($attributes)) . PHP_EOL;
+        return sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $this->createUrl($src)) . PHP_EOL;
     }
 
     /**
      * Create a javascript tag.
      *
-     * @param string $src        The source
-     * @param array  $attributes The html attributes
+     * @param string $src The source
      */
-    public function js($src, array $attributes = array())
+    public function js($src)
     {
-        $attributes = array_merge(array(
-            'type' => 'text/javascript',
-            'src' => $this->createUrl($src)), $attributes);
-
-        return sprintf('<script%s></script>', $this->attributes($attributes)) . PHP_EOL;
+        return sprintf('<script type="text/javascript" src="%s"></script>', $this->createUrl($src)) . PHP_EOL;
     }
 
     /**

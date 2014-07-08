@@ -25,26 +25,10 @@ class TagGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $this->generator->css('css/style.css'));
     }
 
-    public function testCssWithAttributes()
-    {
-        $expected = '<link rel="stylesheet" type="text/css" href="http://example.com/assets/css/style.css" id="css-id" />' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->css('css/style.css', ['id' => 'css-id']));
-    }
-
-    public function testCssWithOverrideAttributes()
-    {
-        $expected = '<link rel="foo" type="bar" href="baz" />' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->css('css/style.css', [
-            'rel' => 'foo',
-            'type' => 'bar',
-            'href' => 'baz'
-        ]));
-    }
-
     public function testExternalCssUrl()
     {
-        $expected = '<link rel="stylesheet" type="text/css" href="http://example.org/foo.css" id="css-id" />' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->css('http://example.org/foo.css', ['id' => 'css-id']));
+        $expected = '<link rel="stylesheet" type="text/css" href="http://example.org/foo.css" />' . PHP_EOL;
+        $this->assertSame($expected, $this->generator->css('http://example.org/foo.css'));
     }
 
     public function testJs()
@@ -53,25 +37,10 @@ class TagGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $this->generator->js('js/main.js'));
     }
 
-    public function testJsWithAttributes()
-    {
-        $expected = '<script type="text/javascript" src="http://example.com/assets/js/main.js" id="js-id"></script>' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->js('js/main.js', ['id' => 'js-id']));
-    }
-
-    public function testJsWithOverrideAttributes()
-    {
-        $expected = '<script type="bar" src="baz"></script>' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->js('js/main.js', [
-            'type' => 'bar',
-            'src' => 'baz'
-        ]));
-    }
-
     public function testExternalJsUrl()
     {
-        $expected = '<script type="text/javascript" src="http://example.com/foo.js" id="js-id"></script>' . PHP_EOL;
-        $this->assertSame($expected, $this->generator->js('http://example.com/foo.js', ['id' => 'js-id']));
+        $expected = '<script type="text/javascript" src="http://example.com/foo.js"></script>' . PHP_EOL;
+        $this->assertSame($expected, $this->generator->js('http://example.com/foo.js'));
     }
 
     public function testSetAssetsUrl()
