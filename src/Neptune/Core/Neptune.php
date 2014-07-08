@@ -180,13 +180,15 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
 
     public function go()
     {
-        $response = $this->handle(Request::createFromGlobals());
+        $request = Request::createFromGlobals();
+        $response = $this->handle($request);
         $response->send();
+        $this->terminate($request, $response);
     }
 
     public function terminate(Request $request, Response $response)
     {
-        $this->kernel->terminate($request, $response);
+        $this['kernel']->terminate($request, $response);
     }
 
 	/**
