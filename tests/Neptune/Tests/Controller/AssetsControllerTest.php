@@ -22,18 +22,15 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 
 	protected $dir;
 	protected $temp;
+    protected $neptune;
 
 	public function setUp() {
 		$this->temp = new Temping();
 		$this->dir = $this->temp->getDirectory();
-		$this->config = new Config('temp');
-		$this->config->set('assets.dir', $this->dir);
-        $neptune = $this->getMockBuilder('Neptune\Core\Neptune')
+        $this->neptune = $this->getMockBuilder('Neptune\Core\Neptune')
                         ->disableOriginalConstructor()
                         ->getMock();
-        $manager = new ConfigManager($neptune);
-        $manager->add($this->config);
-		$this->obj = new AssetsController($manager);
+		$this->obj = new AssetsController($this->neptune);
 	}
 
 	public function tearDown() {
@@ -45,41 +42,23 @@ class AssetsControllerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAssetPath() {
-		$actual = $this->dir . 'asset.css';
-		$this->assertEquals($actual, $this->obj->getAssetPath('asset.css'));
-	}
+		$actual = $this->dir . 'app/assets/asset.css';
+        $this->neptune->expects($this->once())
+                      ->method('getRootDirectory')
+                      ->will($this->returnValue($this->dir));
 
-	public function testGetAssetFiltersSingle() {
-		$filters = array('`.*foo.*`' => 'foo_filter');
-		$this->assertEquals(array('foo_filter'), $this->obj->getAssetFilters('asset_with_foo_in', $filters));
-		$this->assertEquals(array(), $this->obj->getAssetFilters('asset_without_f00_in', $filters));
-	}
-
-	public function testGetAssetFiltersMany() {
-		$filters = array('`.*\.js`' => 'js_filter',
-			'`.*\.css`' => 'css_filter|upper');
-		$this->assertEquals(array('js_filter'), $this->obj->getAssetFilters('javascript.js', $filters));
-		$this->assertEquals(array(), $this->obj->getAssetFilters('blahjs', $filters));
-		$this->assertEquals(array('css_filter', 'upper'), $this->obj->getAssetFilters('style.css', $filters));
-		$this->assertEquals(array('js_filter', 'css_filter', 'upper'), $this->obj->getAssetFilters('test.js.css', $filters));
+		$this->assertSame($actual, $this->obj->getAssetPath('asset.css'));
 	}
 
 	public function testServeAsset() {
-		$this->temp->create('asset.css', 'css_content');
+		$this->temp->create('app/assets/asset.css', 'css_content');
+        $this->neptune->expects($this->once())
+                      ->method('getRootDirectory')
+                      ->will($this->returnValue($this->dir));
 		$response = $this->obj->serveAssetAction(new Request(), 'asset.css');
 		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
 		$this->assertSame('css_content', $response->getContent());
 		$this->assertEquals('text/css', $response->headers->get('content-type'));
-	}
-
-	public function testServeFilteredAsset() {
-		$this->temp->create('filtered.js', 'js_content');
-		$this->config->set('assets.filters', array('`.*\.js$`' => 'upper'));
-		AssetsController::registerFilter('upper', '\\Neptune\\Tests\\Assets\\UpperCaseFilter');
-		$response = $this->obj->serveAssetAction(new Request(), 'filtered.js');
-		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
-		$this->assertEquals('JS_CONTENT', $response->getContent());
-		$this->assertEquals('application/javascript', $response->headers->get('content-type'));
 	}
 
 }
