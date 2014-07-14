@@ -11,20 +11,19 @@ use Neptune\Config\ConfigManager;
  **/
 class AssetManager
 {
-    const DEFAULT_GROUP = '__default';
 
     protected $config;
     protected $generator;
 
-    protected $assets = [];
     protected $concat;
+    protected $css = [];
+    protected $js = [];
 
     public function __construct(ConfigManager $config, TagGenerator $generator, $concatenate = false)
     {
         $this->config = $config;
         $this->generator = $generator;
         $this->concat = (bool) $concatenate;
-        $this->clear();
     }
 
     /**
@@ -43,10 +42,6 @@ class AssetManager
      */
     protected function locateGroup($group, $type)
     {
-        if (isset($this->assets[$type][$group])) {
-            return $this->assets[$type][$group];
-        }
-
         $pos = strpos($group, ':');
         if (!$pos) {
             throw new \Exception("Asset group not found: $group");
@@ -58,51 +53,54 @@ class AssetManager
         if (!is_array($assets)) {
             throw new \Exception("Asset group $group is not an array");
         }
-        $this->assets[$type][$group] = $assets;
 
         return $assets;
     }
 
-    public function addCss($src, $group = self::DEFAULT_GROUP)
+    public function addCss($src)
     {
-        $this->assets['css'][$group][] = $src;
+        $this->css[] = $src;
     }
 
-    public function addCssGroup($group, array $assets)
+    public function addCssGroup($name)
     {
-        $this->assets['css'][$group] = $assets;
-    }
+        if ($this->concat) {
+            $this->css[] = $this->hashGroup($name, 'css');
 
-    public function css($group = self::DEFAULT_GROUP)
-    {
-        if ($this->concat && $group !== self::DEFAULT_GROUP) {
-            return $this->generator->css($this->hashGroup($group, 'css'));
+            return;
         }
+        $this->css = array_merge($this->css, $this->locateGroup($name, 'css'));
+    }
+
+    public function css()
+    {
         $content ='';
-        foreach ($this->locateGroup($group, 'css') as $css) {
+        foreach ($this->css as $css) {
             $content .= $this->generator->css($css);
         }
 
         return $content;
     }
 
-    public function addJs($src, $group = self::DEFAULT_GROUP)
+    public function addJs($src)
     {
-        $this->assets['js'][$group][] = $src;
+        $this->js[] = $src;
     }
 
-    public function addJsGroup($group, array $assets)
+    public function addJsGroup($name)
     {
-        $this->assets['js'][$group] = $assets;
-    }
+        if ($this->concat) {
+            $this->js[] = $this->hashGroup($name, 'js');
 
-    public function js($group = self::DEFAULT_GROUP)
-    {
-        if ($this->concat && $group !== self::DEFAULT_GROUP) {
-            return $this->generator->js($this->hashGroup($group, 'js'));
+            return;
         }
+        $this->js = array_merge($this->js, $this->locateGroup($name, 'js'));
+    }
+
+    public function js()
+    {
         $content ='';
-        foreach ($this->locateGroup($group, 'js') as $js) {
+        foreach ($this->js as $js) {
             $content .= $this->generator->js($js);
         }
 
@@ -111,9 +109,8 @@ class AssetManager
 
     public function clear()
     {
-        $this->assets = ['css' => [], 'js' => []];
-        $this->assets['css'][self::DEFAULT_GROUP] = [];
-        $this->assets['js'][self::DEFAULT_GROUP] = [];
+        $this->css = [];
+        $this->js = [];
     }
 
 }

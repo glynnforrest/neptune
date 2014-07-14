@@ -52,11 +52,21 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('foofoo', $this->assets->css());
     }
 
+    protected function expectConfigFetch($type, $group_name, array $return_assets)
+    {
+        $config = new Config('testing');
+        $config->set("assets.$type.$group_name", $return_assets);
+        $this->config->expects($this->once())
+                     ->method('load')
+                     ->with('test')
+                     ->will($this->returnValue($config));
+    }
+
     public function testCssGroup()
     {
-        $this->assets->addCssGroup('login', [
-            'main.css', 'styles.css', 'layout.css', 'form.css'
-        ]);
+        $this->expectConfigFetch('css', 'login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
+        $this->assets->addCssGroup('test:login');
+
         $this->generator->expects($this->exactly(4))
                         ->method('css')
                         ->with($this->logicalOr(
@@ -65,19 +75,19 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                             $this->equalTo('layout.css'),
                             $this->equalTo('form.css')
                         ));
-        $this->assets->css('login');
+        $this->assets->css();
     }
 
     public function testCssGroupWithConcat()
     {
         $assets = new AssetManager($this->config, $this->generator, true);
-        $assets->addCssGroup('login', [
-            'main.css', 'styles.css', 'layout.css', 'form.css'
-        ]);
+
+        $assets->addCssGroup('test:login');
+
         $this->generator->expects($this->once())
                         ->method('css')
-                        ->with(md5('login') . '.css');
-        $assets->css('login');
+                        ->with(md5('test:login') . '.css');
+        $assets->css();
     }
 
     public function testJs()
@@ -106,28 +116,25 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsGroup()
     {
-        $this->assets->addJsGroup('login', [
-            'js/validation.js', 'js/forms.js'
-        ]);
+        $this->expectConfigFetch('js', 'login', ['js/validation.js', 'js/forms.js']);
+        $this->assets->addJsGroup('test:login');
         $this->generator->expects($this->exactly(2))
                         ->method('js')
                         ->with($this->logicalOr(
                             $this->equalTo('js/validation.js'),
                             $this->equalTo('js/forms.js')
                         ));
-        $this->assets->js('login');
+        $this->assets->js();
     }
 
     public function testJsGroupWithConcat()
     {
         $assets = new AssetManager($this->config, $this->generator, true);
-        $assets->addJsGroup('login', [
-            'js/validation.js', 'js/forms.js'
-        ]);
+        $assets->addJsGroup('test:login');
         $this->generator->expects($this->once())
                         ->method('js')
-                        ->with(md5('login') . '.js');
-        $assets->js('login');
+                        ->with(md5('test:login') . '.js');
+        $assets->js();
     }
 
 }
