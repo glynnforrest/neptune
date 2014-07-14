@@ -131,7 +131,7 @@ examples.
 It's also useful during development to make sure the browser is not
 caching any assets. Set `assets.cache_bust` to true in
 config/neptune.php to add cache busting to all asset urls. It's no
-replacement for a properly configured development server and make sure
+replacement for a properly configured development server, and make sure
 you don't leave it on for production, unless you enjoy large bandwidth bills.
 
 ##Working with build tools
@@ -169,7 +169,7 @@ And our second:
 //inside site-module/config.php
 'assets' => [
     //...
-    'install' => 'bower install && gulp,
+    'install' => 'bower install && gulp',
     'build' => 'gulp build'
 ]
 ```
