@@ -310,4 +310,36 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $c->toString());
     }
 
+    public function testGetAndSetRootUrl()
+    {
+        $config = new Config('neptune');
+        $this->assertNull($config->getRootUrl());
+        $config->setRootUrl('example.org');
+        $this->assertSame('example.org', $config->getRootUrl());
+    }
+
+    public function testGetUrl()
+    {
+        $neptune = new Config('neptune');
+        $neptune->setRootUrl('example.com/');
+        $neptune->set('some.url', 'url/foo/bar');
+        $this->assertSame('example.com/url/foo/bar', $neptune->getUrl('some.url'));
+    }
+
+    public function testGetUrlAbsolute()
+    {
+        $neptune = new Config('neptune');
+        $neptune->set('some.absolute.url', '/example.org');
+        $this->assertSame('/example.org', $neptune->getUrl('some.absolute.url'));
+    }
+
+    public function testGetUrlThrowsException()
+    {
+        $config = new Config('testing');
+        $msg = "Root url has not been set for Config instance 'testing'";
+        $this->setExpectedException('\Exception', $msg);
+        $config->set('foo', 'url/');
+        $config->getUrl('foo');
+    }
+
 }

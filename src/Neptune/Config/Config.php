@@ -19,6 +19,7 @@ class Config
     protected $dot_array;
     protected $original;
     protected $root_dir;
+    protected $root_url;
 
     public function __construct($name, $filename = null)
     {
@@ -152,6 +153,28 @@ class Config
     }
 
     /**
+     * Get a url from the configuration value that matches $key. The
+     * value will be added to the root url to form a complete
+     * directory path. If the url begins with a slash it will be
+     * treated as an absolute url and returned explicitly. A
+     * ConfigKeyException will be thrown if the url can't be resolved.
+     *
+     * @param string $key The key in the config file
+     */
+    public function getUrl($key)
+    {
+        $url = $this->getRequired($key);
+        if (substr($url, 0, 1) === '/') {
+            return $url;
+        }
+        if (!$this->root_url) {
+            throw new \Exception("Root url has not been set for Config instance '$this->name'");
+        }
+
+        return $this->root_url . $url;
+    }
+
+    /**
      * Set a configuration value with $key.
      * $key uses the dot array syntax: parent.child.child.
      * If $value is an array this will also be accessible using the
@@ -263,6 +286,29 @@ class Config
     public function getRootDirectory()
     {
         return $this->root_dir;
+    }
+
+    /**
+     * Set the path of the root url of the application. The
+     * directory is used in the getPath() method.
+     *
+     * @return string The root url, with a trailing slash
+     */
+    public function setRootUrl($url)
+    {
+        $this->root_url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get the path of the root url of the application.
+     *
+     * @return string The root url, with a trailing slash.
+     */
+    public function getRootUrl()
+    {
+        return $this->root_url;
     }
 
 }
