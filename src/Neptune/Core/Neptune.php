@@ -53,7 +53,7 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
         };
 
         $this['config.manager'] = function() {
-            $manager = new ConfigManager($this);
+            $manager = new ConfigManager($this, $this['url']->getRootUrl());
             $manager->add($this['config']);
             return $manager;
         };
