@@ -32,7 +32,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->temp = new Temping();
         $this->temp->init();
         $this->neptune = new Neptune($this->temp->getDirectory());
-        $this->manager = new ConfigManager($this->neptune);
+        $this->manager = new ConfigManager($this->neptune, 'myapp.local');
         $this->file =  __DIR__ . '/fixtures/config.php';
         $this->file2 = __DIR__ . '/fixtures/config2.php';
     }
@@ -261,6 +261,40 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $config->set('img_dir', 'public/images/');
         $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
+    }
+
+    public function testAddedConfigIsGivenRootDirectory()
+    {
+        $config = new Config('testing');
+        $this->assertNull($config->getRootDirectory());
+        $this->manager->add($config);
+        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+    }
+
+    public function testNewConfigIsGivenRootUrl()
+    {
+        $config = $this->manager->create('foo');
+        $this->assertSame('myapp.local', $config->getRootUrl());
+
+        $config->set('img_dir', 'public/images/');
+        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
+    }
+
+    public function testLoadedConfigIsGivenRootUrl()
+    {
+        $config = $this->manager->load('foo', __DIR__ . '/fixtures/config.php');
+        $this->assertSame('myapp.local', $config->getRootUrl());
+
+        $config->set('img_dir', 'public/images/');
+        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
+    }
+
+    public function testAddedConfigIsGivenRootUrl()
+    {
+        $config = new Config('testing');
+        $this->assertNull($config->getRootUrl());
+        $this->manager->add($config);
+        $this->assertSame('myapp.local', $config->getRootUrl());
     }
 
 }

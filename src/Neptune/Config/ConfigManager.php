@@ -16,11 +16,22 @@ class ConfigManager
     protected $configs = array();
     protected $neptune;
     protected $root_directory;
+    protected $root_url;
 
-    public function __construct(Neptune $neptune)
+    public function __construct(Neptune $neptune, $root_url)
     {
         $this->neptune = $neptune;
         $this->root_directory = $neptune->getRootDirectory();
+        $this->root_url = $root_url;
+    }
+
+    /**
+     * Set the root directory and url to a given config instance.
+     */
+    protected function initConfig(Config $config)
+    {
+        $config->setRootDirectory($this->root_directory);
+        $config->setRootUrl($this->root_url);
     }
 
     /**
@@ -32,7 +43,7 @@ class ConfigManager
     {
         $this->configs[$name] = new Config($name);
         $this->configs[$name]->setFilename($filename);
-        $this->configs[$name]->setRootDirectory($this->root_directory);
+        $this->initConfig($this->configs[$name]);
 
         return $this->configs[$name];
     }
@@ -80,7 +91,7 @@ class ConfigManager
         if ($override_name && isset($this->configs[$override_name])) {
             $this->configs[$override_name]->override($config->get());
         }
-        $config->setRootDirectory($this->root_directory);
+        $this->initConfig($config);
         $this->configs[$name] = $config;
 
         return $this->configs[$name];
@@ -164,7 +175,7 @@ class ConfigManager
      */
     public function add(Config $config)
     {
-        $config->setRootDirectory($this->root_directory);
+        $this->initConfig($config);
         $this->configs[$config->getName()] = $config;
     }
 
