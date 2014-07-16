@@ -19,6 +19,16 @@ class Url
         $this->root_url = $root_url;
     }
 
+    /**
+     * Get the root url.
+     *
+     * @return string The root url, with a trailing slash
+     */
+    public function getRootUrl()
+    {
+        return $this->root_url;
+    }
+
     public function to($url, $protocol = 'http')
     {
         if (strpos($url, '://')) {
