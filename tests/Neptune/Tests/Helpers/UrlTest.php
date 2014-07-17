@@ -34,4 +34,9 @@ class UrlTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('ftp://google.com', $this->url->to('ftp://google.com'));
     }
 
+    public function testToEmptyString()
+    {
+        $this->assertSame('http://myapp.local/', $this->url->to());
+    }
+
 }

@@ -19,7 +19,7 @@ class Url
         $this->root_url = $root_url;
     }
 
-    public function to($url, $protocol = 'http')
+    public function to($url = '', $protocol = 'http')
     {
         if (strpos($url, '://')) {
             return $url;
