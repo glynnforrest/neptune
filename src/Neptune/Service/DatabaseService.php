@@ -4,8 +4,6 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Database\DatabaseFactory;
-use Neptune\Database\Driver\PDOCreator;
-use Neptune\Database\EventListener\LoggerListener;
 
 /**
  * DatabaseService
@@ -19,7 +17,7 @@ class DatabaseService implements ServiceInterface
     {
 
         $neptune['database.factory'] = function($neptune) {
-            return new DatabaseFactory($neptune['config'], $neptune, new PDOCreator());
+            return new DatabaseFactory($neptune['config'], $neptune);
         };
 
         $neptune['db'] = function($neptune) {
