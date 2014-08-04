@@ -20,7 +20,7 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
         $this->config = new Config('neptune');
 
         $this->config->set('database.mysql', array(
-            'driver' => 'mysql',
+            'driver' => 'pdo_mysql',
             'database' => 'testing',
             'host' => 'example.org',
             'port' => '100',
@@ -32,33 +32,42 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
         $this->neptune = new Neptune('/root/app');
         $this->neptune['config'] = $this->config;
 
-        $this->creator = $this->getMock('\Neptune\Database\Driver\PDOCreator');
-
-        $this->factory = new DatabaseFactory($this->config, $this->neptune, $this->creator);
+        $this->factory = new DatabaseFactory($this->config, $this->neptune);
     }
 
     public function testGetDefaultDriver()
     {
-        $pdo = new PDOStub();
-        $this->creator->expects($this->once())
-                      ->method('createPDO')
-                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
-                      ->will($this->returnValue($pdo));
-        $driver = $this->factory->get();
-        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
-        $this->assertSame($driver, $this->factory->get());
+        $connection = $this->factory->get();
+        $this->assertInstanceOf('Doctrine\DBAL\Connection', $connection);
+        $this->assertSame($connection, $this->factory->get());
+        $this->assertInstanceOf('Doctrine\DBAL\Driver\PDOMysql\Driver', $connection->getDriver());
+    }
+
+    public function testDriverAsService()
+    {
+        $connection = $this->getMockBuilder('Doctrine\DBAL\Connection')
+                           ->disableOriginalConstructor()
+                           ->getMock();
+        $this->neptune['my_db'] = $connection;
+        $this->config->set('database.custom', 'my_db');
+        $this->assertSame($connection, $this->factory->get('custom'));
+    }
+
+    public function testInvalidServiceThrowsException()
+    {
+        $this->neptune['my_db'] = new \stdClass();
+        $this->config->set('database.custom', 'my_db');
+        $msg = "The database 'custom' requested service 'my_db' which is not an instance of Doctrine\DBAL\Connection";
+        $this->setExpectedException('Neptune\Exceptions\DriverNotFoundException', $msg);
+        $this->factory->get('custom');
     }
 
     public function testGetMysqlDriver()
     {
-        $pdo = new PDOStub();
-        $this->creator->expects($this->once())
-                      ->method('createPDO')
-                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
-                      ->will($this->returnValue($pdo));
-        $driver = $this->factory->get('mysql');
-        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
-        $this->assertSame($driver, $this->factory->get());
+        $connection = $this->factory->get('mysql');
+        $this->assertInstanceOf('Doctrine\DBAL\Connection', $connection);
+        $this->assertSame($connection, $this->factory->get('mysql'));
+        $this->assertInstanceOf('Doctrine\DBAL\Driver\PDOMysql\Driver', $connection->getDriver());
     }
 
     public function testGetMysqlDriverDefaultValues()
@@ -66,33 +75,15 @@ class DatabaseFactoryTest extends \PHPUnit_Framework_TestCase
         //host, port and charset can be optional. They default to
         //localhost, 3306 and UTF8.
         $this->config->set('database.mysql', array(
-            'driver' => 'mysql',
+            'driver' => 'pdo_mysql',
             'database' => 'testing',
             'user' => 'user',
             'pass' => 'pass',
         ));
-        $pdo = new PDOStub();
-        $this->creator->expects($this->once())
-                      ->method('createPDO')
-                      ->with('mysql:host=localhost;port=3306;dbname=testing;charset=UTF8', 'user', 'pass')
-                      ->will($this->returnValue($pdo));
-        $driver = $this->factory->get('mysql');
-        $this->assertInstanceOf('\Neptune\Database\Driver\PDODriver', $driver);
-        $this->assertSame($driver, $this->factory->get());
-    }
-
-    public function testGetMysqlDriverWithEventDriver()
-    {
-        $pdo = new PDOStub();
-        $this->config->set('database.mysql.events', true);
-        $this->creator->expects($this->once())
-                      ->method('createPDO')
-                      ->with('mysql:host=example.org;port=100;dbname=testing;charset=utf8', 'user', 'pass')
-                      ->will($this->returnValue($pdo));
-
-        $driver = $this->factory->get('mysql');
-        $this->assertInstanceOf('\Neptune\Database\Driver\EventDriver', $driver);
-        $this->assertSame($driver, $this->factory->get());
+        $connection = $this->factory->get('mysql');
+        $this->assertInstanceOf('Doctrine\DBAL\Connection', $connection);
+        $this->assertSame($connection, $this->factory->get('mysql'));
+        $this->assertInstanceOf('Doctrine\DBAL\Driver\PDOMysql\Driver', $connection->getDriver());
     }
 
 }
