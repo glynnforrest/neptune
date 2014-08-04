@@ -12,7 +12,8 @@
         "symfony/http-kernel": "2.4.*",
         "pimple/pimple": "2.*",
         "monolog/monolog": "1.*",
-        "doctrine/cache": "1.3.*"
+        "doctrine/cache": "1.3.*",
+        "doctrine/dbal": "2.*"
     },
     "license": "MIT",
     "require-dev": {
