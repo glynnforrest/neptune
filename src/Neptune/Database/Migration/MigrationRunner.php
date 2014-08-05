@@ -2,7 +2,7 @@
 
 namespace Neptune\Database\Migration;
 
-use Neptune\Database\Driver\DatabaseDriverInterface;
+use Doctrine\DBAL\Connection;
 use Neptune\Service\AbstractModule;
 
 use Psr\Log\LoggerInterface;
@@ -16,32 +16,42 @@ use Psr\Log\LogLevel;
 class MigrationRunner
 {
 
-    protected $driver;
-    protected $namespace;
+    protected $connection;
     protected $logger;
     protected $log_level;
+    protected $migrations_table = '_neptune_migrations';
 
-    public function __construct(DatabaseDriverInterface $driver, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
+    protected $dir;
+    protected $namespace;
+    protected $module_name;
+
+    public function __construct(Connection $connection, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
     {
-        $this->driver = $driver;
+        $this->connection = $connection;
         $this->logger = $logger;
         $this->log_level = $log_level;
     }
 
     public function initMigrationsTable()
     {
-        $stmt = $this->driver->prepare('show tables');
-        $stmt->execute();
-        $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-        if (in_array('neptune_migrations', $tables)) {
-            return true;
+        $sm = $this->connection->getSchemaManager();
+
+        foreach ($sm->listTables() as $table) {
+            if ($table->getName() === $this->migrations_table) {
+                return true;
+            }
         }
 
-        $sql = 'create table neptune_migrations (';
-        $sql .= 'version varchar(255) not null,';
-        $sql .= 'module varchar(255) not null)';
-        $stmt = $this->driver->prepare($sql);
-        $stmt->execute();
+        $current = $sm->createSchema();
+        $new = clone $current;
+        $table = $new->createTable('_neptune_migrations');
+        $table->addColumn("version", "string", array("length" => "14"));
+        $table->addColumn("module", "string", array("length" => "255"));
+
+        $queries = $current->getMigrateToSQL($new, $this->connection->getDatabasePlatform());
+        foreach ($queries as $query) {
+            $this->connection->executeQuery($query);
+        }
     }
 
     public function migrate(AbstractModule $module, $version)
@@ -51,32 +61,59 @@ class MigrationRunner
         if (!is_dir($migrations_directory)) {
             throw new \Exception($migrations_directory . ' does not exist');
         }
-        $this->dir = $migrations_directory;
 
-        $namespace = $module->getNamespace() . '\\Migrations\\';
-        $this->namespace = $namespace;
+        $this->dir = $migrations_directory;
+        $this->namespace = $module->getNamespace() . '\\Migrations\\';
+        $this->module_name = $module->getName();
 
         $file = $migrations_directory . 'Migration' . $version . '.php';
         if (!file_exists($file) && (int) $version !== 0) {
             throw new \Exception("Migration not found: $file");
         }
 
-        $this->messages = array();
-
-        //begin transaction
-        $current = $this->getCurrentMigration();
+        $current = $this->getCurrentVersion();
         if ($version == $current) {
             $this->log("Database is already at version $version");
 
             return true;
         }
-        $direction = ($current < $version) ? true : false;
-        //true is up, false is down
-        $migrations = $this->getMigrations($current, $version, $direction);
-        foreach ($migrations as $migration) {
-            $this->executeMigration($migration, $direction);
+
+        //begin transaction
+        if ($current < $version) {
+            $this->migrateUp($current, $version);
+        } else {
+            $this->migrateDown($current, $version);
         }
         //end transaction
+    }
+
+    /**
+     * Get the Migrations between a lower and higher version. The
+     * lower version is not included but the higher is.
+     */
+    protected function getMigrationsBetween($lower_version, $higher_version)
+    {
+        $migrations = [];
+        $files = new \DirectoryIterator($this->dir);
+        foreach ($files as $file) {
+            if ($file->isDot() || !$this->isValidFile($file)) {
+                continue;
+            }
+            $class = $this->namespace . $file->getBasename('.php');
+            $r = new \ReflectionClass($class);
+            if (!$r->isSubclassOf('Neptune\\Database\\Migration\\AbstractMigration') || $r->isAbstract()) {
+                continue;
+            }
+            $migration = $r->newInstance();
+            $version = $migration->getVersion();
+            if ($version <= $lower_version || $version > $higher_version) {
+                unset($migration);
+                continue;
+            }
+            $migrations[$version] = $migration;
+        }
+
+        return $migrations;
     }
 
     public function migrateLatest(AbstractModule $module)
@@ -102,82 +139,75 @@ class MigrationRunner
         return false;
     }
 
-    protected function getMigrations($current, $version, $up = true)
+    /**
+     * @param AbstractMigration $migration
+     * @param bool              $direction True for up, false for down
+     */
+    protected function runMigration(AbstractMigration $migration, $direction)
     {
-        $migrations = array();
-        $files = new \DirectoryIterator($this->dir);
-        foreach ($files as $file) {
-            if ($file->isDot() || !$this->isValidFile($file)) {
-                continue;
-            }
-            $class = $this->namespace . $file->getBasename('.php');
-            $r = new \ReflectionClass($class);
-            if (!$r->isSubclassOf('Neptune\\Database\\Migration\\AbstractMigration') || $r->isAbstract()) {
-                continue;
-            }
-            $migration = $r->newInstance();
-            //check for going up
-            if ($up && !$migration->isRequiredUp($current, $version)) {
-                unset($migration);
-                continue;
-            }
+        $current = $this->connection->getSchemaManager()->createSchema();
+        $new = clone $current;
 
-            //check for going down
-            if (!$up && !$migration->isRequiredDown($current, $version)) {
-                unset($migration);
-                continue;
-            }
-            $migrations[] = $migration;
-        }
-
-        return $migrations;
-    }
-
-    public function executeMigration(AbstractMigration $migration, $up = true)
-    {
-        $up ? $migration->up() : $migration->down();
-        $sql = $migration->getSql();
-        $this->log("Executing " . get_class($migration));
-        foreach ($sql as $query) {
-            $stmt = $this->driver->prepare($query);
-            try {
-                $stmt->execute();
-            } catch (\Exception $e) {
-                $this->log($e->getMessage());
-            }
-        }
-        if ($up) {
-            $this->logVersionUp($migration->getVersion());
+        if ($direction) {
+            $migration->up($new);
         } else {
-            $this->logVersionDown($migration->getVersion());
+            $migration->down($new);
+        }
+
+        $queries = $current->getMigrateToSQL($new, $this->connection->getDatabasePlatform());
+        foreach ($queries as $query) {
+            $this->connection->executeQuery($query);
         }
     }
 
-    protected function getCurrentMigration()
+    protected function migrateUp($current, $version)
     {
-        $sql = 'SELECT version FROM neptune_migrations ORDER BY version DESC';
-        $stmt = $this->driver->prepare($sql);
-        $stmt->execute();
-        $res = $stmt->fetch();
-        if ($res) {
-            return $res['version'];
+        //get all migrations between the current and the version
+        $migrations = $this->getMigrationsBetween($current, $version);
+        //sort the migrations by version number, lowest first
+        sort($migrations);
+
+        foreach ($migrations as $migration) {
+            $this->log('Executing ' . get_class($migration));
+            $this->runMigration($migration, true);
+
+            $this->connection->insert($this->migrations_table, [
+                'version' => $migration->getVersion(),
+                'module' => $this->module_name
+            ]);
         }
-
-        return 0;
     }
 
-    protected function logVersionUp($version)
+    protected function migrateDown($current, $version)
     {
-        $sql = sprintf('INSERT INTO neptune_migrations values ("%s", "%s")', $version, 'module-name');
-        $stmt = $this->driver->prepare($sql);
-        $stmt->execute();
+        //get all migrations between the version and the current
+        $migrations = $this->getMigrationsBetween($version, $current);
+        //sort the migrations by version number, highest first
+        rsort($migrations);
+
+        foreach ($migrations as $migration) {
+            $this->log('Reverting ' . get_class($migration));
+            $this->runMigration($migration, false);
+
+            $this->connection->delete($this->migrations_table, [
+                'version' => $migration->getVersion(),
+                'module' => $this->module_name
+            ]);
+        }
     }
 
-    protected function logVersionDown($version)
+    protected function getCurrentVersion()
     {
-        $sql = sprintf('DELETE FROM neptune_migrations WHERE version = "%s"', $version);
-        $stmt = $this->driver->prepare($sql);
-        $stmt->execute();
+        $qb = $this->connection->createQueryBuilder();
+        $qb->select('version')
+           ->from($this->migrations_table)
+           ->where('module = ?')
+           ->orderBy('version', 'DESC');
+        $stmt = $this->connection->prepare($qb->getSql());
+        $stmt->execute([$this->module_name]);
+        $result = $stmt->fetchColumn();
+
+        return $result ? $result : 0;
     }
 
     protected function log($message)
