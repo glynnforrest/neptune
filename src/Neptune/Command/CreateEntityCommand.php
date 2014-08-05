@@ -16,7 +16,7 @@ use Stringy\StaticStringy as S;
 class CreateEntityCommand extends CreateCommand {
 
 	protected $name = 'create:entity';
-	protected $description = 'Create a new entity and test';
+    protected $description = 'Create a new active doctrine entity and test';
 	protected $prompt = 'Entity name (a singular noun): ';
 	protected $default = 'User';
 
