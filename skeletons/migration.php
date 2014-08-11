@@ -5,7 +5,8 @@ use Neptune\Database\Migration\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 <?=$this->class_info;?>
-class <?=$this->class_name;?> extends AbstractMigration {
+class <?=$this->class_name;?> extends AbstractMigration
+{
 
     protected $description = '<?=$this->description;?>';
 
