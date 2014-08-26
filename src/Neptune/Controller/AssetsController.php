@@ -48,7 +48,7 @@ class AssetsController extends Controller {
         } else {
             return sprintf('%sapp/assets/%s', $this->neptune->getRootDirectory(), $asset);
         }
-        return sprintf('%s/assets/%s', $this->neptune->getModuleDirectory($module), $name);
+        return sprintf('%sassets/%s', $this->neptune->getModuleDirectory($module), $name);
     }
 
 }

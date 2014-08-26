@@ -34,14 +34,14 @@ class AssetsExtension implements ExtensionInterface
         return $this->manager;
     }
 
-    public function js($group = AssetManager::DEFAULT_GROUP)
+    public function js()
     {
-        return $this->manager->js($group);
+        return $this->manager->js();
     }
 
-    public function css($group = AssetManager::DEFAULT_GROUP)
+    public function css()
     {
-        return $this->manager->css($group);
+        return $this->manager->css();
     }
 
 }
