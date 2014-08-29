@@ -101,16 +101,6 @@ class View {
         return ob_get_clean();
     }
 
-    public function load($view, array $values = array())
-    {
-        return $this->getCreator()->load($view, $values);
-    }
-
-    public function insert($view, array $values = array())
-    {
-        echo $this->load($view, $values)->render();
-    }
-
     public function __call($method, $args)
     {
         return $this->getCreator()->callHelper($method, $args);
