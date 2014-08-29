@@ -29,7 +29,7 @@ class ViewCreator
         $pos = strpos($view, ':');
         if (!$pos) {
             //no module has been supplied, so use the app directory
-            return sprintf('%sapp/views/%s.php', $this->neptune->getRootDirectory(), $view);
+            return sprintf('%sapp/views/%s', $this->neptune->getRootDirectory(), $view);
         }
 
         //the template is in a module
@@ -37,12 +37,12 @@ class ViewCreator
         $view = substr($view, $pos + 1);
 
         //check for an overriding template in the app/ folder
-        $override = sprintf('%sapp/views/%s/%s.php', $this->neptune->getRootDirectory(), $module, $view);
+        $override = sprintf('%sapp/views/%s/%s', $this->neptune->getRootDirectory(), $module, $view);
         if (file_exists($override)) {
             return $override;
         }
 
-        return sprintf('%sviews/%s.php', $this->neptune->getModuleDirectory($module), $view);
+        return sprintf('%sviews/%s', $this->neptune->getModuleDirectory($module), $view);
     }
 
     /**
