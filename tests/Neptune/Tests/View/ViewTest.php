@@ -76,12 +76,37 @@ class ViewTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($this->view->not_set));
     }
 
-    public function testGetView()
+    public function testSetAndGetValues()
     {
-        $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getView());
+        $values = [
+            'one' => 'foo',
+            'two' => ['foo', 'bar'],
+            'three' => false
+        ];
+        $this->assertSame($this->view, $this->view->setValues($values));
+        $this->assertSame('foo', $this->view->get('one'));
+        $this->assertSame(['foo', 'bar'], $this->view->get('two'));
+        $this->assertSame(false, $this->view->get('three'));
+        $this->assertSame($values, $this->view->getValues());
     }
 
-    public function testSetView()
+    public function testAddValues()
+    {
+        $values = ['one' => 'foo'];
+
+        $this->assertSame($this->view, $this->view->setValues($values));
+        $this->assertSame('foo', $this->view->get('one'));
+
+        $this->assertSame($this->view, $this->view->addValues(['two' => 'bar']));
+        $this->assertSame('bar', $this->view->get('two'));
+        $this->assertSame(['one' => 'foo', 'two' => 'bar'], $this->view->getValues());
+
+        $this->assertSame($this->view, $this->view->addValues(['one' => 'bar', 'three' => 'baz']));
+        $this->assertSame('bar', $this->view->get('two'));
+        $this->assertSame(['one' => 'bar', 'two' => 'bar', 'three' => 'baz'], $this->view->getValues());
+    }
+
+    public function testSetAndGetView()
     {
         $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getView());
         $this->assertSame($this->view, $this->view->setView('some/other/file'));

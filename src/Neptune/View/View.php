@@ -117,7 +117,7 @@ class View
      */
     public function addValues(array $values = [])
     {
-        $this->values = array_merge($this->values, $values);
+        $this->vars = array_merge($this->vars, $values);
 
         return $this;
     }
