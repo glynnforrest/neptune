@@ -118,13 +118,4 @@ class ViewTest extends \PHPUnit_Framework_TestCase
         $this->view->render();
     }
 
-    public function testToStringDoesNotLeakInformation()
-    {
-        //The exception message thrown by render() contains the view
-        //template name. Ensure __toString() does not return this
-        //message, as it may leak information about the filesystem.
-        $this->temp->delete('test-view.php');
-        $this->assertSame('', (string) $this->view);
-    }
-
 }

@@ -73,16 +73,6 @@ class View {
 		return $this->vars;
 	}
 
-    public function __toString()
-    {
-        try {
-            $content = $this->render();
-        } catch (\Exception $e) {
-            return '';
-        }
-        return $content;
-    }
-
     public function setView($view)
     {
         $this->view = $view;
