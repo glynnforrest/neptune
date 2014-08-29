@@ -119,4 +119,11 @@ class ViewTest extends \PHPUnit_Framework_TestCase
         $this->view->render();
     }
 
+    public function testGetCreatorThrowsException()
+    {
+        $msg = 'ViewCreator not set on view with template "' . $this->temp->getPathname('test-view.php') . '"';
+        $this->setExpectedException('Neptune\View\Exception\ViewCreatorException', $msg);
+        $this->view->getCreator();
+    }
+
 }

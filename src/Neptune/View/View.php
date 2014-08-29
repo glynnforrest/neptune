@@ -3,6 +3,7 @@
 namespace Neptune\View;
 
 use Neptune\View\Exception\ViewNotFoundException;
+use Neptune\View\Exception\ViewCreatorException;
 
 class View
 {
@@ -30,13 +31,13 @@ class View
     /**
      * Get the ViewCreator instance that created this view.
      *
-     * @throws \Exception
+     * @throws ViewCreatorException
      * @return ViewCreator
      */
     public function getCreator()
     {
         if (!isset($this->creator)) {
-            throw new \Exception('ViewCreator not set');
+            throw new ViewCreatorException(sprintf('ViewCreator not set on view with template "%s"', $this->view));
         }
 
         return $this->creator;
