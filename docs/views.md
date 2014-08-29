@@ -111,7 +111,7 @@ and helps in creating portable code.
 $view = new View('/path/to/my-module/views/template.php');
 
 //use the load() method of ViewCreator
-$view = $creator->load('my-module:template');
+$view = $creator->load('my-module:template.php');
 ```
 
 ### Resolving template paths and overriding the template in a module
@@ -124,15 +124,15 @@ a view specific to your application.
 
 ```php
 /* load /app/views/my-view.php */
-$view = $creator->load('my-view');
+$view = $creator->load('my-view.php');
 
 /* load /path/to/my-module/views/index.php */
-$view = $creator->load('my-module:index');
+$view = $creator->load('my-module:index.php');
 
 /* this would have loaded /path/to/my-module/views/login.php, but
 /app/views/my-modules/login.php exists. The template in /app/views/
 takes precedence. */
-$view = $creator->load('my-module:login');
+$view = $creator->load('my-module:login.php');
 ```
 
 ### ViewService and controllers

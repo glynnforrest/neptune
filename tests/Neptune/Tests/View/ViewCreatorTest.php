@@ -41,7 +41,6 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
                ->method('getName')
                ->will($this->returnValue($name));
         $this->neptune->addModule($module);
-        $this->temping->create('views/test-view.php');
         return $module;
     }
 
@@ -56,7 +55,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
     {
         $module = $this->setupModule('test');
         $this->moduleExpectsDirectory($module);
-        $view = $this->creator->load('test:test-view');
+        $view = $this->creator->load('test:test-view.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
         $this->assertSame($this->temping->getPathname('views/test-view.php'), $view->getView());
     }
@@ -101,13 +100,13 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
 
     public function testHas()
     {
-        $this->assertFalse($this->creator->has('test'));
-        $this->assertFalse($this->creator->has('foo:test'));
+        $this->assertFalse($this->creator->has('test.php'));
+        $this->assertFalse($this->creator->has('foo:test.php'));
 
         $this->temping->create('views/test.php');
         $module = $this->setupModule('foo');
         $this->moduleExpectsDirectory($module);
-        $this->assertTrue($this->creator->has('foo:test'));
+        $this->assertTrue($this->creator->has('foo:test.php'));
     }
 
     public function testLoadWithOverride()
@@ -116,7 +115,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         //create a view in the stubbed app/ directory that overrides
         //the module template
         $this->temping->create('app/views/test-module/test.php', 'FOO');
-        $view = $this->creator->load('test-module:test');
+        $view = $this->creator->load('test-module:test.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
         $filename = $this->temping->getPathname('app/views/test-module/test.php');
         $this->assertSame($filename, $view->getView());
@@ -126,7 +125,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
     public function testLoadWithNoModule()
     {
         $this->temping->create('app/views/test.php', 'FOO');
-        $view = $this->creator->load('test');
+        $view = $this->creator->load('test.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
         $this->assertSame($this->temping->getPathname('app/views/test.php'), $view->getView());
         $this->assertSame('FOO', $view->render());
