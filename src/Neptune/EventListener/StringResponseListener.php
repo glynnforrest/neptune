@@ -7,6 +7,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+use Neptune\View\View;
+
 /**
  * StringResponseListener
  * @author Glynn Forrest me@glynnforrest.com
@@ -21,10 +23,14 @@ class StringResponseListener implements EventSubscriberInterface
     public function onKernelView(GetResponseForControllerResultEvent $event)
     {
         $response = $event->getControllerResult();
+
+        if ($response instanceof View) {
+            $response = $response->render();
+        }
+
         if (is_string($response) || (is_object($response) && method_exists($response, '__toString'))) {
             $event->setResponse(new Response((string) $response));
         }
-
     }
 
     public static function getSubscribedEvents()
