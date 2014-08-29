@@ -95,8 +95,9 @@ class ViewTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidViewThrowsException()
     {
+        $view = new View('foo');
         $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
-        new View('foo');
+        $view->render();
     }
 
     public function testCallHelper()

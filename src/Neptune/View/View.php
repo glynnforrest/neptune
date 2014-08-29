@@ -6,18 +6,16 @@ use Neptune\Exceptions\ViewNotFoundException;
 
 class View {
 
-	protected $vars = array();
+    protected $vars = [];
 	//complete file path to the view template.
 	protected $view;
     protected $creator;
 
-	public function __construct($view, array $vars = array()) {
-        if (!file_exists($view)) {
-            throw new ViewNotFoundException("$view not found");
-        }
+    public function __construct($view, array $vars = [])
+    {
         $this->view = $view;
         $this->vars = $vars;
-	}
+    }
 
     public function setCreator(ViewCreator $creator)
     {
