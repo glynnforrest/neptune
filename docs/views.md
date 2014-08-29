@@ -196,7 +196,7 @@ approach offers a few advantages.
 * Child views can be modified and overwritten, perhaps by some kind of
   event listener.
 * The template path could be changed dynamically, depending on some
-  kind of condition, using the `setView` method.
+  kind of condition, using the `setPathname` method.
 * View objects can be passed around before rendering. For example, a
   view may be passed to a series of decorators. Each of these
   decorators could add variables before finally rendering the view.

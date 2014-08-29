@@ -57,7 +57,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->moduleExpectsDirectory($module);
         $view = $this->creator->load('test:test-view.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
-        $this->assertSame($this->temping->getPathname('views/test-view.php'), $view->getView());
+        $this->assertSame($this->temping->getPathname('views/test-view.php'), $view->getPathname());
     }
 
     public function testAddAndGetHelper()
@@ -118,7 +118,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $view = $this->creator->load('test-module:test.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
         $filename = $this->temping->getPathname('app/views/test-module/test.php');
-        $this->assertSame($filename, $view->getView());
+        $this->assertSame($filename, $view->getPathname());
         $this->assertSame('FOO', $view->render());
     }
 
@@ -127,7 +127,7 @@ class ViewCreatorTest extends \PHPUnit_Framework_TestCase
         $this->temping->create('app/views/test.php', 'FOO');
         $view = $this->creator->load('test.php');
         $this->assertInstanceOf('Neptune\View\View', $view);
-        $this->assertSame($this->temping->getPathname('app/views/test.php'), $view->getView());
+        $this->assertSame($this->temping->getPathname('app/views/test.php'), $view->getPathname());
         $this->assertSame('FOO', $view->render());
     }
 

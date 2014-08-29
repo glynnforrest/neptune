@@ -8,12 +8,12 @@ use Neptune\View\Exception\ViewCreatorException;
 class View
 {
     protected $vars = [];
-    protected $view;
+    protected $pathname;
     protected $creator;
 
-    public function __construct($view, array $vars = [])
+    public function __construct($pathname, array $vars = [])
     {
-        $this->view = $view;
+        $this->pathname = $pathname;
         $this->vars = $vars;
     }
 
@@ -37,7 +37,7 @@ class View
     public function getCreator()
     {
         if (!isset($this->creator)) {
-            throw new ViewCreatorException(sprintf('ViewCreator not set on view with template "%s"', $this->view));
+            throw new ViewCreatorException(sprintf('ViewCreator not set on view with template "%s"', $this->pathname));
         }
 
         return $this->creator;
@@ -148,20 +148,26 @@ class View
 
     /**
      * Set the file path of the template.
+     *
+     * @param string $pathname The file path
+     *
+     * @return View This view instance
      */
-    public function setView($view)
+    public function setPathname($pathname)
     {
-        $this->view = $view;
+        $this->pathname = $pathname;
 
         return $this;
     }
 
     /**
-     * Get the file path of the template for this View instance.
+     * Get the file path of the template.
+     *
+     * @return string The file path
      */
-    public function getView()
+    public function getPathname()
     {
-        return $this->view;
+        return $this->pathname;
     }
 
     /**
@@ -172,11 +178,11 @@ class View
      */
     public function render()
     {
-        if (!file_exists($this->view)) {
-            throw new ViewNotFoundException("View template not found: $this->view");
+        if (!file_exists($this->pathname)) {
+            throw new ViewNotFoundException("View template not found: $this->pathname");
         }
         ob_start();
-        include $this->view;
+        include $this->pathname;
 
         return ob_get_clean();
     }

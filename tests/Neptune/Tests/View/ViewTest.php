@@ -106,11 +106,11 @@ class ViewTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(['one' => 'bar', 'two' => 'bar', 'three' => 'baz'], $this->view->getValues());
     }
 
-    public function testSetAndGetView()
+    public function testSetAndGetPathname()
     {
-        $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getView());
-        $this->assertSame($this->view, $this->view->setView('some/other/file'));
-        $this->assertSame('some/other/file', $this->view->getView());
+        $this->assertSame($this->temp->getPathname('test-view.php'), $this->view->getPathname());
+        $this->assertSame($this->view, $this->view->setPathname('some/other/file'));
+        $this->assertSame('some/other/file', $this->view->getPathname());
     }
 
     public function testRender()
