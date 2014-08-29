@@ -2,7 +2,7 @@
 
 namespace Neptune\View;
 
-use Neptune\Exceptions\ViewNotFoundException;
+use Neptune\View\Exception\ViewNotFoundException;
 
 class View
 {

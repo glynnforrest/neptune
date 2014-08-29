@@ -96,7 +96,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase
     public function testInvalidViewThrowsException()
     {
         $view = new View('foo');
-        $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
+        $this->setExpectedException('Neptune\View\Exception\ViewNotFoundException');
         $view->render();
     }
 
@@ -115,7 +115,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase
     public function testRenderThrowsExceptionIfTemplateIfDeleted()
     {
         $this->temp->delete('test-view.php');
-        $this->setExpectedException('Neptune\Exceptions\ViewNotFoundException');
+        $this->setExpectedException('Neptune\View\Exception\ViewNotFoundException');
         $this->view->render();
     }
 
