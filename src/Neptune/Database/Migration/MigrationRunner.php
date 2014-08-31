@@ -61,8 +61,6 @@ class MigrationRunner
 
         $current = $this->getCurrentVersion($module);
         if ((int) $version === (int) $current) {
-            $this->log("Database is already at version $version");
-
             return true;
         }
 

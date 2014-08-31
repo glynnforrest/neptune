@@ -62,6 +62,13 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
             $version = $versions[$index];
         }
 
+        $current = $runner->getCurrentVersion($module);
+        if ((int) $version === (int) $current) {
+            $this->output->writeln("Database is already at version $version");
+
+            return true;
+        }
+
         $runner->migrate($module, $version);
     }
 
