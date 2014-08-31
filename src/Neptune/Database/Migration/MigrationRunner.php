@@ -164,7 +164,7 @@ class MigrationRunner
         ksort($migrations);
 
         foreach ($migrations as $migration) {
-            $this->log('Executing ' . get_class($migration));
+            $this->log(sprintf('Executing %s %s', $migration->getVersion(), $migration->getDescription()));
             $this->runMigration($migration, true);
 
             $this->connection->insert($this->migrations_table, [
@@ -182,7 +182,7 @@ class MigrationRunner
         krsort($migrations);
 
         foreach ($migrations as $migration) {
-            $this->log('Reverting ' . get_class($migration));
+            $this->log(sprintf('Reverting %s %s', $migration->getVersion(), $migration->getDescription()));
             $this->runMigration($migration, false);
 
             $this->connection->delete($this->migrations_table, [
