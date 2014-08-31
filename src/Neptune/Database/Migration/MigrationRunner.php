@@ -2,8 +2,10 @@
 
 namespace Neptune\Database\Migration;
 
-use Doctrine\DBAL\Connection;
 use Neptune\Service\AbstractModule;
+
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\SchemaException;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -20,12 +22,18 @@ class MigrationRunner
     protected $logger;
     protected $log_level;
     protected $migrations_table = '_neptune_migrations';
+    protected $ignore_exceptions;
 
     public function __construct(Connection $connection, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
     {
         $this->connection = $connection;
         $this->logger = $logger;
         $this->log_level = $log_level;
+    }
+
+    public function ignoreExceptions($ignore = true)
+    {
+        $this->ignore_exceptions = $ignore;
     }
 
     public function initMigrationsTable()
@@ -142,15 +150,24 @@ class MigrationRunner
         $current = $this->connection->getSchemaManager()->createSchema();
         $new = clone $current;
 
-        if ($direction) {
-            $migration->up($new);
-        } else {
-            $migration->down($new);
-        }
+        try {
 
-        $queries = $current->getMigrateToSQL($new, $this->connection->getDatabasePlatform());
-        foreach ($queries as $query) {
-            $this->connection->executeQuery($query);
+            if ($direction) {
+                $migration->up($new);
+            } else {
+                $migration->down($new);
+            }
+
+            $queries = $current->getMigrateToSQL($new, $this->connection->getDatabasePlatform());
+            foreach ($queries as $query) {
+                $this->connection->executeQuery($query);
+            }
+
+        } catch (SchemaException $e) {
+            if ($this->ignore_exceptions) {
+                return true;
+            }
+            throw $e;
         }
     }
 
