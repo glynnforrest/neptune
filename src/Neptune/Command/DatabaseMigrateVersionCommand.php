@@ -35,12 +35,22 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
                  InputOption::VALUE_REQUIRED,
                  'The module containing the migration version.',
                  $this->getDefaultModule()
+             )
+             ->addOption(
+                 'force',
+                 'f',
+                 InputOption::VALUE_NONE,
+                 'Log each migration as successful even if it fails.'
              );
     }
 
     public function go(Console $console)
     {
         $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
+
+        if ($this->input->getOption('force')) {
+            $runner->ignoreExceptions();
+        }
 
         $module = $this->neptune->getModule($this->input->getOption('module'));
 
