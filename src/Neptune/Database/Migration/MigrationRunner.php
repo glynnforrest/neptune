@@ -21,10 +21,6 @@ class MigrationRunner
     protected $log_level;
     protected $migrations_table = '_neptune_migrations';
 
-    protected $dir;
-    protected $namespace;
-    protected $module_name;
-
     public function __construct(Connection $connection, LoggerInterface $logger = null, $log_level = LogLevel::INFO)
     {
         $this->connection = $connection;
@@ -57,22 +53,14 @@ class MigrationRunner
     public function migrate(AbstractModule $module, $version)
     {
         $this->initMigrationsTable();
-        $migrations_directory = $module->getDirectory() . 'Migrations/';
-        if (!is_dir($migrations_directory)) {
-            throw new \Exception($migrations_directory . ' does not exist');
-        }
 
-        $this->dir = $migrations_directory;
-        $this->namespace = $module->getNamespace() . '\\Migrations\\';
-        $this->module_name = $module->getName();
-
-        $file = $migrations_directory . 'Migration' . $version . '.php';
+        $file = $this->getMigrationsDirectory($module) . 'Migration' . $version . '.php';
         if (!file_exists($file) && (int) $version !== 0) {
             throw new \Exception("Migration not found: $file");
         }
 
-        $current = $this->getCurrentVersion();
-        if ($version == $current) {
+        $current = $this->getCurrentVersion($module);
+        if ((int) $version === (int) $current) {
             $this->log("Database is already at version $version");
 
             return true;
@@ -80,37 +68,60 @@ class MigrationRunner
 
         //begin transaction
         if ($current < $version) {
-            $this->migrateUp($current, $version);
+            $this->migrateUp($module, $current, $version);
         } else {
-            $this->migrateDown($current, $version);
+            $this->migrateDown($module, $current, $version);
         }
         //end transaction
     }
 
     /**
-     * Get the Migrations between a lower and higher version. The
+     * Get migrations between a lower and higher version in a module. The
      * lower version is not included but the higher is.
      */
-    protected function getMigrationsBetween($lower_version, $higher_version)
+    protected function getMigrationsBetween(AbstractModule $module, $lower_version, $higher_version)
     {
+        $migrations = $this->getAllMigrations($module);
+
+        return array_filter($migrations, function ($migration) use ($lower_version, $higher_version) {
+            $version = $migration->getVersion();
+
+            return $version > $lower_version && $version <= $higher_version;
+        });
+    }
+
+    protected function getMigrationsDirectory(AbstractModule $module)
+    {
+        $dir = $module->getDirectory() . 'Migrations/';
+        if (!is_dir($dir)) {
+            throw new \Exception($dir . ' does not exist');
+        }
+
+        return $dir;
+    }
+
+    /**
+     * Get all migrations from a module.
+     */
+    public function getAllMigrations(AbstractModule $module)
+    {
+        $namespace = $module->getNamespace() . '\\Migrations\\';
+        $directory = $this->getMigrationsDirectory($module);
+
         $migrations = [];
-        $files = new \DirectoryIterator($this->dir);
+        $files = new \DirectoryIterator($directory);
         foreach ($files as $file) {
-            if ($file->isDot() || !$this->isValidFile($file)) {
+            //Possible migrations are files of the form MigrationYYYYMMDDHHMMSS.php
+            if (!$file->isFile() || !preg_match('`Migration\d{14}.php`', $file->getFilename())) {
                 continue;
             }
-            $class = $this->namespace . $file->getBasename('.php');
+            $class = $namespace . $file->getBasename('.php');
             $r = new \ReflectionClass($class);
             if (!$r->isSubclassOf('Neptune\\Database\\Migration\\AbstractMigration') || $r->isAbstract()) {
                 continue;
             }
             $migration = $r->newInstance();
-            $version = $migration->getVersion();
-            if ($version <= $lower_version || $version > $higher_version) {
-                unset($migration);
-                continue;
-            }
-            $migrations[$version] = $migration;
+            $migrations[$migration->getVersion()] = $migration;
         }
 
         return $migrations;
@@ -126,17 +137,6 @@ class MigrationRunner
         $version = substr($files[0], -18, -4);
 
         return $this->migrate($module, $version);
-    }
-
-    protected function isValidFile($file)
-    {
-        $filename = $file->getFilename();
-        //Possible migrations are files of the form MigrationYYYYMMDDHHMMSS.php
-        if ($file->isFile() || preg_match('`Migration\d{14}.php`', $filename)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -160,10 +160,10 @@ class MigrationRunner
         }
     }
 
-    protected function migrateUp($current, $version)
+    protected function migrateUp(AbstractModule $module, $current, $version)
     {
         //get all migrations between the current and the version
-        $migrations = $this->getMigrationsBetween($current, $version);
+        $migrations = $this->getMigrationsBetween($module, $current, $version);
         //sort the migrations by version number, lowest first
         sort($migrations);
 
@@ -173,15 +173,15 @@ class MigrationRunner
 
             $this->connection->insert($this->migrations_table, [
                 'version' => $migration->getVersion(),
-                'module' => $this->module_name
+                'module' => $module->getName()
             ]);
         }
     }
 
-    protected function migrateDown($current, $version)
+    protected function migrateDown(AbstractModule $module, $current, $version)
     {
         //get all migrations between the version and the current
-        $migrations = $this->getMigrationsBetween($version, $current);
+        $migrations = $this->getMigrationsBetween($module, $version, $current);
         //sort the migrations by version number, highest first
         rsort($migrations);
 
@@ -191,20 +191,22 @@ class MigrationRunner
 
             $this->connection->delete($this->migrations_table, [
                 'version' => $migration->getVersion(),
-                'module' => $this->module_name
+                'module' => $module->getName()
             ]);
         }
     }
 
-    protected function getCurrentVersion()
+    public function getCurrentVersion(AbstractModule $module)
     {
+        $this->initMigrationsTable();
+
         $qb = $this->connection->createQueryBuilder();
         $qb->select('version')
            ->from($this->migrations_table)
            ->where('module = ?')
            ->orderBy('version', 'DESC');
         $stmt = $this->connection->prepare($qb->getSql());
-        $stmt->execute([$this->module_name]);
+        $stmt->execute([$module->getName()]);
         $result = $stmt->fetchColumn();
 
         return $result ? $result : 0;
