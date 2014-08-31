@@ -36,4 +36,9 @@ abstract class AbstractMigration implements NeptuneAwareInterface
         return substr(get_class($this), -14);
     }
 
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
 }
