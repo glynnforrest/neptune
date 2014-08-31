@@ -33,7 +33,11 @@ abstract class AbstractMigration implements NeptuneAwareInterface
 
     public function getVersion()
     {
-        return substr(get_class($this), -14);
+        $pieces = explode('\\', get_class($this));
+
+        /* ----9---- | -----14------- */
+        /* Migration | YYYYMMDDHHMMSS | NameOfThisMigration */
+        return substr(array_pop($pieces), 9, 14);
     }
 
     public function getDescription()

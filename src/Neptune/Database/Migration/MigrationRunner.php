@@ -54,9 +54,9 @@ class MigrationRunner
     {
         $this->initMigrationsTable();
 
-        $file = $this->getMigrationsDirectory($module) . 'Migration' . $version . '.php';
-        if (!file_exists($file) && (int) $version !== 0) {
-            throw new \Exception("Migration not found: $file");
+        $migrations = $this->getAllMigrations($module);
+        if (!isset($migrations[$version]) && (int) $version !== 0) {
+            throw new \Exception("Migration version not found: $version");
         }
 
         $current = $this->getCurrentVersion($module);
@@ -84,9 +84,9 @@ class MigrationRunner
         $migrations = $this->getAllMigrations($module);
 
         return array_filter($migrations, function ($migration) use ($lower_version, $higher_version) {
-            $version = $migration->getVersion();
+            $version = (int) $migration->getVersion();
 
-            return $version > $lower_version && $version <= $higher_version;
+            return $version > (int) $lower_version && $version <= (int) $higher_version;
         });
     }
 
@@ -112,7 +112,7 @@ class MigrationRunner
         $files = new \DirectoryIterator($directory);
         foreach ($files as $file) {
             //Possible migrations are files of the form MigrationYYYYMMDDHHMMSS.php
-            if (!$file->isFile() || !preg_match('`Migration\d{14}.php`', $file->getFilename())) {
+            if (!$file->isFile() || !preg_match('`Migration\d{14}\w*.php`', $file->getFilename())) {
                 continue;
             }
             $class = $namespace . $file->getBasename('.php');
@@ -129,12 +129,8 @@ class MigrationRunner
 
     public function migrateLatest(AbstractModule $module)
     {
-        $migrations_directory = $module->getDirectory() . 'Migrations/';
-        if (!is_dir($migrations_directory)) {
-            throw new \Exception($migrations_directory . ' does not exist');
-        }
-        $files = scandir($migrations_directory, 1);
-        $version = substr($files[0], -18, -4);
+        $migrations = $this->getAllMigrations($module);
+        $version = array_pop($migrations)->getVersion();
 
         return $this->migrate($module, $version);
     }
@@ -165,7 +161,7 @@ class MigrationRunner
         //get all migrations between the current and the version
         $migrations = $this->getMigrationsBetween($module, $current, $version);
         //sort the migrations by version number, lowest first
-        sort($migrations);
+        ksort($migrations);
 
         foreach ($migrations as $migration) {
             $this->log('Executing ' . get_class($migration));
@@ -183,7 +179,7 @@ class MigrationRunner
         //get all migrations between the version and the current
         $migrations = $this->getMigrationsBetween($module, $version, $current);
         //sort the migrations by version number, highest first
-        rsort($migrations);
+        krsort($migrations);
 
         foreach ($migrations as $migration) {
             $this->log('Reverting ' . get_class($migration));
