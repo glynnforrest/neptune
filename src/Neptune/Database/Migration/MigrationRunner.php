@@ -3,6 +3,7 @@
 namespace Neptune\Database\Migration;
 
 use Neptune\Service\AbstractModule;
+use Neptune\Database\Migration\Exception\MigrationNotFoundException;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\SchemaException;
@@ -64,7 +65,7 @@ class MigrationRunner
 
         $migrations = $this->getAllMigrations($module);
         if (!isset($migrations[$version]) && (int) $version !== 0) {
-            throw new \Exception("Migration version not found: $version");
+            throw new MigrationNotFoundException("Migration version not found: $version");
         }
 
         $current = $this->getCurrentVersion($module);
@@ -100,7 +101,7 @@ class MigrationRunner
     {
         $dir = $module->getDirectory() . 'Migrations/';
         if (!is_dir($dir)) {
-            throw new \Exception($dir . ' does not exist');
+            throw new MigrationNotFoundException($dir . ' does not exist');
         }
 
         return $dir;
