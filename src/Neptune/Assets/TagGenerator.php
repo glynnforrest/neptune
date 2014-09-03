@@ -76,4 +76,24 @@ class TagGenerator
         $this->assets_url = $assets_url;
     }
 
+    /**
+     * Create an inline javascript tag.
+     *
+     * @param string $js The javascript code
+     */
+    public function inlineJs($js)
+    {
+        return sprintf('<script type="text/javascript">%s</script>', PHP_EOL . $js . PHP_EOL) . PHP_EOL;
+    }
+
+    /**
+     * Create an inline css tag.
+     *
+     * @param string $css The css code
+     */
+    public function inlineCss($css)
+    {
+        return sprintf('<style type="text/css">%s</style>', PHP_EOL . $css . PHP_EOL) . PHP_EOL;
+    }
+
 }

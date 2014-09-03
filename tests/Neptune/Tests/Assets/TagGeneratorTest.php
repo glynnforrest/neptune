@@ -4,8 +4,6 @@ namespace Neptune\Tests\Assets;
 
 use Neptune\Assets\TagGenerator;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * TagGeneratorTest
  *
@@ -75,4 +73,21 @@ class TagGeneratorTest extends \PHPUnit_Framework_TestCase
         $js = '<script type="text/javascript" src="http://example.org/main.js"></script>' . PHP_EOL;
         $this->assertSame($js, $this->generator->js('http://example.org/main.js'));
     }
+
+    public function testInlineCss()
+    {
+        $css = '<style type="text/css">' . PHP_EOL . 'body { color: #666; }' . PHP_EOL . '</style>' . PHP_EOL;
+        $this->assertSame($css, $this->generator->inlineCss('body { color: #666; }'));
+        $this->generator->setCacheBusting();
+        $this->assertSame($css, $this->generator->inlineCss('body { color: #666; }'));
+    }
+
+    public function testInlineJs()
+    {
+        $js = '<script type="text/javascript">' . PHP_EOL . 'console.log(\'foo\');' . PHP_EOL . '</script>' . PHP_EOL;
+        $this->assertSame($js, $this->generator->inlineJs("console.log('foo');"));
+        $this->generator->setCacheBusting();
+        $this->assertSame($js, $this->generator->inlineJs("console.log('foo');"));
+    }
+
 }
