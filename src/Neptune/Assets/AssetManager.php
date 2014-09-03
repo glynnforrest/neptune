@@ -2,7 +2,6 @@
 
 namespace Neptune\Assets;
 
-use Neptune\Assets\TagGenerator;
 use Neptune\Config\ConfigManager;
 
 /**
@@ -11,6 +10,9 @@ use Neptune\Config\ConfigManager;
  **/
 class AssetManager
 {
+
+    const LINK = 1;
+    const INLINE = 2;
 
     protected $config;
     protected $generator;
@@ -26,6 +28,11 @@ class AssetManager
         $this->concat = (bool) $concatenate;
     }
 
+    public function concatenate($concatenate = true)
+    {
+        $this->concat = (bool) $concatenate;
+    }
+
     /**
      * Create a unique identifier of a group name for an asset
      * file. Override this method to define a different group asset
@@ -37,8 +44,7 @@ class AssetManager
     }
 
     /**
-     * Locate an asset group, either from a registered group or a
-     * module config file.
+     * Locate an asset group from a module config file.
      */
     protected function locateGroup($group, $type)
     {
@@ -54,29 +60,41 @@ class AssetManager
             throw new \Exception("Asset group $group is not an array");
         }
 
-        return $assets;
+        return array_map(function ($asset) {
+            return [self::LINK, $asset];
+        }, $assets);
     }
 
     public function addCss($src)
     {
-        $this->css[] = $src;
+        $this->css[] = [self::LINK, $src];
     }
 
     public function addCssGroup($name)
     {
         if ($this->concat) {
-            $this->css[] = $this->hashGroup($name, 'css');
+            $this->css[] = [self::LINK, $this->hashGroup($name, 'css')];
 
             return;
         }
         $this->css = array_merge($this->css, $this->locateGroup($name, 'css'));
     }
 
+    /**
+     * Add an inline css tag.
+     *
+     * @param string $css The css code
+     */
+    public function addInlineCss($css)
+    {
+        $this->css[] = [self::INLINE, $css];
+    }
+
     public function css()
     {
         $content ='';
         foreach ($this->css as $css) {
-            $content .= $this->generator->css($css);
+            $content .= $css[0] === self::INLINE ? $this->generator->inlineCss($css[1]) : $this->generator->css($css[1]);
         }
 
         return $content;
@@ -84,24 +102,34 @@ class AssetManager
 
     public function addJs($src)
     {
-        $this->js[] = $src;
+        $this->js[] = [self::LINK, $src];
     }
 
     public function addJsGroup($name)
     {
         if ($this->concat) {
-            $this->js[] = $this->hashGroup($name, 'js');
+            $this->js[] = [self::LINK, $this->hashGroup($name, 'js')];
 
             return;
         }
         $this->js = array_merge($this->js, $this->locateGroup($name, 'js'));
     }
 
+    /**
+     * Add an inline javascript tag.
+     *
+     * @param string $js The javascript code
+     */
+    public function addInlineJs($js)
+    {
+        $this->js[] = [self::INLINE, $js];
+    }
+
     public function js()
     {
         $content ='';
         foreach ($this->js as $js) {
-            $content .= $this->generator->js($js);
+            $content .= $js[0] === self::INLINE ? $this->generator->inlineJs($js[1]) : $this->generator->js($js[1]);
         }
 
         return $content;

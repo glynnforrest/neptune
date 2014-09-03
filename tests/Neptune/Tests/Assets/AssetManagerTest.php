@@ -90,6 +90,61 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $assets->css();
     }
 
+    public function testInlineCss()
+    {
+        $css = "body { color: #eee; }";
+        $this->assets->addInlineCss($css);
+        $this->generator->expects($this->once())
+                        ->method('inlineCss')
+                        ->with($css)
+                        ->will($this->returnValue('inline '));
+        $this->assertSame('inline ', $this->assets->css());
+    }
+
+    public function testInlineCssAndGroup()
+    {
+        $css = "body { color: #eee; }";
+        $this->assets->addInlineCss($css);
+        $this->generator->expects($this->once())
+                        ->method('inlineCss')
+                        ->with($css)
+                        ->will($this->returnValue('inline '));
+
+        $this->expectConfigFetch('css', 'login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
+        $this->assets->addCssGroup('test:login');
+
+        $this->generator->expects($this->exactly(4))
+                        ->method('css')
+                        ->with($this->logicalOr(
+                            $this->equalTo('main.css'),
+                            $this->equalTo('styles.css'),
+                            $this->equalTo('layout.css'),
+                            $this->equalTo('form.css')
+                        ))
+                        ->will($this->returnValue('foo '));
+
+        $this->assertSame('inline foo foo foo foo ', $this->assets->css());
+    }
+
+    public function testInlineCssAndConcatGroup()
+    {
+        $this->assets->concatenate();
+        $this->assets->addCssGroup('test:login');
+        $this->generator->expects($this->once())
+                        ->method('css')
+                        ->with(md5('test:login') . '.css')
+                        ->will($this->returnValue('concat '));
+
+        $css = "body { color: #eee; }";
+        $this->assets->addInlineCss($css);
+        $this->generator->expects($this->once())
+                        ->method('inlineCss')
+                        ->with($css)
+                        ->will($this->returnValue('inline'));
+
+        $this->assertSame('concat inline', $this->assets->css());
+    }
+
     public function testJs()
     {
         $this->assets->addJs('js/main.js');
@@ -135,6 +190,58 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                         ->method('js')
                         ->with(md5('test:login') . '.js');
         $assets->js();
+    }
+
+    public function testInlineJs()
+    {
+        $js = "console.log('foo');";
+        $this->assets->addInlineJs($js);
+        $this->generator->expects($this->once())
+                        ->method('inlineJs')
+                        ->with($js)
+                        ->will($this->returnValue('inline '));
+        $this->assertSame('inline ', $this->assets->js());
+    }
+
+    public function testInlineJsAndGroup()
+    {
+        $js = "console.log('foo');";
+        $this->assets->addInlineJs($js);
+        $this->generator->expects($this->once())
+                        ->method('inlineJs')
+                        ->with($js)
+                        ->will($this->returnValue('inline '));
+
+        $this->expectConfigFetch('js', 'login', ['js/validation.js', 'js/forms.js']);
+        $this->assets->addJsGroup('test:login');
+        $this->generator->expects($this->exactly(2))
+                        ->method('js')
+                        ->with($this->logicalOr(
+                            $this->equalTo('js/validation.js'),
+                            $this->equalTo('js/forms.js')
+                        ))
+                        ->will($this->returnValue('foo '));
+
+        $this->assertSame('inline foo foo ', $this->assets->js());
+    }
+
+    public function testInlineJsAndConcatGroup()
+    {
+        $this->assets->concatenate();
+        $this->assets->addJsGroup('test:login');
+        $this->generator->expects($this->once())
+                        ->method('js')
+                        ->with(md5('test:login') . '.js')
+                        ->will($this->returnValue('concat '));
+
+        $js = "console.log('foo');";
+        $this->assets->addInlineJs($js);
+        $this->generator->expects($this->once())
+                        ->method('inlineJs')
+                        ->with($js)
+                        ->will($this->returnValue('inline'));
+
+        $this->assertSame('concat inline', $this->assets->js());
     }
 
 }
