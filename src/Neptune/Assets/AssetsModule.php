@@ -38,7 +38,7 @@ class AssetsModule extends AbstractModule
         };
     }
 
-    public function routes(Router $router, $prefix)
+    public function routes(Router $router, $prefix, Neptune $neptune)
     {
         //add a slash if the given url doesn't start or end with one
         $url = $this->config->getRequired('assets.url');

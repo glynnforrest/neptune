@@ -97,7 +97,7 @@ class Router {
      * @param AbstractModule $module The module
      * @param mixed $prefix The routing prefix or prefixes
      */
-    public function routeModule(AbstractModule $module, $prefix)
+    public function routeModule(AbstractModule $module, $prefix, Neptune $neptune)
     {
 		//store current globals so they aren't used in
 		//the module and can be restored later
@@ -111,7 +111,7 @@ class Router {
         //create the routes for every prefix, passing in this Router
         //and the module name
         foreach ($prefixes as $prefix) {
-            $module->routes($this, $prefix);
+            $module->routes($this, $prefix, $neptune);
         }
 
         //reset the module name to null and the globals to what they were before
@@ -127,7 +127,7 @@ class Router {
             if (!$prefix = $neptune->getRoutePrefix($name)) {
                 continue;
             }
-            $this->routeModule($module, $prefix, $name);
+            $this->routeModule($module, $prefix, $neptune);
         }
     }
 

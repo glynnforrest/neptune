@@ -118,7 +118,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     protected function setUpTestModule($prefix)
     {
         $module = new TestModule();
-        $this->router->routeModule($module, $prefix);
+        $neptune = $this->getMockBuilder('Neptune\Core\Neptune')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+        $this->router->routeModule($module, $prefix, $neptune);
     }
 
     public function testAddModuleSetsPrefix()
