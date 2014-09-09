@@ -7,6 +7,7 @@ use Neptune\View\ViewCreator;
 
 use Neptune\View\Extension\AssetsExtension;
 use Neptune\View\Extension\SecurityExtension;
+use Neptune\View\Extension\UrlExtension;
 
 /**
  * ViewService
@@ -27,6 +28,10 @@ class ViewService implements ServiceInterface
 
             if ($neptune->offsetExists('security')) {
                 $creator->addExtension(new SecurityExtension($neptune['security']));
+            }
+
+            if ($neptune->offsetExists('router')) {
+                $creator->addExtension(new UrlExtension($neptune['router'], $neptune['url']));
             }
 
             return $creator;
