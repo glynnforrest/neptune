@@ -44,9 +44,12 @@ class AssetManager
     }
 
     /**
-     * Locate an asset group from a module config file.
+     * Get a list of all assets in a given group.
+     *
+     * @param string $group The name of the group - <module>:<name>
+     * @param string $type  The type of assets - css or js
      */
-    protected function locateGroup($group, $type)
+    protected function getGroupAssets($group, $type)
     {
         $pos = strpos($group, ':');
         if (!$pos) {
@@ -60,9 +63,32 @@ class AssetManager
             throw new \Exception("Asset group $group is not an array");
         }
 
+        //loop through the given assets, treating any that begin with
+        //'@' as a group.
+        $results = [];
+        foreach ($assets as $asset) {
+            if (substr($asset, 0, 1) === '@') {
+                $results = array_merge($results, $this->getGroupAssets(substr($asset, 1), $type));
+            } else {
+                $results[] = $asset;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Get a list of all assets in a given group, formatted for
+     * internal AssetManager usage.
+     *
+     * @param string $group The name of the group - <module>:<name>
+     * @param string $type  The type of assets - css or js
+     */
+    protected function getGroupAssetsFormatted($group, $type)
+    {
         return array_map(function ($asset) {
             return [self::LINK, $asset];
-        }, $assets);
+        }, $this->getGroupAssets($group, $type));
     }
 
     public function addCss($src)
@@ -77,7 +103,7 @@ class AssetManager
 
             return;
         }
-        $this->css = array_merge($this->css, $this->locateGroup($name, 'css'));
+        $this->css = array_merge($this->css, $this->getGroupAssetsFormatted($name, 'css'));
     }
 
     /**
@@ -112,7 +138,7 @@ class AssetManager
 
             return;
         }
-        $this->js = array_merge($this->js, $this->locateGroup($name, 'js'));
+        $this->js = array_merge($this->js, $this->getGroupAssetsFormatted($name, 'js'));
     }
 
     /**

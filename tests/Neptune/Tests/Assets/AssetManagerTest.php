@@ -78,6 +78,31 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assets->css();
     }
 
+    public function testCssGroupWithInheritance()
+    {
+        $config = new Config('testing');
+        $config->set('assets.css.main', ['main.css', 'styles.css', 'layout.css']);
+        $config->set('assets.css.theme', ['theme.css', '@test:main']);
+        $config->set('assets.css.super-theme', ['@test:theme', 'super-theme.css']);
+        $this->config->expects($this->exactly(3))
+                     ->method('load')
+                     ->with('test')
+                     ->will($this->returnValue($config));
+
+        $this->assets->addCssGroup('test:super-theme');
+
+        $this->generator->expects($this->exactly(5))
+                        ->method('css')
+                        ->withConsecutive(
+                            ['theme.css'],
+                            ['main.css'],
+                            ['styles.css'],
+                            ['layout.css'],
+                            ['super-theme.css']
+                        );
+        $this->assets->css();
+    }
+
     public function testCssGroupWithConcat()
     {
         $assets = new AssetManager($this->config, $this->generator, true);
@@ -179,6 +204,31 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                             $this->equalTo('js/validation.js'),
                             $this->equalTo('js/forms.js')
                         ));
+        $this->assets->js();
+    }
+
+    public function testJsGroupWithInheritance()
+    {
+        $config = new Config('testing');
+        $config->set('assets.js.main', ['library.js', 'main.js']);
+        $config->set('assets.js.app', ['@test:main', 'app.js']);
+        $config->set('assets.js.super-app', ['extra-library.js', '@test:app', 'super-app.js']);
+        $this->config->expects($this->exactly(3))
+                     ->method('load')
+                     ->with('test')
+                     ->will($this->returnValue($config));
+
+        $this->assets->addJsGroup('test:super-app');
+
+        $this->generator->expects($this->exactly(5))
+                        ->method('js')
+                        ->withConsecutive(
+                            ['extra-library.js'],
+                            ['library.js'],
+                            ['main.js'],
+                            ['app.js'],
+                            ['super-app.js']
+                        );
         $this->assets->js();
     }
 
