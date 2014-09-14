@@ -40,8 +40,8 @@ $am->addJs('/js/analytics.js');
 $am->addJs('http://cdn.example.org/js/library.js');
 ```
 
-The asset manager can be accessed with $neptune['assets'], or
-$this->assets() if you're in a controller. I can show you how to
+The asset manager can be accessed with `$neptune['assets']`, or
+`$this->assets()` if you're in a controller. I can show you how to
 instantiate it manually later if you need to. Make sure to have
 registered the AssetsModule.
 
@@ -84,12 +84,12 @@ In this config, css files from 'site-module' were included, and the
 'admin' javascript group imports the whole of the 'main' group using
 the '@' sign.
 
-After defining them, groups can be added using the addCssGroup() and
-addJsGroup() methods.
+After defining them, groups can be added using the `addCssGroup()` and
+`addJsGroup()` methods.
 
 ```php
-$am->addCssGroup('my-module/main');
-$am->addJsGroup('my-module/admin');
+$am->addCssGroup('my-module:main');
+$am->addJsGroup('my-module:admin');
 ```
 
 ##Including assets in views
@@ -98,7 +98,7 @@ Having done all the prep work, we can now include these assets in
 templates with code that never references assets by name. This
 allows for alteration of the included assets (perhaps a nice holiday
 css theme) without changing the template code. The AssetsExtension
-class registers css() and js() functions which covers everything you
+class registers `css()` and `js()` functions which covers everything you
 need.
 
 ```html
