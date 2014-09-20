@@ -149,24 +149,34 @@ class Route {
 		return $this;
 	}
 
-	public function method($methods)
+    /**
+     * Set the http method or methods accepted by this route.
+     *
+     * @param mixed The method as a string, or an array of methods.
+     */
+    public function method($methods)
     {
-        $this->methods = array_map(function($method) {
-            return strtoupper($method);
-        }, (array) $methods);
+        $this->methods = array_map('strtoupper', (array) $methods);
 
         return $this;
-	}
+    }
 
 	public function format($format) {
 		$this->format = (array) $format;
 		return $this;
 	}
 
-	public function transforms($name, $function) {
-		$this->transforms[$name] = $function;
-		return $this;
-	}
+    /**
+     * Add a function to transform an argument.
+     *
+     * @param string $name The name of the argument
+     * @param Closure $callback The function
+     */
+    public function transform($name, \Closure $callback)
+    {
+        $this->transforms[$name] = $callback;
+        return $this;
+    }
 
 	public function rules(array $rules) {
 		$this->rules = $rules;

@@ -203,21 +203,21 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test($this->request('/email/me@glynnforrest.com/foo')));
 	}
 
-	public function testTransforms() {
+	public function testTransform() {
 		$r = new Route('test', '/:var');
 		$r->controller('foo')
-          ->action('index')
-          ->transforms('var', function($string) {
-          return strtoupper($string);
-      });
+            ->action('index')
+            ->transform('var', function($string) {
+                return strtoupper($string);
+            });
 		$this->assertTrue($r->test($this->request('/foo')));
 		$this->assertSame(['foo', 'index', ['var' => 'FOO']], $r->getControllerAction());
 	}
 
-    public function testTransformsCreatingObject()
+    public function testTransformCreatingObject()
     {
         $r = new Route('test', '/user/:id', 'user', 'show');
-        $r->transforms('id', function($id) {
+        $r->transform('id', function($id) {
             $user = new \stdClass();
             $user->id = $id;
             return $user;
@@ -283,7 +283,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
     public function testMethodIsChanged()
     {
-        $r = new Route('test', '.*', 'controller', 'method');
+        $r = new Route('test', '.*', 'controller', 'action');
         $r->method('get');
         $this->assertTrue($r->test($this->request('/page')));
         $r->method('post');
@@ -337,7 +337,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame(Route::FAILURE_CONTROLLER, $r->getStatus());
     }
 
-	public function testMethodCanBeReset() {
+	public function testActionCanBeReset() {
 		$r = new Route('test', '.*', 'controller', 'method');
 		$r->action(null);
 		$this->assertFalse($r->test($this->request('anything')));
