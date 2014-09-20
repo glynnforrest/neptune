@@ -13,35 +13,37 @@ use Symfony\Component\HttpFoundation\Request;
  **/
 class Route {
 
-	const PASSED = 1;
-	const UNTESTED = 2;
-	const FAILURE_REGEXP = 3;
-	const FAILURE_HTTP_METHOD = 4;
-	const FAILURE_FORMAT = 5;
-	const FAILURE_CONTROLLER = 6;
-	const FAILURE_METHOD = 7;
-	const FAILURE_VALIDATION = 8;
+    const UNTESTED = 1;
+    const PASSED = 2;
+    const FAILURE_URL = 3;
+    const FAILURE_CONTROLLER = 4;
+    const FAILURE_ACTION = 5;
+    const FAILURE_FORMAT = 6;
+    const FAILURE_METHOD = 7;
+    const FAILURE_VALIDATION = 8;
 
+    protected $name;
 	protected $url;
 	protected $controller;
-	protected $method;
-	protected $args = array();
-	protected $format;
-	protected $transforms = array();
-	protected $rules = array();
-	protected $default_args = array();
-	protected $http_methods = array();
-	protected $result;
+    protected $action;
+    protected $processed_args = [];
+    protected $default_args = [];
+    protected $transforms = [];
+    protected $rules = [];
+    protected $format;
+    protected $methods = [];
+    protected $status;
 	protected $args_regex = '[^/.]+';
 	protected $auto_args;
 	protected $auto_args_regex = '[^/.]+';
 
-	public function __construct($url, $controller = null, $method = null, $args = null) {
-		$this->url($url);
+	public function __construct($name, $url, $controller = null, $action = null, array $args = array()) {
+        $this->name = $name;
+		$this->url = $url;
 		$this->controller = $controller;
-		$this->method = $method;
-		$this->args = $args;
-		$this->result = self::UNTESTED;
+		$this->action = $action;
+		$this->default_args = $args;
+		$this->status = self::UNTESTED;
 	}
 
 	/**
@@ -88,26 +90,24 @@ class Route {
 		return $this;
 	}
 
-	public function method($method) {
-		if($method) {
-			$this->method = $method;
-		}
+	public function action($action) {
+        $this->action = $action;
+
 		return $this;
 	}
 
-	public function args($args) {
-		if($args) {
-			$this->args = $args;
-		}
+	public function args(array $args) {
+        $this->default_args = $args;
 		return $this;
 	}
 
-	public function httpMethod($http_methods) {
-		$http_methods = (array) $http_methods;
-		foreach($http_methods as $method) {
-			$this->http_methods[] = strtoupper($method);
-		}
-		return $this;
+	public function method($methods)
+    {
+        $this->methods = array_map(function($method) {
+            return strtoupper($method);
+        }, (array) $methods);
+
+        return $this;
 	}
 
 	public function format($format) {
@@ -122,11 +122,6 @@ class Route {
 
 	public function rules(array $rules) {
 		$this->rules = $rules;
-		return $this;
-	}
-
-	public function defaultArgs($default_args) {
-		$this->default_args = (array) $default_args;
 		return $this;
 	}
 
@@ -148,45 +143,53 @@ class Route {
 	}
 
 	public function test(Request $request) {
-        //check there is a controller and method before checking the
-        //regex
+        //controller
 		if (!$this->controller) {
-			$this->result = self::FAILURE_CONTROLLER;
+			$this->status = self::FAILURE_CONTROLLER;
 			return false;
 		}
-		if (!$this->method) {
-			$this->result = self::FAILURE_METHOD;
+
+        //action
+		if (!$this->action) {
+            //allow if controller is callable?
+			$this->status = self::FAILURE_ACTION;
 			return false;
 		}
+
+		//method
+		if ($this->methods) {
+			if (!in_array($request->getMethod(), $this->methods)) {
+				$this->status = self::FAILURE_METHOD;
+				return false;
+			}
+		}
+
+        //url
 		$path = $request->getPathInfo();
+        //for convenience, trim / off the end of the url
 		if(strlen($path) > 1) {
 			$path = rtrim($path, '/');
 		}
 		if (!preg_match($this->getRegex(), $path, $vars)) {
-			$this->result = self::FAILURE_REGEXP;
+			$this->status = self::FAILURE_URL;
 			return false;
 		}
-		//Check if the request method is supported by this route.
-		if ($this->http_methods) {
-			if (!in_array($request->getMethod(), $this->http_methods)) {
-				$this->result = self::FAILURE_HTTP_METHOD;
-				return false;
-			}
-		}
-		//Check if the format requested is supported by this route.
-		$format = isset($vars['_format']) ? $vars['_format'] : 'html';
-		if ($this->format) {
-			if (!in_array($format, $this->format) && !in_array('any', $this->format)) {
-					$this->result = self::FAILURE_FORMAT;
-					return false;
-			}
-		} else {
-			if ($format !== 'html') {
-				$this->result = self::FAILURE_FORMAT;
-				return false;
-			}
-		}
-		unset($vars['_format']);
+
+        //format
+        $format = isset($vars['_format']) ? $vars['_format'] : 'html';
+        if ($this->format) {
+            if (!in_array($format, $this->format) && !in_array('any', $this->format)) {
+                    $this->status = self::FAILURE_FORMAT;
+                    return false;
+            }
+        } else {
+            if ($format !== 'html') {
+                $this->status = self::FAILURE_FORMAT;
+                return false;
+            }
+        }
+        unset($vars['_format']);
+
 		//process the transforms.
 		foreach ($this->transforms as $k => $v) {
 			if (isset($vars[$k])) {
@@ -195,19 +198,15 @@ class Route {
 		}
 
 		//get args
-		$args = array();
+		$args = [];
 		//gather named variables from regex
 		foreach ($vars as $k => $v) {
 			if (!is_numeric($k)) {
 				$args[$k] = $vars[$k];
 			}
 		}
-		//add default variables if they don't exist.
-		foreach ($this->default_args as $name => $value) {
-			if (!isset($args[$name])) {
-				$args[$name] = $value;
-			}
-		}
+
+        $args = array_merge($this->default_args, $args);
 
 		//gather numerically indexed args if auto_args is set
 		if ($this->auto_args && isset($vars['args'])) {
@@ -220,6 +219,7 @@ class Route {
 			}
 			unset($args['args']);
 		}
+
 		//test the variables using validator
 		if (!empty($this->rules)) {
             foreach ($this->rules as $name => $regex) {
@@ -229,30 +229,32 @@ class Route {
             }
 		}
 		if(!empty($args)) {
-			$this->args = $args;
+			$this->processed_args = $args;
 		}
-		$this->result = self::PASSED;
+		$this->status = self::PASSED;
 		return true;
 	}
 
-	/**
-	 * @return array An array with the controller class, method and
-	 * arguments to run.
-	 * @throws RouteUntestedException
-	 * @throws RouteFailedException
-	 */
-	public function getAction() {
-		if($this->result === self::PASSED) {
-			return array($this->controller, $this->method, (array) $this->args);
-		}
-		if($this->result === self::UNTESTED) {
-			throw new RouteUntestedException('Route untested, unable to get action.');
-		}
-		throw new RouteFailedException('Route failed, unable to get action.');
-	}
+    /**
+     *  Get the controller class, action and arguments to run. An
+     *  exception will be thrown if the route is untested or has
+     *  failed testing.
+     *
+     * @return array The action
+     */
+    public function getControllerAction()
+    {
+        if($this->status === self::PASSED) {
+            return [$this->controller, $this->action, $this->processed_args];
+        }
+        if($this->status === self::UNTESTED) {
+            throw new RouteUntestedException('Route untested, unable to get controller action.');
+        }
+        throw new RouteFailedException('Route failed, unable to get controller action.');
+    }
 
 	/**
-	 * Return the result code of this Route:
+	 * Return the status code of this Route:
 	 *
 	 * Route::PASSED if the Route has been tested and is passing.
 	 * Route::UNTESTED if the Route has not been tested.
@@ -261,8 +263,9 @@ class Route {
 	 *
 	 * @return int The result code.
 	 */
-	public function getResult() {
-		return $this->result;
-	}
+    public function getStatus()
+    {
+        return $this->status;
+    }
 
 }

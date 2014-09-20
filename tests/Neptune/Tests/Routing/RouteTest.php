@@ -6,8 +6,6 @@ use Neptune\Routing\Route;
 
 use Symfony\Component\HttpFoundation\Request;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * RouteTest
  * @author Glynn Forrest me@glynnforrest.com
@@ -19,7 +17,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testHomeMatch() {
-		$r = new Route('/', 'controller', 'method');
+		$r = new Route('foo', '/', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/')));
 		$this->assertTrue($r->test($this->request('/.html')));
 		$this->assertTrue($r->test($this->request('')));
@@ -27,14 +25,14 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testExplicitMatch() {
-		$r = new Route('/hello', 'controller', 'method');
+		$r = new Route('test', '/hello', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/hello')));
 		$this->assertFalse($r->test($this->request('/not_hello')));
 		$this->assertFalse($r->test($this->request('/hello/world')));
 	}
 
 	public function testCatchAllMatch() {
-		$r = new Route('.*', 'controller', 'method');
+		$r = new Route('test', '.*', 'controller', 'method');
 		$r->format('any');
 		$this->assertTrue($r->test($this->request('/anything')));
 		$this->assertTrue($r->test($this->request('')));
@@ -42,77 +40,64 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testArgsExplicitMatch() {
-		$r = new Route('/url_with_args');
-		$r->controller('foo')->method('index')->args(array(1));
+		$r = new Route('test', '/url_with_args');
+		$r->controller('foo')->action('index')->args([1]);
 		$this->assertTrue($r->test($this->request('/url_with_args')));
-		$this->assertEquals(array('foo', 'index', array(1)), $r->getAction());
+		$this->assertSame(['foo', 'index', [1]], $r->getControllerAction());
 	}
 
 	public function testGetAction() {
-		$r = new Route('/hello', 'controller', 'method');
+		$r = new Route('test', '/hello', 'controller', 'method');
 		$r->test($this->request('/hello'));
-		$this->assertNotNull($r->getAction());
-	}
-
-	public function testGetActionThrowsExceptionBeforeTest() {
-		$r = new Route('/hello', 'controller', 'method');
-		$this->setExpectedException('\\Neptune\\Routing\\RouteUntestedException');
-		$r->getAction();
-	}
-
-	public function testGetActionThrowsExceptionWithFailedTest() {
-		$r = new Route('/hello', 'controller', 'method');
-		$r->test($this->request('/fails'));
-		$this->setExpectedException('\\Neptune\\Routing\\RouteFailedException');
-		$r->getAction();
+        $this->assertSame(['controller', 'method', []], $r->getControllerAction());
 	}
 
 	public function testNamedArgs() {
-		$r = new Route('/args/:id');
-		$r->controller('controller')->method('method');
-		$r->test($this->request('/args/4'));
-		$this->assertEquals(array('controller', 'method', array('id' => 4)), $r->getAction());
-		$r2 = new Route('/args/:var/:var2/:var3');
-		$r2->controller('controller')->method('method');
+		$r = new Route('test', '/args/:id');
+		$r->controller('controller')->action('method');
+		$this->assertTrue($r->test($this->request('/args/4')));
+		$this->assertSame(['controller', 'method', ['id' => '4']], $r->getControllerAction());
+		$r2 = new Route('test', '/args/:var/:var2/:var3');
+		$r2->controller('controller')->action('method');
 		$r2->test($this->request('/args/foo/bar/baz'));
-		$this->assertEquals(array('controller', 'method',
+		$this->assertSame(array('controller', 'method',
 			array('var' => 'foo',
 			'var2' => 'bar',
-			'var3' => 'baz')), $r2->getAction());
+			'var3' => 'baz')), $r2->getControllerAction());
 	}
 
 	public function testDefaultArgs() {
-		$r = new Route('/hello(/:place)', 'foo', 'method');
-		$r->defaultArgs(array('place' => 'world'));
+		$r = new Route('test', '/hello(/:place)', 'foo', 'method');
+		$r->args(['place' => 'world']);
 		$r->test($this->request('/hello'));
-		$this->assertEquals(array('foo', 'method', array('place' => 'world')), $r->getAction());
+		$this->assertSame(['foo', 'method', ['place' => 'world']], $r->getControllerAction());
 		$r->test($this->request('/hello/earth'));
-		$this->assertEquals(array('foo', 'method', array('place' => 'earth')), $r->getAction());
+		$this->assertSame(['foo', 'method', ['place' => 'earth']], $r->getControllerAction());
 	}
 
 	public function testAutoArgs() {
-		$r = new Route('/url(/:args)');
-		$r->controller('test')->method('index')->autoArgs();
+		$r = new Route('test', '/url(/:args)');
+		$r->controller('test')->action('index')->autoArgs();
 		$r->test($this->request('/url'));
-		$this->assertEquals(array('test', 'index', array()), $r->getAction());
+		$this->assertSame(['test', 'index', []], $r->getControllerAction());
 		$r->test($this->request('/url/one'));
-		$this->assertEquals(array('test', 'index', array('one')), $r->getAction());
+		$this->assertSame(['test', 'index', ['one']], $r->getControllerAction());
 		$r->test($this->request('/url/one/2'));
-		$this->assertEquals(array('test', 'index', array('one', 2)), $r->getAction());
+		$this->assertSame(['test', 'index', ['one', '2']], $r->getControllerAction());
 		$r->test($this->request('/url/one/2/thr££'));
-		$this->assertEquals(array('test', 'index', array('one', 2, 'thr££')), $r->getAction());
+		$this->assertSame(['test', 'index', ['one', '2', 'thr££']], $r->getControllerAction());
 	}
 
 	public function testAutoArgsDifferentDelimeter() {
-		$r = new Route('/url/:args', 'controller', 'method');
+		$r = new Route('test', '/url/:args', 'controller', 'method');
 		$r->autoArgs('[a-z]+');
 		$this->assertTrue($r->test($this->request('/url/fooBbar5baz-qoz')));
-		$expected = array('controller', 'method', array('foo', 'bar', 'baz', 'qoz'));
-		$this->assertSame($expected, $r->getAction());
+		$expected = ['controller', 'method', ['foo', 'bar', 'baz', 'qoz']];
+		$this->assertSame($expected, $r->getControllerAction());
 	}
 
 	public function testAutoArgsBadRegexThrowsException() {
-		$r = new Route('/url/:args', 'controller', 'method');
+		$r = new Route('test', '/url/:args', 'controller', 'method');
 		$r->autoArgs('bad_regex');
 		$msg = 'Unable to parse auto args with regex `bad_regex`';
 		$this->setExpectedException('\Neptune\Routing\RouteFailedException', $msg);
@@ -120,7 +105,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testAutoArgsThrowsExceptionWithNoArgs() {
-		$r = new Route('/url/without_args', 'foo', 'bar');
+		$r = new Route('test', '/url/without_args', 'foo', 'bar');
 		$r->autoArgs();
 		$msg = "A route with auto args must contain ':args' in the url";
 		$this->setExpectedException('\Neptune\Routing\RouteFailedException', $msg);
@@ -128,25 +113,25 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testNonAutoRouteCanUseArgsName() {
-		$r = new Route('/url/with/:args', 'controller', 'method');
+		$r = new Route('test', '/url/with/:args', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/url/with/foo')));
-		$expected = array('controller', 'method', array('args' => 'foo'));
-		$this->assertSame($expected, $r->getAction());
+		$expected = ['controller', 'method', ['args' => 'foo']];
+		$this->assertSame($expected, $r->getControllerAction());
 	}
 
 	public function testArgsRegexNoDelimeter() {
-		$r = new Route('/website(/:site)');
-		$r->controller('test')->method('index');
+		$r = new Route('test', '/website(/:site)');
+		$r->controller('test')->action('index');
 		$r->argsRegex('.*');
 		$r->test($this->request('/website'));
-		$this->assertEquals(array('test', 'index', array()), $r->getAction());
+		$this->assertSame(['test', 'index', []], $r->getControllerAction());
 		$r->test($this->request('/website/http://foo.com/bar/baz'));
-		$this->assertEquals(array('test', 'index', array('site' => 'http://foo.com/bar/baz')), $r->getAction());
+		$this->assertSame(['test', 'index', ['site' => 'http://foo.com/bar/baz']], $r->getControllerAction());
 	}
 
 	public function testValidatedArgs() {
-		$r = new Route('/add/:first/:second/ok');
-		$r->controller('calculator')->method('add')->rules(
+		$r = new Route('test', '/add/:first/:second/ok');
+		$r->controller('calculator')->action('add')->rules(
 			array('first' => '\d+',
 			'second' => '\d+'));
 		$this->assertFalse($r->test($this->request('/add/1/a/ok')));
@@ -154,36 +139,36 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testValidatedArgsWithDot() {
-		$r = new Route('/email/:email/foo');
+		$r = new Route('test', '/email/:email/foo');
 		$r->controller('email')
-		  ->method('verify')
+		  ->action('verify')
 		  ->argsRegex('[^/]+')
-		  ->rules(array('email' => '\w+@\w+\.\w+'));
+            ->rules(['email' => '\w+@\w+\.\w+']);
 		$this->assertFalse($r->test($this->request('/email/me@glynnforrest@com/foo')));
 		$this->assertTrue($r->test($this->request('/email/me@glynnforrest.com/foo')));
 	}
 
 	public function testTransforms() {
-		$r = new Route('/:var');
+		$r = new Route('test', '/:var');
 		$r->controller('foo')
-          ->method('index')
+          ->action('index')
           ->transforms('var', function($string) {
           return strtoupper($string);
       });
 		$this->assertTrue($r->test($this->request('/foo')));
-		$this->assertEquals(array('foo', 'index', array('var' => 'FOO')), $r->getAction());
+		$this->assertSame(['foo', 'index', ['var' => 'FOO']], $r->getControllerAction());
 	}
 
     public function testTransformsCreatingObject()
     {
-        $r = new Route('/user/:id', 'user', 'show');
+        $r = new Route('test', '/user/:id', 'user', 'show');
         $r->transforms('id', function($id) {
             $user = new \stdClass();
             $user->id = $id;
             return $user;
         });
         $this->assertTrue($r->test($this->request('/user/3')));
-        $action = $r->getAction();
+        $action = $r->getControllerAction();
         $this->assertSame('user', $action[0]);
         $this->assertSame('show', $action[1]);
         $this->assertInstanceOf('\stdClass', $action[2]['id']);
@@ -191,7 +176,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
     }
 
 	public function testOneFormat() {
-		$r = new Route('/foo', 'test', 'foo');
+		$r = new Route('test', '/foo', 'test', 'foo');
 		$r->format('json');
 		$this->assertTrue($r->test($this->request('/foo.json')));
 		$this->assertFalse($r->test($this->request('/foo.html')));
@@ -199,13 +184,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testHtmlFormatDefault() {
-		$r = new Route('/foo', 'test', 'foo');
+		$r = new Route('test', '/foo', 'test', 'foo');
 		$this->assertFalse($r->test($this->request('/foo.xml')));
 		$this->assertTrue($r->test($this->request('/foo.html')));
 	}
 
 	public function testAnyFormat() {
-		$r = new Route('/format', 'test', 'index');
+		$r = new Route('test', '/format', 'test', 'index');
 		$r->format('any');
 		$this->assertTrue($r->test($this->request('/format.json')));
 		$this->assertTrue($r->test($this->request('/format.html')));
@@ -214,13 +199,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetUrl() {
-		$r = new Route('/hiya');
-		$r->controller('controller')->method('index');
-		$this->assertEquals('/hiya', $r->getUrl());
+		$r = new Route('test', '/hiya');
+		$r->controller('controller')->action('index');
+		$this->assertSame('/hiya', $r->getUrl());
 	}
 
 	public function testChangeUrl() {
-		$r = new Route('.*', 'controller', 'method');
+		$r = new Route('test', '.*', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/anything')));
 		$this->assertTrue($r->test($this->request('/url')));
 		$r->url('/url');
@@ -228,9 +213,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test($this->request('/url')));
 	}
 
-	public function testOneHttpMethod() {
-		$r = new Route('.*', 'controller', 'method');
-		$r->httpMethod('get');
+	public function testOneMethod() {
+		$r = new Route('test', '.*', 'controller', 'method');
+		$r->method('get');
 		$req = $this->request('/anything');
 		$req->setMethod('get');
 		$this->assertTrue($r->test($req));
@@ -238,9 +223,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($r->test($req));
 	}
 
-	public function testArrayHttpMethod() {
-		$r = new Route('.*', 'controller', 'method');
-		$r->httpMethod(array('get', 'PoST'));
+	public function testArrayMethod() {
+		$r = new Route('test', '.*', 'controller', 'method');
+		$r->method(['get', 'PoST']);
 		$req = $this->request('/anything');
 		$req->setMethod('get');
 		$this->assertTrue($r->test($req));
@@ -250,115 +235,144 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($r->test($req));
 	}
 
+    public function testMethodIsChanged()
+    {
+        $r = new Route('test', '.*', 'controller', 'method');
+        $r->method('get');
+        $this->assertTrue($r->test($this->request('/page')));
+        $r->method('post');
+        $this->assertFalse($r->test($this->request('/page')));
+    }
+
 	public function testTrailingSlashesStripped() {
-		$r = new Route('/page', 'controller', 'method');
+		$r = new Route('test', '/page', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/page/')));
 		$this->assertTrue($r->test($this->request('/page//')));
 		$this->assertTrue($r->test($this->request('/page////')));
 	}
 
 	public function testArgWithDot() {
-		$r = new Route('/route/:arg/suffix/just/because');
-		$r->controller('Foo')->method('bar')->argsRegex('[^/]+');
+		$r = new Route('test', '/route/:arg/suffix/just/because');
+		$r->controller('Foo')->action('bar')->argsRegex('[^/]+');
 		$this->assertTrue($r->test($this->request('/route/test.css/suffix/just/because')));
-		$this->assertEquals(array('Foo', 'bar', array('arg' => 'test.css')),
-							$r->getAction());
+		$this->assertSame(['Foo', 'bar', ['arg' => 'test.css']],
+							$r->getControllerAction());
 	}
+
+    public function testArgsMixedWithDefaults()
+    {
+        $r = new Route('test', '/hello/:name', 'foo', 'action');
+        $r->args(['lang' => 'en']);
+        $this->assertTrue($r->test($this->request('/hello/glynn')));
+        $args = [
+            'lang' => 'en',
+            'name' => 'glynn'
+        ];
+        $this->assertSame(['foo', 'action', $args], $r->getControllerAction());
+    }
+
+    public function testArgsMixedSetOrder()
+    {
+        $r = new Route('test', '/hello/:name', 'foo', 'action');
+        $r->args(['name' => 'world', 'lang' => 'en']);
+        $this->assertTrue($r->test($this->request('/hello/glynn')));
+        $args = [
+            'name' => 'glynn',
+            'lang' => 'en'
+        ];
+        $this->assertSame(['foo', 'action', $args], $r->getControllerAction());
+    }
 
 	public function testControllerNullNotApplied() {
-		$r = new Route('.*', 'controller', 'method');
+		$r = new Route('test', '.*', 'controller', 'method');
 		$r->controller(null);
 		$r->test($this->request('anything'));
-		$action = $r->getAction();
+		$action = $r->getControllerAction();
         $this->assertSame('controller', $action[0]);
 		$this->assertSame('method', $action[1]);
 	}
 
-	public function testMethodNullNotApplied() {
-		$r = new Route('.*', 'controller', 'method');
-		$r->method(null);
-		$r->test($this->request('anything'));
-		$action = $r->getAction();
-        $this->assertSame('controller', $action[0]);
-		$this->assertSame('method', $action[1]);
+	public function testMethodCanBeReset() {
+		$r = new Route('test', '.*', 'controller', 'method');
+		$r->action(null);
+		$this->assertFalse($r->test($this->request('anything')));
+        $this->assertSame(Route::FAILURE_ACTION, $r->getStatus());
 	}
 
-	public function testArgsNullNotApplied() {
-		$args = array('foo' => 'bar');
-		$r = new Route('.*', 'controller', 'method', $args);
-		$r->args(null);
-		$r->test($this->request('anything'));
-		$action = $r->getAction();
-		$actual_args = $action[2];
-		$this->assertEquals($args, $actual_args);
-	}
+    public function testArgsCanBeReset()
+    {
+        $r = new Route('test', '.*', 'controller', 'method', ['foo' => 'bar']);
+        $r->args([]);
+        $this->assertTrue($r->test($this->request('/url')));
+        $this->assertSame(['controller', 'method', []], $r->getControllerAction());
+    }
 
-	public function testGetResultPassed() {
-		$r = new Route('/url', 'controller', 'method');
+	public function testGetStatusPassed() {
+		$r = new Route('test', '/url', 'controller', 'method');
 		$this->assertTrue($r->test($this->request('/url')));
-		$this->assertSame(Route::PASSED, $r->getResult());
+		$this->assertSame(Route::PASSED, $r->getStatus());
 	}
 
-	public function testGetResultUntested() {
-		$r = new Route('.*');
-		$this->assertSame(Route::UNTESTED, $r->getResult());
+	public function testGetStatusUntested() {
+		$r = new Route('test', '.*');
+		$this->assertSame(Route::UNTESTED, $r->getStatus());
 	}
 
-	public function testGetResultFailedRegexp() {
-		$r = new Route('/some_url', 'foo', 'bar');
+	public function testGetStatusFailedUrl() {
+		$r = new Route('test', '/some_url', 'foo', 'bar');
 		$this->assertFalse($r->test($this->request('/something')));
-		$this->assertSame(Route::FAILURE_REGEXP, $r->getResult());
+		$this->assertSame(Route::FAILURE_URL, $r->getStatus());
 	}
 
-	public function testGetResultFailedHttpMethod() {
-		$r = new Route('.*', 'foo', 'bar');
-		$r->httpMethod('post');
+	public function testGetStatusFailedMethod() {
+		$r = new Route('test', '.*', 'foo', 'bar');
+		$r->method('post');
 		$this->assertFalse($r->test($this->request('/something')));
-		$this->assertSame(Route::FAILURE_HTTP_METHOD, $r->getResult());
+		$this->assertSame(Route::FAILURE_METHOD, $r->getStatus());
 	}
 
-	public function testGetResultFailedFormat() {
-		$r = new Route('.*', 'foo', 'bar');
+	public function testGetStatusFailedFormat() {
+		$r = new Route('test', '.*', 'foo', 'bar');
 		$r->format('json');
 		$this->assertFalse($r->test($this->request('/something')));
-		$this->assertSame(Route::FAILURE_FORMAT, $r->getResult());
+		$this->assertSame(Route::FAILURE_FORMAT, $r->getStatus());
 	}
 
-	public function testGetResultFailedController() {
-		$r = new Route('/url');
+	public function testGetStatusFailedController() {
+		$r = new Route('test', '/url');
 		$this->assertFalse($r->test($this->request('/url')));
-		$this->assertSame(Route::FAILURE_CONTROLLER, $r->getResult());
+		$this->assertSame(Route::FAILURE_CONTROLLER, $r->getStatus());
 	}
 
-	public function testGetResultFailedMethod() {
-		$r = new Route('/url', 'controller');
+	public function testGetStatusFailedAction() {
+		$r = new Route('test', '/url', 'controller');
 		$this->assertFalse($r->test($this->request('/url')));
-		$this->assertSame(Route::FAILURE_METHOD, $r->getResult());
+		$this->assertSame(Route::FAILURE_ACTION, $r->getStatus());
 	}
 
-	public function testGetResultFailedValidation() {
-		$r = new Route('/foo/bar/:message');
-		$r->controller('foo')->method('bar');
-		$r->rules(array('message' => 'alpha'));
+	public function testGetStatusFailedValidation() {
+		$r = new Route('test', '/foo/bar/:message');
+		$r->controller('foo')->action('bar');
+		$r->rules(['message' => 'alpha']);
 		$this->assertFalse($r->test($this->request('/foo/bar/baz1')));
 	}
 
-	public function testHiddenFormatIsNotInActionArray() {
-		$r = new Route('/foo/:bar/baz', 'foo', 'hello');
+	public function testHiddenFormatIsNotInAction() {
+		$r = new Route('test', '/foo/:bar/baz', 'foo', 'hello');
 		$this->assertTrue($r->test($this->request('/foo/hello/baz.html')));
 		$expected = array(
-			'foo', 'hello', array('bar' => 'hello')
+			'foo', 'hello', ['bar' => 'hello']
 		);
-		$this->assertSame($expected, $r->getAction());
+		$this->assertSame($expected, $r->getControllerAction());
 	}
 
 	public function testHiddenFormatWorksWithVariable() {
-		$r = new Route('/foo/:bar/:baz', 'foo', 'hello');
+		$r = new Route('test', '/foo/:bar/:baz', 'foo', 'hello');
 		$this->assertFalse($r->test($this->request('/foo/hello/world.json')));
 		$this->assertTrue($r->test($this->request('/foo/hello/world')));
 		$this->assertTrue($r->test($this->request('/foo/hello/world.html')));
-		$expected = array('foo', 'hello', array('bar' => 'hello', 'baz' => 'world'));
-		$this->assertSame($expected, $r->getAction());
+		$expected = ['foo', 'hello', ['bar' => 'hello', 'baz' => 'world']];
+		$this->assertSame($expected, $r->getControllerAction());
 	}
 
 }
