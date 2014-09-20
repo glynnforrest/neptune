@@ -22,12 +22,11 @@ class Router {
 
 	protected $routes = array();
 	protected $names = array();
-	protected $globals;
-	protected $matched_url;
 	protected $cache;
 	protected $current_name;
     protected $current_module;
     protected $url;
+    protected $unknown_count = 0;
 
 	public function __construct(Url $url) {
         $this->url = $url;
@@ -41,52 +40,42 @@ class Router {
 		return $this->cache;
 	}
 
+    protected function createRouteName()
+    {
+        if ($this->current_name) {
+            return $this->current_module ? $this->current_module . ':' . $this->current_name : $this->current_name;
+        }
+
+        $count = $this->unknown_count;
+        $this->unknown_count++;
+
+        if($this->current_module) {
+            return $this->current_module . ':_unknown_' . $count;
+        }
+
+        return '_unknown_' . $count;
+    }
+
 	/**
 	 * Create a new Route for the Router to handle with $url.
 	 */
-	public function route($url, $controller = null, $method = null, $args = null) {
+	public function route($url, $controller = null, $action = null, array $args = array()) {
 		//add a slash if the given url doesn't start with one
 		if(substr($url, 0, 1) !== '/' && $url !== '.*') {
 			$url = '/' . $url;
 		}
-		$route = clone $this->globals();
-		$route->url($url)->controller($controller)->method($method)->args($args);
-		$this->routes[$url] = $route;
-		if(!is_null($this->current_name)) {
-			$this->names[$this->current_name] = $url;
-			$this->current_name = null;
-		}
-		return $this->routes[$url];
-	}
 
-	public function globals() {
-		if(!$this->globals) {
-			$this->globals = new Route('.*');
-		}
-		return $this->globals;
-	}
+        $name = $this->createRouteName();
 
-	/**
-	 * Serve assets with Neptune\Controller\AssetsController at the
-	 * given url.
-	 */
-	public function routeAssets($url) {
-		//add a slash if the given url doesn't start or end with one
-		if(substr($url, 0, 1) !== '/') {
-			$url = '/' . $url;
-		}
-		if(substr($url, -1, 1) !== '/') {
-			$url .= '/';
-		}
-		$url = $url . ':asset';
-		$route = new Route($url);
-		$route->controller('\\Neptune\\Controller\\AssetsController')
-			  ->method('serveAsset')
-			  ->format('any')
-			  ->argsRegex('.+');
-		$this->routes[$url] = $route;
-		$this->names['neptune.assets'] = $url;
-		return $this->routes[$url];
+        if (isset($this->routes[$name])) {
+            throw new \Exception(sprintf('A route named "%s" already exists.', $name));
+        }
+
+		$this->routes[$name] = new Route($name, $url, $controller, $action, $args);
+        $this->names[$name] = $url;
+        $this->current_name = null;
+
+		return $this->routes[$name];
 	}
 
     /**
@@ -99,12 +88,7 @@ class Router {
      */
     public function routeModule(AbstractModule $module, $prefix, Neptune $neptune)
     {
-		//store current globals so they aren't used in
-		//the module and can be restored later
-		$old_globals = $this->globals;
-		//reset globals so the module can define them
-		$this->globals = null;
-        //set the current module name so the name() method can use it
+        //set the current module name for naming routes
         $this->current_module = $module->getName();
 
         $prefixes = (array) $prefix;
@@ -114,9 +98,8 @@ class Router {
             $module->routes($this, $prefix, $neptune);
         }
 
-        //reset the module name to null and the globals to what they were before
+        //reset the current module name
         $this->current_module = null;
-        $this->globals = $old_globals;
 
         return true;
     }
@@ -131,22 +114,24 @@ class Router {
         }
     }
 
-	public function catchAll($controller, $method ='index', $args = null) {
+	public function catchAll($controller, $method ='index', array $args = array()) {
 		$url = '.*';
-		$this->names['neptune.catch_all'] = $url;
-		return $this->route($url, $controller, $method, $args)->format('any');
+		return $this->name('neptune.catch_all')
+            ->route($url, $controller, $method, $args)
+            ->format('any');
 	}
 
-	/**
-	 * Give the next defined route a name.
-	 */
-	public function name($name) {
-        if($this->current_module) {
-            $name = $this->current_module . ':' . $name;
-        }
+    /**
+     * Give the next defined route a name.
+     *
+     * @param string $name The name of the route
+     */
+    public function name($name)
+    {
         $this->current_name = $name;
-		return $this;
-	}
+
+        return $this;
+    }
 
 	/**
 	 * Get the name that will be assigned to the next route.
@@ -174,11 +159,6 @@ class Router {
 		return $this;
 	}
 
-	public function clearGlobals() {
-		$this->globals = false;
-		return $this;
-	}
-
     /**
      * Match a Request with a registered route and return a controller
      * action. If no route is found a RouteNotFoundException will be
@@ -195,7 +175,7 @@ class Router {
                 continue;
             }
             $this->matched_url = $url;
-            $action =  $route->getAction();
+            $action =  $route->getControllerAction();
             $this->cacheAction($request, $action);
             return $action;
         }
@@ -248,10 +228,6 @@ class Router {
         return false;
     }
 
-	public function getMatchedUrl() {
-		return $this->matched_url;
-	}
-
 	/**
      * Get the url for a named route. If routing has been skipped due
      * to caching, this method will attempt to fetch the route names
@@ -259,10 +235,10 @@ class Router {
 	 */
 	public function getNamedUrl($name) {
 		if(empty($this->names)) {
-			//no named routes have been defined
+			//no routes have been defined
 			//attempt to fetch names from cache
 			if(!$this->cache || !$result = $this->cache->fetch(self::CACHE_KEY_NAMES)) {
-				throw new \Exception("No named routes defined");
+				throw new \Exception("No routes defined");
 			}
 			if(!is_array($result)) {
 				throw new \Exception('Cache value \'' . self::CACHE_KEY_NAMES . '\' is not an array');

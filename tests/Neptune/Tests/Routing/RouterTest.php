@@ -10,8 +10,6 @@ use Neptune\Tests\Routing\TestModule;
 
 use Symfony\Component\HttpFoundation\Request;
 
-include __DIR__ . ('/../../../bootstrap.php');
-
 /**
  * RouterTest
  * @author Glynn Forrest <me@glynnforrest.com>
@@ -38,55 +36,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->route('/url'));
 	}
 
-	public function testGlobalsReturnsRoute() {
-		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->globals());
-	}
-
 	public function testCatchAllReturnRoute() {
 		$r = $this->router->catchAll('foo');
 		$this->assertInstanceOf('\Neptune\Routing\Route', $r);
 		$this->assertSame('.*', $r->getUrl());
-		//assert route is given a name
-		$names = array('neptune.catch_all' => '.*');
-		$this->assertSame($names, $this->router->getNames());
+		$this->assertSame(['neptune.catch_all' => '.*'], $this->router->getNames());
 	}
 
 	public function testMissingSlash() {
 		$r = $this->router->route('test');
 		$this->assertSame('/test', $r->getUrl());
-	}
-
-	public function testRouteInheritsGlobals() {
-		$this->router->globals()->controller('foo');
-		$r = $this->router->route('/foo', null, 'index');
-		$this->routeTest($r, '/foo');
-		$this->assertSame(array('foo', 'index', array()), $r->getAction());
-	}
-
-	public function testRouteAssets() {
-		$r = $this->router->routeAssets('/assets/');
-		$this->assertSame('/assets/:asset', $r->getUrl());
-		$this->assertTrue($this->routeTest($r, '/assets/css/test'));
-		$expected = array(
-			'\Neptune\Controller\AssetsController',
-			'serveAsset',
-			array('asset' => 'css/test'));
-		$this->assertSame($expected, $r->getAction());
-		//assert the route is given a name
-		$names = array('neptune.assets' => '/assets/:asset');
-		$this->assertSame($names, $this->router->getNames());
-	}
-
-	public function testRouteAssetsMissingSlashes() {
-		$r = $this->router->routeAssets('assets');
-		$this->assertSame('/assets/:asset', $r->getUrl());
-		$this->assertTrue($this->routeTest($r, '/assets/lib/js/test'));
-		$expected = array(
-			'\Neptune\Controller\AssetsController',
-			'serveAsset',
-			array('asset' => 'lib/js/test')
-		);
-		$this->assertSame($expected, $r->getAction());
 	}
 
 	public function testMatch() {
@@ -133,40 +92,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('/foo/login', $routes[0]->getUrl());
     }
 
-    public function testAddModuleHasLocalGlobals()
-    {
-        //TestModule defines a global controller as ::$module.controller.bar
-        $this->setUpTestModule('foo');
-        $routes = $this->router->getRoutes();
-        $route = $routes[0];
-        $this->assertTrue($this->routeTest($route, '/foo/login'));
-        $action = $route->getAction();
-        $this->assertSame('::test-module.controller.bar', $action[0]);
-    }
-
-    public function testAddModuleDoesNotChangeGlobals()
-    {
-        $before = $this->router->globals()->controller('foo');
-        $this->setUpTestModule('bar');
-        $after = $this->router->globals();
-        $this->assertSame($before, $after);
-        $route = $this->router->route('.*', null, 'some_method');
-        $this->assertTrue($this->routeTest($route, 'anything'));
-        $action = $route->getAction();
-        $this->assertSame('foo', $action[0]);
-    }
-
-    public function testAddModuleDefinesNewGlobals()
-    {
-     $this->router->globals()->args(array('globals' => 'very_yes'));
-     $this->setUpTestModule('admin');
-     $routes = $this->router->getRoutes();
-     $route = $routes[0];
-     $this->assertTrue($this->routeTest($route, '/admin/login'));
-     $action = $route->getAction();
-     $args = $action[2];
-     $this->assertSame(array(), $args);
-    }
 
 	public function testGetAndSetCache() {
 		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
@@ -184,12 +109,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('foo', $this->router->getName());
 		$r = $this->router->route('/test', 'foo');
 		$this->assertNull($this->router->getName());
-		$expected = array('foo' => $r->getUrl());
-		$this->assertSame($expected, $this->router->getNames());
-		//second route doesn't have a name, so names should not be modified
+        $names = ['foo' => $r->getUrl()];
+		$this->assertSame($names, $this->router->getNames());
+
+		//second route should be given a name automatically
 		$this->router->route('/second', 'bar');
 		$this->assertNull($this->router->getName());
-		$this->assertSame($expected, $this->router->getNames());
+        $names['_unknown_0'] = '/second';
+		$this->assertSame($names, $this->router->getNames());
 	}
 
 	public function testGetNamesReturnsEmptyArray() {
@@ -236,7 +163,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testUrlThrowsExceptionWithNoNames() {
-		$this->setExpectedException('\Exception', 'No named routes defined');
+		$this->setExpectedException('\Exception', 'No routes defined');
 		$this->router->url('get');
 	}
 
@@ -273,7 +200,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 			   ->method('fetch')
 			   ->with(Router::CACHE_KEY_NAMES);
 		$this->router->setCache($driver);
-		$this->setExpectedException('\Exception', 'No named routes defined');
+		$this->setExpectedException('\Exception', 'No routes defined');
 		$this->router->url('get');
 	}
 
@@ -281,7 +208,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     {
         //the second route in TestModule sets a name of 'secret'
         $this->setUpTestModule('foo');
-        $names = array('test-module:secret' => '/foo/secret');
+        $names = [
+            'test-module:_unknown_0' => '/foo/login',
+            'test-module:secret' => '/foo/secret'
+        ];
         $this->assertSame($names, $this->router->getNames());
         $routes = $this->router->getRoutes();
         $secret = $routes[1];
@@ -292,11 +222,12 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     public function testAddModuleDoesNotAffectFutureNames()
     {
         $this->setUpTestModule('bar');
-        $this->router->name('hello')->route('foo');
-        $names = array(
+        $this->router->route('foo');
+        $names = [
+            'test-module:_unknown_0' => '/bar/login',
             'test-module:secret' => '/bar/secret',
-            'hello' => '/foo',
-        );
+            '_unknown_1' => '/foo',
+        ];
         $this->assertSame($names, $this->router->getNames());
     }
 
