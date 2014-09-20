@@ -301,14 +301,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame(['foo', 'action', $args], $r->getControllerAction());
     }
 
-	public function testControllerNullNotApplied() {
-		$r = new Route('test', '.*', 'controller', 'method');
-		$r->controller(null);
-		$r->test($this->request('anything'));
-		$action = $r->getControllerAction();
-        $this->assertSame('controller', $action[0]);
-		$this->assertSame('method', $action[1]);
-	}
+    public function testControllerCanBeReset()
+    {
+        $r = new Route('test', '.*', 'controller', 'method');
+        $r->controller(null);
+        $this->assertFalse($r->test($this->request('anything')));
+        $this->assertSame(Route::FAILURE_CONTROLLER, $r->getStatus());
+    }
 
 	public function testMethodCanBeReset() {
 		$r = new Route('test', '.*', 'controller', 'method');

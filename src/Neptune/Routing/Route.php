@@ -78,12 +78,12 @@ class Route {
 		return '`^' . $regex . '$`';
 	}
 
-	public function controller($controller) {
-		if($controller) {
-			$this->controller = $controller;
-		}
-		return $this;
-	}
+    public function controller($controller)
+    {
+        $this->controller = $controller;
+
+        return $this;
+    }
 
 	public function action($action) {
         $this->action = $action;
