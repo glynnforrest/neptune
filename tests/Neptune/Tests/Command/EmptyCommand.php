@@ -3,18 +3,21 @@
 namespace Neptune\Tests\Command;
 
 use Neptune\Command\Command;
-use Neptune\Console\Console;
+
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * EmptyCommand
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class EmptyCommand extends Command {
+class EmptyCommand extends Command
+{
+    protected $name = 'empty';
 
-	protected $name = 'empty';
-
-	public function go(Console $c) {
-	}
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+    }
 
 }

@@ -4,7 +4,6 @@ namespace Neptune\Command;
 
 use Neptune\Console\Console;
 use Neptune\Core\Neptune;
-use Neptune\Core\NeptuneAwareInterface;
 
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,9 +17,6 @@ abstract class Command extends SymfonyCommand {
 
     protected $neptune;
 	protected $config;
-	protected $input;
-	protected $output;
-	protected $console;
 
 	protected $name;
 	protected $description;
@@ -37,28 +33,6 @@ abstract class Command extends SymfonyCommand {
         $this->setName($this->name)
              ->setDescription($this->description);
     }
-
-	public function execute(InputInterface $input, OutputInterface $output) {
-		$this->input = $input;
-		$this->output = $output;
-		//add a neptune Console helper for useful functions
-		$this->console = new Console($input, $output);
-		//set helper set
-		$this->console->setHelperSet($this->getHelperSet());
-		$this->go($this->console);
-		//return status code here
-	}
-
-	/**
-	 * Run the command. The following are available:
-	 * $console ==> Console instance
-	 * $this->input ==> InputInterface
-	 * $this->output ==> OutputInterface
-	 * $this->console ==> Console
-	 * $this->config ==> 'neptune' Config instance
-     * $this->neptune ==> Neptune
-	 */
-	abstract public function go(Console $console);
 
     public function getRootDirectory()
     {
