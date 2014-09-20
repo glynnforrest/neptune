@@ -134,6 +134,22 @@ The method on the controller to use.
 
 ### Arguments
 
-The arguments to pass to the action.
+The arguments to pass to the action. Any additional arguments that are
+found while testing the request will be merged.
+
+```php
+$route = $router->route('/hello/:name');
+$route->args(['lang' => 'en']);
+// '/hello/glynn' will give args of ['lang' => 'en', 'name' => 'glynn']
+```
+
+The args method can also be used to ensure arguments are given to the
+action in a particular order.
+
+```php
+$route = $router->route('/hello/:name');
+$route->args(['name' => 'world', 'lang' => 'en']);
+// '/hello/glynn' will give args of ['name' => 'glynn', 'lang' => 'en']
+```
 
 ## Routing a standard request
