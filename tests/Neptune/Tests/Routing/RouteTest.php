@@ -12,6 +12,34 @@ use Symfony\Component\HttpFoundation\Request;
  **/
 class RouteTest extends \PHPUnit_Framework_TestCase {
 
+    public function testName()
+    {
+        $r = new Route('foo', '/');
+        $this->assertSame('foo', $r->getName());
+    }
+
+    public function testUrl()
+    {
+        $r = new Route('foo', '/');
+        $this->assertSame('/', $r->getUrl());
+    }
+
+    public function testController()
+    {
+        $r = new Route('foo', '/', 'foo');
+        $this->assertSame('foo', $r->getController());
+        $this->assertSame($r, $r->controller('bar'));
+        $this->assertSame('bar', $r->getController());
+    }
+
+    public function testAction()
+    {
+        $r = new Route('foo', '/', 'foo', 'bar');
+        $this->assertSame('bar', $r->getAction());
+        $this->assertSame($r, $r->action('baz'));
+        $this->assertSame('baz', $r->getAction());
+    }
+
 	protected function request($string) {
 		return Request::create($string);
 	}

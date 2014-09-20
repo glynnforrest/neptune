@@ -46,6 +46,26 @@ class Route {
 		$this->status = self::UNTESTED;
 	}
 
+    /**
+     * Get the name of this route.
+     *
+     * @return string The name
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get the url of this route.
+     *
+     * @return string The url
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
 	/**
 	 * Generate the regex that represents this route.
 	 */
@@ -78,6 +98,12 @@ class Route {
 		return '`^' . $regex . '$`';
 	}
 
+    /**
+     * Set the controller for this route.
+     *
+     * @param string $controller The controller
+     * @return Route This route
+     */
     public function controller($controller)
     {
         $this->controller = $controller;
@@ -85,11 +111,38 @@ class Route {
         return $this;
     }
 
-	public function action($action) {
+    /**
+     * Get the controller for this route.
+     *
+     * @return string The controller
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     * Set the action for this route.
+     *
+     * @param string $action The action
+     * @return Route This route
+     */
+    public function action($action)
+    {
         $this->action = $action;
 
-		return $this;
-	}
+        return $this;
+    }
+
+    /**
+     * Get the action for this route.
+     *
+     * @return string The action
+     */
+    public function getAction()
+    {
+        return $this->action;
+    }
 
 	public function args(array $args) {
         $this->default_args = $args;
@@ -131,10 +184,6 @@ class Route {
 		}
 		$this->auto_args = true;
 		return $this;
-	}
-
-	public function getUrl() {
-		return $this->url;
 	}
 
 	public function test(Request $request) {
