@@ -61,7 +61,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 
 	public function testCatchAllMatch() {
 		$r = new Route('test', '.*', 'controller', 'method');
-		$r->format('any');
+		$r->format(true);
 		$this->assertTrue($r->test($this->request('/anything')));
 		$this->assertTrue($r->test($this->request('')));
 		$this->assertTrue($r->test($this->request('..23sd')));
@@ -244,9 +244,17 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($r->test($this->request('/foo.html')));
 	}
 
+    public function testHtmlFormatDefaultEmptyArray()
+    {
+        $r = new Route('test', '/foo', 'test', 'foo');
+        $r->format([]);
+        $this->assertFalse($r->test($this->request('/foo.xml')));
+        $this->assertTrue($r->test($this->request('/foo.html')));
+    }
+
 	public function testAnyFormat() {
 		$r = new Route('test', '/format', 'test', 'index');
-		$r->format('any');
+		$r->format(true);
 		$this->assertTrue($r->test($this->request('/format.json')));
 		$this->assertTrue($r->test($this->request('/format.html')));
 		$this->assertTrue($r->test($this->request('/format.xml')));

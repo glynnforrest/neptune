@@ -113,7 +113,7 @@ class Router {
 		$url = '.*';
 		return $this->name('neptune.catch_all')
             ->route($url, $controller, $method, $args)
-            ->format('any');
+            ->format(true);
 	}
 
     /**

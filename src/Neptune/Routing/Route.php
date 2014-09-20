@@ -152,7 +152,8 @@ class Route {
     /**
      * Set the http method or methods accepted by this route.
      *
-     * @param mixed The method as a string, or an array of methods.
+     * @param mixed The method as a string, or an array of methods
+     * @return Route This route
      */
     public function method($methods)
     {
@@ -161,10 +162,19 @@ class Route {
         return $this;
     }
 
-	public function format($format) {
-		$this->format = (array) $format;
-		return $this;
-	}
+    /**
+     * Set the format or formats accepted by this route. Pass true to
+     * accept any format.
+     *
+     * @param mixed $format The format as a string, an array of formats, or true
+     * @return Route This route
+     */
+    public function format($format)
+    {
+        $this->format = true === $format ?: (array) $format;
+
+        return $this;
+    }
 
     /**
      * Add a function to transform an argument.
@@ -231,12 +241,15 @@ class Route {
 
         //format
         $format = isset($vars['_format']) ? $vars['_format'] : 'html';
-        if ($this->format) {
-            if (!in_array($format, $this->format) && !in_array('any', $this->format)) {
-                    $this->status = self::FAILURE_FORMAT;
-                    return false;
+        if (!empty($this->format)) {
+            //format has been configured. It may be an array of
+            //formats, or true for anything
+            if ($this->format !== true && !in_array($format, $this->format, true)) {
+                $this->status = self::FAILURE_FORMAT;
+                return false;
             }
         } else {
+            //no format configured, fail if it's not html
             if ($format !== 'html') {
                 $this->status = self::FAILURE_FORMAT;
                 return false;
