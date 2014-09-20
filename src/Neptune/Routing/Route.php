@@ -248,9 +248,9 @@ class Route {
             return [$this->controller, $this->action, $this->processed_args];
         }
         if($this->status === self::UNTESTED) {
-            throw new RouteUntestedException('Route untested, unable to get controller action.');
+            throw new RouteUntestedException(sprintf('Route "%s" is untested, unable to get controller action.', $this->name));
         }
-        throw new RouteFailedException('Route failed, unable to get controller action.');
+        throw new RouteFailedException(sprintf('Route "%s" failed, unable to get controller action.', $this->name));
     }
 
 	/**

@@ -46,11 +46,29 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(['foo', 'index', [1]], $r->getControllerAction());
 	}
 
-	public function testGetAction() {
+    public function testGetControllerAction()
+    {
 		$r = new Route('test', '/hello', 'controller', 'method');
 		$r->test($this->request('/hello'));
         $this->assertSame(['controller', 'method', []], $r->getControllerAction());
 	}
+
+    public function testGetControllerActionThrowsExceptionBeforeTest()
+    {
+        $r = new Route('test', '/hello', 'controller', 'method');
+        $msg = 'Route "test" is untested, unable to get controller action.';
+        $this->setExpectedException('Neptune\\Routing\\RouteUntestedException', $msg);
+        $r->getControllerAction();
+    }
+
+    public function testGetControllerActionThrowsExceptionWithFailedTest()
+    {
+        $r = new Route('test', '/hello', 'controller', 'method');
+        $this->assertFalse($r->test($this->request('/fails')));
+        $msg = 'Route "test" failed, unable to get controller action.';
+        $this->setExpectedException('Neptune\\Routing\\RouteFailedException', $msg);
+        $r->getControllerAction();
+    }
 
 	public function testNamedArgs() {
 		$r = new Route('test', '/args/:id');
