@@ -5,6 +5,9 @@ namespace Neptune\Command;
 use Neptune\Command\Command;
 use Neptune\Console\Console;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 use \DirectoryIterator;
 
 /**
@@ -17,11 +20,12 @@ class EnvListCommand extends Command {
 	protected $name = 'env:list';
 	protected $description = 'List all application environments';
 
-	public function go(Console $console) {
-		foreach ($this->getEnvsHighlightCurrent() as $env) {
-			$console->writeln($env);
-		}
-	}
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        foreach ($this->getEnvsHighlightCurrent() as $env) {
+            $output->writeln($env);
+        }
+    }
 
 	protected function getEnvs() {
 		$envs = array();

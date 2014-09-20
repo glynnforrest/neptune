@@ -35,7 +35,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
         $this->neptune['config'] = $this->config;
 
 		$application = new Application();
-		$application->add(new EnvListCommand($this->neptune, $this->config));
+		$application->add(new EnvListCommand($this->neptune));
 		$command = $application->find('env:list');
 		$this->tester = new CommandTester($command);
 	}
@@ -63,16 +63,24 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame("development\nproduction\n", $this->tester->getDisplay(true));
 	}
 
-	public function testCurrentEnvHighlighted() {
-		//set the Console helper within EnvListCommand to give raw
-		//output so we can look at the <tags>
-		Console::outputRaw();
-		$this->config->set('env', 'production');
-		$this->temping->create('config/env/production.php');
-		$this->temping->create('config/env/development.php');
-		$this->tester->execute(array());
-		$expected = "development\n<info>production</info>\n";
-		$this->assertSame($expected, $this->tester->getDisplay(true));
-	}
+    /**
+     * Mock output interface to check for tags, as they won't appear
+     * in getDisplay().
+     */
+    public function testCurrentEnvHighlighted()
+    {
+        $this->config->set('env', 'production');
+        $this->temping->create('config/env/production.php');
+        $this->temping->create('config/env/development.php');
+
+        $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
+        $output = $this->getMock('Symfony\Component\Console\Output\OutputInterface');
+        $output->expects($this->exactly(2))
+            ->method('writeln')
+            ->withConsecutive(['development'], ['<info>production</info>']);
+
+        $command = new EnvListCommand($this->neptune);
+        $command->run($input, $output);
+    }
 
 }
