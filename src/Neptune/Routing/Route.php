@@ -78,11 +78,6 @@ class Route {
 		return '`^' . $regex . '$`';
 	}
 
-	public function url($url) {
-		$this->url = $url;
-		return $this;
-	}
-
 	public function controller($controller) {
 		if($controller) {
 			$this->controller = $controller;

@@ -222,15 +222,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('/hiya', $r->getUrl());
 	}
 
-	public function testChangeUrl() {
-		$r = new Route('test', '.*', 'controller', 'method');
-		$this->assertTrue($r->test($this->request('/anything')));
-		$this->assertTrue($r->test($this->request('/url')));
-		$r->url('/url');
-		$this->assertFalse($r->test($this->request('/anything')));
-		$this->assertTrue($r->test($this->request('/url')));
-	}
-
 	public function testOneMethod() {
 		$r = new Route('test', '.*', 'controller', 'method');
 		$r->method('get');
