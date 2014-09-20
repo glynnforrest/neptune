@@ -93,6 +93,15 @@ class RouteTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(['foo', 'method', ['place' => 'earth']], $r->getControllerAction());
 	}
 
+    public function testArgsAreReset()
+    {
+        $r = new Route('test', '/hello(/:place)', 'foo', 'method');
+        $r->test($this->request('/hello/world'));
+        $this->assertSame(['foo', 'method', ['place' => 'world']], $r->getControllerAction());
+        $r->test($this->request('/hello'));
+        $this->assertSame(['foo', 'method', []], $r->getControllerAction());
+    }
+
 	public function testAutoArgs() {
 		$r = new Route('test', '/url(/:args)');
 		$r->controller('test')->action('index')->autoArgs();

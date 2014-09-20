@@ -223,9 +223,8 @@ class Route {
                 }
             }
 		}
-		if(!empty($args)) {
-			$this->processed_args = $args;
-		}
+
+        $this->processed_args = $args;
 		$this->status = self::PASSED;
 		return true;
 	}
