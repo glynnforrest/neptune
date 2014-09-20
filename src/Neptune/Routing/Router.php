@@ -43,7 +43,7 @@ class Router {
     protected function createRouteName()
     {
         if ($this->current_name) {
-            return $this->current_module ? $this->current_module . ':' . $this->current_name : $this->current_name;
+            return $this->current_name;
         }
 
         $count = $this->unknown_count;
@@ -80,23 +80,18 @@ class Router {
 
     /**
      * Load the routes for a module, using $prefix to namespace to
-     * urls. A module may be routed to multiple prefixes by supplying
-     * an array instead of a string.
+     * urls.
      *
      * @param AbstractModule $module The module
-     * @param mixed $prefix The routing prefix or prefixes
+     * @param string $prefix The routing prefix
+     * @param Neptune $neptune
      */
     public function routeModule(AbstractModule $module, $prefix, Neptune $neptune)
     {
         //set the current module name for naming routes
         $this->current_module = $module->getName();
 
-        $prefixes = (array) $prefix;
-        //create the routes for every prefix, passing in this Router
-        //and the module name
-        foreach ($prefixes as $prefix) {
-            $module->routes($this, $prefix, $neptune);
-        }
+        $module->routes($this, $prefix, $neptune);
 
         //reset the current module name
         $this->current_module = null;

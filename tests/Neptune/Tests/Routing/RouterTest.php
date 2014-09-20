@@ -83,15 +83,40 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->router->routeModule($module, $prefix, $neptune);
     }
 
-    public function testAddModuleSetsPrefix()
+    public function testAddModule()
     {
         //TestModule defines a route with '/$prefix/login
         $this->setUpTestModule('foo');
+        $names = [
+            'test-module:_unknown_0' => '/foo/login',
+            'test-module:secret' => '/foo/secret'
+        ];
+        $this->assertSame($names, $this->router->getNames());
+
         $routes = $this->router->getRoutes();
-        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
-        $this->assertSame('/foo/login', $routes[0]->getUrl());
+
+        $this->assertSame(2, count($routes));
+
+        $route = $routes[0];
+        $this->assertInstanceOf('\Neptune\Routing\Route', $route);
+        $this->assertSame('/foo/login', $route->getUrl());
+
+        $route = $routes[1];
+        $this->assertInstanceOf('\Neptune\Routing\Route', $route);
+        $this->assertSame('/foo/secret', $route->getUrl());
     }
 
+    public function testAddModuleDoesNotAffectFutureNames()
+    {
+        $this->setUpTestModule('bar');
+        $this->router->route('foo');
+        $names = [
+            'test-module:_unknown_0' => '/bar/login',
+            'test-module:secret' => '/bar/secret',
+            '_unknown_1' => '/foo',
+        ];
+        $this->assertSame($names, $this->router->getNames());
+    }
 
 	public function testGetAndSetCache() {
 		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
@@ -204,33 +229,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 		$this->router->url('get');
 	}
 
-    public function testNamedRouteInModuleHasPrefix()
-    {
-        //the second route in TestModule sets a name of 'secret'
-        $this->setUpTestModule('foo');
-        $names = [
-            'test-module:_unknown_0' => '/foo/login',
-            'test-module:secret' => '/foo/secret'
-        ];
-        $this->assertSame($names, $this->router->getNames());
-        $routes = $this->router->getRoutes();
-        $secret = $routes[1];
-        $action = array('::test-module.controller.bar', 'secretArea', array());
-        $this->assertSame($action, $this->match('/foo/secret'));
-    }
-
-    public function testAddModuleDoesNotAffectFutureNames()
-    {
-        $this->setUpTestModule('bar');
-        $this->router->route('foo');
-        $names = [
-            'test-module:_unknown_0' => '/bar/login',
-            'test-module:secret' => '/bar/secret',
-            '_unknown_1' => '/foo',
-        ];
-        $this->assertSame($names, $this->router->getNames());
-    }
-
     public function testMatchCached()
     {
         $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
@@ -275,24 +273,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     {
         $request = Request::create('/foo');
         $this->assertFalse($this->router->matchCached($request));
-    }
-
-    public function testRouteModuleToMultiplePrefixes()
-    {
-        //TestModule defines a route with '/$prefix/login
-        $this->setUpTestModule(array('foo', 'admin', 'mobile'));
-        $routes = $this->router->getRoutes();
-
-        //TestModule defines 2 routes. If this ever changes the
-        //following will need updating
-        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
-        $this->assertSame('/foo/login', $routes[0]->getUrl());
-
-        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[2]);
-        $this->assertSame('/admin/login', $routes[2]->getUrl());
-
-        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[4]);
-        $this->assertSame('/mobile/login', $routes[4]->getUrl());
     }
 
 }

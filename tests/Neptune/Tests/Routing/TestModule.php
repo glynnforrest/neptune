@@ -19,7 +19,7 @@ class TestModule extends AbstractModule
         $module = $this->getName();
 
         $router->route("$prefix/login", "::$module.controller.bar", "{$module}_module_method");
-        $router->name('secret')->route("$prefix/secret", "::$module.controller.bar", 'secretArea');
+        $router->name("$module:secret")->route("$prefix/secret", "::$module.controller.bar", 'secretArea');
     }
 
     public function getName()
