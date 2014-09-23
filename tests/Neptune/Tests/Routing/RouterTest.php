@@ -2,7 +2,7 @@
 
 namespace Neptune\Tests\Routing;
 
-use Neptune\Helpers\Url;
+use Neptune\Routing\Url;
 use Neptune\Routing\Router;
 use Neptune\Routing\Route;
 

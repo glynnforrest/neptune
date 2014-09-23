@@ -4,7 +4,7 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 
-use Neptune\Helpers\Url;
+use Neptune\Routing\Url;
 use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;

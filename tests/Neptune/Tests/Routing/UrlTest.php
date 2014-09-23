@@ -1,10 +1,8 @@
 <?php
 
-namespace Neptune\Tests\Helpers;
+namespace Neptune\Tests\Routing;
 
-use Neptune\Helpers\Url;
-
-require_once __DIR__ . '/../../../bootstrap.php';
+use Neptune\Routing\Url;
 
 /**
  * UrlTest

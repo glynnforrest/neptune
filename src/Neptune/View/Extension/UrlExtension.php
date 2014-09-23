@@ -2,7 +2,7 @@
 
 namespace Neptune\View\Extension;
 
-use Neptune\Helpers\Url;
+use Neptune\Routing\Url;
 use Neptune\Routing\Router;
 
 /**

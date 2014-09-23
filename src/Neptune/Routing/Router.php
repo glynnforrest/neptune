@@ -4,7 +4,7 @@ namespace Neptune\Routing;
 
 use Neptune\Routing\Route;
 use Neptune\Core\Neptune;
-use Neptune\Helpers\Url;
+use Neptune\Routing\Url;
 use Neptune\Routing\RouteNotFoundException;
 use Neptune\Service\AbstractModule;
 

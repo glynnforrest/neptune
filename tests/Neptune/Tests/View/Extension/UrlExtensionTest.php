@@ -18,7 +18,7 @@ class UrlExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->url = $this->getMockBuilder('Neptune\Helpers\Url')
+        $this->url = $this->getMockBuilder('Neptune\Routing\Url')
                           ->disableOriginalConstructor()
                           ->getMock();
         $this->router = $this->getMockBuilder('Neptune\Routing\Router')
