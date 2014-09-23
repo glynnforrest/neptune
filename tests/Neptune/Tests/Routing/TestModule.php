@@ -14,7 +14,7 @@ use Neptune\Core\Neptune;
 class TestModule extends AbstractModule
 {
 
-    public function routes(Router $router, $prefix, Neptune $neptune)
+    protected function routes(Router $router, $prefix, Neptune $neptune)
     {
         $module = $this->getName();
 

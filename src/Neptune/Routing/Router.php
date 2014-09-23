@@ -83,15 +83,14 @@ class Router {
      * urls.
      *
      * @param AbstractModule $module The module
-     * @param string $prefix The routing prefix
      * @param Neptune $neptune
      */
-    public function routeModule(AbstractModule $module, $prefix, Neptune $neptune)
+    public function routeModule(AbstractModule $module, Neptune $neptune)
     {
         //set the current module name for naming routes
         $this->current_module = $module->getName();
 
-        $module->routes($this, $prefix, $neptune);
+        $module->loadRoutes($this, $neptune);
 
         //reset the current module name
         $this->current_module = null;
@@ -101,11 +100,8 @@ class Router {
 
     public function routeModules(Neptune $neptune)
     {
-        foreach ($neptune->getModules() as $name => $module) {
-            if (!$prefix = $neptune->getRoutePrefix($name)) {
-                continue;
-            }
-            $this->routeModule($module, $prefix, $neptune);
+        foreach ($neptune->getModules() as $module) {
+            $this->routeModule($module, $neptune);
         }
     }
 
