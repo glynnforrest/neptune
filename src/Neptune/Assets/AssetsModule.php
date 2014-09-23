@@ -29,7 +29,10 @@ class AssetsModule extends AbstractModule
         };
 
         $neptune['assets'] = function ($neptune) {
-            return new AssetManager($neptune['config.manager'], new TagGenerator($neptune['url']->to($neptune['assets.url'])));
+            $url = $neptune['url']->to($neptune['assets.url']);
+            $cache_bust = $neptune['config']->getRequired('assets.cache_bust');
+
+            return new AssetManager($neptune['config.manager'], new TagGenerator($url, $cache_bust));
         };
 
         $neptune['controller.assets'] = function ($neptune) {
