@@ -18,10 +18,9 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Router {
 
-	const CACHE_KEY_NAMES = 'Router.names';
+	const CACHE_KEY = 'Router.routes';
 
 	protected $routes = array();
-	protected $names = array();
 	protected $cache;
 	protected $current_name;
     protected $current_module;
@@ -72,7 +71,6 @@ class Router {
         }
 
 		$this->routes[$name] = new Route($name, $url, $controller, $action, $args);
-        $this->names[$name] = $url;
         $this->current_name = null;
 
 		return $this->routes[$name];
@@ -132,13 +130,6 @@ class Router {
 	}
 
 	/**
-	 * Get a list of all named routes and their urls.
-	 */
-	public function getNames() {
-		return $this->names;
-	}
-
-	/**
 	 * Return all defined routes in an array.
 	 */
 	public function getRoutes() {
@@ -167,7 +158,7 @@ class Router {
             }
             $this->matched_url = $url;
             $action =  $route->getControllerAction();
-            $this->cacheAction($request, $action);
+            $this->cacheRoutes($request, $action);
             return $action;
         }
         throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
@@ -185,13 +176,12 @@ class Router {
     }
 
     /**
-     * Cache the action used for a particular request.
+     * Cache the current Routes.
      */
-    protected function cacheAction(Request $request, array $action)
+    protected function cacheRoutes()
     {
         if ($this->cache) {
-            $this->cache->save($this->getRequestCacheKey($request), $action);
-            $this->cache->save(self::CACHE_KEY_NAMES, $this->names);
+            $this->cache->save(static::CACHE_KEY, $this->routes);
         }
     }
 
@@ -209,14 +199,15 @@ class Router {
         if (!$this->cache) {
             return false;
         }
-        $cached = $this->cache->fetch($key = $this->getRequestCacheKey($request));
-        if ($cached) {
-            if (!is_array($cached)) {
-                throw new \Exception("Cache value $key is not an array");
-            }
-            return $cached;
+        if (!$cached = $this->cache->fetch(static::CACHE_KEY)) {
+            return false;
         }
-        return false;
+        if (!is_array($cached)) {
+            throw new \Exception("Cache value $key is not an array");
+        }
+        $this->routes = $cached;
+
+        return $this->match($request);
     }
 
 	/**
@@ -225,21 +216,13 @@ class Router {
      * from the cache.
 	 */
 	public function getNamedUrl($name) {
-		if(empty($this->names)) {
-			//no routes have been defined
-			//attempt to fetch names from cache
-			if(!$this->cache || !$result = $this->cache->fetch(self::CACHE_KEY_NAMES)) {
+		if(empty($this->routes)) {
 				throw new \Exception("No routes defined");
-			}
-			if(!is_array($result)) {
-				throw new \Exception('Cache value \'' . self::CACHE_KEY_NAMES . '\' is not an array');
-			}
-			$this->names = $result;
 		}
-		if(!isset($this->names[$name])) {
+		if(!isset($this->routes[$name])) {
 			throw new \Exception("Unknown route '$name'");
 		}
-		return $this->names[$name];
+		return $this->routes[$name]->getUrl();
 	}
 
 	/**

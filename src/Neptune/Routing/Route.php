@@ -46,6 +46,11 @@ class Route {
 		$this->status = self::UNTESTED;
 	}
 
+    public function __sleep()
+    {
+        return ['name', 'url', 'controller', 'action', 'default_args'];
+    }
+
     /**
      * Get the name of this route.
      *
