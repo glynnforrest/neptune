@@ -96,8 +96,7 @@ class ControllerResolver implements ControllerResolverInterface
     }
 
     /**
-     * Inject the neptune instance if the controller is able to accept
-     * them.
+     * Inject the neptune instance if the controller requires it.
      */
     protected function configureController($controller)
     {
