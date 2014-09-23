@@ -7,13 +7,9 @@ use Neptune\Core\Events;
 use Neptune\Service\ServiceInterface;
 use Neptune\Service\AbstractModule;
 use Neptune\Core\ComponentException;
-use Neptune\Routing\Router;
-use Neptune\Routing\ControllerResolver;
-use Neptune\EventListener\RouterListener;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
 use Neptune\Config\ConfigManager;
-use Neptune\Helpers\Url;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,20 +53,8 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
             return $manager;
         };
 
-        $this['url'] = function() {
-            return new Url($this['config']->getRequired('root_url'));
-        };
-
-        $this['router'] = function() {
-            return new Router($this['url']);
-        };
-
         $this['dispatcher'] = function () {
             return new EventDispatcher;
-        };
-
-        $this['resolver'] = function () {
-            return new ControllerResolver($this);
         };
 
         $this['request_stack'] = function () {
@@ -138,7 +122,6 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
     {
         if(!$this->booted) {
             $dispatcher = $this['dispatcher'];
-            $dispatcher->addSubscriber(new RouterListener($this['router'], $this));
             $dispatcher->addSubscriber(new StringResponseListener());
 
             foreach ($this->services as $service) {
