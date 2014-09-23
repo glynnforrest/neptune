@@ -15,44 +15,36 @@ use Neptune\Controller\AssetsController;
  **/
 class AssetsModule extends AbstractModule
 {
-    protected $config;
-
-    public function __construct(Config $config = null)
-    {
-        $this->config = $config;
-    }
 
     public function register(Neptune $neptune)
     {
-        //if no config was supplied, grab the default
-        if (!$this->config) {
-            $this->config = $neptune['config'];
-        }
+        $neptune['assets.url'] = function ($neptune) {
+            $url =  $neptune['config']->getRequired('assets.url');
+            //add a slash if the given url doesn't end with one
+            if (substr($url, -1, 1) !== '/') {
+                $url .= '/';
+            }
 
-        $neptune['assets'] = function($neptune) {
-            return new AssetManager($neptune['config.manager'], new TagGenerator($neptune['url']->to('assets/')));
+            return $url;
         };
 
-        $neptune['controller.assets'] = function($neptune) {
+        $neptune['assets'] = function ($neptune) {
+            return new AssetManager($neptune['config.manager'], new TagGenerator($neptune['url']->to($neptune['assets.url'])));
+        };
+
+        $neptune['controller.assets'] = function ($neptune) {
             return new AssetsController($neptune);
         };
     }
 
-    public function routes(Router $router, $prefix, Neptune $neptune)
+    public function loadRoutes(Router $router, Neptune $neptune)
     {
-        //add a slash if the given url doesn't start or end with one
-        $url = $this->config->getRequired('assets.url');
-        if (substr($url, 0, 1) !== '/') {
-            $url = '/' . $url;
-        }
-        if (substr($url, -1, 1) !== '/') {
-            $url .= '/';
-        }
-        $url = $url . ':asset';
-        $router->name('neptune.assets')
-               ->route($url, '::controller.assets', 'serveAsset')
-               ->format('any')
-               ->argsRegex('.+');
+        $url = $neptune['assets.url'];
+
+        $router->name('neptune:assets')
+            ->route($url . ':asset', '::controller.assets', 'serveAsset')
+            ->format(true)
+            ->argsRegex('.+');
     }
 
     public function boot(Neptune $neptune)
