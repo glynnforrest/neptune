@@ -57,7 +57,7 @@ class EnvCreateCommand extends Command {
             }
         }
         $c = new Config($name, $config);
-        $c->set('root_url', '');
+        $c->set('rooting.root_url', '');
         $c->save();
         $this->output->writeln("Created <info>$config</info>");
     }

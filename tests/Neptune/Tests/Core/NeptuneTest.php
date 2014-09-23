@@ -27,9 +27,6 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         //override config for testing
         $this->config = new Config('neptune');
         $this->neptune['config'] = $this->config;
-        //this is an ugly hack to make sure the router works. When the
-        //router is decoupled into a service this won't be needed
-        $this->neptune['config']->set('root_url', 'myapp.local/');
 	}
 
 	public function tearDown() {

@@ -20,11 +20,16 @@ class RoutingService implements ServiceInterface
     public function register(Neptune $neptune)
     {
         $neptune['url'] = function ($neptune) {
-            return new Url($neptune['config']->getRequired('root_url'));
+            return new Url($neptune['config']->getRequired('routing.root_url'));
         };
 
         $neptune['router'] = function ($neptune) {
-            return new Router($neptune['url']);
+            $router = new Router($neptune['url']);
+            if ($cache = $neptune['config']->get('routing.cache')) {
+                $router->setCache($neptune[$cache]);
+            }
+
+            return $router;
         };
 
         $neptune['resolver'] = function ($neptune) {
@@ -34,7 +39,6 @@ class RoutingService implements ServiceInterface
         $neptune['router.listener'] = function ($neptune) {
             return new RouterListener($neptune['router'], $neptune);
         };
-
     }
 
     public function boot(Neptune $neptune)
