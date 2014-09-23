@@ -177,23 +177,6 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($expected, $this->neptune->getModules());
     }
 
-    public function testGetRoutePrefix()
-    {
-        $this->assertFalse($this->neptune->getRoutePrefix('test-module'));
-        $module = new TestModule();
-        $this->neptune->addModule($module, 'admin/');
-        $this->assertSame('admin/', $this->neptune->getRoutePrefix('test-module'));
-    }
-
-    public function testGetRoutePrefixNoRouting()
-    {
-        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
-        $module = $this->getMock('\Neptune\Service\AbstractModule');
-        //no routing prefix set, so the module won't be routed.
-        $this->neptune->addModule($module);
-        $this->assertFalse($this->neptune->getRoutePrefix('foo'));
-    }
-
     public function testConfigSetup()
     {
         $stub = new Config('testing');

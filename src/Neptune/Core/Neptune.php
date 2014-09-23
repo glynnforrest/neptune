@@ -32,7 +32,6 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
     protected $booted;
     protected $services = array();
     protected $modules = array();
-    protected $module_routes = array();
     protected $root_directory;
 
     public function __construct($root_directory)
@@ -84,9 +83,9 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
     }
 
     /**
-     * Add a service to this Neptune instance.
+     * Register a service.
      *
-     * @param ServiceInterface The service to add.
+     * @param ServiceInterface The service to add
      */
     public function addService(ServiceInterface $service)
     {
@@ -95,22 +94,14 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
     }
 
     /**
-     * Add a module to this Neptune instance. If $route_prefix is a
-     * string, the module will be routed using the string as a prefix.
-     * If true, the module will be routed without a prefix. If false,
-     * the module will not be routed.
+     * Register a module.
      *
      * @param AbstractModule The module to add
-     * @param mixed $route_prefix The prefix to use in routes for the module
      */
-    public function addModule(AbstractModule $module, $route_prefix = false)
+    public function addModule(AbstractModule $module)
     {
         $this->addService($module);
-        $name = $module->getName();
-        $this->modules[$name] = $module;
-        if ($route_prefix) {
-            $this->module_routes[$name] = $route_prefix;
-        }
+        $this->modules[$module->getName()] = $module;
     }
 
     /**
@@ -137,19 +128,6 @@ class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
     public function getModules()
     {
         return $this->modules;
-    }
-
-    /**
-     * Get the route prefix of a registered module. False will be
-     * returned if the module isn't registered or routing is disabled
-     * for that module.
-     *
-     * @param string $module The name of the module
-     * @return string The route prefix, or false on failure.
-     */
-    public function getRoutePrefix($module)
-    {
-        return isset($this->module_routes[$module]) ? $this->module_routes[$module] : false;
     }
 
     /**
