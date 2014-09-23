@@ -72,7 +72,6 @@ class ControllerResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->neptune, $controller[0]->getNeptune());
     }
 
-
     public function testGetControllerWithNoModule()
     {
         $req = $this->createRequest('test', 'bar');

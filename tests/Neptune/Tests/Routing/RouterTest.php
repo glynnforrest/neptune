@@ -6,73 +6,82 @@ use Neptune\Routing\Url;
 use Neptune\Routing\Router;
 use Neptune\Routing\Route;
 
-use Neptune\Tests\Routing\TestModule;
-
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * RouterTest
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class RouterTest extends \PHPUnit_Framework_TestCase {
+class RouterTest extends \PHPUnit_Framework_TestCase
+{
+    public function setUp()
+    {
+        $this->router = new Router(new Url('myapp.local/'));
+    }
 
-	public function setUp() {
-		$this->router = new Router(new Url('myapp.local/'));
-	}
+    protected function routeTest($route, $url)
+    {
+        $req = Request::create($url);
 
-	protected function routeTest($route, $url) {
-		$req = Request::create($url);
-		return $route->test($req);
-	}
+        return $route->test($req);
+    }
 
     protected function match($pathinfo, $method = 'GET')
     {
         $request = Request::create($pathinfo);
         $request->setMethod($method);
+
         return $this->router->match($request);
     }
 
-	public function testRouteReturnsRoute() {
-		$this->assertInstanceOf('\Neptune\Routing\Route', $this->router->route('/url'));
-	}
+    public function testRouteReturnsRoute()
+    {
+        $this->assertInstanceOf('\Neptune\Routing\Route', $this->router->route('/url'));
+    }
 
-	public function testCatchAllReturnRoute() {
-		$r = $this->router->catchAll('foo');
-		$this->assertInstanceOf('\Neptune\Routing\Route', $r);
-		$this->assertSame('.*', $r->getUrl());
-		$this->assertSame(['neptune.catch_all' => '.*'], $this->router->getNames());
-	}
+    public function testCatchAllReturnRoute()
+    {
+        $r = $this->router->catchAll('foo');
+        $this->assertInstanceOf('\Neptune\Routing\Route', $r);
+        $this->assertSame('.*', $r->getUrl());
+        $this->assertSame(['neptune.catch_all' => '.*'], $this->router->getNames());
+    }
 
-	public function testMissingSlash() {
-		$r = $this->router->route('test');
-		$this->assertSame('/test', $r->getUrl());
-	}
+    public function testMissingSlash()
+    {
+        $r = $this->router->route('test');
+        $this->assertSame('/test', $r->getUrl());
+    }
 
-	public function testMatch() {
-		$this->router->route('/test', 'test', 'index');
-		$expected = array('test', 'index', array());
-		$this->assertSame($expected, $this->match('/test'));
-	}
+    public function testMatch()
+    {
+        $this->router->route('/test', 'test', 'index');
+        $expected = ['test', 'index', []];
+        $this->assertSame($expected, $this->match('/test'));
+    }
 
-	public function testMatchThrowsExceptionNoAction() {
-		$msg = 'No route found that matches "foo"';
-		$this->setExpectedException('\Neptune\Routing\RouteNotFoundException', $msg);
-		$this->match('foo');
-	}
+    public function testMatchThrowsExceptionNoAction()
+    {
+        $msg = 'No route found that matches "foo"';
+        $this->setExpectedException('\Neptune\Routing\RouteNotFoundException', $msg);
+        $this->match('foo');
+    }
 
-	public function testCatchAll() {
-		$this->router->route('/test', 'test', 'index');
-		$this->router->catchAll('foo');
-		$expected = array('foo', 'index', array());
-		$this->assertSame($expected, $this->match('/foo'));
-	}
+    public function testCatchAll()
+    {
+        $this->router->route('/test', 'test', 'index');
+        $this->router->catchAll('foo');
+        $expected = ['foo', 'index', []];
+        $this->assertSame($expected, $this->match('/foo'));
+    }
 
-	public function testGetRoutes() {
-		$this->router->catchAll('foo');
-		$routes = $this->router->getRoutes();
-		$this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
-		$this->assertSame('.*', $routes[0]->getUrl());
-	}
+    public function testGetRoutes()
+    {
+        $this->router->catchAll('foo');
+        $routes = $this->router->getRoutes();
+        $this->assertInstanceOf('\Neptune\Routing\Route', $routes[0]);
+        $this->assertSame('.*', $routes[0]->getUrl());
+    }
 
     protected function setUpTestModule($prefix)
     {
@@ -118,121 +127,137 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame($names, $this->router->getNames());
     }
 
-	public function testGetAndSetCache() {
-		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
-		$this->router->setCache($driver);
-		$this->assertSame($driver, $this->router->getCache());
-	}
+    public function testGetAndSetCache()
+    {
+        $driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $this->router->setCache($driver);
+        $this->assertSame($driver, $this->router->getCache());
+    }
 
-	public function testName() {
-		$this->assertInstanceOf('\Neptune\Routing\Router', $this->router->name('route'));
-		$this->assertSame('route', $this->router->getName());
-	}
+    public function testName()
+    {
+        $this->assertInstanceOf('\Neptune\Routing\Router', $this->router->name('route'));
+        $this->assertSame('route', $this->router->getName());
+    }
 
-	public function testNameIsAddedToRouteThenUnset() {
-		$this->router->name('foo');
-		$this->assertSame('foo', $this->router->getName());
-		$r = $this->router->route('/test', 'foo');
-		$this->assertNull($this->router->getName());
+    public function testNameIsAddedToRouteThenUnset()
+    {
+        $this->router->name('foo');
+        $this->assertSame('foo', $this->router->getName());
+        $r = $this->router->route('/test', 'foo');
+        $this->assertNull($this->router->getName());
         $names = ['foo' => $r->getUrl()];
-		$this->assertSame($names, $this->router->getNames());
+        $this->assertSame($names, $this->router->getNames());
 
-		//second route should be given a name automatically
-		$this->router->route('/second', 'bar');
-		$this->assertNull($this->router->getName());
+        //second route should be given a name automatically
+        $this->router->route('/second', 'bar');
+        $this->assertNull($this->router->getName());
         $names['_unknown_0'] = '/second';
-		$this->assertSame($names, $this->router->getNames());
-	}
+        $this->assertSame($names, $this->router->getNames());
+    }
 
-	public function testGetNamesReturnsEmptyArray() {
-		$this->assertSame(array(), $this->router->getNames());
-	}
+    public function testGetNamesReturnsEmptyArray()
+    {
+        $this->assertSame([], $this->router->getNames());
+    }
 
-	public function testUrlSimple() {
-		$this->router->name('simple')->route('/url', 'controller');
-		$this->assertSame('http://myapp.local/url', $this->router->url('simple'));
-	}
+    public function testUrlSimple()
+    {
+        $this->router->name('simple')->route('/url', 'controller');
+        $this->assertSame('http://myapp.local/url', $this->router->url('simple'));
+    }
 
-	public function testUrlSimpleFtp() {
-		$this->router->name('ftp')->route('/url', 'controller');
-		$this->assertSame('ftp://myapp.local/url', $this->router->url('ftp', array(), 'ftp'));
-	}
+    public function testUrlSimpleFtp()
+    {
+        $this->router->name('ftp')->route('/url', 'controller');
+        $this->assertSame('ftp://myapp.local/url', $this->router->url('ftp', [], 'ftp'));
+    }
 
-	public function testUrlWithArgs() {
-		$this->router->name('args')->route('/url/:var/:second', 'controller');
-		$this->assertSame('http://myapp.local/url/foo/bar', $this->router->url('args', array('var' => 'foo', 'second' => 'bar')));
-	}
+    public function testUrlWithArgs()
+    {
+        $this->router->name('args')->route('/url/:var/:second', 'controller');
+        $this->assertSame('http://myapp.local/url/foo/bar', $this->router->url('args', ['var' => 'foo', 'second' => 'bar']));
+    }
 
-	public function testUrlWithArgsFtp() {
-		$this->router->name('args_ftp')->route('/url/:var/:second', 'controller');
-		$this->assertSame('ftp://myapp.local/url/foo/bar', $this->router->url('args_ftp',
-			array('var' => 'foo', 'second' => 'bar'), 'ftp'));
-	}
+    public function testUrlWithArgsFtp()
+    {
+        $this->router->name('args_ftp')->route('/url/:var/:second', 'controller');
+        $this->assertSame('ftp://myapp.local/url/foo/bar', $this->router->url('args_ftp',
+            ['var' => 'foo', 'second' => 'bar'], 'ftp'));
+    }
 
-	public function testUrlOptionalArgs() {
-		$this->router->name('opt_args')->route('/url/(:var(/:second))');
-		$this->assertSame('http://myapp.local/url/foo',
-			$this->router->url('opt_args', array('var' => 'foo')));
-	}
+    public function testUrlOptionalArgs()
+    {
+        $this->router->name('opt_args')->route('/url/(:var(/:second))');
+        $this->assertSame('http://myapp.local/url/foo',
+            $this->router->url('opt_args', ['var' => 'foo']));
+    }
 
-	public function testUrlNoOptionalArgs() {
-		$this->router->name('no_opt_args')->route('/url/(:var(/:second))', 'controller');
-		$this->assertSame('http://myapp.local/url', $this->router->url('no_opt_args'));
-	}
+    public function testUrlNoOptionalArgs()
+    {
+        $this->router->name('no_opt_args')->route('/url/(:var(/:second))', 'controller');
+        $this->assertSame('http://myapp.local/url', $this->router->url('no_opt_args'));
+    }
 
-	public function testUrlAppendedGetVariables() {
-		$this->router->name('get')->route('/get/:id', 'getController');
-		$args = array('id' => 34, 'foo' => 'bar', 'baz' => 'qoz');
-		$actual = $this->router->url('get', $args);
-		$this->assertSame('http://myapp.local/get/34?foo=bar&baz=qoz', $actual);
-	}
+    public function testUrlAppendedGetVariables()
+    {
+        $this->router->name('get')->route('/get/:id', 'getController');
+        $args = ['id' => 34, 'foo' => 'bar', 'baz' => 'qoz'];
+        $actual = $this->router->url('get', $args);
+        $this->assertSame('http://myapp.local/get/34?foo=bar&baz=qoz', $actual);
+    }
 
-	public function testUrlThrowsExceptionWithNoNames() {
-		$this->setExpectedException('\Exception', 'No routes defined');
-		$this->router->url('get');
-	}
+    public function testUrlThrowsExceptionWithNoNames()
+    {
+        $this->setExpectedException('\Exception', 'No routes defined');
+        $this->router->url('get');
+    }
 
-	public function testUrlThrowsExceptionUnknownName() {
-		$this->router->name('foo')->route('/foo', 'bar');
-		$this->setExpectedException('\Exception', "Unknown route 'get'");
-		$this->router->url('get');
-	}
+    public function testUrlThrowsExceptionUnknownName()
+    {
+        $this->router->name('foo')->route('/foo', 'bar');
+        $this->setExpectedException('\Exception', "Unknown route 'get'");
+        $this->router->url('get');
+    }
 
-	public function testUrlGetsNamesFromCache() {
-		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
-		$driver->expects($this->exactly(1))
-			   ->method('fetch')
-			   ->with(Router::CACHE_KEY_NAMES)
-			   ->will($this->returnValue(array('get' => '/get/:id')));
-		$this->router->setCache($driver);
-		$this->assertSame('http://myapp.local/get/42', $this->router->url('get', array('id' => 42)));
-	}
+    public function testUrlGetsNamesFromCache()
+    {
+        $driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $driver->expects($this->exactly(1))
+               ->method('fetch')
+               ->with(Router::CACHE_KEY_NAMES)
+               ->will($this->returnValue(['get' => '/get/:id']));
+        $this->router->setCache($driver);
+        $this->assertSame('http://myapp.local/get/42', $this->router->url('get', ['id' => 42]));
+    }
 
-	public function testUrlThrowsExceptionWithInvalidCache() {
-		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
-		$driver->expects($this->exactly(1))
-			   ->method('fetch')
-			   ->with(Router::CACHE_KEY_NAMES)
-			   ->will($this->returnValue('foo'));
-		$this->router->setCache($driver);
-		$this->setExpectedException('\Exception', 'Cache value \'Router.names\' is not an array');
-		$this->router->url('get');
-	}
+    public function testUrlThrowsExceptionWithInvalidCache()
+    {
+        $driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $driver->expects($this->exactly(1))
+               ->method('fetch')
+               ->with(Router::CACHE_KEY_NAMES)
+               ->will($this->returnValue('foo'));
+        $this->router->setCache($driver);
+        $this->setExpectedException('\Exception', 'Cache value \'Router.names\' is not an array');
+        $this->router->url('get');
+    }
 
-	public function testUrlThrowsExceptionWithCacheMiss() {
-		$driver = $this->getMock('\Doctrine\Common\Cache\Cache');
-		$driver->expects($this->exactly(1))
-			   ->method('fetch')
-			   ->with(Router::CACHE_KEY_NAMES);
-		$this->router->setCache($driver);
-		$this->setExpectedException('\Exception', 'No routes defined');
-		$this->router->url('get');
-	}
+    public function testUrlThrowsExceptionWithCacheMiss()
+    {
+        $driver = $this->getMock('\Doctrine\Common\Cache\Cache');
+        $driver->expects($this->exactly(1))
+               ->method('fetch')
+               ->with(Router::CACHE_KEY_NAMES);
+        $this->router->setCache($driver);
+        $this->setExpectedException('\Exception', 'No routes defined');
+        $this->router->url('get');
+    }
 
     public function testMatchCached()
     {
         $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
-        $route = array('::controller.foo', 'index', array());
+        $route = ['::controller.foo', 'index', []];
         $cache->expects($this->once())
               ->method('fetch')
               ->with('Router./fooGET')

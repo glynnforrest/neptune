@@ -9,6 +9,6 @@ use Neptune\Controller\Controller;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class TestController extends Controller {
-
+class TestController extends Controller
+{
 }
