@@ -247,7 +247,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     public function testMatchCachedThrowsExceptionOnInvalidCache()
     {
         $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
-        $route = array('::controller.foo', 'index', array());
         $cache->expects($this->once())
               ->method('fetch')
               ->with('Router./fooGET')
@@ -260,13 +259,39 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     public function testRouteIsCachedOnSuccess()
     {
+        $this->router->name('test-route')->route('/test', 'module:controller', 'index');
+
         $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
-        $expected = array('module:controller', 'index', array());
         $cache->expects($this->exactly(2))
+            ->method('save')
+            //router saves route names and action
+            ->with($this->logicalOr(
+                'Router./testGET',
+                'Router.names'
+            ),
+            $this->logicalOr(
+                ['test-route' => '/test'],
+                ['module:controller', 'index', []]
+            ));
+
+        $this->router->setCache($cache);
+
+        $expected = ['module:controller', 'index', []];
+        $this->assertSame($expected, $this->match('/test'));
+    }
+
+    public function testRouteWithVariableIsNotCached()
+    {
+        $this->router->route('/test/:var', 'module:controller', 'index');
+
+        $cache = $this->getMock('\Doctrine\Common\Cache\Cache');
+        //a route with a variable should not be cached
+        $cache->expects($this->never())
                ->method('save');
         $this->router->setCache($cache);
-        $this->router->route('/test', 'module:controller', 'index');
-        $this->assertSame($expected, $this->match('/test'));
+
+        $expected = ['module:controller', 'index', ['var' => 'foo']];
+        $this->assertSame($expected, $this->match('/test/foo'));
     }
 
     public function testMatchCachedReturnsFalseWithNoCache()

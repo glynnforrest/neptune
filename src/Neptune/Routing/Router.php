@@ -167,7 +167,12 @@ class Router {
             }
             $this->matched_url = $url;
             $action =  $route->getControllerAction();
-            $this->cacheAction($request, $action);
+
+            //cache the result if the route doesn't contain a variable
+            if (false === strpos($route->getUrl(), ':')) {
+                $this->cacheAction($request, $action);
+            }
+
             return $action;
         }
         throw new RouteNotFoundException(sprintf('No route found that matches "%s"', $request->getPathInfo()));
