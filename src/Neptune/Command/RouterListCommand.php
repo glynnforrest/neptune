@@ -31,14 +31,19 @@ class RouterListCommand extends Command
         $router = $this->neptune['router'];
 
         if ($module) {
-            $router->routeModule($this->neptune->getModule($module), $this->neptune->getRoutePrefix($module), $this->neptune);
+            $router->routeModule($this->neptune->getModule($module), $this->neptune);
         } else {
             $router->routeModules($this->neptune);
         }
+        $routes = array_map(function($route) {
+            return [$route->getName(), $route->getUrl(), $route->getController(), $route->getAction()];
+        }, $router->getRoutes());
 
-        foreach ($router->getRoutes() as $route) {
-            $console->writeln($route->getUrl());
-        }
+        $table = $this->getHelper('table');
+        $table->setHeaders(array('Name', 'Url', 'Controller', 'Action'))
+            ->setRows($routes);
+        $table->render($this->output);
+
     }
 
 }
