@@ -2,64 +2,64 @@
 
 namespace Neptune\Command;
 
-use Neptune\Command\Command;
-use Neptune\Console\Console;
 use Neptune\Exceptions\FileException;
 use Neptune\Config\Config;
 
 use Symfony\Component\Console\Input\InputArgument;
-
-use \DirectoryIterator;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * EnvCreateCommand
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class EnvCreateCommand extends Command {
+class EnvCreateCommand extends Command
+{
 
-	protected $name = 'env:create';
-	protected $description = 'Create a new application environment';
+    protected $name = 'env:create';
+    protected $description = 'Create a new application configuration';
 
-	protected function configure() {
-		$this->setName($this->name)
-			 ->setDescription($this->description)
-			 ->addArgument(
-				 'name',
-				 InputArgument::OPTIONAL,
-				 'The name of the new environment.'
-			 );
-	}
+    protected function configure()
+    {
+        $this->setName($this->name)
+             ->setDescription($this->description)
+             ->addArgument(
+                 'name',
+                 InputArgument::OPTIONAL,
+                 'The name of the new environment.'
+             );
+    }
 
-	public function go(Console $console) {
-		$name = $this->input->getArgument('name');
-		$dialog = $this->getHelper('dialog');
-		if(!$name) {
-			$name = $dialog->ask($this->output, 'Name of environment: ');
-		}
-		try {
-			$this->newEnv($name);
-		} catch (\Exception $e){
-			$overwrite = $dialog->askConfirmation($this->output, "<info>$name</info> exists. Overwrite? ", false);
-			if($overwrite) {
-				$this->newEnv($name, true);
-			}
-		}
-	}
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $name = $input->getArgument('name');
+        $dialog = $this->getHelper('dialog');
+        if (!$name) {
+            $name = $dialog->ask($output, 'Name of environment: ');
+        }
+        try {
+            $this->newEnv($output, $name);
+        } catch (FileException $e) {
+            $overwrite = $dialog->askConfirmation($output, "<info>$name</info> exists. Overwrite? ", false);
+            if ($overwrite) {
+                $this->newEnv($output, $name, true);
+            }
+        }
+    }
 
-    protected function newEnv($name, $overwrite = false)
+    protected function newEnv(OutputInterface $output, $name, $overwrite = false)
     {
         $name = strtolower($name);
         $config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
-        if(file_exists($config)) {
-            if(!$overwrite) {
+        if (file_exists($config)) {
+            if (!$overwrite) {
                 throw new FileException("Environment $name already exists");
             }
         }
-        $c = new Config($name, $config);
-        $c->set('root_url', '');
-        $c->save();
-        $this->output->writeln("Created <info>$config</info>");
+        //hacky method for now until Config can create a new file.
+        file_put_contents($config, '<?php return array ();');
+        $output->writeln("Created <info>$config</info>");
     }
 
 }
