@@ -2,10 +2,11 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
 use Neptune\Console\ConsoleLogger;
 use Neptune\Database\Migration\MigrationRunner;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -31,10 +32,10 @@ class DatabaseMigrateLatestCommand extends Command
              );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
-        $module = $this->input->getOption('module');
+        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($output));
+        $module = $input->getOption('module');
         $runner->migrateLatest($this->neptune->getModule($module));
     }
 
