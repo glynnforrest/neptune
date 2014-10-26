@@ -8,6 +8,8 @@ use Stringy\Stringy;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CreateMigrationCommand
@@ -43,12 +45,12 @@ class CreateMigrationCommand extends CreateCommand
         return 'Migrations/' . $name . '.php';
     }
 
-    protected function getResourceName()
+    protected function getResourceName(InputInterface $input, OutputInterface $output)
     {
-        $description = $this->input->getArgument('description');
+        $description = $input->getArgument('description');
         if (!$description) {
             $dialog = $this->getHelper('dialog');
-            $description = $dialog->ask($this->output, 'Description for this migration: ');
+            $description = $dialog->ask($output, 'Description for this migration: ');
         }
 
         $this->migration_description = str_replace("'", "\'", $description);
