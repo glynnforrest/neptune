@@ -2,7 +2,6 @@
 namespace <?=$this->namespace;?>\Command;
 
 use Neptune\Command\Command;
-use Neptune\Console\Console;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,9 +15,9 @@ class <?=$this->class_name;?> extends Command
     protected $name = '<?=$this->name?>';
     protected $description = '<?=$this->description;?>';
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $console->writeln('Hello from <?=$this->name;?>');
+        $output->writeln('Hello from <?=$this->name;?> command');
     }
 
 }
