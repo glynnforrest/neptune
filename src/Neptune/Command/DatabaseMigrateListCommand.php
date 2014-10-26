@@ -2,12 +2,11 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
-use Neptune\Console\ConsoleLogger;
 use Neptune\Database\Migration\MigrationRunner;
 use Neptune\Service\AbstractModule;
 
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -33,16 +32,16 @@ class DatabaseMigrateListCommand extends Command
              );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $runner = new MigrationRunner($this->neptune['db']);
 
-        $module = $this->neptune->getModule($this->input->getOption('module'));
+        $module = $this->neptune->getModule($input->getOption('module'));
 
-        $this->output->writeln(sprintf('Migrations for module <info>%s</info>:', $module->getName()));
+        $output->writeln(sprintf('Migrations for module <info>%s</info>:', $module->getName()));
 
         foreach ($this->getMigrationsWithHighlight($runner, $module) as $message) {
-            $this->output->writeln($message);
+            $output->writeln($message);
         }
     }
 
