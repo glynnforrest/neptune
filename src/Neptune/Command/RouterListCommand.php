@@ -2,8 +2,8 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
-
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 class RouterListCommand extends Command
@@ -24,9 +24,9 @@ class RouterListCommand extends Command
              );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $module = $this->input->getOption('module');
+        $module = $input->getOption('module');
 
         $router = $this->neptune['router'];
 
@@ -37,7 +37,7 @@ class RouterListCommand extends Command
         }
 
         foreach ($router->getRoutes() as $route) {
-            $console->writeln($route->getUrl());
+            $output->writeln($route->getUrl());
         }
     }
 
