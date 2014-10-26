@@ -2,7 +2,8 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 class ServiceListCommand extends Command
@@ -23,21 +24,21 @@ class ServiceListCommand extends Command
              );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $services = $this->neptune->keys();
 
-        $console->writeln('<info>Available services</info>');
+        $output->writeln('<info>Available services</info>');
 
         sort($services);
 
-        if ($this->input->getOption('names')) {
+        if ($input->getOption('names')) {
             foreach ($services as $service) {
-                $console->writeln($service);
+                $output->writeln($service);
             }
         } else {
             foreach ($services as $service) {
-                $console->writeln(sprintf('%s: %s', $service, $this->asString($this->neptune[$service])));
+                $output->writeln(sprintf('%s: %s', $service, $this->asString($this->neptune[$service])));
             }
         }
     }
