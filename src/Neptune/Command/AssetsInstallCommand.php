@@ -2,10 +2,10 @@
 
 namespace Neptune\Command;
 
-use Neptune\Command\Command;
-use Neptune\Console\Console;
 use Neptune\Exceptions\ConfigFileException;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
@@ -29,9 +29,9 @@ class AssetsInstallCommand extends Command
              );
     }
 
-    protected function getModulesToProcess()
+    protected function getModulesToProcess(InputInterface $input)
     {
-        $args = $this->input->getArgument('modules');
+        $args = $input->getArgument('modules');
         if (!$args) {
             return $this->neptune->getModules();
         }
@@ -43,31 +43,30 @@ class AssetsInstallCommand extends Command
         return $modules;
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $modules = $this->getModulesToProcess();
+        $modules = $this->getModulesToProcess($input);
 
         foreach ($modules as $name => $module) {
             try {
                 $config = $this->neptune['config.manager']->loadModule($name);
             } catch (ConfigFileException $e) {
-                $console->writeln("Skipping <info>$name</info>");
+                $output->writeln("Skipping <info>$name</info>");
                 continue;
             }
 
-            $command = $config->get('assets.install_cmd', false);
-            if (!$command) {
-                $console->writeln("Skipping <info>$name</info>");
+            if (!$command = $config->get('assets.install_cmd', false)) {
+                $output->writeln("Skipping <info>$name</info>");
                 continue;
             }
 
-            $console->writeln("Installing <info>$name</info>");
+            $output->writeln("Installing <info>$name</info>");
             $dir = $module->getDirectory();
 
             passthru("cd $dir && $command");
         }
-        $console->writeln('');
-        $console->writeln(sprintf('Installed assets'));
+        $output->writeln('');
+        $output->writeln(sprintf('Installed assets'));
     }
 
 }
