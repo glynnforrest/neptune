@@ -2,10 +2,11 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
 use Neptune\Console\ConsoleLogger;
 use Neptune\Database\Migration\MigrationRunner;
 use Neptune\Database\Migration\Exception\MigrationNotFoundException;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Input\InputOption;
 
@@ -31,18 +32,18 @@ class DatabaseMigrateAllCommand extends DatabaseMigrateListCommand
         );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
+        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($output));
 
-        if ($this->input->getOption('force')) {
+        if ($input->getOption('force')) {
             $runner->ignoreExceptions();
         }
 
         foreach ($this->neptune->getModules() as $module) {
             try {
                 $runner->migrateLatest($module);
-                $this->output->writeln(sprintf('Module <info>%s</info> up to date', $module->getName()));
+                $output->writeln(sprintf('Module <info>%s</info> up to date', $module->getName()));
             } catch (MigrationNotFoundException $e) {
                 //this means the module doesn't have a migrations
                 //folder, so skip it

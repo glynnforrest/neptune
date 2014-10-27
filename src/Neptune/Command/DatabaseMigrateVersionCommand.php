@@ -2,11 +2,11 @@
 
 namespace Neptune\Command;
 
-use Neptune\Console\Console;
 use Neptune\Console\ConsoleLogger;
 use Neptune\Database\Migration\MigrationRunner;
-use Neptune\Service\AbstractModule;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -44,17 +44,17 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
              );
     }
 
-    public function go(Console $console)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($this->output));
+        $runner = new MigrationRunner($this->neptune['db'], new ConsoleLogger($output));
 
-        if ($this->input->getOption('force')) {
+        if ($input->getOption('force')) {
             $runner->ignoreExceptions();
         }
 
-        $module = $this->neptune->getModule($this->input->getOption('module'));
+        $module = $this->neptune->getModule($input->getOption('module'));
 
-        $version = $this->input->getArgument('version');
+        $version = $input->getArgument('version');
 
         if (!$version && $version !== '0') {
             //no version has been specified, so prompt for a version
@@ -68,13 +68,13 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
 
             $prompt =  sprintf('Select a migration for module <info>%s</info>:', $module->getName());
             $dialog = $this->getHelper('dialog');
-            $index = $dialog->select($this->output, $prompt, $messages);
+            $index = $dialog->select($output, $prompt, $messages);
             $version = $versions[$index];
         }
 
         $current = $runner->getCurrentVersion($module);
         if ((int) $version === (int) $current) {
-            $this->output->writeln("Database is already at version $version");
+            $output->writeln("Database is already at version $version");
 
             return true;
         }
