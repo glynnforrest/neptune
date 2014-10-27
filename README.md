@@ -1,21 +1,55 @@
 # Neptune
-### A PHP application library
-### By Glynn Forrest
 
 [![Build Status](https://travis-ci.org/glynnforrest/neptune.png)](https://travis-ci.org/glynnforrest/neptune)
 
-Intro
------
-Neptune is a PHP library designed to take the pain out of PHP. It offers a
-usable yet powerful set of components built to handle the common
-problems a PHP developer encounters.
+Neptune is a PHP 5.4+ framework built on the Symfony HttpKernel. It is
+designed to be quick and easy to use while allowing room for
+customization and expansion.
 
-Neptune offers solutions to many of these: Database abstraction, data
-validation, powerful routing, restful architectures, magic formatting,
-usable views with powerful helpers and easy to use caching.
+The framework originally started out as a hobby project, but has since
+found use in non-trivial applications too. I'm also using it as an
+example of my PHP skills to show potential clients and employers.
 
-Installation
-------------
+That being said, Neptune is not a toy project. It is built on solid,
+battle tested components and I intend to support it for the
+foreseeable future. The goal is to get it to version 1.0, where it
+will then be considered feature complete. This version will be
+supported with subsequent bugfixes and dependency updates.
+
+## Components overview
+
+The framework is built on a set of robust, reusable components:
+
+* Symfony's HttpKernel - A solid foundation with many benefits.
+* Pimple - A lightweight dependency injection container.
+* Doctrine DBAL - A robust database abstraction layer.
+* ActiveDoctrine - Active record using the Doctrine DBAL.
+* Reform - Forms that render and validate with ease.
+* Blockade - Firewall and security for the HttpKernel.
+* Monolog - PSR-3 compatible Logging.
+
+## Additional features
+
+The framework itself boasts some cool features:
+
+* A robust module system for structuring applications into reusable
+  chunks.
+* A straightforward yet powerful assets workflow, allowing for easy
+  integration with build tools such as grunt and bower.
+* Configuration anyone can understand, in PHP!
+* An extensible PHP template system (twig is also available).
+* A migration system that makes a distinction between different
+  modules, built on the Doctrine DBAL. Add a new module without
+  affecting the order of other migrations.
+* A bunch of console commands for speeding up development and aiding
+  deployment.
+
+## Documentation
+
+See docs/ for documentation and usage examples.
+
+# Installation
+
 Neptune is installed via Composer. To add it to your project, simply add it to your
 composer.json file:
 
@@ -39,16 +73,8 @@ to create a blank neptune project from scratch.
 
 Note: install.php assumes you have `composer` available as an executable on your PATH.
 
+# License
 
-Documentation and support
--------------------------
-Look in the docs/ folder. Better documentation is on the way.
+MIT, see LICENSE for details.
 
-Warning
--------
-Neptune is under heavy development so expect the code to change regularly.
-
-License
--------
-
-MIT
+Copyright 2011 - 2014 Glynn Forrest
