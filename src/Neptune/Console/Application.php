@@ -19,6 +19,9 @@ use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\TableHelper;
 use Symfony\Component\Console\Helper\ProgressHelper;
 
+use SensioLabs\Security\SecurityChecker;
+use SensioLabs\Security\Command\SecurityCheckerCommand;
+
 use Stringy\StaticStringy as S;
 
 /**
@@ -84,6 +87,11 @@ class Application extends SymfonyApplication
     protected function registerCommands(OutputInterface $output)
     {
         $this->registerNamespace('Neptune', $this->neptune->getRootDirectory() . 'vendor/glynnforrest/neptune/src/Neptune/Command/');
+
+        if (class_exists('\SensioLabs\Security\SecurityChecker')) {
+            $this->add(new SecurityCheckerCommand(new SecurityChecker()));
+        }
+
         foreach ($this->neptune->getModules() as $module) {
             $namespace = $module->getNamespace();
             $path = $module->getDirectory();

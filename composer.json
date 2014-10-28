@@ -21,6 +21,9 @@
         "glynnforrest/temping": "0.5.*",
         "ircmaxell/password-compat": "1.0.*"
     },
+    "suggest": {
+        "sensiolabs/security-checker": "Add a command to check for security vulnerabilities"
+    },
     "authors": [
         {
             "name": "Glynn Forrest",
