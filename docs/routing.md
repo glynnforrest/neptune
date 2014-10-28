@@ -75,7 +75,7 @@ class ContactModule extends AbstractModule
     public function routes(Router $router, $prefix, Neptune $neptune)
     {
         $router->route('$prefix', 'contact-module:contact', 'show');
-        $router->route('$prefix/submit', 'contact-module:contact', 'submit);
+        $router->route('$prefix/submit', 'contact-module:contact', 'submit');
     }
 
     public function getName()
@@ -124,7 +124,7 @@ used.
 
 ```php
 $route->controller('my-module:foo'); // FooController from my-module
-$route->controller('admin:admin/setting); // Admin\SettingsController from admin
+$route->controller('admin:admin/setting'); // Admin\SettingsController from admin
 $route->controller('::controller-service') // The controller-service service
 ```
 
