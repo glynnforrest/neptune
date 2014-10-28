@@ -4,8 +4,7 @@ namespace Neptune\Tests\Assets;
 
 use Neptune\Config\Config;
 use Neptune\Assets\AssetManager;
-
-require_once __DIR__ . '/../../../bootstrap.php';
+use Temping\Temping;
 
 /**
  * AssetManagerTest
@@ -292,6 +291,43 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                         ->will($this->returnValue('inline'));
 
         $this->assertSame('concat inline', $this->assets->js());
+    }
+
+    public function testConcatenateAssets()
+    {
+        $config = new Config('assets');
+        $temping = new Temping();
+        $base = 'path/to/assets/';
+
+        $config->set('assets.css.main', ['foo.css', 'bar/bar.css']);
+        $hashed_css_file = $temping->getPathname($base . $this->assets->hashGroup('my-module:main', 'css'));
+        $this->assertFileNotExists($hashed_css_file);
+
+        $config->set('assets.js.main', ['foo.js', 'bar/bar.js']);
+        $hashed_js_file = $temping->getPathname($base . $this->assets->hashGroup('my-module:main', 'js'));
+        $this->assertFileNotExists($hashed_js_file);
+
+        $temping = new Temping();
+        $asset_files = ['foo.css', 'bar/bar.css', 'foo.js', 'bar/bar.js'];
+        foreach ($asset_files as $file) {
+            $temping->create($base . $file, $file);
+        }
+
+        $this->config->expects($this->any())
+            ->method('load')
+            ->with('my-module')
+            ->will($this->returnValue($config));
+
+        $this->assets->concatenateAssets('my-module', $temping->getPathname('path/to/assets/'));
+
+        $this->assertFileExists($hashed_css_file);
+        $css_content = 'foo.css' . PHP_EOL . PHP_EOL . 'bar/bar.css' . PHP_EOL . PHP_EOL;
+        $this->assertSame($css_content, file_get_contents($hashed_css_file));
+
+        $this->assertFileExists($hashed_js_file);
+        $js_content = 'foo.js' . PHP_EOL . PHP_EOL . 'bar/bar.js' . PHP_EOL . PHP_EOL;
+        $this->assertSame($js_content, file_get_contents($hashed_js_file));
+        $temping->reset();
     }
 
 }

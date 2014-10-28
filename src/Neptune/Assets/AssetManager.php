@@ -38,7 +38,7 @@ class AssetManager
      * file. Override this method to define a different group asset
      * schema.
      */
-    protected function hashGroup($group, $type)
+    public function hashGroup($group, $type)
     {
         return md5($group) . '.' . $type;
     }
