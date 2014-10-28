@@ -2,177 +2,104 @@
 
 namespace Neptune\Command;
 
-use Neptune\Command\Command;
-use Neptune\Console\Console;
-use Neptune\Controller\AssetsController;
+use Neptune\Output\Output;
 use Neptune\Assets\Asset;
 
+use Neptune\Exceptions\ConfigFileException;
+
 use Symfony\Component\Console\Input\InputArgument;
-
-use Symfony\Component\HttpFoundation\Request;
-
-use \DirectoryIterator;
-use \RecursiveIteratorIterator;
-use \RecursiveDirectoryIterator;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * AssetsBuildCommand
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class AssetsBuildCommand extends Command {
+class AssetsBuildCommand extends AssetsInstallCommand
+{
+    protected $name = 'assets:build';
+    protected $description = 'Build module assets and link to the public folder';
+    protected $build_dir;
+    protected $progress;
+    protected $assets_count;
 
-	protected $name = 'assets:build';
-	protected $description = 'Apply filters to all assets and copy to the public folder';
-	protected $build_dir;
-	protected $progress;
-	protected $assets_count;
+    protected function configure()
+    {
+        $this->setName($this->name)
+             ->setDescription($this->description)
+             ->addArgument(
+                 'modules',
+                 InputArgument::IS_ARRAY,
+                 'A list of modules to build instead of all.'
+             );
+    }
 
-	protected function configure() {
-		$this->setName($this->name)
-			 ->setDescription($this->description)
-			 ->addArgument(
-				 'modules',
-				 InputArgument::IS_ARRAY,
-				 'A list of modules to build instead of all.'
-			 );
-	}
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->setupBuildDir($output);
+        $modules = $this->getModulesToProcess($input);
+        $manager = $this->neptune['assets'];
 
-	protected function setupBuildDir() {
-		$build_dir = $this->getRootDirectory()
-			. 'public/'
-			. $this->config->get('assets.url');
-		//make sure build_dir has a trailing slash
-		if(substr($build_dir, -1) !== '/') {
-			$build_dir .= '/';
-		}
-		//create build_dir if it doesn't exist
-		if(!file_exists($build_dir)) {
-			mkdir($build_dir, 0755, true);
-			$this->console->writeln("Creating $build_dir");
-		}
-		if(!is_dir($build_dir) | !is_writeable($build_dir)) {
-			throw new \Exception(
-				"Unable to write to $build_dir. Check file paths and permissions are correct.");
-		}
-		$this->build_dir = $build_dir;
-	}
+        foreach ($modules as $name => $module) {
+            $output->writeln('');
+            try {
+                $config = $this->neptune['config.manager']->loadModule($name);
+            } catch (ConfigFileException $e) {
+                $output->writeln("Skipping <info>$name</info>");
+                continue;
+            }
 
-	protected function getModulesToProcess() {
-		$args = $this->input->getArgument('modules');
-		if($args) {
-			$modules = array();
-			foreach ($args as $name) {
-				$modules[$name] = $this->config->getRequired('modules.' . $name);
-			}
-		} else {
-			$modules = $this->config->getRequired('modules');
-		}
-		return $modules;
-	}
+            if (!$command = $config->get('assets.build_cmd', false)) {
+                $output->writeln("Skipping <info>$name</info>");
+                continue;
+            }
 
-	public function go(Console $console) {
-		$this->setupBuildDir();
-		//create shared assets controller instance
-		/* $this->assets_controller = new AssetsController(); */
+            $output->writeln("Building <info>$name</info>");
+            $dir = $module->getDirectory();
 
-		$modules = $this->getModulesToProcess();
-		//create dirs
-		$assets = $this->getAssets($modules);
+            passthru("cd $dir && $command");
 
-		$this->assets_count = count($assets);
+            //move built assets into public dir
+            $build_dir = $dir . 'assets_built/';
+            if (!file_exists($build_dir)) {
+                throw new \Exception(sprintf('Assets build command for "%s" must create directory "%s"', $name, $build_dir));
+            }
 
-		//check for dry run argument here
+            $public_dir = $this->neptune->getRootDirectory() . 'public/assets/';
+            $group_dir = $public_dir . $name;
+            if (file_exists($group_dir)) {
+                unlink($group_dir);
+            }
 
-		//create the progress bar, but only if output is not very verbose
-		if(!$this->output->isVeryVerbose()) {
-			$this->progress = $this->getHelper('progress');
-			$this->progress->start($this->output, $this->assets_count);
-			$this->progress->setEmptyBarCharacter('_');
-			$this->progress->setBarCharacter('-');
-			$this->progress->setProgressCharacter('€');
-		}
+            symlink($build_dir, $group_dir);
+            $output->writeln(sprintf('Linking %s to %s', $build_dir, $group_dir));
 
-		//each asset is an array:
-		//array($src, $target, $filters)
-		foreach ($assets as $count => $asset) {
-			$this->processAsset($asset[0], $asset[1], $asset[2]);
-			$this->advance($asset[1], $count);
-		}
+            //generate concatenated asset files
+            $manager->concatenateAssets($name, $public_dir);
+            $output->writeln('Creating concatenated group files');
+        }
+        $output->writeln('');
+        $output->writeln(sprintf('Built assets to <info>%s</info>', $this->build_dir));
+    }
 
-		if(!$this->output->isVeryVerbose()) {
-			$this->progress->finish();
-		}
-		$console->writeln(sprintf('Built assets to <info>%s</info>', $this->build_dir));
-	}
-
-	protected function advance($target, $count) {
-		if(!$this->output->isVeryVerbose()) {
-			$this->progress->advance();
-		} else {
-			$percent =  floor($count / $this->assets_count * 100) . '%';
-			//pad the percentage so messages line up nicely
-			//3%..
-			//10%.
-			//100%
-			$percent = str_pad($percent, 3);
-			$this->console->writeln(sprintf('%s Created <info>%s</info>', $percent, $target));
-		}
-	}
-
-	protected function getAssets(array $modules) {
-		$assets = array();
-		foreach ($modules as $module => $src) {
-			$config = $this->neptune['config.manager']->loadModule($module);
-			$src_dir = $config->getModulePath('assets.dir');
-
-			//identify the target build dir for this module. Create if
-			//necessary.
-			$target_dir = $this->build_dir . $module . '/';
-			if(!file_exists($target_dir)) {
-				mkdir($target_dir, 0755, true);
-				$this->console->debug("Created directory <info>$target_dir</info>");
-			}
-
-			//get the filters for this module
-			$filters = $config->get('asset.filters');
-
-			//create an iterator that recursively loops through the source
-			//directory, ignoring dots and listing most shallow paths
-			//first
-			$i = new RecursiveIteratorIterator(
-				new RecursiveDirectoryIterator(
-					$src_dir, RecursiveDirectoryIterator::SKIP_DOTS),
-				RecursiveIteratorIterator::SELF_FIRST);
-
-			//loop through all paths. For every directory, create it
-			//if it doesn't exist. For every asset, add it to the
-			//array of assets with the filters from the current
-			//config.
-			foreach ($i as $file) {
-				if ($file->isDir()) {
-					if(!file_exists($target_dir . $i->getSubPathName())) {
-						mkdir($target_dir . $i->getSubPathName());
-					}
-				} else {
-					$assets[] = array($file, $target_dir . $i->getSubPathName(), $filters);
-				}
-			}
-		}
-		return $assets;
-	}
-
-	protected function processAsset($src, $target, $regexps) {
-		$asset = new Asset($src);
-		$c = new AssetsController(new Request());
-		//add filters if we have any
-		if(is_array($regexps)) {
-			foreach($c->getAssetFilters($src, $regexps) as $f) {
-				$this->console->write($f);
-				$c->applyFilter($asset, $f);
-			}
-		}
-		$asset->saveFile($target);
-	}
+    protected function setupBuildDir(OutputInterface $output)
+    {
+        $build_dir = $this->getRootDirectory() . 'public/' . $this->config->get('assets.url', 'assets/');
+        //make sure build_dir has a trailing slash
+        if (substr($build_dir, -1) !== '/') {
+            $build_dir .= '/';
+        }
+        //create build_dir if it doesn't exist
+        if (!file_exists($build_dir)) {
+            mkdir($build_dir, 0755, true);
+            $output->writeln("Creating $build_dir");
+        }
+        if (!is_dir($build_dir) | !is_writeable($build_dir)) {
+            throw new \Exception(
+                "Unable to write to $build_dir. Check file paths and permissions are correct.");
+        }
+        $this->build_dir = $build_dir;
+    }
 
 }
