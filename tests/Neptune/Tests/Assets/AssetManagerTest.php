@@ -27,6 +27,12 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assets = new AssetManager($this->config, $this->generator);
     }
 
+    public function testHashGroup()
+    {
+        $this->assertSame(md5('my-module:testcss') . '.css', $this->assets->hashGroup('my-module:test', 'css'));
+        $this->assertSame(md5('my-module:testjs') . '.js', $this->assets->hashGroup('my-module:test', 'js'));
+    }
+
     public function testCss()
     {
         $this->assets->addCss('css/style.css');
@@ -109,8 +115,8 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $assets->addCssGroup('test:login');
 
         $this->generator->expects($this->once())
-                        ->method('css')
-                        ->with(md5('test:login') . '.css');
+            ->method('css')
+            ->with($this->assets->hashGroup('test:login', 'css'));
         $assets->css();
     }
 
@@ -155,9 +161,9 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assets->concatenate();
         $this->assets->addCssGroup('test:login');
         $this->generator->expects($this->once())
-                        ->method('css')
-                        ->with(md5('test:login') . '.css')
-                        ->will($this->returnValue('concat '));
+            ->method('css')
+            ->with($this->assets->hashGroup('test:login', 'css'))
+            ->will($this->returnValue('concat '));
 
         $css = "body { color: #eee; }";
         $this->assets->addInlineCss($css);
@@ -236,8 +242,8 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $assets = new AssetManager($this->config, $this->generator, true);
         $assets->addJsGroup('test:login');
         $this->generator->expects($this->once())
-                        ->method('js')
-                        ->with(md5('test:login') . '.js');
+            ->method('js')
+            ->with($this->assets->hashGroup('test:login', 'js'));
         $assets->js();
     }
 
@@ -279,9 +285,9 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assets->concatenate();
         $this->assets->addJsGroup('test:login');
         $this->generator->expects($this->once())
-                        ->method('js')
-                        ->with(md5('test:login') . '.js')
-                        ->will($this->returnValue('concat '));
+            ->method('js')
+            ->with($this->assets->hashGroup('test:login', 'js'))
+            ->will($this->returnValue('concat '));
 
         $js = "console.log('foo');";
         $this->assets->addInlineJs($js);
