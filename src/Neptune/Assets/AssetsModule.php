@@ -19,7 +19,7 @@ class AssetsModule extends AbstractModule
     public function register(Neptune $neptune)
     {
         $neptune['assets.url'] = function ($neptune) {
-            $url =  $neptune['config']->getRequired('assets.url');
+            $url =  $neptune['config']->get('assets.url', 'assets/');
             //add a slash if the given url doesn't end with one
             if (substr($url, -1, 1) !== '/') {
                 $url .= '/';
