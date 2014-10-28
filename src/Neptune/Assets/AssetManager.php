@@ -167,4 +167,40 @@ class AssetManager
         $this->js = [];
     }
 
+    /**
+     * Create concatenated asset files for a given module. Make sure
+     * the build directory is a root directory for all modules
+     * (public/assets/), not for a single module
+     * (public/assets/module/).
+     *
+     * @param string $module_name
+     * @param string $build_directory The directory containing all built assets
+     */
+    public function concatenateAssets($module_name, $build_directory)
+    {
+        $config = $this->config->load($module_name);
+
+        foreach (['css', 'js'] as $type) {
+            $groups = array_keys($config->get("assets.$type", []));
+
+            foreach ($groups as $group) {
+                $group_name = $module_name . ':' . $group;
+                $files = $this->getGroupAssets($group_name, $type);
+                $group_file = new \SplFileObject($build_directory . $this->hashGroup($group_name, $type), 'w');
+
+                foreach ($files as $file) {
+                    $group_file->fwrite(file_get_contents($build_directory . $file));
+                    $group_file->fwrite(PHP_EOL . PHP_EOL);
+                }
+
+                //Free the handle on the file (no close method
+                //exists). Since this method may be called in a long
+                //running process (the cli), this prevents
+                //accidentally locking the file and preventing
+                //deletion. Better to be safe than smelly.
+                $group_file = null;
+            }
+        }
+    }
+
 }
