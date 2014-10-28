@@ -53,8 +53,8 @@ class CreateModuleCommand extends Command
         $this->createDirectories($output, $this->createModuleDirectory($namespace));
 
         $file = $this->createModuleDirectory($namespace) . 'config.php';
-        //hacky method for now until Config can create a new file.
-        file_put_contents($file, '<?php return array ();');
+        $config = new Config($name);
+        $config->save($file);
         $output->writeln("Created <info>$file</info>");
 
         //create module class
