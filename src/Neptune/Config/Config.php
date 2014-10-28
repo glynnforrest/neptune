@@ -15,7 +15,6 @@ class Config
 {
     protected $name;
     protected $filename;
-    protected $modified = false;
     protected $dot_array;
     protected $original;
     protected $root_dir;
@@ -24,13 +23,13 @@ class Config
     {
         if ($filename) {
             if (!file_exists($filename)) {
-                throw new ConfigFileException(
-                    'Configuration file ' . $filename . ' not found');
+                throw new ConfigFileException($filename . ' not found');
             }
+            ob_start();
             $values = include $filename;
+            ob_end_clean();
             if (!is_array($values)) {
-                throw new ConfigFileException(
-                    'Configuration file ' . $filename . ' does not return a php array');
+                throw new ConfigFileException($filename . ' does not return a php array');
             }
             $this->filename = $filename;
         } else {
@@ -161,7 +160,6 @@ class Config
     {
         $this->dot_array->set($key, $value);
         $this->original->set($key, $value);
-        $this->modified = true;
 
         return $this;
     }
@@ -193,9 +191,6 @@ class Config
      */
     public function save($filename = null)
     {
-        if (false === $this->modified) {
-            return true;
-        }
         if (null === $filename) {
             $filename = $this->filename;
         }
@@ -205,18 +200,10 @@ class Config
                 "Unable to save Config instance '$this->name', no filename supplied"
             );
         }
+
         if (!file_exists($filename) && !@touch($filename)) {
             throw new ConfigFileException(
-                "Unable to create configuration file
-                        $filename. Check file paths and permissions
-                        are correct."
-            );
-        };
-        if (!is_writable($filename)) {
-            throw new ConfigFileException(
-                "Unable to write to configuration file
-                        $filename. Check file paths and permissions
-                        are correct."
+                "Unable to write to configuration file $filename. Check file paths and permissions are correct."
             );
         }
         file_put_contents($filename, $this->toString());

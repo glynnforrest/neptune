@@ -150,6 +150,27 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         return preg_replace('`\s+`', '', $content);
     }
 
+    public function testLoadFile()
+    {
+        $c = new Config('testing', __DIR__ . '/fixtures/config.php');
+        $this->assertSame('bar', $c->get('foo'));
+    }
+
+    public function testLoadNonExistentFileThrowsException()
+    {
+        $not_here = $this->temp->getPathname('not_here');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $not_here . ' not found');
+        new Config('unlikely', $not_here);
+    }
+
+    public function testLoadInvalidFileThrowsException()
+    {
+        $this->temp->create('invalid.php', 'foo');
+        $path = $this->temp->getPathname('invalid.php');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $path . ' does not return a php array');
+        new Config('unlikely', $path);
+    }
+
     public function testSave()
     {
         $this->config->set('foo', 'bar');
@@ -191,11 +212,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $c->save();
     }
 
-    public function testUnreadableConfig()
+    public function testSaveNewFile()
     {
-        $this->setExpectedException('Neptune\Exceptions\ConfigFileException');
-        $not_here = $this->temp->getDirectory() . 'not_here';
-        new Config('unlikely', $not_here);
+        $file = $this->temp->getPathname('do-not-write.php');
+        $c = new Config('new');
+        $c->setFilename($file);
+        $c->save();
+        $this->assertTrue(file_exists($file));
     }
 
     public function testSaveThrowsExceptionWhenFileWriteFails()
@@ -209,15 +232,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $c->set('key', 'value');
         $this->setExpectedException('Neptune\Exceptions\ConfigFileException');
         $c->save($file);
-    }
-
-    public function testSaveDoesNotWriteIfNotModified()
-    {
-        $file = $this->temp->getPathname('do-not-write.php');
-        $c = new Config('new');
-        $c->setFilename($file);
-        $c->save();
-        $this->assertFalse(file_exists($file));
     }
 
     public function testSetAndGetFilename()
