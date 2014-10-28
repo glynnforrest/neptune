@@ -40,7 +40,7 @@ class AssetManager
      */
     public function hashGroup($group, $type)
     {
-        return md5($group) . '.' . $type;
+        return md5($group . $type) . '.' . $type;
     }
 
     /**
