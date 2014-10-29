@@ -48,7 +48,7 @@ The framework itself boasts some cool features:
 
 See docs/ for documentation and usage examples.
 
-# Installation
+## Installation
 
 Neptune is installed via Composer. To add it to your project, simply add it to your
 composer.json file:
@@ -73,7 +73,7 @@ to create a blank neptune project from scratch.
 
 Note: install.php assumes you have `composer` available as an executable on your PATH.
 
-# License
+## License
 
 MIT, see LICENSE for details.
 
