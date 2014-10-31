@@ -20,13 +20,13 @@ supported with subsequent bugfixes and dependency updates.
 
 The framework is built on a set of robust, reusable components:
 
-* Symfony's HttpKernel - A solid foundation with many benefits.
-* Pimple - A lightweight dependency injection container.
-* Doctrine DBAL - A robust database abstraction layer.
-* ActiveDoctrine - Active record using the Doctrine DBAL.
-* Reform - Forms that render and validate with ease.
-* Blockade - Firewall and security for the HttpKernel.
-* Monolog - PSR-3 compatible Logging.
+* [Symfony HttpKernel](https://github.com/symfony/HttpKernel) - A solid foundation with many benefits.
+* [Pimple](https://github.com/fabpot/Pimple) - A lightweight dependency injection container.
+* [Doctrine DBAL](https://github.com/doctrine/dbal) - A robust database abstraction layer.
+* [ActiveDoctrine](https://github.com/glynnforrest/active-doctrine) - Active record using the Doctrine DBAL.
+* [Reform](https://github.com/glynnforrest/reform) - Forms that render and validate with ease.
+* [Blockade](https://github.com/glynnforrest/blockade) - Firewall and security for the HttpKernel.
+* [Monolog](https://github.com/Seldaek/monolog) - PSR-3 compatible logging for a variety of platforms.
 
 ## Additional features
 
