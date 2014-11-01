@@ -6,8 +6,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
-use Reform\Helper\Html;
-
 /**
  * JavascriptEmbedListener
  *
@@ -39,7 +37,7 @@ class JavascriptEmbedListener implements EventSubscriberInterface
 
         $scripts = '';
         foreach ($this->urls as $url) {
-            PHP_EOL . $scripts .= Html::js($url);
+            PHP_EOL . $scripts .= sprintf('<script type="text/javascript" src="%s"></script>', $url);
         }
 
         $response->setContent(str_replace('</body>', $scripts . '</body>', $response->getContent()));
