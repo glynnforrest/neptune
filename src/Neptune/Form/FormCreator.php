@@ -17,7 +17,6 @@ class FormCreator
 
     protected $neptune;
     protected $dispatcher;
-    protected $registered = array();
 
     public function __construct(Neptune $neptune, EventDispatcherInterface $dispatcher)
     {
@@ -25,14 +24,12 @@ class FormCreator
         $this->dispatcher = $dispatcher;
     }
 
-    public function register($name, $class)
-    {
-        $this->registered[$name] = $class;
-    }
-
     public function create($name = null, $action = null)
     {
         $form = $this->doCreate($name, $action);
+        if (!$form instanceof Form) {
+            throw new \RuntimeException(sprintf('Service "%s" is not an instance of Reform\Form\Form', $name));
+        }
         $form->setEventDispatcher($this->dispatcher);
 
         return $form;
@@ -44,21 +41,16 @@ class FormCreator
             return new Form($action);
         }
 
-        if (!isset($this->registered[$name])) {
-            throw new \RuntimeException(sprintf('Form "%s" is not registered', $name));
+        if (substr_count($name, ':') !== 1) {
+            return $this->neptune[$name];
         }
 
-        $form = $this->registered[$name];
+        $pos = strpos($name, ':' );
+        $module = $this->neptune->getModule(substr($name, 0, $pos));
+        $form = substr($name, $pos + 1);
+        $form_class = $module->getNamespace() . '\\Form\\' . ucfirst($form) . 'Form';
 
-        //the form may be a service - check for ::
-        //if not, assume a class name
-        if (substr($form, 0, 2) !== '::') {
-            return new $form($action);
-        }
-
-        $service = substr($form, 2);
-        $function = $this->neptune->raw($service);
-        return $function($action);
+        return new $form_class($action);
     }
 
 }

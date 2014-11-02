@@ -29,45 +29,56 @@ class FormCreatorTest extends \PHPUnit_Framework_TestCase
         $this->creator = new FormCreator($this->neptune, $this->dispatcher);
     }
 
-    public function testCreateEmptyForm()
+    public function testCreateDefaultForm()
     {
         $form = $this->creator->create();
         $this->assertInstanceOf('\Reform\Form\Form', $form);
     }
 
-    public function testCreateEmptyFormWithAction()
+    public function testCreateDefaultFormWithAction()
     {
         $form = $this->creator->create(null, '/login');
         $this->assertInstanceOf('\Reform\Form\Form', $form);
         $this->assertSame('/login', $form->getAction());
     }
 
-    public function testCreateCustomForm()
+    public function testCreateForm()
     {
-        $this->creator->register('foo', '\Neptune\Tests\Form\FooForm');
-        $form = $this->creator->create('foo');
-        $this->assertInstanceOf( '\Neptune\Tests\Form\FooForm', $form);
-    }
+        $module = $this->getMockBuilder('Neptune\Service\AbstractModule')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $module->expects($this->once())
+              ->method('getNamespace')
+              ->will($this->returnValue('Neptune\Tests'));
 
-    public function testCreateUnregisteredThrowsException()
-    {
-        $msg = 'Form "foo" is not registered';
-        $this->setExpectedException('\RuntimeException', $msg);
-        $this->creator->create('foo');
+        $this->neptune->expects($this->once())
+            ->method('getModule')
+            ->with('my-module')
+            ->will($this->returnValue($module));
+
+        $form = $this->creator->create('my-module:foo');
+        $this->assertInstanceOf( '\Neptune\Tests\Form\FooForm', $form);
     }
 
     public function testCreateWithService()
     {
-        $this->creator->register('foo', '::form.foo');
-        $function = function($action) {
-            return new FooForm($action);
-        };
+        $form = new FooForm('/foo');
         $this->neptune->expects($this->once())
-                      ->method('raw')
+                      ->method('offsetGet')
                       ->with('form.foo')
-                      ->will($this->returnValue($function));
-        $form = $this->creator->create('foo');
-        $this->assertInstanceOf('Neptune\Tests\Form\FooForm', $form);
+                      ->will($this->returnValue($form));
+        $this->assertSame($form, $this->creator->create('form.foo'));
+    }
+
+    public function testBadServiceThrowsException()
+    {
+        $msg = 'Service "form.foo" is not an instance of Reform\Form\Form';
+        $this->neptune->expects($this->once())
+            ->method('offsetGet')
+            ->with('form.foo')
+            ->will($this->returnValue(new \stdClass()));
+        $this->setExpectedException('\RuntimeException', $msg);
+        $this->creator->create('form.foo');
     }
 
 }
