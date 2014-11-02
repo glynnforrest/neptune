@@ -19,9 +19,9 @@ use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-use \Pimple;
+use Pimple\Container;
 
-class Neptune extends Pimple implements HttpKernelInterface, TerminableInterface
+class Neptune extends Container implements HttpKernelInterface, TerminableInterface
 {
 
     protected $env;
