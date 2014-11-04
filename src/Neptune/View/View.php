@@ -182,7 +182,14 @@ class View
             throw new ViewNotFoundException("View template not found: $this->pathname");
         }
         ob_start();
-        include $this->pathname;
+        try {
+            include $this->pathname;
+        } catch (\Exception $e) {
+            //catch any exceptions in rendering the template and
+            //rethrow outside of the output buffer
+            ob_end_clean();
+            throw $e;
+        }
 
         return ob_get_clean();
     }
