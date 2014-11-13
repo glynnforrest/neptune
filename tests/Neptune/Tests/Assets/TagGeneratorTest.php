@@ -23,6 +23,12 @@ class TagGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $this->generator->css('css/style.css'));
     }
 
+    public function testCssAbsolute()
+    {
+        $expected = '<link rel="stylesheet" type="text/css" href="/css/style.css" />' . PHP_EOL;
+        $this->assertSame($expected, $this->generator->css('/css/style.css'));
+    }
+
     public function testExternalCssUrl()
     {
         $expected = '<link rel="stylesheet" type="text/css" href="http://example.org/foo.css" />' . PHP_EOL;
@@ -33,6 +39,12 @@ class TagGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $expected = '<script type="text/javascript" src="http://example.com/assets/js/main.js"></script>' . PHP_EOL;
         $this->assertSame($expected, $this->generator->js('js/main.js'));
+    }
+
+    public function testJsAbsolute()
+    {
+        $expected = '<script type="text/javascript" src="/js/main.js"></script>' . PHP_EOL;
+        $this->assertSame($expected, $this->generator->js('/js/main.js'));
     }
 
     public function testExternalJsUrl()

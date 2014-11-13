@@ -27,7 +27,7 @@ class TagGenerator
      */
     protected function createUrl($src)
     {
-        if (strpos($src, '://')) {
+        if (strpos($src, '://') || substr($src, 0, 1) === '/') {
             return $src;
         }
         $url = $this->assets_url . $src;
