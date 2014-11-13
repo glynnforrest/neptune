@@ -214,7 +214,7 @@ class MigrationRunner
 
         $qb = $this->connection->createQueryBuilder();
         $qb->select('version')
-           ->from($this->migrations_table)
+           ->from($this->migrations_table, 't')
            ->where('module = ?')
            ->orderBy('version', 'DESC');
         $stmt = $this->connection->prepare($qb->getSql());
