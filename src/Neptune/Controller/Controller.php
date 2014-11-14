@@ -59,10 +59,6 @@ abstract class Controller implements NeptuneAwareInterface
 
     public function security(Request $request, $driver = null)
     {
-        if (!$this->neptune->offsetExists('security')) {
-            throw new \Exception('Security service has not been registered');
-        }
-
         $security = $this->neptune['security']->get($driver);
         $security->setRequest($request);
 
@@ -76,10 +72,6 @@ abstract class Controller implements NeptuneAwareInterface
 
     public function view($view, array $values = array())
     {
-        if (!$this->neptune->offsetExists('view')) {
-            throw new \Exception('View service has not been registered');
-        }
-
         return $this->neptune['view']->load($view, $values);
     }
 
