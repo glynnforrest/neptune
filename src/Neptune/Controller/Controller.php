@@ -2,12 +2,11 @@
 
 namespace Neptune\Controller;
 
-use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
-use Reform\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Controller
@@ -63,6 +62,18 @@ abstract class Controller implements NeptuneAwareInterface
         $security->setRequest($request);
 
         return $security;
+    }
+
+    /**
+     * Throw a new HttpException with a status code and message.
+     *
+     * @param int    $code The HTTP status code
+     * @param string $message    The message
+     * @param array  $headers    An array of HTTP headers
+     */
+    public function error($code, $message = '', array $headers = [])
+    {
+        throw new HttpException($code, $message, null, $headers);
     }
 
     public function database()
