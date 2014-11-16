@@ -38,7 +38,11 @@ class ServiceListCommand extends Command
             }
         } else {
             foreach ($services as $service) {
-                $output->writeln(sprintf('%s: %s', $service, $this->asString($this->neptune[$service])));
+                try {
+                    $output->writeln(sprintf('%s: %s', $service, $this->asString($this->neptune[$service])));
+                } catch (\Exception $e) {
+                    throw new \Exception(sprintf('An exception occurred resolving "%s": %s', $service, $e->getMessage()));
+                }
             }
         }
     }
