@@ -5,8 +5,7 @@ namespace Neptune\Service;
 use Neptune\Core\Neptune;
 use Neptune\Config\Config;
 use Neptune\Swiftmailer\TransportFactory;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Neptune\EventListener\SwiftmailerListener;
 
 /**
  * SwiftmailerService
@@ -53,6 +52,8 @@ class SwiftmailerService implements ServiceInterface
 
         $neptune['mailer'] = function ($neptune) {
             if ($this->config->get('mailer.spool', false)) {
+                $neptune['mailer.spool_used'] = true;
+
                 return new \Swift_Mailer($neptune['mailer.transport.spool']);
             }
 
@@ -62,9 +63,14 @@ class SwiftmailerService implements ServiceInterface
         $neptune['mailer.dispatcher'] = function () {
             return new \Swift_Events_SimpleEventDispatcher();
         };
+
+        $neptune['mailer.listener'] = function ($neptune) {
+            return new SwiftmailerListener($neptune);
+        };
     }
 
     public function boot(Neptune $neptune)
     {
+        $neptune['dispatcher']->addSubscriber($neptune['mailer.listener']);
     }
 }
