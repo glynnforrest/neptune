@@ -6,11 +6,11 @@ use Neptune\Exceptions\DriverNotFoundException;
 use Neptune\Exceptions\ConfigKeyException;
 
 /**
- * TransportFactory
+ * SwiftmailerFactory
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class TransportFactory
+class SwiftmailerFactory
 {
     protected $dispatcher;
     protected $defaults = [
@@ -46,7 +46,7 @@ class TransportFactory
      *
      * @param array $config The configuration.
      */
-    public function create(array $config)
+    public function createTransport(array $config)
     {
         $config = array_merge($this->defaults, $config);
 

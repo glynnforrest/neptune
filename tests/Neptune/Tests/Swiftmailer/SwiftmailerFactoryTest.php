@@ -2,30 +2,30 @@
 
 namespace Neptune\Tests\Swiftmailer;
 
-use Neptune\Swiftmailer\TransportFactory;
+use Neptune\Swiftmailer\SwiftmailerFactory;
 use Temping\Temping;
 
 /**
- * TransportFactory
+ * SwiftmailerFactoryTest
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class TransportFactoryTest extends \PHPUnit_Framework_TestCase
+class SwiftmailerFactoryTest extends \PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->factory = new TransportFactory(new \Swift_Events_SimpleEventDispatcher());
+        $this->factory = new SwiftmailerFactory(new \Swift_Events_SimpleEventDispatcher());
     }
 
     public function testInvalidTransport()
     {
         $this->setExpectedException('Neptune\Exceptions\DriverNotFoundException');
-        $this->factory->create(['driver' => 'foo']);
+        $this->factory->createTransport(['driver' => 'foo']);
     }
 
     public function testDefaultTransport()
     {
-        $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->create([]));
+        $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->createTransport([]));
     }
 
     public function testNullTransport()
@@ -33,7 +33,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $config = [
             'driver' => 'null',
         ];
-        $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->create($config));
+        $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->createTransport($config));
     }
 
     public function testDefaultSmtpTransport()
@@ -41,7 +41,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $config = [
             'driver' => 'smtp',
         ];
-        $transport = $this->factory->create($config);
+        $transport = $this->factory->createTransport($config);
 
         $this->assertInstanceOf('\Swift_Transport_EsmtpTransport', $transport);
         $this->assertSame('localhost', $transport->getHost());
@@ -63,7 +63,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
             'encryption' => 'ssl',
             'auth_mode' => 'login',
         ];
-        $transport = $this->factory->create($config);
+        $transport = $this->factory->createTransport($config);
 
         $this->assertInstanceOf('\Swift_Transport_EsmtpTransport', $transport);
         $this->assertSame('example.org', $transport->getHost());
@@ -81,7 +81,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
             'username' => 'example',
             'password' => 'example',
         ];
-        $transport = $this->factory->create($config);
+        $transport = $this->factory->createTransport($config);
 
         $this->assertInstanceOf('\Swift_Transport_EsmtpTransport', $transport);
         $this->assertSame('smtp.gmail.com', $transport->getHost());
@@ -103,7 +103,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
             'auth_mode' => 'foo',
             'encryption' => 'foo',
         ];
-        $transport = $this->factory->create($config);
+        $transport = $this->factory->createTransport($config);
 
         $this->assertInstanceOf('\Swift_Transport_EsmtpTransport', $transport);
         $this->assertSame('smtp.gmail.com', $transport->getHost());

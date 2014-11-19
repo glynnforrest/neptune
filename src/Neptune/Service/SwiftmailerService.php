@@ -4,7 +4,7 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Config\Config;
-use Neptune\Swiftmailer\TransportFactory;
+use Neptune\Swiftmailer\SwiftmailerFactory;
 use Neptune\EventListener\SwiftmailerListener;
 
 /**
@@ -28,11 +28,11 @@ class SwiftmailerService implements ServiceInterface
         }
 
         $neptune['mailer.factory'] = function ($neptune) {
-            return new TransportFactory($neptune['mailer.dispatcher']);
+            return new SwiftmailerFactory($neptune['mailer.dispatcher']);
         };
 
         $neptune['mailer.transport'] = function ($neptune) {
-            return $neptune['mailer.factory']->create($this->config->get('mailer', []));
+            return $neptune['mailer.factory']->createTransport($this->config->get('mailer', []));
         };
 
         $neptune['mailer.spool'] = function ($neptune) {
