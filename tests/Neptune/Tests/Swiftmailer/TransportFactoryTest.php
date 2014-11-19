@@ -3,6 +3,7 @@
 namespace Neptune\Tests\Swiftmailer;
 
 use Neptune\Swiftmailer\TransportFactory;
+use Temping\Temping;
 
 /**
  * TransportFactory
@@ -11,30 +12,34 @@ use Neptune\Swiftmailer\TransportFactory;
  **/
 class TransportFactoryTest extends \PHPUnit_Framework_TestCase
 {
-
     public function setup()
     {
         $this->factory = new TransportFactory(new \Swift_Events_SimpleEventDispatcher());
     }
-    public function testInvalidDriver()
+
+    public function testInvalidTransport()
     {
         $this->setExpectedException('Neptune\Exceptions\DriverNotFoundException');
         $this->factory->create(['driver' => 'foo']);
     }
 
-    public function testCreateNull()
+    public function testDefaultTransport()
     {
         $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->create([]));
+    }
+
+    public function testNullTransport()
+    {
         $config = [
-            'driver' => 'null'
+            'driver' => 'null',
         ];
         $this->assertInstanceOf('\Swift_Transport_NullTransport', $this->factory->create($config));
     }
 
-    public function testCreateSmtpDefaults()
+    public function testDefaultSmtpTransport()
     {
         $config = [
-            'driver' => 'smtp'
+            'driver' => 'smtp',
         ];
         $transport = $this->factory->create($config);
 
@@ -47,7 +52,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $transport->getAuthMode());
     }
 
-    public function testCreateSmtp()
+    public function testSmtpTransport()
     {
         $config = [
             'driver' => 'smtp',
@@ -56,7 +61,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
             'username' => 'user',
             'password' => 'pass',
             'encryption' => 'ssl',
-            'auth_mode' => 'login'
+            'auth_mode' => 'login',
         ];
         $transport = $this->factory->create($config);
 
@@ -69,12 +74,12 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('login', $transport->getAuthMode());
     }
 
-    public function testCreateGmail()
+    public function testGmailTransport()
     {
         $config = [
             'driver' => 'gmail',
             'username' => 'example',
-            'password' => 'example'
+            'password' => 'example',
         ];
         $transport = $this->factory->create($config);
 
@@ -87,7 +92,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('login', $transport->getAuthMode());
     }
 
-    public function testCreateGmailNoOverrideSettings()
+    public function testGmailTransportNoOverrideSettings()
     {
         $config = [
             'driver' => 'gmail',
@@ -96,7 +101,7 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
             'host' => 'foo',
             'port' => 42,
             'auth_mode' => 'foo',
-            'encryption' => 'foo'
+            'encryption' => 'foo',
         ];
         $transport = $this->factory->create($config);
 
@@ -109,4 +114,51 @@ class TransportFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('login', $transport->getAuthMode());
     }
 
+    public function testInvalidSpool()
+    {
+        $this->setExpectedException('Neptune\Exceptions\DriverNotFoundException');
+        $this->factory->createSpool(['driver' => 'foo']);
+    }
+
+    public function testDefaultSpool()
+    {
+        $this->assertInstanceOf('\Swift_MemorySpool', $this->factory->createSpool([]));
+    }
+
+    public function testMemorySpool()
+    {
+        $config = ['driver' => 'memory'];
+        $this->assertInstanceOf('\Swift_MemorySpool', $this->factory->createSpool($config));
+    }
+
+    public function testFileSpoolNoPath()
+    {
+        $this->setExpectedException('Neptune\Exceptions\ConfigKeyException');
+        $this->factory->createSpool(['driver' => 'file']);
+    }
+
+    public function testFileSpool()
+    {
+        //use a temporary directory so FileSpool can create the path it
+        //requires
+        $temping = new Temping();
+        $path = $temping->getPathname('foo/bar');
+
+        $config = [
+            'driver' => 'file',
+            'path' => $path,
+        ];
+        $spool = $this->factory->createSpool($config);
+
+        //clean up the temporary directory before any assertions in case they
+        //fail
+        $temping->reset();
+
+        $this->assertInstanceOf('\Swift_FileSpool', $spool);
+        //FileSpool doesn't have a getPath() method
+        $r = new \ReflectionClass('\Swift_FileSpool');
+        $property = $r->getProperty('_path');
+        $property->setAccessible(true);
+        $this->assertSame($path, $property->getValue($spool));
+    }
 }

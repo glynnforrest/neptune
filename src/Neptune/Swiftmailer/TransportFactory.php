@@ -3,6 +3,7 @@
 namespace Neptune\Swiftmailer;
 
 use Neptune\Exceptions\DriverNotFoundException;
+use Neptune\Exceptions\ConfigKeyException;
 
 /**
  * TransportFactory
@@ -20,6 +21,9 @@ class TransportFactory
         'password' => '',
         'encryption' => null,
         'auth_mode' => null,
+    ];
+    protected $spool_defaults = [
+        'driver' => 'memory',
     ];
 
     public function __construct(\Swift_Events_EventDispatcher $dispatcher)
@@ -82,5 +86,33 @@ class TransportFactory
         $transport->setAuthMode($config['auth_mode']);
 
         return $transport;
+    }
+
+    /**
+     * Create a Swiftmailer spool from a configuration.
+     *
+     * Valid settings with their defaults:
+     *
+     * driver - 'memory' or 'file' (memory)
+     * path - The path to the spool folder when using the file driver
+     *
+     * @param array $config The configuration.
+     */
+    public function createSpool(array $config)
+    {
+        $config = array_merge($this->spool_defaults, $config);
+
+        switch ($config['driver']) {
+            case 'memory':
+                return new \Swift_MemorySpool();
+            case 'file':
+                if (!isset($config['path'])) {
+                    throw new ConfigKeyException('Swiftmailer file spool must have a path set');
+                }
+
+                return new \Swift_FileSpool($config['path']);
+            default:
+                throw new DriverNotFoundException(sprintf('Swiftmailer spool not implemented: "%s"', $config['driver']));
+        }
     }
 }
