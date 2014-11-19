@@ -5,6 +5,8 @@ namespace Neptune\Service;
 use Neptune\Core\Neptune;
 use Neptune\Config\Config;
 use Neptune\Swiftmailer\TransportFactory;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 
 /**
  * SwiftmailerService
@@ -34,7 +36,26 @@ class SwiftmailerService implements ServiceInterface
             return $neptune['mailer.factory']->create($this->config->get('mailer', []));
         };
 
+        $neptune['mailer.spool'] = function ($neptune) {
+            $config = $this->config->get('mailer.spool', []);
+
+            if (is_string($config)) {
+                //the spool is a service
+                return $neptune[$config];
+            }
+
+            return $neptune['mailer.factory']->createSpool($config);
+        };
+
+        $neptune['mailer.transport.spool'] = function ($neptune) {
+            return new \Swift_Transport_SpoolTransport($neptune['mailer.dispatcher'], $neptune['mailer.spool']);
+        };
+
         $neptune['mailer'] = function ($neptune) {
+            if ($this->config->get('mailer.spool', false)) {
+                return new \Swift_Mailer($neptune['mailer.transport.spool']);
+            }
+
             return new \Swift_Mailer($neptune['mailer.transport']);
         };
 
