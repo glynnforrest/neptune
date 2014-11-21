@@ -18,6 +18,7 @@ class ViewCreator
      */
     protected $neptune;
     protected $helpers = array();
+    protected $globals = [];
 
     public function __construct(Neptune $neptune)
     {
@@ -45,6 +46,11 @@ class ViewCreator
         return sprintf('%sviews/%s', $this->neptune->getModuleDirectory($module), $view);
     }
 
+    public function setGlobal($key, $value)
+    {
+        $this->globals[$key] = $value;
+    }
+
     /**
      * Load a view template. The view may be of the form <view> or
      * <module>:<view>. A template inside a module is by overridden by
@@ -57,7 +63,8 @@ class ViewCreator
     public function load($view, array $values = array())
     {
         $view = new View($this->getViewFilename($view));
-        $view->setValues($values);
+        $view->addValues($this->globals);
+        $view->addValues($values);
         $view->setCreator($this);
 
         return $view;
