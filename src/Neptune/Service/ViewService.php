@@ -5,6 +5,8 @@ namespace Neptune\Service;
 use Neptune\Core\Neptune;
 use Neptune\View\ViewCreator;
 
+use Neptune\EventListener\ViewListener;
+
 use Neptune\View\Extension\AssetsExtension;
 use Neptune\View\Extension\SecurityExtension;
 use Neptune\View\Extension\UrlExtension;
@@ -40,6 +42,7 @@ class ViewService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
+        $neptune['dispatcher']->addSubscriber(new ViewListener($neptune, 'view'));
     }
 
 }
