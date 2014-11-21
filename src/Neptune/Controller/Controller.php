@@ -29,6 +29,20 @@ abstract class Controller implements NeptuneAwareInterface
         return $this->neptune;
     }
 
+    /**
+     * Add a message to the request flash bag.
+     *
+     * @param Request $request
+     * @param string  $key
+     * @param string  $value
+     */
+    public function flash(Request $request, $key, $value)
+    {
+        $request->getSession()->getFlashbag()->add($key, $value);
+
+        return $this;
+    }
+
     public function assets()
     {
         return $this->neptune['assets'];
