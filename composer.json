@@ -37,5 +37,10 @@
         "psr-4": {
             "Neptune\\": "src/Neptune"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.5-dev"
+        }
     }
 }
