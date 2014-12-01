@@ -2,11 +2,8 @@
 
 namespace Neptune\Tests\Security\Driver;
 
-require_once __DIR__ . '/../../../../bootstrap.php';
-
 use Neptune\Security\Driver\ConfigDriver;
 use Neptune\Config\Config;
-
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -16,7 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
  **/
 class ConfigDriverTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $driver;
     protected $config;
 
@@ -69,5 +65,4 @@ class ConfigDriverTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('\Blockade\Exception\BlockadeFailureException');
         $this->driver->authenticate();
     }
-
 }
