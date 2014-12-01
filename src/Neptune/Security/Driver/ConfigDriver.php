@@ -38,12 +38,12 @@ class ConfigDriver extends AbstractDriver
     {
         $username = $this->request->request->get('username');
         if (!$username) {
-            throw new CredentialsException($this, "No username supplied.");
+            throw CredentialsException::from($this, "No username supplied.");
         }
 
         $password = $this->request->request->get('password');
         if (!$password) {
-            throw new CredentialsException($this, "No password supplied.");
+            throw CredentialsException::from($this, "No password supplied.");
         }
 
         try {
@@ -55,11 +55,11 @@ class ConfigDriver extends AbstractDriver
 
         //safe compare required
         if ($username !== $config_username) {
-            throw new CredentialsException($this, "Invalid username and password combination.");
+            throw CredentialsException::from($this, "Invalid username and password combination.");
         }
 
         if (!password_verify($password, $hash)) {
-            throw new CredentialsException($this, "Invalid username and password combination.");
+            throw CredentialsException::from($this, "Invalid username and password combination.");
         }
 
         return true;
