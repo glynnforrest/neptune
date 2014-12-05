@@ -205,4 +205,15 @@ class View
         return $this->getCreator()->callHelper($method, $args);
     }
 
+    /**
+     * Get the escaped contents of a variable.
+     *
+     * @param string $key The name of the variable
+     *
+     * @return string The HTML-escaped contents of the variable
+     */
+    public function e($name)
+    {
+        return htmlspecialchars($this->get($name));
+    }
 }

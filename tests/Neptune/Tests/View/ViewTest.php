@@ -151,4 +151,11 @@ class ViewTest extends \PHPUnit_Framework_TestCase
         $this->view->getCreator();
     }
 
+    public function testEscape()
+    {
+        $view = new View('foo');
+        $view->junk = '<script>alert("foo")</script>';
+        $expected = '&lt;script&gt;alert(&quot;foo&quot;)&lt;/script&gt;';
+        $this->assertSame($expected, $view->e('junk'));
+    }
 }
