@@ -43,6 +43,8 @@ class RouterListCommand extends Command
         $table->setHeaders(array('Name', 'Url', 'Controller', 'Action'))
             ->setRows($routes);
         $table->render($output);
+
+        $output->writeln(sprintf('<info>%s</info> registered routes.', count($routes)));
     }
 
 }
