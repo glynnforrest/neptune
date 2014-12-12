@@ -289,10 +289,18 @@ class Router
             $url = str_replace('(', '', $url);
             $url = str_replace(')', '', $url);
             $url = rtrim($url, '/');
+
+            //remove any extra slashes before the extension
+            $pos = strpos($url, '.');
+            if ($pos !== false) {
+                $ext = substr($url, $pos);
+                $base = substr($url, 0, $pos);
+                $url = rtrim($base, '/') . $ext;
+            }
         }
         //append get variables using any args that are left
-        if (!empty($args)) {
-            $url .= '?' . http_build_query($args);
+        if (!empty($args) && $query = http_build_query($args)) {
+            $url .= '?' . $query;
         }
 
         return $this->url->to($url, $protocol);

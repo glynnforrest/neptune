@@ -188,9 +188,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testUrlOptionalArgs()
     {
-        $this->router->name('opt_args')->route('/url/(:var(/:second))');
+        $this->router->name('opt_args')->route('/url(/:var(/:second))');
         $this->assertSame('http://myapp.local/url/foo',
             $this->router->url('opt_args', ['var' => 'foo']));
+    }
+
+    public function testUrlWithFalseyArgs()
+    {
+        $this->router->name('opt_args')->route('/url(/:var(/:second)).json');
+        $this->assertSame('http://myapp.local/url.json',
+            $this->router->url('opt_args', ['var' => null]));
     }
 
     public function testUrlNoOptionalArgs()
