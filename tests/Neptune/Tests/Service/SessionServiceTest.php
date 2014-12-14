@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\Service;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 use Neptune\Service\SessionService;
 
 /**

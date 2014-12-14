@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\Form;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 use Neptune\Form\FormCreator;
 
 use Symfony\Component\HttpFoundation\Request;

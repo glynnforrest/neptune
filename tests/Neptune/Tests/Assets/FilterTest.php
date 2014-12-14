@@ -6,8 +6,6 @@ use Neptune\Assets\Asset;
 use Neptune\Assets\Filter;
 use Neptune\Tests\Assets\UpperCaseFilter;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * FilterTest
  * @author Glynn Forrest me@glynnforrest.com

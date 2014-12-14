@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\EventListener;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 use Neptune\Security\SecurityRequestListener;
 
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;

@@ -8,8 +8,6 @@ use Neptune\View\ViewCreator;
 
 use Temping\Temping;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * ViewCreatorTest
  *

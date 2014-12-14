@@ -6,8 +6,6 @@ use Neptune\Controller\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * ControllerTest
  * @author Glynn Forrest me@glynnforrest.com

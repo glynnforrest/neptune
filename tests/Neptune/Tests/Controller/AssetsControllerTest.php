@@ -12,8 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Temping\Temping;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * AssetsControllerTest
  * @author Glynn Forrest me@glynnforrest.com

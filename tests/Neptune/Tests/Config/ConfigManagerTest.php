@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\Core;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 use Neptune\Config\ConfigManager;
 use Neptune\Core\Neptune;
 use Neptune\Config\NeptuneConfig;

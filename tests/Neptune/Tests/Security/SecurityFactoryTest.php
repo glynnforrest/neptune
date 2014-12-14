@@ -5,8 +5,6 @@ namespace Neptune\Tests\Security;
 use Neptune\Security\SecurityFactory;
 use Neptune\Config\Config;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * SecurityFactoryTest
  * @author Glynn Forrest <me@glynnforrest.com>

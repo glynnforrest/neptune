@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\Command;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Application;
 

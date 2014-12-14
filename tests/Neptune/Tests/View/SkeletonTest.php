@@ -6,8 +6,6 @@ use Neptune\View\Skeleton;
 
 use Temping\Temping;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * SkeletonTest
  * @author Glynn Forrest <me@glynnforrest.com>

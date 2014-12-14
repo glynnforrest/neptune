@@ -6,8 +6,6 @@ use Neptune\Assets\Asset;
 
 use Temping\Temping;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * AssetTest
  * @author Glynn Forrest me@glynnforrest.com

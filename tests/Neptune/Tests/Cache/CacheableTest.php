@@ -5,8 +5,6 @@ namespace Neptune\Tests\Cache;
 use Neptune\Cache\Cacheable;
 use Neptune\Tests\Cache\FooCacheable;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * CacheableTest
  *

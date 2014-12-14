@@ -2,8 +2,6 @@
 
 namespace Neptune\Tests\Database\Migration;
 
-require_once __DIR__ . '/../../../../bootstrap.php';
-
 /**
  * MigrationRunnerTest
  *

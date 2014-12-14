@@ -5,8 +5,6 @@ namespace Neptune\Tests\Console;
 use Neptune\Console\DialogHelper;
 use Symfony\Component\Console\Output\StreamOutput;
 
-require_once __DIR__ . '/../../../bootstrap.php';
-
 /**
  * DialogHelperTest
  *
