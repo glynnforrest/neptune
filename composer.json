@@ -37,6 +37,7 @@
             "Neptune\\": "src/Neptune"
         }
     },
+    "bin": ["bin/neptune-install"],
     "extra": {
         "branch-alias": {
             "dev-master": "0.5-dev"
