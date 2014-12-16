@@ -39,6 +39,26 @@ abstract class Command extends SymfonyCommand {
         return $this->neptune->getRootDirectory();
     }
 
+    /**
+     * Get a loaded module from the 'module' argument or by prompting
+     * for it.
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     */
+    protected function getModuleArgument(InputInterface $input, OutputInterface $output)
+    {
+        $module_name = $input->getArgument('module');
+        if (!$module_name) {
+            $dialog = $this->getHelper('dialog');
+            $modules = array_keys($this->neptune->getModules());
+            $index = $dialog->select($output, 'Module:', $modules);
+            $module_name = $modules[$index];
+        }
+
+        return $this->neptune->getModule($module_name);
+    }
+
 	/**
 	 * Get the namespace of a module with no beginning slash.
 	 *
