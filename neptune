@@ -4,45 +4,31 @@
 //this script needs to be in the root directory of your app to work properly.
 //Make sure that you have run `composer install` if the autoloader isn't working.
 
-include('vendor/autoload.php');
+include 'vendor/autoload.php';
 
 use Neptune\Config\Config;
 use Neptune\Core\Neptune;
 use Neptune\Console\Application as ConsoleApplication;
 use Neptune\Console\OutputFormatter;
-
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 $output = new ConsoleOutput();
 $output->setFormatter(new OutputFormatter());
 
-$neptune = new Neptune(__DIR__);
-
-$in_setup = isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == 'setup';
-
 if (!file_exists('config/neptune.php')) {
-    if(!$in_setup) {
-        $output->writeln('<error>config/neptune.php not found!</error>');
-        $output->writeln('Please run `<info>php neptune setup</info>`');
-        exit(1);
-    } else {
-        $config = new Config('neptune');
-        $config->setFilename(__DIR__ . '/config/neptune.php');
-        $config->setRootDirectory(__DIR__ . '/');
-
-        $neptune['config'] = $config;
-    }
+    $output->writeln('<error>Error: config/neptune.php not found.</error>');
+    $output->writeln('Run `<info>vendor/bin/neptune-install</info>`.');
+    exit(1);
 }
 
-//include the Application, but only if this isn't the setup command
-if (file_exists('app/Application.php') && !$in_setup) {
-    include('app/Application.php');
+$neptune = new Neptune(__DIR__);
+
+if (file_exists('app/Application.php')) {
+    include 'app/Application.php';
     $app = new \Application();
     $app->start($neptune);
     $app->console($neptune, $output);
 }
 
-//off we go
 $app = new ConsoleApplication($neptune);
-
 $app->run(null, $output);
