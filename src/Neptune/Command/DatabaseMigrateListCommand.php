@@ -7,7 +7,7 @@ use Neptune\Service\AbstractModule;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 
 /**
  * DatabaseMigrateListCommand
@@ -23,12 +23,10 @@ class DatabaseMigrateListCommand extends Command
     protected function configure()
     {
         parent::configure();
-        $this->addOption(
+        $this->addArgument(
                  'module',
-                 'm',
-                 InputOption::VALUE_REQUIRED,
-                 'The module containing the migration version.',
-                 $this->getDefaultModule()
+                 InputArgument::OPTIONAL,
+                 'The module containing the migrations'
              );
     }
 
@@ -36,8 +34,7 @@ class DatabaseMigrateListCommand extends Command
     {
         $runner = new MigrationRunner($this->neptune['db']);
 
-        $module = $this->neptune->getModule($input->getOption('module'));
-
+        $module = $this->getModuleArgument($input, $output);
         $output->writeln(sprintf('Migrations for module <info>%s</info>:', $module->getName()));
 
         foreach ($this->getMigrationsWithHighlight($runner, $module) as $message) {
