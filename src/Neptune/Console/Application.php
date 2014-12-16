@@ -86,7 +86,7 @@ class Application extends SymfonyApplication
      */
     protected function registerCommands(OutputInterface $output)
     {
-        $this->registerNamespace('Neptune', $this->neptune->getRootDirectory() . 'vendor/glynnforrest/neptune/src/Neptune/Command/');
+        $this->registerNamespace('Neptune', __DIR__ . '/../Command/');
 
         if (class_exists('\SensioLabs\Security\SecurityChecker')) {
             $this->add(new SecurityCheckerCommand(new SecurityChecker()));
@@ -94,11 +94,15 @@ class Application extends SymfonyApplication
 
         foreach ($this->neptune->getModules() as $module) {
             $namespace = $module->getNamespace();
-            $path = $module->getDirectory();
+            $path = $module->getDirectory().'Command/';
+            if (!file_exists($path)) {
+                continue;
+            }
+
             try {
-                $this->registerNamespace($namespace, $path . 'Command/');
+                $this->registerNamespace($namespace, $path);
             } catch (\Exception $e) {
-                $output->writeln(sprintf('Warning: %s', $e->getMessage()));
+                $output->writeln(sprintf('<error>%s: %s</error>', get_class($e), $e->getMessage()));
             }
 
         }
@@ -117,7 +121,7 @@ class Application extends SymfonyApplication
     public function registerNamespace($namespace, $command_dir)
     {
         if (!is_dir($command_dir)) {
-            return false;
+            throw new \InvalidArgumentException(sprintf('%s does not exist', $command_dir));
         }
         $i = new DirectoryIterator($command_dir);
         //Possible commands must be files that end in Command.php
@@ -126,17 +130,13 @@ class Application extends SymfonyApplication
         });
         foreach ($candidates as $file) {
             $class = $namespace . '\\Command\\' . $file->getBasename('.php');
-            try {
-                $r = new ReflectionClass($class);
-                if ($r->isSubclassOf('\Symfony\Component\Console\Command\Command') && !$r->isAbstract()) {
-                    if ($r->isSubclassOf('\Neptune\Command\Command')) {
-                        $this->add($r->newInstance($this->neptune));
-                    } else {
-                        $this->add($r->newInstance());
-                    }
+            $r = new ReflectionClass($class);
+            if ($r->isSubclassOf('\Symfony\Component\Console\Command\Command') && !$r->isAbstract()) {
+                if ($r->isSubclassOf('\Neptune\Command\Command')) {
+                    $this->add($r->newInstance($this->neptune));
+                } else {
+                    $this->add($r->newInstance());
                 }
-            } catch (\ReflectionException $e) {
-                continue;
             }
         }
     }
