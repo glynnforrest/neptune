@@ -26,17 +26,14 @@ abstract class CreateCommand extends Command
         $this->setName($this->name)
              ->setDescription($this->description)
              ->addArgument(
+                 'module',
+                 InputArgument::OPTIONAL,
+                 'The module of the new resource.'
+             )
+             ->addArgument(
                  'name',
                  InputArgument::OPTIONAL,
                  'The name of the new resource.'
-                 //make this an array to create loads
-             )
-             ->addOption(
-                 'module',
-                 'm',
-                 InputOption::VALUE_REQUIRED,
-                 'The module of the new resource.',
-                 $this->getDefaultModule()
              )
              ->addOption(
                  'with-test',
@@ -81,22 +78,17 @@ abstract class CreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $module = $this->getModuleArgument($input, $output);
+
         $name = $this->getResourceName($input, $output);
         $skeleton = $this->getSkeleton($name);
+        $skeleton->setNamespace($module->getNamespace());
 
-        $module = $input->getOption('module');
-
-        $verbose = $output->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE;
-        if ($verbose) {
-            $output->writeln(sprintf('Target module: <info>%s</info>', $module));
-        }
-
-        $skeleton->setNamespace($this->getModuleNamespace($module));
-        $target_file = $this->getModuleDirectory($module) . $this->getTargetPath($name);
+        $target_file = $module->getDirectory() . $this->getTargetPath($name);
         $directory = dirname($target_file);
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
-            if ($verbose) {
+            if ($output->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
                 $output->writeln(sprintf('Created directory <info>%s</info>', $directory));
             }
 

@@ -27,16 +27,14 @@ class CreateMigrationCommand extends CreateCommand
         $this->setName($this->name)
              ->setDescription($this->description)
              ->addArgument(
+                 'module',
+                 InputArgument::OPTIONAL,
+                 'The module of the migration.'
+             )
+             ->addArgument(
                  'description',
                  InputArgument::OPTIONAL,
                  'The description of the migration.'
-             )
-             ->addOption(
-                 'module',
-                 'm',
-                 InputOption::VALUE_REQUIRED,
-                 'The module to place the file.',
-                 $this->getDefaultModule()
              );
     }
 
