@@ -2,7 +2,7 @@
 
 namespace Neptune\Command;
 
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,7 +13,7 @@ use Neptune\Config\Config;
  * SetupCommand
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class SetupCommand extends Command
+class SetupCommand extends SymfonyCommand
 {
     protected $name = 'setup';
     protected $description = 'Setup a new neptune application';
