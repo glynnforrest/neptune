@@ -4,7 +4,6 @@ namespace Neptune\Command;
 
 use Neptune\Console\ConsoleLogger;
 use Neptune\Database\Migration\MigrationRunner;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,7 +16,6 @@ use Symfony\Component\Console\Input\InputOption;
  **/
 class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
 {
-
     protected $name = 'database:migrate:version';
     protected $description = 'Migrate to a specific database schema version';
 
@@ -28,13 +26,6 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
                  'version',
                  InputArgument::OPTIONAL,
                  'The version to migrate to.'
-             )
-             ->addOption(
-                 'module',
-                 'm',
-                 InputOption::VALUE_REQUIRED,
-                 'The module containing the migration version.',
-                 $this->getDefaultModule()
              )
              ->addOption(
                  'force',
@@ -52,7 +43,7 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
             $runner->ignoreExceptions();
         }
 
-        $module = $this->neptune->getModule($input->getOption('module'));
+        $module = $this->getModuleArgument($input, $output);
 
         $version = $input->getArgument('version');
 
@@ -81,5 +72,4 @@ class DatabaseMigrateVersionCommand extends DatabaseMigrateListCommand
 
         $runner->migrate($module, $version);
     }
-
 }
