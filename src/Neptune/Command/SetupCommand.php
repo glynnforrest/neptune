@@ -45,6 +45,7 @@ class SetupCommand extends SymfonyCommand
         $this->populateNeptuneConfig($output, $dir.'config/neptune.php');
         $files_to_copy = [
             'neptune' => 'neptune',
+            'skeletons/htaccess' => 'public/.htaccess',
         ];
         foreach ($files_to_copy as $source => $target) {
             $this->copyFile($input, $output, $dir.'vendor/glynnforrest/neptune/'.$source, $dir.$target);
