@@ -43,7 +43,12 @@ class SetupCommand extends SymfonyCommand
 
         $this->createDirectories($output, $dir);
         $this->populateNeptuneConfig($output, $dir.'config/neptune.php');
-        $this->copyConsoleRunner($input, $output, $dir);
+        $files_to_copy = [
+            'neptune' => 'neptune',
+        ];
+        foreach ($files_to_copy as $source => $target) {
+            $this->copyFile($input, $output, $dir.'vendor/glynnforrest/neptune/'.$source, $dir.$target);
+        }
     }
 
     protected function createDirectories(OutputInterface $output, $root)
@@ -92,11 +97,8 @@ class SetupCommand extends SymfonyCommand
         $config->save($path);
     }
 
-    protected function copyConsoleRunner(InputInterface $input, OutputInterface $output, $dir)
+    protected function copyFile(InputInterface $input, OutputInterface $output, $source, $target)
     {
-        $source = $dir.'vendor/glynnforrest/neptune/neptune';
-        $target = $dir.'neptune';
-
         if (file_exists($target)) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(sprintf('<info>%s</info> exists. Overwrite? ', $target), false);
