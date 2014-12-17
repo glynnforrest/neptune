@@ -4,7 +4,7 @@ namespace Neptune\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 
 class RouterListCommand extends Command
 {
@@ -16,17 +16,16 @@ class RouterListCommand extends Command
     {
         $this->setName($this->name)
              ->setDescription($this->description)
-             ->addOption(
+             ->addArgument(
                  'module',
-                 'm',
-                 InputOption::VALUE_REQUIRED,
+                 InputArgument::OPTIONAL,
                  'Only list routes from a given module'
              );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $module = $input->getOption('module');
+        $module = $input->getArgument('module');
 
         $router = $this->neptune['router'];
 
