@@ -38,7 +38,7 @@ class Application extends SymfonyApplication
     {
         $this->neptune = $neptune;
         $this->config = $neptune['config'];
-        parent::__construct('Neptune', '0.2.5');
+        parent::__construct('Neptune', Neptune::NEPTUNE_VERSION);
         $this->useNeptuneHelperSet();
     }
 
