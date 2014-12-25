@@ -23,6 +23,7 @@ use Pimple\Container;
 
 class Neptune extends Container implements HttpKernelInterface, TerminableInterface
 {
+    const NEPTUNE_VERSION = '0.5-dev';
 
     protected $env;
     protected $booted;
