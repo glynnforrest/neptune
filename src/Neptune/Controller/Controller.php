@@ -6,7 +6,6 @@ use Neptune\Assets\Assets;
 use Neptune\Core\Neptune;
 use Neptune\Core\NeptuneAwareInterface;
 use Reform\Form\Form;
-
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 abstract class Controller implements NeptuneAwareInterface
 {
-
     protected $neptune;
 
     public function setNeptune(Neptune $neptune)
@@ -56,6 +54,7 @@ abstract class Controller implements NeptuneAwareInterface
 
         $security = $this->neptune['security']->get($driver);
         $security->setRequest($request);
+
         return $security;
     }
 
@@ -78,10 +77,30 @@ abstract class Controller implements NeptuneAwareInterface
         return $this->neptune['form']->create($name, $action);
     }
 
-    public function redirect($to, $with = array())
+    /**
+     * Create a new redirect response.
+     *
+     * @param string $to The url to redirect to
+     *
+     * @return RedirectResponse
+     */
+    public function redirect($to)
     {
-        //set session parameters here
         return new RedirectResponse($to);
     }
 
+    /**
+     * Create a new redirect response to a named route.
+     *
+     * @param string $route_name The route to redirect to
+     * @param array  $params     The parameters in the url
+     *
+     * @return RedirectResponse
+     */
+    public function redirectTo($route_name, array $params = [])
+    {
+        $url = $this->neptune['router']->url($route_name, $params);
+
+        return $this->redirect($url);
+    }
 }
