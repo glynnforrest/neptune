@@ -54,11 +54,18 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('production', $this->neptune->getEnv());
 	}
 
-	public function testLoadEnvNoArgThrowsException() {
-		$c = new Config('neptune');
-		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
-		$this->neptune->loadEnv();
-	}
+    public function testLoadEnvNotInConfig()
+    {
+        $this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
+        $this->neptune->loadEnv();
+    }
+
+    public function testLoadEnvNotFound()
+    {
+        $msg = sprintf('Unable to load environment "development": %s not found', $this->temp->getPathname('config/env/development.php'));
+        $this->setExpectedException('\Neptune\Exceptions\ConfigFileException', $msg);
+        $this->neptune->loadEnv('development');
+    }
 
 	public function testGetEnvReturnsNullWithNoEnv() {
 		$this->assertNull($this->neptune->getEnv());

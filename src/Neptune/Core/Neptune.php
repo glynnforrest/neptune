@@ -10,6 +10,7 @@ use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
 use Neptune\Config\ConfigManager;
+use Neptune\Exceptions\ConfigFileException;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -164,7 +165,12 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
 		}
         $file = $this->root_directory . 'config/env/' . $env . '.php';
         //load $env as a config file, merging into neptune
-        $this['config.manager']->load($env, $file, 'neptune');
+        try {
+            $this['config.manager']->load($env, $file, 'neptune');
+        } catch (ConfigFileException $e) {
+            throw new ConfigFileException(sprintf('Unable to load environment "%s": %s', $env, $e->getMessage()));
+        }
+
 		$this->env = $env;
 
 		return true;
