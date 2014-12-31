@@ -322,4 +322,45 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $c->toString());
     }
 
+    public function testOverrideNoMerge()
+    {
+        $c = new Config('testing');
+        $c->set('array_key', ['foo', 'bar', 'baz']);
+        $c->set('foo_key', 'foo');
+        //array_key shouldn't be merged
+        $c->set('_options', [
+            'array_key' => 'no_merge'
+        ]);
+        $c->override([
+            'array_key' => ['something', 'else'],
+            'bar_key' => 'bar'
+        ]);
+
+        $this->assertSame(['something', 'else'], $c->get('array_key'));
+        $this->assertSame('foo', $c->get('foo_key'));
+        $this->assertSame('bar', $c->get('bar_key'));
+    }
+
+    public function testOverrideNoMergeNestedKey()
+    {
+        $c = new Config('testing');
+        $c->set('foo.bar.array_key', ['foo', 'bar', 'baz']);
+        $c->set('foo_key', 'foo');
+        //foo.bar.array_key shouldn't be merged
+        $c->set('_options', [
+            'foo.bar.array_key' => 'no_merge'
+        ]);
+        $c->override([
+            'foo' => [
+                'bar' => [
+                    'array_key' => ['something', 'else'],
+                ]
+            ],
+            'bar_key' => 'bar'
+        ]);
+
+        $this->assertSame(['something', 'else'], $c->get('foo.bar.array_key'));
+        $this->assertSame('foo', $c->get('foo_key'));
+        $this->assertSame('bar', $c->get('bar_key'));
+    }
 }

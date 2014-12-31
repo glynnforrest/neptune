@@ -13,6 +13,8 @@ use Crutches\DotArray;
  */
 class Config
 {
+    const OPTION_NO_MERGE = 'no_merge';
+
     protected $name;
     protected $filename;
     protected $dot_array;
@@ -170,6 +172,21 @@ class Config
      */
     public function override(array $array)
     {
+        //process any options for specific keys
+        $options = $this->dot_array->get('_options', []);
+        $override = new DotArray($array);
+        foreach ($options as $key => $option) {
+            if ($option !== self::OPTION_NO_MERGE) {
+                continue;
+            }
+
+            if (!$value = $override->get($key)) {
+                continue;
+            }
+            $this->dot_array->set($key, $value);
+        }
+
+        //merge the incoming array
         $this->dot_array->merge($array);
     }
 
