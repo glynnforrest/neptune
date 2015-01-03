@@ -174,36 +174,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $c->toString());
     }
 
-    public function testToStringDoesNotIncludeMerged()
-    {
-        $c = new Config();
-        $c->set('foo', 'bar');
-        $c->override(array('bar' => 'baz'));
-        $both = array('foo' => 'bar', 'bar' => 'baz');
-        $this->assertSame($both, $c->get());
-        $expected = '<?php return ' . var_export(array('foo' => 'bar'), true) . '?>';
-        $this->assertSame($expected, $c->toString());
-    }
-
-    public function testToStringUsesOriginalValue()
-    {
-        $c = new Config();
-        $c->set('foo', 'bar');
-        $override = array('foo' => 'override-bar', 'bar' => 'baz');
-        $c->override($override);
-        $this->assertSame($override, $c->get());
-        $this->assertSame('override-bar', $c->get('foo'));
-
-        //values are not changed coming from an override
-        $expected =  '<?php return ' . var_export(array('foo' => 'bar'), true) . '?>';
-        $this->assertSame($expected, $c->toString());
-
-        //values are overridden when explicitly set however
-        $c->set('foo', 'set-bar');
-        $expected =  '<?php return ' . var_export(array('foo' => 'set-bar'), true) . '?>';
-        $this->assertSame($expected, $c->toString());
-    }
-
     public function testOverrideNoMerge()
     {
         $c = new Config();

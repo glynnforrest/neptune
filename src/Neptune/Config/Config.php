@@ -11,47 +11,11 @@ use Crutches\DotArray;
  * Config
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Config
+class Config extends DotArray
 {
     const OPTION_NO_MERGE = 'no_merge';
 
-    protected $dot_array;
-    protected $original;
     protected $root_dir;
-
-    public function __construct()
-    {
-        $values = [];
-        $this->dot_array = new DotArray($values);
-        $this->original = new DotArray($values);
-
-        return true;
-    }
-
-    /**
-     * Get a configuration value that matches $key.
-     * $key uses the dot array syntax: parent.child.child
-     * If the key matches an array the whole array will be returned.
-     * If no key is specified the entire configuration array will be
-     * returned.
-     * $default will be returned (null unless specified) if the key is
-     * not found.
-     */
-    public function get($key = null, $default = null)
-    {
-        return $this->dot_array->get($key, $default);
-    }
-
-    /**
-     * Get the first value from an array of configuration values that
-     * matches $key.
-     * $default will be returned (null unless specified) if the key is
-     * not found or does not contain an array.
-     */
-    public function getFirst($key = null, $default = null)
-    {
-        return $this->dot_array->getFirst($key, $default);
-    }
 
     /**
      * Get a configuration value that matches $key in the same way as
@@ -97,7 +61,7 @@ class Config
      */
     public function getFirstRequired($key)
     {
-        $value = $this->dot_array->getFirst($key);
+        $value = $this->getFirst($key);
         if ($value) {
             return $value;
         }
@@ -112,8 +76,7 @@ class Config
      */
     public function set($key, $value)
     {
-        $this->dot_array->set($key, $value);
-        $this->original->set($key, $value);
+        parent::set($key, $value);
 
         return $this;
     }
@@ -125,7 +88,7 @@ class Config
     public function override(array $array)
     {
         //process any options for specific keys
-        $options = $this->dot_array->get('_options', []);
+        $options = $this->get('_options', []);
         $override = new DotArray($array);
         foreach ($options as $key => $option) {
             if ($option !== self::OPTION_NO_MERGE) {
@@ -135,11 +98,11 @@ class Config
             if (!$value = $override->get($key)) {
                 continue;
             }
-            $this->dot_array->set($key, $value);
+            $this->set($key, $value);
         }
 
         //merge the incoming array
-        $this->dot_array->merge($array);
+        $this->merge($array);
     }
 
     /**
@@ -150,7 +113,7 @@ class Config
      */
     public function toString()
     {
-        return '<?php return ' . var_export($this->original->get(), true) . '?>';
+        return '<?php return ' . var_export($this->get(), true) . '?>';
     }
 
     /**
