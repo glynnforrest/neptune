@@ -3,6 +3,7 @@
 namespace Neptune\Config;
 
 use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Loader\LoaderInterface;
 
 /**
  * ConfigManager
@@ -12,6 +13,7 @@ use Neptune\Exceptions\ConfigFileException;
 class ConfigManager
 {
     protected $config;
+    protected $loaders = [];
 
     public function __construct(Config $config)
     {
@@ -29,21 +31,37 @@ class ConfigManager
     }
 
     /**
+     * Add a configuration loader.
+     *
+     * @param LoaderInterface $loader
+     */
+    public function addLoader(LoaderInterface $loader)
+    {
+        array_unshift($this->loaders, $loader);
+    }
+
+    /**
      * Load configuration settings from a file.
      *
-     * @param string $filename
+     * @param string      $filename
      * @param string|null $prefix
      */
     public function load($filename, $prefix = null)
     {
         if (!file_exists($filename)) {
-            throw new ConfigFileException($filename . ' not found');
+            throw new ConfigFileException($filename.' not found');
         }
-        ob_start();
-        $values = include $filename;
-        ob_end_clean();
-        if (!is_array($values)) {
-            throw new ConfigFileException($filename . ' does not return a php array');
+
+        foreach ($this->loaders as $loader) {
+            if (!$loader->supports($filename)) {
+                continue;
+            }
+
+            $values = $loader->load($filename);
+        }
+
+        if (!isset($values)) {
+            throw new ConfigFileException(sprintf('No configuration loader available for %s', $filename));
         }
 
         return $this->loadValues($values, $prefix);

@@ -8,6 +8,7 @@ use Neptune\Config\NeptuneConfig;
 use Neptune\Config\Config;
 
 use Temping\Temping;
+use Neptune\Config\Loader\PhpLoader;
 
 /**
  * ConfigManagerTest
@@ -28,6 +29,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->temp->init();
         $this->config = new Config();
         $this->manager = new ConfigManager($this->config);
+        $this->manager->addLoader(new PhpLoader());
         $this->file =  __DIR__ . '/fixtures/config.php';
         $this->file2 = __DIR__ . '/fixtures/config2.php';
     }
