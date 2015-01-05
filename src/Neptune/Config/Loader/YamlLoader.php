@@ -15,11 +15,8 @@ class YamlLoader implements LoaderInterface
     public function load($filename)
     {
         $values = Yaml::parse(file_get_contents($filename));
-        if (!is_array($values)) {
-            throw new ConfigFileException(sprintf('Unable to parse configuration file %s', $filename));
-        }
 
-        return $values;
+        return is_array($values) ? $values : [];
     }
 
     public function supports($filename)
