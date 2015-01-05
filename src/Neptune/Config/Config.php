@@ -95,7 +95,8 @@ class Config extends DotArray
                 continue;
             }
 
-            if (!$value = $override->get($key)) {
+            $value = $override->get($key);
+            if (!$value && $value !== []) {
                 continue;
             }
             $this->set($key, $value);

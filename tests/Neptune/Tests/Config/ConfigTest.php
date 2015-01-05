@@ -193,6 +193,25 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('bar', $c->get('bar_key'));
     }
 
+    public function testOverrideNoMergeEmptyArray()
+    {
+        $c = new Config();
+        $c->set('array_key', ['foo', 'bar', 'baz']);
+        $c->set('foo_key', 'foo');
+        //array_key shouldn't be merged
+        $c->set('_options', [
+            'array_key' => 'no_merge'
+        ]);
+        $c->override([
+            'array_key' => [],
+            'bar_key' => 'bar'
+        ]);
+
+        $this->assertSame([], $c->get('array_key'));
+        $this->assertSame('foo', $c->get('foo_key'));
+        $this->assertSame('bar', $c->get('bar_key'));
+    }
+
     public function testOverrideNoMergeNestedKey()
     {
         $c = new Config();
