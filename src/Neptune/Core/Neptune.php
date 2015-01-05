@@ -9,6 +9,7 @@ use Neptune\Service\AbstractModule;
 use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
+use Neptune\Config\Loader;
 use Neptune\Config\ConfigManager;
 use Neptune\Exceptions\ConfigFileException;
 
@@ -44,14 +45,27 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         $this->root_directory = $root_directory;
 
         $this['config'] = function() {
-            $config = new Config('neptune', $this->root_directory . 'config/neptune.php');
+            $manager = $this['config.manager'];
+
+            //load configuration for each module, then for the
+            //application (default is config/neptune.yml).
+            foreach ($this->modules as $module) {
+                $module->loadConfig($manager);
+            }
+            $this->loadConfig($manager);
+
+            $config = $manager->getConfig();
             $config->setRootDirectory($this->root_directory);
+
             return $config;
         };
 
         $this['config.manager'] = function() {
-            $manager = new ConfigManager($this);
-            $manager->add($this['config']);
+            $manager = new ConfigManager(new Config);
+
+            $manager->addLoader(new Loader\YamlLoader());
+            $manager->addLoader(new Loader\PhpLoader());
+
             return $manager;
         };
 
@@ -163,18 +177,25 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
 		if(!$env) {
 			$env = $this['config']->getRequired('env');
 		}
-        $file = $this->root_directory . 'config/env/' . $env . '.php';
-        //load $env as a config file, merging into neptune
+
         try {
-            $this['config.manager']->load($env, $file, 'neptune');
+            $this['config.manager']->load($this->root_directory.'config/env/'.$env.'.yml');
         } catch (ConfigFileException $e) {
             throw new ConfigFileException(sprintf('Unable to load environment "%s": %s', $env, $e->getMessage()));
         }
 
 		$this->env = $env;
-
-		return true;
 	}
+
+    /**
+     * Load configuration for this application.
+     *
+     * @param ConfigManager $config
+     */
+    public function loadConfig(ConfigManager $config)
+    {
+        $config->load($this->root_directory.'config/neptune.yml');
+    }
 
 	/**
 	 * Get the name of the currently loaded environment.

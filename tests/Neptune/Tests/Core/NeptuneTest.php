@@ -23,7 +23,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 		$this->temp = new Temping();
 		$this->neptune = new Neptune($this->temp->getDirectory());
         //override config for testing
-        $this->config = new Config('neptune');
+        $this->config = new Config();
         $this->neptune['config'] = $this->config;
 	}
 
@@ -33,19 +33,24 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
     protected function stubEnvConfig()
     {
-        $config = new Config('production');
-        $config->set('foo', 'override');
-        $this->temp->create('config/env/production.php', $config->toString());
+        $yaml = 'foo: override';
+        $this->temp->create('config/env/production.yml', $yaml);
     }
 
-	public function testLoadAndGetEnv() {
+    public function testLoadAndGetEnv()
+    {
+        $neptune = new Neptune($this->temp->getDirectory());
+        //stub config/neptune.yml for testing
+        $this->temp->create('config/neptune.yml');
+        $config = $neptune['config'];
+        $config->set('foo', 'default');
+        $this->assertSame('default', $config->get('foo'));
+
         $this->stubEnvConfig();
-		$this->config->set('foo', 'default');
-		$this->assertSame('default', $this->config->get('foo'));
-		$this->neptune->loadEnv('production');
-		$this->assertEquals('override', $this->config->get('foo'));
-		$this->assertSame('production', $this->neptune->getEnv());
-	}
+        $neptune->loadEnv('production');
+        $this->assertSame('override', $config->get('foo'));
+        $this->assertSame('production', $neptune->getEnv());
+    }
 
 	public function testLoadAndGetDefaultEnv() {
         $this->stubEnvConfig();
@@ -62,7 +67,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
     public function testLoadEnvNotFound()
     {
-        $msg = sprintf('Unable to load environment "development": %s not found', $this->temp->getPathname('config/env/development.php'));
+        $msg = sprintf('Unable to load environment "development": %s not found', $this->temp->getPathname('config/env/development.yml'));
         $this->setExpectedException('\Neptune\Exceptions\ConfigFileException', $msg);
         $this->neptune->loadEnv('development');
     }
@@ -181,13 +186,14 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
     public function testConfigSetup()
     {
-        $stub = new Config('testing');
-        $this->temp->create('config/neptune.php', $stub->toString());
+        $yaml = 'foo: bar';
+        $this->temp->create('config/neptune.yml', $yaml);
 
         $neptune = new Neptune($this->temp->getDirectory());
         $config = $neptune['config'];
         $this->assertInstanceOf('Neptune\Config\Config', $config);
         $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+        $this->assertSame('bar', $config->get('foo'));
     }
 
 }
