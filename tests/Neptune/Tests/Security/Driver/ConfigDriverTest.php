@@ -18,7 +18,7 @@ class ConfigDriverTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = new Config('testing');
+        $this->config = new Config();
         $this->driver = new ConfigDriver($this->config);
 
         $this->request = Request::create('testing');

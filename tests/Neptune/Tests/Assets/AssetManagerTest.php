@@ -59,7 +59,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     protected function expectConfigFetch($type, $group_name, array $return_assets)
     {
-        $config = new Config('testing');
+        $config = new Config();
         $config->set("assets.$type.$group_name", $return_assets);
         $this->config->expects($this->once())
                      ->method('load')
@@ -85,7 +85,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCssGroupWithInheritance()
     {
-        $config = new Config('testing');
+        $config = new Config();
         $config->set('assets.css.main', ['main.css', 'styles.css', 'layout.css']);
         $config->set('assets.css.theme', ['theme.css', '@test:main']);
         $config->set('assets.css.super-theme', ['@test:theme', 'super-theme.css']);
@@ -214,7 +214,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsGroupWithInheritance()
     {
-        $config = new Config('testing');
+        $config = new Config();
         $config->set('assets.js.main', ['library.js', 'main.js']);
         $config->set('assets.js.app', ['@test:main', 'app.js']);
         $config->set('assets.js.super-app', ['extra-library.js', '@test:app', 'super-app.js']);
@@ -301,7 +301,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testConcatenateAssets()
     {
-        $config = new Config('assets');
+        $config = new Config();
         $temping = new Temping();
         $base = 'path/to/assets/';
 
