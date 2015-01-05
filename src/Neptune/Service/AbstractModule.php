@@ -5,6 +5,7 @@ namespace Neptune\Service;
 use Neptune\Service\ServiceInterface;
 use Neptune\Routing\Router;
 use Neptune\Core\Neptune;
+use Neptune\Config\ConfigManager;
 
 /**
  * AbstractModule
@@ -46,6 +47,19 @@ abstract class AbstractModule implements ServiceInterface
 
     protected function routes(Router $router, $prefix, Neptune $neptune) {
         //add routes in child classes
+    }
+
+    /**
+     * Load configuration for this module.
+     *
+     * @param ConfigManager $config
+     */
+    public function loadConfig(ConfigManager $config)
+    {
+        $file = $this->getDirectory() . 'config.yml';
+        if (file_exists($file)) {
+            $config->load($file, $this->getName());
+        }
     }
 
     abstract public function getName();
