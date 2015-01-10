@@ -4,9 +4,10 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Exceptions\ConfigKeyException;
-
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Configuration;
+use Neptune\Database\PsrSqlLogger;
+use Pimple\Container;
 
 /**
  * DatabaseService
@@ -15,39 +16,46 @@ use Doctrine\DBAL\Configuration;
  **/
 class DatabaseService implements ServiceInterface
 {
-
     public function register(Neptune $neptune)
     {
-        $config = $neptune['config'];
+        $neptune['db.config'] = function ($neptune) {
+            $config = $neptune['config']->get('database', []);
 
-        $names = array_keys($config->get('database', []));
-        if (empty($names)) {
-            throw new ConfigKeyException('Database configuration is empty');
-        }
+            if (empty($config)) {
+                throw new ConfigKeyException('Database configuration is empty');
+            }
 
-        foreach ($names as $name) {
-            $neptune["db.$name"] = function ($neptune) use ($name, $config) {
-                $configuration = new Configuration();
+            return $config;
+        };
 
-                $logger = $config->get("database.$name.logger", false);
-                if ($logger) {
-                    $configuration->setSQLLogger(new \Neptune\Database\PsrSqlLogger($neptune[$logger]));
-                }
+        $neptune['dbs'] = function ($neptune) {
+            $dbs = new Container();
 
-                return DriverManager::getConnection($config->getRequired("database.$name"), $configuration);
-            };
-        }
+            foreach ($neptune['db.config'] as $name => $config) {
+                $dbs[$name] = function ($dbs) use ($name, $config, $neptune) {
+                    $configuration = new Configuration();
+                    if (isset($config['logger'])) {
+                        $configuration->setSQLLogger(new PsrSqlLogger($neptune[$config['logger']]));
+                    }
+
+                    return DriverManager::getConnection($config, $configuration);
+                };
+            }
+
+            return $dbs;
+        };
 
         //shortcut for the first database
-        $neptune['db'] = function ($neptune) use ($names) {
-            $name = $names[0];
+        $neptune['db'] = function ($neptune) {
+            $config = $neptune['db.config'];
+            reset($config);
+            $default = key($config);
 
-            return $neptune["db.$name"];
+            return $neptune['dbs'][$default];
         };
     }
 
     public function boot(Neptune $neptune)
     {
     }
-
 }
