@@ -70,7 +70,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     public function testLoadNonExistentFileThrowsException()
     {
         $not_here = $this->temp->getPathname('not_here');
-        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $not_here . ' not found');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', sprintf('Configuration file "%s" not found', $not_here));
         $this->manager->load($not_here);
     }
 
@@ -79,6 +79,14 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->temp->create('invalid.php', 'foo');
         $path = $this->temp->getPathname('invalid.php');
         $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $path . ' does not return a php array');
+        $this->manager->load($path);
+    }
+
+    public function testLoadFailsWithNoSuitableLoader()
+    {
+        $this->temp->create('invalid.txt', 'foo');
+        $path = $this->temp->getPathname('invalid.txt');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', sprintf('No configuration loader available for "%s"', $path));
         $this->manager->load($path);
     }
 

@@ -61,7 +61,7 @@ class ConfigManager
         }
 
         if (!isset($values)) {
-            throw new ConfigFileException(sprintf('No configuration loader available for %s', $filename));
+            throw new ConfigFileException(sprintf('No configuration loader available for "%s"', $filename));
         }
 
         return $this->loadValues($values, $prefix);
