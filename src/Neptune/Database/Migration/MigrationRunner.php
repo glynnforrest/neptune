@@ -137,6 +137,10 @@ class MigrationRunner
     public function migrateLatest(AbstractModule $module)
     {
         $migrations = $this->getAllMigrations($module);
+        if (empty($migrations)) {
+            return;
+        }
+
         $version = array_pop($migrations)->getVersion();
 
         return $this->migrate($module, $version);
