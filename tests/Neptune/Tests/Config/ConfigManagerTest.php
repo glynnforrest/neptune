@@ -8,6 +8,7 @@ use Neptune\Config\NeptuneConfig;
 use Neptune\Config\Config;
 
 use Temping\Temping;
+use Neptune\Config\Loader\PhpLoader;
 
 /**
  * ConfigManagerTest
@@ -16,10 +17,7 @@ use Temping\Temping;
  **/
 class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $manager;
-    protected $neptune;
-
     protected $file;
     protected $file2;
 
@@ -29,8 +27,9 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->temp = new Temping();
         $this->temp->init();
-        $this->neptune = new Neptune($this->temp->getDirectory());
-        $this->manager = new ConfigManager($this->neptune);
+        $this->config = new Config();
+        $this->manager = new ConfigManager($this->config);
+        $this->manager->addLoader(new PhpLoader());
         $this->file =  __DIR__ . '/fixtures/config.php';
         $this->file2 = __DIR__ . '/fixtures/config2.php';
     }
@@ -40,26 +39,15 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->temp->reset();
     }
 
-    /**
-     * Strip out whitespace and new lines from config settings to make
-     * them easier to compare against.
-     */
-    protected function removeWhitespace($content)
+    public function testGetConfig()
     {
-        return preg_replace('`\s+`', '', $content);
-    }
-
-    public function testCreate()
-    {
-        $config1 = $this->manager->create('testing');
-        $this->assertInstanceOf('Neptune\Config\Config', $config1);
-        $config2 = $this->manager->create('testing');
-        $this->assertNotSame($config1, $config2);
+        $this->assertSame($this->config, $this->manager->getConfig());
     }
 
     public function testLoad()
     {
-        $config = $this->manager->load('testing', $this->file);
+        $this->manager->load($this->file);
+        $config = $this->manager->getConfig();
         $this->assertInstanceOf('Neptune\Config\Config', $config);
         $this->assertSame('bar', $config->get('foo'));
     }
@@ -70,195 +58,60 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->load('testing');
     }
 
-    public function testLoadThrowExceptionWithNoName()
-    {
-        $this->setExpectedException('Neptune\Exceptions\ConfigFileException');
-        $this->manager->load();
-    }
-
-    public function testLoadAfterCreation()
-    {
-        $created = $this->manager->create('testing');
-        $this->assertInstanceOf('Neptune\Config\Config', $created);
-        $loaded = $this->manager->load('testing');
-        $this->assertInstanceOf('Neptune\Config\Config', $loaded);
-        $this->assertSame($created, $loaded);
-    }
-
-    public function testLoadOverwritesWithDifferentFilename()
-    {
-        $config = $this->manager->load('testing', $this->file);
-        $same_file = $this->manager->load('testing', $this->file);
-        $this->assertSame($config, $same_file);
-        $different_file = $this->manager->load('testing', $this->file2);
-        $this->assertNotSame($config, $different_file);
-    }
-
-    public function testSaveAll()
-    {
-        $file = $this->temp->getPathname('config1.php');
-        $file2 = $this->temp->getPathname('config2.php');
-
-        $first = $this->manager->create('first', $file);
-        $first->set('foo', 'bar');
-
-        $second = $this->manager->create('second', $file2);
-        $second->set('foo', 'bar');
-
-        $this->manager->saveAll();
-        $this->assertSame($this->removeWhitespace($first->toString()),
-                            $this->removeWhitespace($this->temp->getContents('config1.php')));
-        $this->assertSame($this->removeWhitespace($second->toString()),
-                            $this->removeWhitespace($this->temp->getContents('config2.php')));
-    }
-
     public function testLoadWithOverride()
     {
-        $default = $this->manager->load('default', $this->file);
-        $this->assertSame('bar', $default->get('foo'));
-        $this->manager->load('override', $this->file2, 'default');
-        $this->assertSame('bar-override', $default->get('foo'));
+        $this->manager->load($this->file);
+        $this->assertSame('bar', $this->config->get('foo'));
+
+        $this->manager->load($this->file2);
+        $this->assertSame('bar-override', $this->config->get('foo'));
     }
 
-    public function testLoadModule()
+    public function testLoadNonExistentFileThrowsException()
     {
-        $module = $this->getMock('Neptune\Service\AbstractModule');
-        $module->expects($this->once())
-               ->method('getDirectory')
-               ->with()
-               ->will($this->returnValue(__DIR__ . '/fixtures/'));
-        $module->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test_module'));
-        $this->neptune->addModule($module);
-        $config = $this->manager->loadModule('test_module');
-        $this->assertInstanceOf('Neptune\Config\Config', $config);
-        $this->assertSame('bar', $config->get('foo'));
+        $not_here = $this->temp->getPathname('not_here');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', sprintf('Configuration file "%s" not found', $not_here));
+        $this->manager->load($not_here);
     }
 
-    public function testLoadModuleThrowsExceptionForUnknownModule()
+    public function testLoadInvalidFileThrowsException()
     {
-        $this->setExpectedException('\InvalidArgumentException');
-        $this->manager->loadModule('unknown');
+        $this->temp->create('invalid.php', 'foo');
+        $path = $this->temp->getPathname('invalid.php');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $path . ' does not return a php array');
+        $this->manager->load($path);
     }
 
-    public function testLoadModuleThrowsExceptionForConfigFileNotFound()
+    public function testLoadFailsWithNoSuitableLoader()
     {
-        $module = $this->getMock('Neptune\Service\AbstractModule');
-        $module->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test_module'));
-        $this->neptune->addModule($module);
-        $this->setExpectedException('\Neptune\Exceptions\ConfigFileException');
-        $this->manager->loadModule('test_module');
+        $this->temp->create('invalid.txt', 'foo');
+        $path = $this->temp->getPathname('invalid.txt');
+        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', sprintf('No configuration loader available for "%s"', $path));
+        $this->manager->load($path);
     }
 
-    protected function createModuleConfigs()
+    public function testLoadValuesContainingOptionsKey()
     {
-        //neptune will look for config/modules/<modulename>.php and
-        //override any values in the module config. Set these files up here.
-        $config = new Config('module');
-        $config->set('foo', 'bar');
-        $this->temp->create('test_module/config.php', $config->toString());
+        $this->config->set('_options', ['foo' => 'no_merge']);
 
-        $override = new Config('override');
-        $override->set('foo', 'bar-override');
-        $this->temp->create('config/modules/test_module.php', $override->toString());
+        $module_config = [
+            '_options' => [
+                'my-module.array_key' => 'no_merge'
+            ],
+            'array_key' => ['foo', 'bar']
+        ];
 
-        $module = $this->getMock('Neptune\Service\AbstractModule');
-        $module->expects($this->once())
-               ->method('getDirectory')
-               ->with()
-               ->will($this->returnValue($this->temp->getPathname('test_module/')));
-        $module->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test_module'));
-        $this->neptune->addModule($module);
+        $this->manager->loadValues($module_config, 'my-module');
+        $this->assertSame(['foo', 'bar'], $this->config->get('my-module.array_key'));
+
+        //_options should have been merged with the global options
+        $expected_options = [
+            'foo' => 'no_merge',
+            'my-module.array_key' => 'no_merge'
+        ];
+        $this->assertSame($expected_options, $this->config->get('_options'));
+
+        $this->manager->loadValues(['my-module' => ['array_key' => ['bar']]]);
+        $this->assertSame(['bar'], $this->config->get('my-module.array_key'));
     }
-
-    public function testLoadModuleLoadsLocalConfig()
-    {
-        $this->createModuleConfigs();
-        //test_module/config.php should be overridden by
-        //config/modules/test_module.php
-        $module_config = $this->manager->loadModule('test_module');
-        $this->assertEquals('bar-override', $module_config->get('foo'));
-    }
-
-    public function testLoadDefaultModule()
-    {
-        $this->createModuleConfigs();
-        $config = $this->manager->loadModule();
-        $this->assertSame('bar-override', $config->get('foo'));
-    }
-
-    public function testLoadAllModules()
-    {
-        $this->createModuleConfigs();
-        $configs = $this->manager->loadAllModules();
-        $this->assertInternalType('array', $configs);
-        $this->assertTrue(count($configs) === 1);
-        $config = $configs[0];
-        $this->assertInstanceOf('Neptune\Config\Config', $config);
-        $this->assertSame('bar-override', $config->get('foo'));
-    }
-
-    public function testLoadCallsLoadModule()
-    {
-        $this->createModuleConfigs();
-        //test_module/config.php should be overridden by
-        //config/modules/test_module.php
-        $module_config = $this->manager->load('test_module');
-        $this->assertEquals('bar-override', $module_config->get('foo'));
-    }
-
-    public function testLoadingNeptuneAsAModuleDoesNotBreakEverything()
-    {
-        $this->setExpectedException('\InvalidArgumentException');
-        $this->manager->loadModule('neptune');
-    }
-
-    public function testGetNames()
-    {
-        $configs = array('foo', 'bar', 'baz');
-        foreach ($configs as $name) {
-            $this->manager->create($name);
-        }
-        $this->assertSame($configs, $this->manager->getNames());
-    }
-
-    public function testUnloadNamed()
-    {
-        $this->manager->create('foo');
-        $this->manager->create('bar');
-        $this->manager->unload('foo');
-        $this->assertSame(array('bar'), $this->manager->getNames());
-    }
-
-    public function testUnloadAll()
-    {
-        $this->manager->create('foo');
-        $this->manager->create('bar');
-        $this->manager->unload();
-        $this->assertSame(array(), $this->manager->getNames());
-    }
-
-    public function testNewConfigIsGivenRootDirectory()
-    {
-        $config = $this->manager->create('foo');
-        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
-
-        $config->set('img_dir', 'public/images/');
-        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
-    }
-
-    public function testLoadedConfigIsGivenRootDirectory()
-    {
-        $config = $this->manager->load('foo', __DIR__ . '/fixtures/config.php');
-        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
-
-        $config->set('img_dir', 'public/images/');
-        $this->assertSame($this->temp->getPathname('public/images/'), $config->getPath('img_dir'));
-    }
-
 }

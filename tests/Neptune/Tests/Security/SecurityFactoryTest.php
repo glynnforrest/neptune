@@ -18,7 +18,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->config = new Config('neptune');
+        $this->config = new Config();
 
         $this->config->set('security.drivers.driver1', array(
             'driver' => 'pass',
@@ -64,7 +64,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetDefaultNoConfig()
     {
         $this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-        $factory = new SecurityFactory(new Config('empty'), $this->neptune);
+        $factory = new SecurityFactory(new Config(), $this->neptune);
         $factory->get();
     }
 

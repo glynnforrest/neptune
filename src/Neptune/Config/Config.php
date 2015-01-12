@@ -11,71 +11,11 @@ use Crutches\DotArray;
  * Config
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Config
+class Config extends DotArray
 {
-    protected $name;
-    protected $filename;
-    protected $dot_array;
-    protected $original;
+    const OPTION_NO_MERGE = 'no_merge';
+
     protected $root_dir;
-
-    public function __construct($name, $filename = null)
-    {
-        if ($filename) {
-            if (!file_exists($filename)) {
-                throw new ConfigFileException($filename . ' not found');
-            }
-            ob_start();
-            $values = include $filename;
-            ob_end_clean();
-            if (!is_array($values)) {
-                throw new ConfigFileException($filename . ' does not return a php array');
-            }
-            $this->filename = $filename;
-        } else {
-            $values = array();
-        }
-        $this->name = $name;
-        $this->dot_array = new DotArray($values);
-        $this->original = new DotArray($values);
-
-        return true;
-    }
-
-    /**
-     * Get the name of this Config instance.
-     *
-     * @return string The name of this Config instance
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get a configuration value that matches $key.
-     * $key uses the dot array syntax: parent.child.child
-     * If the key matches an array the whole array will be returned.
-     * If no key is specified the entire configuration array will be
-     * returned.
-     * $default will be returned (null unless specified) if the key is
-     * not found.
-     */
-    public function get($key = null, $default = null)
-    {
-        return $this->dot_array->get($key, $default);
-    }
-
-    /**
-     * Get the first value from an array of configuration values that
-     * matches $key.
-     * $default will be returned (null unless specified) if the key is
-     * not found or does not contain an array.
-     */
-    public function getFirst($key = null, $default = null)
-    {
-        return $this->dot_array->getFirst($key, $default);
-    }
 
     /**
      * Get a configuration value that matches $key in the same way as
@@ -88,7 +28,7 @@ class Config
         if (null !== $value) {
             return $value;
         }
-        throw new ConfigKeyException("Required value not found in Config instance '$this->name': $key");
+        throw new ConfigKeyException("Required value not found: $key");
     }
 
     /**
@@ -115,39 +55,17 @@ class Config
     }
 
     /**
-     * Get a directory path from the configuration value that matches
-     * $key. The value will be added to the directory of this module
-     * to form a complete directory path. If the value begins
-     * with a slash it will be treated as an absolute path and
-     * returned explicitly. If this config instance is
-     * 'neptune', the result will be the same as getPath(). A
-     * ConfigKeyException will be thrown if the path can't be
-     * resolved.
-     *
-     * @param string $key The key in the config file
-     */
-    public function getRelativePath($key)
-    {
-        $path = $this->getRequired($key);
-        if (substr($path, 0, 1) === '/') {
-            return $path;
-        }
-
-        return dirname($this->filename) . '/' . $path;
-    }
-
-    /**
      * Get the first value from an array of configuration values that
      * matches $key in the same way as getFirst(), but a
      * ConfigKeyException will be thrown if the key is not found.
      */
     public function getFirstRequired($key)
     {
-        $value = $this->dot_array->getFirst($key);
+        $value = $this->getFirst($key);
         if ($value) {
             return $value;
         }
-        throw new ConfigKeyException("Required first value not found in Config instance '$this->name': $key");
+        throw new ConfigKeyException("Required first value not found: $key");
     }
 
     /**
@@ -158,8 +76,7 @@ class Config
      */
     public function set($key, $value)
     {
-        $this->dot_array->set($key, $value);
-        $this->original->set($key, $value);
+        parent::set($key, $value);
 
         return $this;
     }
@@ -170,7 +87,23 @@ class Config
      */
     public function override(array $array)
     {
-        $this->dot_array->merge($array);
+        //process any options for specific keys
+        $options = $this->get('_options', []);
+        $override = new DotArray($array);
+        foreach ($options as $key => $option) {
+            if ($option !== self::OPTION_NO_MERGE) {
+                continue;
+            }
+
+            $value = $override->get($key);
+            if (!$value && $value !== []) {
+                continue;
+            }
+            $this->set($key, $value);
+        }
+
+        //merge the incoming array
+        $this->merge($array);
     }
 
     /**
@@ -181,52 +114,7 @@ class Config
      */
     public function toString()
     {
-        return '<?php return ' . var_export($this->original->get(), true) . '?>';
-    }
-
-    /**
-     * Save the current configuration instance.
-     * A ConfigFileException will be thrown if filename is not set or
-     * if php can't write to the file.
-     */
-    public function save($filename = null)
-    {
-        if (null === $filename) {
-            $filename = $this->filename;
-        }
-
-        if (!$filename) {
-            throw new ConfigFileException(
-                "Unable to save Config instance '$this->name', no filename supplied"
-            );
-        }
-
-        if (!file_exists($filename) && !@touch($filename)) {
-            throw new ConfigFileException(
-                "Unable to write to configuration file $filename. Check file paths and permissions are correct."
-            );
-        }
-        file_put_contents($filename, $this->toString());
-
-        return true;
-    }
-
-    /**
-     * Set the filename for the current configuration instance.
-     *
-     * @param string $filename The name of the file
-     */
-    public function setFileName($filename)
-    {
-        $this->filename = $filename;
-    }
-
-    /**
-     * Get the filename of the current configuration instance.
-     */
-    public function getFileName()
-    {
-        return $this->filename;
+        return '<?php return ' . var_export($this->get(), true) . '?>';
     }
 
     /**

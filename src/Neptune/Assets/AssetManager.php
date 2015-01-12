@@ -2,7 +2,7 @@
 
 namespace Neptune\Assets;
 
-use Neptune\Config\ConfigManager;
+use Neptune\Config\Config;
 
 /**
  * AssetManager
@@ -21,7 +21,7 @@ class AssetManager
     protected $css = [];
     protected $js = [];
 
-    public function __construct(ConfigManager $config, TagGenerator $generator, $concatenate = false)
+    public function __construct(Config $config, TagGenerator $generator, $concatenate = false)
     {
         $this->config = $config;
         $this->generator = $generator;
@@ -58,7 +58,7 @@ class AssetManager
         $module = substr($group, 0, $pos);
         $name = substr($group, $pos + 1);
 
-        $assets = $this->config->load($module)->getRequired("assets.$type.$name");
+        $assets = $this->config->getRequired("$module.assets.$type.$name");
         if (!is_array($assets)) {
             throw new \Exception("Asset group $group is not an array");
         }
@@ -178,10 +178,8 @@ class AssetManager
      */
     public function concatenateAssets($module_name, $build_directory)
     {
-        $config = $this->config->load($module_name);
-
         foreach (['css', 'js'] as $type) {
-            $groups = array_keys($config->get("assets.$type", []));
+            $groups = array_keys($this->config->get("$module_name.assets.$type", []));
 
             foreach ($groups as $group) {
                 $group_name = $module_name . ':' . $group;

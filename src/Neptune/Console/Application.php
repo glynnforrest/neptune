@@ -2,7 +2,6 @@
 
 namespace Neptune\Console;
 
-use Neptune\Config\Config;
 use Neptune\Console\DialogHelper as NeptuneDialogHelper;
 use Neptune\Core\Neptune;
 
@@ -23,6 +22,7 @@ use SensioLabs\Security\SecurityChecker;
 use SensioLabs\Security\Command\SecurityCheckerCommand;
 
 use Stringy\StaticStringy as S;
+use Neptune\Exceptions\ConfigFileException;
 
 /**
  * Application
@@ -31,13 +31,11 @@ use Stringy\StaticStringy as S;
 class Application extends SymfonyApplication
 {
     protected $neptune;
-    protected $config;
     protected $commands_registered;
 
     public function __construct(Neptune $neptune)
     {
         $this->neptune = $neptune;
-        $this->config = $neptune['config'];
         parent::__construct('Neptune', Neptune::NEPTUNE_VERSION);
         $this->useNeptuneHelperSet();
     }
@@ -62,17 +60,25 @@ class Application extends SymfonyApplication
      */
     public function doRun(InputInterface $input, OutputInterface $output)
     {
+        //potentially override the environment
         if ($input->hasParameterOption(array('--env', '-e'))) {
-            $env = $input->getParameterOption(array('--env', '-e'));
-        } else {
-            $env = $this->config->get('env');
+            $this->neptune->setEnv($input->getParameterOption(array('--env', '-e')));
         }
-        if ($env) {
-            $this->neptune->loadEnv($env);
-            if ($output->isVeryVerbose()) {
-                $output->writeln("Using environment <info>$env</info>");
-            }
+        if ($output->isVeryVerbose() && $this->neptune->getEnv()) {
+            $output->writeln(sprintf('Using environment <info>%s</info>'), $this->neptune->getEnv());
         }
+
+        //load the app configuration now to give a useful message if
+        //it fails
+        try {
+            $this->neptune['config'];
+        } catch (ConfigFileException $e) {
+            $this->renderException($e, $output);
+            $output->writeln('Run `<info>./vendor/bin/neptune-install .</info>` to set up a default configuration.');
+
+            return;
+        }
+
         if (!$this->commands_registered) {
             $this->registerCommands($output);
         }

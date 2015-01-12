@@ -22,14 +22,15 @@ class ConfigGetCommand extends Command
              ->setDescription($this->description)
              ->addArgument(
                  'key',
-                 InputArgument::REQUIRED,
+                 InputArgument::OPTIONAL,
                  'The configuration key.'
              );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $value = $this->neptune['config']->getRequired($input->getArgument('key'));
-        $output->write(var_export($value));
+        $key = $input->hasArgument('key') ? $input->getArgument('key') : '';
+        $value = $this->neptune['config']->getRequired($key);
+        $output->writeln(var_export($value));
     }
 }

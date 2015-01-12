@@ -19,7 +19,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->neptune = new Neptune('some/dir');
-        $this->neptune['config'] = new Config('testing');
+        $this->neptune['config'] = new Config();
 
         //needed for now as create commands get the default module in arguments
         $module = $this->getMock('Neptune\Service\AbstractModule');

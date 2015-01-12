@@ -19,7 +19,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
     protected $temping;
 
 	public function setUp() {
-		$this->config = new Config('cache');
+		$this->config = new Config();
         $this->temping = new Temping();
 
 		$this->config->set('cache.array', array(
@@ -144,7 +144,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetDefaultNoConfig() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
-		$factory = new CacheFactory(new Config('empty'), $this->neptune);
+		$factory = new CacheFactory(new Config(), $this->neptune);
 		$factory->get();
 	}
 

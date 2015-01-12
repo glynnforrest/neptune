@@ -22,54 +22,73 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		$this->temp = new Temping();
 		$this->neptune = new Neptune($this->temp->getDirectory());
-        //override config for testing
-        $this->config = new Config('neptune');
-        $this->neptune['config'] = $this->config;
 	}
 
 	public function tearDown() {
 		$this->temp->reset();
 	}
 
-    protected function stubEnvConfig()
+    protected function stubConfig($env = null)
     {
-        $config = new Config('production');
-        $config->set('foo', 'override');
-        $this->temp->create('config/env/production.php', $config->toString());
+        $this->temp->create("config/neptune.yml", 'foo: bar');
+
+        if ($env) {
+            $this->temp->create("config/env/$env.yml", 'foo: override');
+        }
     }
 
-	public function testLoadAndGetEnv() {
-        $this->stubEnvConfig();
-		$this->config->set('foo', 'default');
-		$this->assertSame('default', $this->config->get('foo'));
-		$this->neptune->loadEnv('production');
-		$this->assertEquals('override', $this->config->get('foo'));
-		$this->assertSame('production', $this->neptune->getEnv());
-	}
-
-	public function testLoadAndGetDefaultEnv() {
-        $this->stubEnvConfig();
-		$this->config->set('env', 'production');
-		$this->neptune->loadEnv();
-		$this->assertSame('production', $this->neptune->getEnv());
-	}
-
-    public function testLoadEnvNotInConfig()
+    public function testSetAndGetEnv()
     {
-        $this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
-        $this->neptune->loadEnv();
+        $this->assertNull($this->neptune->getEnv());
+        $this->neptune->setEnv('dev');
+        $this->assertSame('dev', $this->neptune->getEnv());
     }
 
-    public function testLoadEnvNotFound()
+    public function testLoadConfig()
     {
-        $msg = sprintf('Unable to load environment "development": %s not found', $this->temp->getPathname('config/env/development.php'));
-        $this->setExpectedException('\Neptune\Exceptions\ConfigFileException', $msg);
-        $this->neptune->loadEnv('development');
+        $this->stubConfig();
+        $this->assertSame('bar', $this->neptune['config']->get('foo'));
     }
 
-	public function testGetEnvReturnsNullWithNoEnv() {
-		$this->assertNull($this->neptune->getEnv());
-	}
+    public function testLoadConfigFromModule()
+    {
+        $this->stubConfig();
+        $module = $this->getMock('Neptune\Service\AbstractModule');
+        $module->expects($this->any())
+               ->method('getName')
+               ->will($this->returnValue('test-module'));
+        $this->neptune->addModule($module);
+
+        $module->expects($this->once())
+               ->method('loadConfig');
+        $this->neptune['config'];
+    }
+
+    public function testLoadConfigWithEnv()
+    {
+        $this->stubConfig('production');
+        $this->neptune->setEnv('production');
+        $this->assertSame('override', $this->neptune['config']->get('foo'));
+    }
+
+    public function testSetEnvAfterConfigLoadThrowsException()
+    {
+        $this->stubConfig();
+        $this->assertSame('bar', $this->neptune['config']->get('foo'));
+        $msg = 'Environment is locked because configuration is already loaded.';
+        $this->setExpectedException('\Exception', $msg);
+        $this->neptune->setEnv('development');
+    }
+
+    public function testSetEnvAfterConfigLoadWithEnvThrowsException()
+    {
+        $this->stubConfig('production');
+        $this->neptune->setEnv('production');
+        $this->assertSame('override', $this->neptune['config']->get('foo'));
+        $msg = 'Environment is locked to "production" because configuration is already loaded.';
+        $this->setExpectedException('\Exception', $msg);
+        $this->neptune->setEnv('development');
+    }
 
 	public function testGetRootDirectory() {
 		$this->assertSame($this->temp->getDirectory(), $this->neptune->getRootDirectory());
@@ -181,13 +200,14 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 
     public function testConfigSetup()
     {
-        $stub = new Config('testing');
-        $this->temp->create('config/neptune.php', $stub->toString());
+        $yaml = 'foo: bar';
+        $this->temp->create('config/neptune.yml', $yaml);
 
         $neptune = new Neptune($this->temp->getDirectory());
         $config = $neptune['config'];
         $this->assertInstanceOf('Neptune\Config\Config', $config);
         $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
+        $this->assertSame('bar', $config->get('foo'));
     }
 
 }

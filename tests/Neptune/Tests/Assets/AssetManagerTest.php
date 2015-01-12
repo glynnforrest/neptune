@@ -21,9 +21,7 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->generator = $this->getMockBuilder('Neptune\Assets\TagGenerator')
                                 ->disableOriginalConstructor()
                                 ->getMock();
-        $this->config = $this->getMockBuilder('Neptune\Config\ConfigManager')
-                             ->disableOriginalConstructor()
-                             ->getMock();
+        $this->config = new Config();
         $this->assets = new AssetManager($this->config, $this->generator);
     }
 
@@ -57,20 +55,10 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('foofoo', $this->assets->css());
     }
 
-    protected function expectConfigFetch($type, $group_name, array $return_assets)
-    {
-        $config = new Config('testing');
-        $config->set("assets.$type.$group_name", $return_assets);
-        $this->config->expects($this->once())
-                     ->method('load')
-                     ->with('test')
-                     ->will($this->returnValue($config));
-    }
-
     public function testCssGroup()
     {
-        $this->expectConfigFetch('css', 'login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
-        $this->assets->addCssGroup('test:login');
+        $this->config->set('test-module.assets.css.login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
+        $this->assets->addCssGroup('test-module:login');
 
         $this->generator->expects($this->exactly(4))
                         ->method('css')
@@ -85,16 +73,11 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCssGroupWithInheritance()
     {
-        $config = new Config('testing');
-        $config->set('assets.css.main', ['main.css', 'styles.css', 'layout.css']);
-        $config->set('assets.css.theme', ['theme.css', '@test:main']);
-        $config->set('assets.css.super-theme', ['@test:theme', 'super-theme.css']);
-        $this->config->expects($this->exactly(3))
-                     ->method('load')
-                     ->with('test')
-                     ->will($this->returnValue($config));
+        $this->config->set('test-module.assets.css.main', ['main.css', 'styles.css', 'layout.css']);
+        $this->config->set('test-module.assets.css.theme', ['theme.css', '@test-module:main']);
+        $this->config->set('test-module.assets.css.super-theme', ['@test-module:theme', 'super-theme.css']);
 
-        $this->assets->addCssGroup('test:super-theme');
+        $this->assets->addCssGroup('test-module:super-theme');
 
         $this->generator->expects($this->exactly(5))
                         ->method('css')
@@ -112,11 +95,11 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
     {
         $assets = new AssetManager($this->config, $this->generator, true);
 
-        $assets->addCssGroup('test:login');
+        $assets->addCssGroup('test-module:login');
 
         $this->generator->expects($this->once())
             ->method('css')
-            ->with($this->assets->hashGroup('test:login', 'css'));
+            ->with($this->assets->hashGroup('test-module:login', 'css'));
         $assets->css();
     }
 
@@ -140,8 +123,8 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                         ->with($css)
                         ->will($this->returnValue('inline '));
 
-        $this->expectConfigFetch('css', 'login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
-        $this->assets->addCssGroup('test:login');
+        $this->config->set('test-module.assets.css.login', ['main.css', 'styles.css', 'layout.css', 'form.css']);
+        $this->assets->addCssGroup('test-module:login');
 
         $this->generator->expects($this->exactly(4))
                         ->method('css')
@@ -159,10 +142,10 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
     public function testInlineCssAndConcatGroup()
     {
         $this->assets->concatenate();
-        $this->assets->addCssGroup('test:login');
+        $this->assets->addCssGroup('test-module:login');
         $this->generator->expects($this->once())
             ->method('css')
-            ->with($this->assets->hashGroup('test:login', 'css'))
+            ->with($this->assets->hashGroup('test-module:login', 'css'))
             ->will($this->returnValue('concat '));
 
         $css = "body { color: #eee; }";
@@ -201,8 +184,8 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsGroup()
     {
-        $this->expectConfigFetch('js', 'login', ['js/validation.js', 'js/forms.js']);
-        $this->assets->addJsGroup('test:login');
+        $this->config->set('test-module.assets.js.login', ['js/validation.js', 'js/forms.js']);
+        $this->assets->addJsGroup('test-module:login');
         $this->generator->expects($this->exactly(2))
                         ->method('js')
                         ->with($this->logicalOr(
@@ -214,16 +197,11 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsGroupWithInheritance()
     {
-        $config = new Config('testing');
-        $config->set('assets.js.main', ['library.js', 'main.js']);
-        $config->set('assets.js.app', ['@test:main', 'app.js']);
-        $config->set('assets.js.super-app', ['extra-library.js', '@test:app', 'super-app.js']);
-        $this->config->expects($this->exactly(3))
-                     ->method('load')
-                     ->with('test')
-                     ->will($this->returnValue($config));
+        $this->config->set('test-module.assets.js.main', ['library.js', 'main.js']);
+        $this->config->set('test-module.assets.js.app', ['@test-module:main', 'app.js']);
+        $this->config->set('test-module.assets.js.super-app', ['extra-library.js', '@test-module:app', 'super-app.js']);
 
-        $this->assets->addJsGroup('test:super-app');
+        $this->assets->addJsGroup('test-module:super-app');
 
         $this->generator->expects($this->exactly(5))
                         ->method('js')
@@ -240,10 +218,10 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
     public function testJsGroupWithConcat()
     {
         $assets = new AssetManager($this->config, $this->generator, true);
-        $assets->addJsGroup('test:login');
+        $assets->addJsGroup('test-module:login');
         $this->generator->expects($this->once())
             ->method('js')
-            ->with($this->assets->hashGroup('test:login', 'js'));
+            ->with($this->assets->hashGroup('test-module:login', 'js'));
         $assets->js();
     }
 
@@ -267,8 +245,8 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
                         ->with($js)
                         ->will($this->returnValue('inline '));
 
-        $this->expectConfigFetch('js', 'login', ['js/validation.js', 'js/forms.js']);
-        $this->assets->addJsGroup('test:login');
+        $this->config->set('test-module.assets.js.login', ['js/validation.js', 'js/forms.js']);
+        $this->assets->addJsGroup('test-module:login');
         $this->generator->expects($this->exactly(2))
                         ->method('js')
                         ->with($this->logicalOr(
@@ -283,10 +261,10 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
     public function testInlineJsAndConcatGroup()
     {
         $this->assets->concatenate();
-        $this->assets->addJsGroup('test:login');
+        $this->assets->addJsGroup('test-module:login');
         $this->generator->expects($this->once())
             ->method('js')
-            ->with($this->assets->hashGroup('test:login', 'js'))
+            ->with($this->assets->hashGroup('test-module:login', 'js'))
             ->will($this->returnValue('concat '));
 
         $js = "console.log('foo');";
@@ -301,15 +279,14 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testConcatenateAssets()
     {
-        $config = new Config('assets');
         $temping = new Temping();
         $base = 'path/to/assets/';
 
-        $config->set('assets.css.main', ['foo.css', 'bar/bar.css']);
+        $this->config->set('my-module.assets.css.main', ['foo.css', 'bar/bar.css']);
         $hashed_css_file = $temping->getPathname($base . $this->assets->hashGroup('my-module:main', 'css'));
         $this->assertFileNotExists($hashed_css_file);
 
-        $config->set('assets.js.main', ['foo.js', 'bar/bar.js']);
+        $this->config->set('my-module.assets.js.main', ['foo.js', 'bar/bar.js']);
         $hashed_js_file = $temping->getPathname($base . $this->assets->hashGroup('my-module:main', 'js'));
         $this->assertFileNotExists($hashed_js_file);
 
@@ -318,11 +295,6 @@ class AssetManagerTest extends \PHPUnit_Framework_TestCase
         foreach ($asset_files as $file) {
             $temping->create($base . $file, $file);
         }
-
-        $this->config->expects($this->any())
-            ->method('load')
-            ->with('my-module')
-            ->will($this->returnValue($config));
 
         $this->assets->concatenateAssets('my-module', $temping->getPathname('path/to/assets/'));
 

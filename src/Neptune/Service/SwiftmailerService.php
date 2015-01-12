@@ -3,7 +3,6 @@
 namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
-use Neptune\Config\Config;
 use Neptune\Swiftmailer\SwiftmailerFactory;
 use Neptune\EventListener\SwiftmailerListener;
 
@@ -14,36 +13,25 @@ use Neptune\EventListener\SwiftmailerListener;
  **/
 class SwiftmailerService implements ServiceInterface
 {
-    protected $config;
-
-    public function __construct(Config $config = null)
-    {
-        $this->config = $config;
-    }
-
     public function register(Neptune $neptune)
     {
-        if (!$this->config) {
-            $this->config = $neptune['config'];
-        }
-
         $neptune['mailer.factory'] = function ($neptune) {
             return new SwiftmailerFactory($neptune['mailer.dispatcher']);
         };
 
         $neptune['mailer.transport'] = function ($neptune) {
-            return $neptune['mailer.factory']->createTransport($this->config->get('mailer', []));
+           return $neptune['mailer.factory']->createTransport($neptune['config']->get('mailer', []));
         };
 
         $neptune['mailer.spool'] = function ($neptune) {
-            $config = $this->config->get('mailer.spool', []);
+            $spool_config = $neptune['config']->get('mailer.spool', []);
 
-            if (is_string($config)) {
+            if (is_string($spool_config)) {
                 //the spool is a service
-                return $neptune[$config];
+                return $neptune[$spool_config];
             }
 
-            return $neptune['mailer.factory']->createSpool($config);
+            return $neptune['mailer.factory']->createSpool($spool_config);
         };
 
         $neptune['mailer.transport.spool'] = function ($neptune) {
@@ -51,7 +39,7 @@ class SwiftmailerService implements ServiceInterface
         };
 
         $neptune['mailer'] = function ($neptune) {
-            if ($this->config->get('mailer.spool', false)) {
+            if ($neptune['config']->get('mailer.spool', false)) {
                 $neptune['mailer.spool_used'] = true;
 
                 return new \Swift_Mailer($neptune['mailer.transport.spool']);

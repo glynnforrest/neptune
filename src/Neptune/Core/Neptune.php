@@ -9,6 +9,7 @@ use Neptune\Service\AbstractModule;
 use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
+use Neptune\Config\Loader;
 use Neptune\Config\ConfigManager;
 use Neptune\Exceptions\ConfigFileException;
 
@@ -27,6 +28,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     const NEPTUNE_VERSION = '0.5-dev';
 
     protected $env;
+    protected $env_locked;
     protected $booted;
     protected $services = array();
     protected $modules = array();
@@ -44,14 +46,28 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         $this->root_directory = $root_directory;
 
         $this['config'] = function() {
-            $config = new Config('neptune', $this->root_directory . 'config/neptune.php');
+            $manager = $this['config.manager'];
+
+            //load configuration for each module, then for the
+            //application (default is config/neptune.yml).
+            foreach ($this->modules as $module) {
+                $module->loadConfig($manager);
+            }
+            $this->loadConfig($manager);
+
+            $config = $manager->getConfig();
             $config->setRootDirectory($this->root_directory);
+            $this->env_locked = true;
+
             return $config;
         };
 
         $this['config.manager'] = function() {
-            $manager = new ConfigManager($this);
-            $manager->add($this['config']);
+            $manager = new ConfigManager(new Config);
+
+            $manager->addLoader(new Loader\YamlLoader());
+            $manager->addLoader(new Loader\PhpLoader());
+
             return $manager;
         };
 
@@ -76,7 +92,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     public function addService(ServiceInterface $service)
     {
         $this->services[] = $service;
-        return $service->register($this);
+        $service->register($this);
     }
 
     /**
@@ -154,34 +170,46 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         $this['kernel']->terminate($request, $response);
     }
 
-	/**
-	 * Load the environment config $env. If $env is not
-	 * defined, the value of the config key 'env' in
-	 * config/neptune.php will be used.
-	 */
-	public function loadEnv($env = null) {
-		if(!$env) {
-			$env = $this['config']->getRequired('env');
-		}
-        $file = $this->root_directory . 'config/env/' . $env . '.php';
-        //load $env as a config file, merging into neptune
-        try {
-            $this['config.manager']->load($env, $file, 'neptune');
-        } catch (ConfigFileException $e) {
-            throw new ConfigFileException(sprintf('Unable to load environment "%s": %s', $env, $e->getMessage()));
+    /**
+     * Set the environment name to use when loading configuration for
+     * this application. An exception will be thrown if configuration
+     * has already been loaded.
+     *
+     * @param string $env The environment name
+     */
+    public function setEnv($env)
+    {
+        if ($this->env_locked) {
+            $locked = $this->env ? sprintf('locked to "%s"', $this->env) : 'locked';
+            throw new \Exception(sprintf('Environment is %s because configuration is already loaded.', $locked));
         }
 
-		$this->env = $env;
+        $this->env = $env;
+    }
 
-		return true;
-	}
+    /**
+     * Get the environment name of this application.
+     *
+     * @return string The name of the environment
+     */
+    public function getEnv()
+    {
+        return $this->env;
+    }
 
-	/**
-	 * Get the name of the currently loaded environment.
-	 */
-	public function getEnv() {
-		return $this->env;
-	}
+    /**
+     * Load configuration for this application.
+     *
+     * @param ConfigManager $config
+     */
+    public function loadConfig(ConfigManager $config)
+    {
+        $config->load($this->root_directory.'config/neptune.yml');
+
+        if ($this->env) {
+            $config->load(sprintf('%sconfig/env/%s.yml', $this->root_directory, $this->env));
+        }
+    }
 
     /**
      * Get the absolute path of the root directory of the

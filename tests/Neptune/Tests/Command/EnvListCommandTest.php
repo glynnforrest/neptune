@@ -29,7 +29,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 		$this->temping = new Temping();
 		$this->temping->createDirectory('config/env');
         $this->neptune = new Neptune($this->temping->getDirectory());
-        $this->config = new Config('neptune');
+        $this->config = new Config();
         $this->neptune['config'] = $this->config;
 
 		$application = new Application();
