@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Neptune\Config\Config;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * SetupCommand
@@ -42,7 +43,7 @@ class SetupCommand extends SymfonyCommand
         }
 
         $this->createDirectories($output, $dir);
-        $this->populateNeptuneConfig($output, $dir.'config/neptune.php');
+        $this->populateNeptuneConfig($input, $output, $dir.'config/neptune.yml');
         $files_to_copy = [
             'neptune' => 'neptune',
             'skeletons/htaccess' => 'public/.htaccess',
@@ -56,7 +57,6 @@ class SetupCommand extends SymfonyCommand
     {
         $dirs = [
             'app',
-            'config/modules',
             'config/env',
             'src',
             'public',
@@ -71,8 +71,12 @@ class SetupCommand extends SymfonyCommand
         }
     }
 
-    protected function populateNeptuneConfig(OutputInterface $output, $path)
+    protected function populateNeptuneConfig(InputInterface $input, OutputInterface $output, $path)
     {
+        if (!$this->allowedToWrite($input, $output, $path)) {
+            return;
+        }
+
         //a list of neptune config values to set as a starter. Flatten
         //the config so the output messages are more meaningful.
         $values = [
@@ -80,33 +84,40 @@ class SetupCommand extends SymfonyCommand
             'routing.root_url' => 'myapp.dev/',
         ];
 
-        //load config if it already exists
-        $config = new Config('neptune');
+        $config = new Config();
 
         foreach ($values as $key => $value) {
             $config->set($key, $value);
             if (is_string($value) && !empty($value)) {
-                $msg = sprintf("Neptune config: Setting <info>%s</info> to <info>%s</info>", $key, $value);
+                $msg = sprintf("Config: Setting <info>%s</info> to <info>%s</info>", $key, $value);
             } else {
-                $msg = sprintf("Neptune config: Setting <info>%s</info>", $key);
+                $msg = sprintf("Config: Setting <info>%s</info>", $key);
             }
-            if ($output->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
+            if ($output->isVerbose()) {
                 $output->writeln($msg);
             }
         }
 
-        $config->save($path);
+        $yaml = Yaml::dump($config->get());
+        file_put_contents($path, $yaml);
+        $output->writeln(sprintf('Created <info>%s</info>', $path));
+    }
+
+    protected function allowedToWrite(InputInterface $input, OutputInterface $output, $target)
+    {
+        if (!file_exists($target)) {
+            return true;
+        }
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(sprintf('<info>%s</info> exists. Overwrite? ', $target), false);
+
+        return $helper->ask($input, $output, $question);
     }
 
     protected function copyFile(InputInterface $input, OutputInterface $output, $source, $target)
     {
-        if (file_exists($target)) {
-            $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(sprintf('<info>%s</info> exists. Overwrite? ', $target), false);
-
-            if (!$helper->ask($input, $output, $question)) {
-                return;
-            }
+        if (!$this->allowedToWrite($input, $output, $target)) {
+            return;
         }
 
         copy($source, $target);
