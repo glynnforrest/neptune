@@ -22,6 +22,7 @@ use SensioLabs\Security\SecurityChecker;
 use SensioLabs\Security\Command\SecurityCheckerCommand;
 
 use Stringy\StaticStringy as S;
+use Neptune\Exceptions\ConfigFileException;
 
 /**
  * Application
@@ -66,6 +67,18 @@ class Application extends SymfonyApplication
         if ($output->isVeryVerbose() && $this->neptune->getEnv()) {
             $output->writeln(sprintf('Using environment <info>%s</info>'), $this->neptune->getEnv());
         }
+
+        //load the app configuration now to give a useful message if
+        //it fails
+        try {
+            $this->neptune['config'];
+        } catch (ConfigFileException $e) {
+            $this->renderException($e, $output);
+            $output->writeln('Run `<info>./vendor/bin/neptune-install .</info>` to set up a default configuration.');
+
+            return;
+        }
+
         if (!$this->commands_registered) {
             $this->registerCommands($output);
         }

@@ -15,12 +15,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 $output = new ConsoleOutput();
 $output->setFormatter(new OutputFormatter());
 
-if (!file_exists('config/neptune.php')) {
-    $output->writeln('<error>Error: config/neptune.php not found.</error>');
-    $output->writeln('Run `<info>vendor/bin/neptune-install</info>`.');
-    exit(1);
-}
-
 $neptune = new Neptune(__DIR__);
 
 if (file_exists('app/Application.php')) {
