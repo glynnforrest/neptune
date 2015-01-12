@@ -49,7 +49,7 @@ class ConfigManager
     public function load($filename, $prefix = null)
     {
         if (!file_exists($filename)) {
-            throw new ConfigFileException($filename.' not found');
+            throw new ConfigFileException(sprintf('Configuration file "%s" not found', $filename));
         }
 
         foreach ($this->loaders as $loader) {
