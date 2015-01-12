@@ -28,6 +28,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     const NEPTUNE_VERSION = '0.5-dev';
 
     protected $env;
+    protected $env_locked;
     protected $booted;
     protected $services = array();
     protected $modules = array();
@@ -56,6 +57,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
 
             $config = $manager->getConfig();
             $config->setRootDirectory($this->root_directory);
+            $this->env_locked = true;
 
             return $config;
         };
@@ -90,7 +92,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     public function addService(ServiceInterface $service)
     {
         $this->services[] = $service;
-        return $service->register($this);
+        $service->register($this);
     }
 
     /**
@@ -168,24 +170,32 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         $this['kernel']->terminate($request, $response);
     }
 
-	/**
-	 * Load the environment config $env. If $env is not
-	 * defined, the value of the config key 'env' in
-	 * config/neptune.php will be used.
-	 */
-	public function loadEnv($env = null) {
-		if(!$env) {
-			$env = $this['config']->getRequired('env');
-		}
-
-        try {
-            $this['config.manager']->load($this->root_directory.'config/env/'.$env.'.yml');
-        } catch (ConfigFileException $e) {
-            throw new ConfigFileException(sprintf('Unable to load environment "%s": %s', $env, $e->getMessage()));
+    /**
+     * Set the environment name to use when loading configuration for
+     * this application. An exception will be thrown if configuration
+     * has already been loaded.
+     *
+     * @param string $env The environment name
+     */
+    public function setEnv($env)
+    {
+        if ($this->env_locked) {
+            $locked = $this->env ? sprintf('locked to "%s"', $this->env) : 'locked';
+            throw new \Exception(sprintf('Environment is %s because configuration is already loaded.', $locked));
         }
 
-		$this->env = $env;
-	}
+        $this->env = $env;
+    }
+
+    /**
+     * Get the environment name of this application.
+     *
+     * @return string The name of the environment
+     */
+    public function getEnv()
+    {
+        return $this->env;
+    }
 
     /**
      * Load configuration for this application.
@@ -195,14 +205,11 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     public function loadConfig(ConfigManager $config)
     {
         $config->load($this->root_directory.'config/neptune.yml');
-    }
 
-	/**
-	 * Get the name of the currently loaded environment.
-	 */
-	public function getEnv() {
-		return $this->env;
-	}
+        if ($this->env) {
+            $config->load(sprintf('%sconfig/env/%s.yml', $this->root_directory, $this->env));
+        }
+    }
 
     /**
      * Get the absolute path of the root directory of the

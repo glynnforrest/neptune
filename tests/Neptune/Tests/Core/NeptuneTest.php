@@ -22,59 +22,73 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		$this->temp = new Temping();
 		$this->neptune = new Neptune($this->temp->getDirectory());
-        //override config for testing
-        $this->config = new Config();
-        $this->neptune['config'] = $this->config;
 	}
 
 	public function tearDown() {
 		$this->temp->reset();
 	}
 
-    protected function stubEnvConfig()
+    protected function stubConfig($env = null)
     {
-        $yaml = 'foo: override';
-        $this->temp->create('config/env/production.yml', $yaml);
+        $this->temp->create("config/neptune.yml", 'foo: bar');
+
+        if ($env) {
+            $this->temp->create("config/env/$env.yml", 'foo: override');
+        }
     }
 
-    public function testLoadAndGetEnv()
+    public function testSetAndGetEnv()
     {
-        $neptune = new Neptune($this->temp->getDirectory());
-        //stub config/neptune.yml for testing
-        $this->temp->create('config/neptune.yml');
-        $config = $neptune['config'];
-        $config->set('foo', 'default');
-        $this->assertSame('default', $config->get('foo'));
-
-        $this->stubEnvConfig();
-        $neptune->loadEnv('production');
-        $this->assertSame('override', $config->get('foo'));
-        $this->assertSame('production', $neptune->getEnv());
+        $this->assertNull($this->neptune->getEnv());
+        $this->neptune->setEnv('dev');
+        $this->assertSame('dev', $this->neptune->getEnv());
     }
 
-	public function testLoadAndGetDefaultEnv() {
-        $this->stubEnvConfig();
-		$this->config->set('env', 'production');
-		$this->neptune->loadEnv();
-		$this->assertSame('production', $this->neptune->getEnv());
-	}
-
-    public function testLoadEnvNotInConfig()
+    public function testLoadConfig()
     {
-        $this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
-        $this->neptune->loadEnv();
+        $this->stubConfig();
+        $this->assertSame('bar', $this->neptune['config']->get('foo'));
     }
 
-    public function testLoadEnvNotFound()
+    public function testLoadConfigFromModule()
     {
-        $msg = sprintf('Unable to load environment "development": %s not found', $this->temp->getPathname('config/env/development.yml'));
-        $this->setExpectedException('\Neptune\Exceptions\ConfigFileException', $msg);
-        $this->neptune->loadEnv('development');
+        $this->stubConfig();
+        $module = $this->getMock('Neptune\Service\AbstractModule');
+        $module->expects($this->any())
+               ->method('getName')
+               ->will($this->returnValue('test-module'));
+        $this->neptune->addModule($module);
+
+        $module->expects($this->once())
+               ->method('loadConfig');
+        $this->neptune['config'];
     }
 
-	public function testGetEnvReturnsNullWithNoEnv() {
-		$this->assertNull($this->neptune->getEnv());
-	}
+    public function testLoadConfigWithEnv()
+    {
+        $this->stubConfig('production');
+        $this->neptune->setEnv('production');
+        $this->assertSame('override', $this->neptune['config']->get('foo'));
+    }
+
+    public function testSetEnvAfterConfigLoadThrowsException()
+    {
+        $this->stubConfig();
+        $this->assertSame('bar', $this->neptune['config']->get('foo'));
+        $msg = 'Environment is locked because configuration is already loaded.';
+        $this->setExpectedException('\Exception', $msg);
+        $this->neptune->setEnv('development');
+    }
+
+    public function testSetEnvAfterConfigLoadWithEnvThrowsException()
+    {
+        $this->stubConfig('production');
+        $this->neptune->setEnv('production');
+        $this->assertSame('override', $this->neptune['config']->get('foo'));
+        $msg = 'Environment is locked to "production" because configuration is already loaded.';
+        $this->setExpectedException('\Exception', $msg);
+        $this->neptune->setEnv('development');
+    }
 
 	public function testGetRootDirectory() {
 		$this->assertSame($this->temp->getDirectory(), $this->neptune->getRootDirectory());
