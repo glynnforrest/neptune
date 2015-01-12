@@ -2,7 +2,6 @@
 
 namespace Neptune\Console;
 
-use Neptune\Console\DialogHelper as NeptuneDialogHelper;
 use Neptune\Core\Neptune;
 
 use \DirectoryIterator;
@@ -37,17 +36,6 @@ class Application extends SymfonyApplication
     {
         $this->neptune = $neptune;
         parent::__construct('Neptune', Neptune::NEPTUNE_VERSION);
-        $this->useNeptuneHelperSet();
-    }
-
-    public function useNeptuneHelperSet()
-    {
-        $this->setHelperSet(new HelperSet(array(
-            new FormatterHelper(),
-            new NeptuneDialogHelper(),
-            new ProgressHelper(),
-            new TableHelper(),
-        )));
     }
 
     /**
@@ -150,7 +138,7 @@ class Application extends SymfonyApplication
     protected function getDefaultInputDefinition()
     {
         $definition = parent::getDefaultInputDefinition();
-        $option = new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The name of the environment, instead of the default in config/neptune.php');
+        $option = new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The name of the environment.');
         $definition->addOption($option);
 
         return $definition;

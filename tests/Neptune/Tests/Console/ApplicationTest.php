@@ -21,16 +21,14 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         $this->neptune = new Neptune('some/dir');
         $this->neptune['config'] = new Config();
 
-        //needed for now as create commands get the default module in arguments
-        $module = $this->getMock('Neptune\Service\AbstractModule');
-        $this->neptune->addModule($module);
-
         $this->app = new Application($this->neptune);
     }
 
+    /**
+     * Check that all neptune commands are registered without errors.
+     */
     public function testRegisterNeptuneCommands()
     {
-        //check that all neptune commands are registered correctly.
         $this->app->registerNamespace('Neptune', __DIR__ . '/../../../../src/Neptune/Command/');
     }
 }
