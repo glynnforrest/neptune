@@ -53,7 +53,7 @@ class Application extends SymfonyApplication
             $this->neptune->setEnv($input->getParameterOption(array('--env', '-e')));
         }
         if ($output->isVeryVerbose() && $this->neptune->getEnv()) {
-            $output->writeln(sprintf('Using environment <info>%s</info>'), $this->neptune->getEnv());
+            $output->writeln(sprintf('Using environment <info>%s</info>', $this->neptune->getEnv()));
         }
 
         //load the app configuration now to give a useful message if
