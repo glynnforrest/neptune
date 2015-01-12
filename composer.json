@@ -18,6 +18,7 @@
         "glynnforrest/active-doctrine": "0.2.*",
         "symfony/http-kernel": "~2.4",
         "symfony/console": "~2.4",
+        "symfony/yaml": "~2.4",
         "pimple/pimple": "~3.0",
         "monolog/monolog": "1.*",
         "doctrine/cache": "1.3.*",
