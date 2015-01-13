@@ -83,34 +83,4 @@ abstract class Command extends SymfonyCommand {
 	public function getDefaultModule() {
         return $this->neptune->getDefaultModule();
 	}
-
-	/**
-	 * Check if the neptune config has been setup.
-	 *
-	 * Return false if the neptune cli config hasn't been setup.
-	 */
-	public function neptuneConfigSetup() {
-		$root = $this->getRootDirectory();
-		if(!file_exists($root . 'config/neptune.php')) {
-			return false;
-		}
-		//check to see if config settings required for neptune have been set
-		return true;
-	}
-
-	/**
-	 * Check if app, config, public and storage directories have been
-	 * created.
-	 */
-	public function directoriesCreated() {
-		$dirs = array('app', 'config', 'public', 'storage/logs');
-		foreach ($dirs as $dir) {
-			if(!file_exists($dir)) {
-				$this->console->error('Not found: ' . $dir);
-				return false;
-			}
-		}
-		return true;
-	}
-
 }

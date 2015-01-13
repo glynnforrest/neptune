@@ -96,11 +96,6 @@ abstract class CreateCommand extends Command
         $this->saveSkeletonToFile($output, $skeleton, $target_file);
     }
 
-    public function isEnabled()
-    {
-        return $this->neptuneConfigSetup();
-    }
-
     protected function saveSkeletonToFile(OutputInterface $output, Skeleton $skeleton, $file)
     {
         $create_msg = "Created <info>$file</info>";
