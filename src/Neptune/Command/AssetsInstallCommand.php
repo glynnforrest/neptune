@@ -47,15 +47,10 @@ class AssetsInstallCommand extends Command
     {
         $modules = $this->getModulesToProcess($input);
 
-        foreach ($modules as $name => $module) {
-            try {
-                $config = $this->neptune['config.manager']->loadModule($name);
-            } catch (ConfigFileException $e) {
-                $output->writeln("Skipping <info>$name</info>");
-                continue;
-            }
+        $config = $this->neptune['config'];
 
-            if (!$command = $config->get('assets.install_cmd', false)) {
+        foreach ($modules as $name => $module) {
+            if (!$command = $config->get("$name.assets.install_cmd", false)) {
                 $output->writeln("Skipping <info>$name</info>");
                 continue;
             }
