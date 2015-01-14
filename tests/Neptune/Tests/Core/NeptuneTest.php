@@ -210,4 +210,62 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('bar', $config->get('foo'));
     }
 
+    public function testLoadCachedConfig()
+    {
+        $cache = $this->getMockBuilder('Neptune\Config\ConfigCache')
+                      ->disableOriginalConstructor()
+                      ->getMock();
+        $this->neptune['config.cache'] = $cache;
+        $cache->expects($this->once())
+              ->method('isSaved')
+              ->will($this->returnValue(true));
+        $config = new Config();
+        $cache->expects($this->once())
+              ->method('getConfig')
+              ->will($this->returnValue($config));
+        $cache->expects($this->never())
+              ->method('save');
+
+        //check that the config manager is not used to load files
+        $manager = $this->getMockBuilder('Neptune\Config\ConfigManager')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+        $this->neptune['config.manager'] = $manager;
+        $manager->expects($this->never())
+                ->method('load');
+
+        $this->neptune->enableCache();
+        $this->assertSame($config, $this->neptune['config']);
+    }
+
+    public function testConfigLoadedWhenCacheNotSaved()
+    {
+        $cache = $this->getMockBuilder('Neptune\Config\ConfigCache')
+                      ->disableOriginalConstructor()
+                      ->getMock();
+        $this->neptune['config.cache'] = $cache;
+        $cache->expects($this->once())
+              ->method('isSaved')
+              ->will($this->returnValue(false));
+        $cache->expects($this->never())
+              ->method('getConfig');
+
+        $config = new Config();
+        $cache->expects($this->once())
+              ->method('save')
+              ->with($config);
+
+        $manager = $this->getMockBuilder('Neptune\Config\ConfigManager')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+        $this->neptune['config.manager'] = $manager;
+        $manager->expects($this->any())
+                ->method('load');
+        $manager->expects($this->once())
+                ->method('getConfig')
+                ->will($this->returnValue($config));
+
+        $this->neptune->enableCache();
+        $this->assertSame($config, $this->neptune['config']);
+    }
 }

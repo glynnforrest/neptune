@@ -11,6 +11,7 @@ use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
 use Neptune\Config\Loader;
 use Neptune\Config\ConfigManager;
+use Neptune\Config\ConfigCache;
 use Neptune\Exceptions\ConfigFileException;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +34,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     protected $services = array();
     protected $modules = array();
     protected $root_directory;
+    protected $cache_enabled;
 
     public function __construct($root_directory)
     {
@@ -45,19 +47,41 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         }
         $this->root_directory = $root_directory;
 
+        $this['config.cache'] = function() {
+            $cache_file = $this->root_directory.'storage/cache/config-'.$this->env.'.php';
+
+            return new ConfigCache($cache_file);
+        };
+
         $this['config'] = function() {
+            $this->env_locked = true;
+
+            if ($this->cache_enabled) {
+                $cache = $this['config.cache'];
+                if ($cache->isSaved()) {
+                    $config = $cache->getConfig();
+                    $config->setRootDirectory($this->root_directory);
+
+                    return $config;
+                }
+            }
+
             $manager = $this['config.manager'];
 
-            //load configuration for each module, then for the
-            //application (default is config/neptune.yml).
+            //load configuration for each module
             foreach ($this->modules as $module) {
                 $module->loadConfig($manager);
             }
+
+            //then for the application (default is config/neptune.yml).
             $this->loadConfig($manager);
 
             $config = $manager->getConfig();
+            if ($this->cache_enabled) {
+                $cache->save($config);
+            }
+
             $config->setRootDirectory($this->root_directory);
-            $this->env_locked = true;
 
             return $config;
         };
@@ -185,6 +209,23 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         }
 
         $this->env = $env;
+    }
+
+    /**
+     * Enable caching of configuration for faster performance. Any
+     * configuration changes will not take affect until the cache is
+     * cleared.
+     *
+     * @param bool $enabled
+     */
+    public function enableCache($enabled = true)
+    {
+        if ($this->env_locked) {
+            $status = $this->cache_enabled ? 'enabled' : 'disabled';
+            throw new \Exception(sprintf('Application cache is locked to "%s" because configuration is already loaded.', $status));
+        }
+
+        $this->cache_enabled = $enabled;
     }
 
     /**
