@@ -114,4 +114,29 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->loadValues(['my-module' => ['array_key' => ['bar']]]);
         $this->assertSame(['bar'], $this->config->get('my-module.array_key'));
     }
+
+    public function testLoadValuesContainingOptionsKeyAndOverride()
+    {
+        $this->config->set('my-module.array_key', ['foo', 'bar']);
+
+        $module_config = [
+            '_options' => [
+                'my-module.array_key' => 'no_merge'
+            ],
+            'array_key' => ['bar']
+        ];
+
+        $this->manager->loadValues($module_config, 'my-module');
+
+        //options should have been loaded in advance before merging
+        //the module config, specifying that my-module.array_key
+        //should not be merged.
+        $this->assertSame(['bar'], $this->config->get('my-module.array_key'));
+
+        //_options should have been merged with the global options
+        $expected_options = [
+            'my-module.array_key' => 'no_merge',
+        ];
+        $this->assertSame($expected_options, $this->config->get('_options'));
+    }
 }

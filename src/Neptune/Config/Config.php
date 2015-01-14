@@ -89,6 +89,10 @@ class Config extends DotArray
     {
         //process any options for specific keys
         $options = $this->get('_options', []);
+        if (isset($array['_options'])) {
+            $options = array_merge($options, $array['_options']);
+        }
+
         $override = new DotArray($array);
         foreach ($options as $key => $option) {
             if ($option !== self::OPTION_NO_MERGE) {
