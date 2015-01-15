@@ -80,25 +80,26 @@ class SetupCommand extends SymfonyCommand
         //a list of neptune config values to set as a starter. Flatten
         //the config so the output messages are more meaningful.
         $values = [
-            'env' => 'development',
-            'routing.root_url' => 'myapp.dev/',
+            'logger.path' => 'storage/logs/logs.log',
+            'assets.url' => 'assets/',
         ];
 
         $config = new Config();
 
         foreach ($values as $key => $value) {
             $config->set($key, $value);
+            if (!$output->isVerbose()) {
+                continue;
+            }
             if (is_string($value) && !empty($value)) {
                 $msg = sprintf("Config: Setting <info>%s</info> to <info>%s</info>", $key, $value);
             } else {
                 $msg = sprintf("Config: Setting <info>%s</info>", $key);
             }
-            if ($output->isVerbose()) {
-                $output->writeln($msg);
-            }
+            $output->writeln($msg);
         }
 
-        $yaml = Yaml::dump($config->get());
+        $yaml = Yaml::dump($config->get(), 100, 2);
         file_put_contents($path, $yaml);
         $output->writeln(sprintf('Created <info>%s</info>', $path));
     }
