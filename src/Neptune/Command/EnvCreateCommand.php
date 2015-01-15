@@ -8,6 +8,7 @@ use Neptune\Config\Config;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * EnvCreateCommand
@@ -18,7 +19,7 @@ class EnvCreateCommand extends Command
 {
 
     protected $name = 'env:create';
-    protected $description = 'Create a new application configuration';
+    protected $description = 'Create a yaml configuration for a new environment';
 
     protected function configure()
     {
@@ -41,6 +42,10 @@ class EnvCreateCommand extends Command
         try {
             $this->newEnv($output, $name);
         } catch (FileException $e) {
+            if (!$input->isInteractive()) {
+                throw $e;
+            }
+
             $overwrite = $dialog->askConfirmation($output, "<info>$name</info> exists. Overwrite? ", false);
             if ($overwrite) {
                 $this->newEnv($output, $name, true);
@@ -51,16 +56,38 @@ class EnvCreateCommand extends Command
     protected function newEnv(OutputInterface $output, $name, $overwrite = false)
     {
         $name = strtolower($name);
-        $config = $this->getRootDirectory() . 'config/env/' . $name . '.php';
-        if (file_exists($config)) {
-            if (!$overwrite) {
-                throw new FileException("Environment $name already exists");
-            }
+        $file = $this->getRootDirectory() . 'config/env/' . $name . '.yml';
+        if (file_exists($file) && !$overwrite) {
+            throw new FileException("$file already exists");
         }
-        //hacky method for now until Config can create a new file.
-        //set('rooting.root_url', '');
-        file_put_contents($config, '<?php return array ();');
-        $output->writeln("Created <info>$config</info>");
-    }
 
+        $values = [
+            'routing.root_url' => 'myapp.dev/',
+            'database.main.driver' => 'pdo_mysql',
+            'database.main.dbname' => 'sandbox',
+            'database.main.user' => 'root',
+            'database.main.pass' => '',
+            'database.main.logger' => 'logger',
+        ];
+
+        $config = new Config();
+
+        foreach ($values as $key => $value) {
+            $config->set($key, $value);
+            if (!$output->isVerbose()) {
+                continue;
+            }
+            if (is_string($value) && !empty($value)) {
+                $msg = sprintf("Config: Setting <info>%s</info> to <info>%s</info>", $key, $value);
+            } else {
+                $msg = sprintf("Config: Setting <info>%s</info>", $key);
+            }
+            $output->writeln($msg);
+        }
+
+        $yaml = Yaml::dump($config->get(), 100, 2);
+        file_put_contents($file, $yaml);
+
+        $output->writeln("Created <info>$file</info>");
+    }
 }
