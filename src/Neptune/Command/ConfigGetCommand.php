@@ -31,6 +31,6 @@ class ConfigGetCommand extends Command
     {
         $key = $input->hasArgument('key') ? $input->getArgument('key') : '';
         $value = $this->neptune['config']->getRequired($key);
-        $output->writeln(var_export($value));
+        $output->write(var_export($value).PHP_EOL);
     }
 }
