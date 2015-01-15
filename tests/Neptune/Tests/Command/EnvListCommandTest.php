@@ -55,7 +55,7 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 
 	public function testListMultipleEnvs() {
 		//create a mock project folder containing some stub config files
-		$this->temping->create('config/env/production.php');
+		$this->temping->create('config/env/production.yml');
 		$this->temping->create('config/env/development.php');
 		$this->tester->execute(array());
 		$this->assertSame("development\nproduction\n", $this->tester->getDisplay(true));
@@ -67,9 +67,9 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
      */
     public function testCurrentEnvHighlighted()
     {
-        $this->config->set('env', 'production');
+        $this->neptune->setEnv('production');
         $this->temping->create('config/env/production.php');
-        $this->temping->create('config/env/development.php');
+        $this->temping->create('config/env/development.yml');
 
         $input = $this->getMock('Symfony\Component\Console\Input\InputInterface');
         $output = $this->getMock('Symfony\Component\Console\Output\OutputInterface');
