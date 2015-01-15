@@ -44,8 +44,8 @@ class EnvSwitchCommand extends EnvListCommand
             return false;
         }
 
-        $this->config->set('env', $name);
-        $this->config->save();
+        $env_file = "<?php return '$name';".PHP_EOL;
+        file_put_contents($this->neptune->getRootDirectory().'app/env.php', $env_file);
         $output->writeln("Switched to <info>$name</info> environment.");
     }
 
