@@ -166,14 +166,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('/my-dir', $neptune->getPath('some.absolute.dir'));
     }
 
-    public function testToString()
-    {
-        $c = new Config();
-        $c->set('foo', 'bar');
-        $expected =  '<?php return ' . var_export($c->get(), true) . '?>';
-        $this->assertSame($expected, $c->toString());
-    }
-
     public function testOverrideNoMerge()
     {
         $c = new Config();

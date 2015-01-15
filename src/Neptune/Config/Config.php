@@ -3,8 +3,6 @@
 namespace Neptune\Config;
 
 use Neptune\Exceptions\ConfigKeyException;
-use Neptune\Exceptions\ConfigFileException;
-
 use Crutches\DotArray;
 
 /**
@@ -48,10 +46,10 @@ class Config extends DotArray
             return $path;
         }
         if (!$this->root_dir) {
-            throw new \Exception("Root directory has not been set for Config instance '$this->name'");
+            throw new \Exception('Configuration root directory has not been set.');
         }
 
-        return $this->root_dir . $path;
+        return $this->root_dir.$path;
     }
 
     /**
@@ -83,7 +81,7 @@ class Config extends DotArray
 
     /**
      * Override values in this Config instance with values from
-     * $array. They will not be included in toString() or save().
+     * $array.
      */
     public function override(array $array)
     {
@@ -111,17 +109,6 @@ class Config extends DotArray
     }
 
     /**
-     * Get the current configuration as a string, as it would appear
-     * when saved to a file.
-     *
-     * @return string The current configuration
-     */
-    public function toString()
-    {
-        return '<?php return ' . var_export($this->get(), true) . '?>';
-    }
-
-    /**
      * Set the path of the root directory of the application. The
      * directory is used in the getPath() method.
      *
@@ -143,5 +130,4 @@ class Config extends DotArray
     {
         return $this->root_dir;
     }
-
 }
