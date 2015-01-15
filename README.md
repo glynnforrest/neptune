@@ -53,25 +53,22 @@ See docs/ for documentation and usage examples.
 Neptune is installed via Composer. To add it to your project, simply add it to your
 composer.json file:
 
-	{
-		"require": {
-			"glynnforrest/neptune": "0.4.*"
-		}
-	}
+```json
+{
+    "require": {
+        "glynnforrest/neptune": "0.4.*"
+    }
+}
+```
 
 And run composer to update your dependencies:
 
-	$ curl -s http://getcomposer.org/installer | php
-	$ php composer.phar update
+```bash
+$ curl -s http://getcomposer.org/installer | php
+$ php composer.phar update
+```
 
-Alternatively, run
-
-	$ mkdir project_name && cd project_name
-	$ curl https://raw.github.com/glynnforrest/neptune/master/install.php | php
-
-to create a blank neptune project from scratch.
-
-Note: install.php assumes you have `composer` available as an executable on your PATH.
+Run `vendor/bin/neptune-install .` to setup a new application.
 
 ## License
 
