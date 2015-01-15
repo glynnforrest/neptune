@@ -31,7 +31,9 @@ class EnvListCommand extends Command
         $i = new DirectoryIterator($env_dir);
         foreach ($i as $file) {
             if ($file->isFile()) {
-                $envs[] = $file->getBasename('.php');
+                $position = strrpos($file->getBasename(), '.');
+                $basename = substr($file->getBasename(), 0, $position);
+                $envs[] = $basename;
             }
         }
         sort($envs);
@@ -41,7 +43,7 @@ class EnvListCommand extends Command
 
     protected function getEnvsHighlightCurrent()
     {
-        $current_env = $this->config->get('env');
+        $current_env = $this->neptune->getEnv();
 
         return array_map(function ($env) use ($current_env) {
             if ($env === $current_env) {
