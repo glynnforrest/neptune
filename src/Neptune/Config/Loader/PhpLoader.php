@@ -2,7 +2,7 @@
 
 namespace Neptune\Config\Loader;
 
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 
 /**
  * PhpLoader

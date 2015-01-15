@@ -3,7 +3,7 @@
 namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Configuration;
 use Neptune\Database\PsrSqlLogger;

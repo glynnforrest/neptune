@@ -133,7 +133,7 @@ class SwiftmailerFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testFileSpoolNoPath()
     {
-        $this->setExpectedException('Neptune\Exceptions\ConfigKeyException');
+        $this->setExpectedException('Neptune\Config\Exception\ConfigKeyException');
         $this->factory->createSpool(['driver' => 'file']);
     }
 

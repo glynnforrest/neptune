@@ -89,7 +89,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFileDriverNoNamespace() {
-		$this->setExpectedException('\Neptune\Exceptions\ConfigKeyException');
+		$this->setExpectedException('\Neptune\Config\Exception\ConfigKeyException');
 		$this->config->set('cache.file.namespace', null);
 		$this->factory->get('file');
 	}
@@ -132,24 +132,24 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 		if(!class_exists('\\Memcached')) {
 			$this->markTestSkipped('Memcached extension not installed.');
 		}
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
 		$this->config->set('cache.memcached.namespace', null);
 		$this->factory->get('memcached');
 	}
 
 	public function testGetNoConfig() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
 		$this->factory->get('wrong');
 	}
 
 	public function testGetDefaultNoConfig() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
 		$factory = new CacheFactory(new Config(), $this->neptune);
 		$factory->get();
 	}
 
 	public function testGetNoDriver() {
-		$this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
 		$this->config->set('cache.wrong', array(
 			'namespace' => 'testing:'
 			//no driver

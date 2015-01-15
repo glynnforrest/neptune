@@ -2,7 +2,7 @@
 
 namespace Neptune\Config;
 
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 use Neptune\Config\Loader\LoaderInterface;
 
 /**

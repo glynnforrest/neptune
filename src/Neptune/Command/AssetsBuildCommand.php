@@ -5,7 +5,7 @@ namespace Neptune\Command;
 use Neptune\Output\Output;
 use Neptune\Assets\Asset;
 
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

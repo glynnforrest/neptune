@@ -57,20 +57,20 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetNoDefinition()
     {
-        $this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+        $this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
         $this->factory->get('wrong');
     }
 
     public function testGetDefaultNoConfig()
     {
-        $this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+        $this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
         $factory = new SecurityFactory(new Config(), $this->neptune);
         $factory->get();
     }
 
     public function testGetNoDriver()
     {
-        $this->setExpectedException('\\Neptune\\Exceptions\\ConfigKeyException');
+        $this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
         $this->config->set('security.wrong', array(
             //no driver
         ));

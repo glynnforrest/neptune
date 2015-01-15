@@ -8,7 +8,7 @@ use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\Cache;
 
 use Neptune\Core\AbstractFactory;
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
 
 use \Memcached;

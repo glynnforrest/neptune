@@ -9,7 +9,7 @@ use Blockade\Driver\FailDriver;
 use Neptune\Security\Driver\ConfigDriver;
 
 use Neptune\Core\AbstractFactory;
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 use Neptune\Exceptions\DriverNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 

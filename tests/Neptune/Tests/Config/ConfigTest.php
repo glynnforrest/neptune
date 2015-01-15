@@ -65,7 +65,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testGetRequiredThrowsException()
     {
         $msg = "Required value not found: fake";
-        $this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
+        $this->setExpectedException('Neptune\\Config\Exception\\ConfigKeyException', $msg);
         $this->config->getRequired('fake');
     }
 
@@ -83,7 +83,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testGetFirstRequiredThrowsException()
     {
         $msg = "Required first value not found: fake";
-        $this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
+        $this->setExpectedException('Neptune\\Config\Exception\\ConfigKeyException', $msg);
         $this->config->getFirstRequired('fake');
     }
 
@@ -94,7 +94,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->config->set('3.1', 'not-an-array');
         $msg = "Required first value not found: 3.1";
-        $this->setExpectedException('Neptune\\Exceptions\\ConfigKeyException', $msg);
+        $this->setExpectedException('Neptune\\Config\Exception\\ConfigKeyException', $msg);
         $this->config->getFirstRequired('3.1');
     }
 

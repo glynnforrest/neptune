@@ -2,7 +2,7 @@
 
 namespace Neptune\Command;
 
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

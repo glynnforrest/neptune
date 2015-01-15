@@ -3,7 +3,7 @@
 namespace Neptune\Security\Driver;
 
 use Neptune\Config\Config;
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 
 use Blockade\Exception\CredentialsException;
 use Blockade\Exception\BlockadeFailureException;

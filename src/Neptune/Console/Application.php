@@ -21,7 +21,7 @@ use SensioLabs\Security\SecurityChecker;
 use SensioLabs\Security\Command\SecurityCheckerCommand;
 
 use Stringy\StaticStringy as S;
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 
 /**
  * Application

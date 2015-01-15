@@ -64,7 +64,7 @@ class ConfigCacheTest extends \PHPUnit_Framework_TestCase
     {
         $this->temp->create($this->cache_file);
         $msg = sprintf('Configuration cache for "%s" is invalid.', $this->temp->getPathname($this->cache_file));
-        $this->setExpectedException('Neptune\Exceptions\ConfigFileException', $msg);
+        $this->setExpectedException('Neptune\Config\Exception\ConfigFileException', $msg);
         $this->cache->getConfig();
     }
 

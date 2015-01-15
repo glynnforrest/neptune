@@ -2,7 +2,7 @@
 
 namespace Neptune\Config;
 
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 use Crutches\DotArray;
 
 /**

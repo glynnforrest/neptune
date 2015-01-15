@@ -12,7 +12,7 @@ use Neptune\Config\Config;
 use Neptune\Config\Loader;
 use Neptune\Config\ConfigManager;
 use Neptune\Config\ConfigCache;
-use Neptune\Exceptions\ConfigFileException;
+use Neptune\Config\Exception\ConfigFileException;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

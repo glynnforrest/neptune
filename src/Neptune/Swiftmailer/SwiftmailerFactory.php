@@ -3,7 +3,7 @@
 namespace Neptune\Swiftmailer;
 
 use Neptune\Exceptions\DriverNotFoundException;
-use Neptune\Exceptions\ConfigKeyException;
+use Neptune\Config\Exception\ConfigKeyException;
 
 /**
  * SwiftmailerFactory
