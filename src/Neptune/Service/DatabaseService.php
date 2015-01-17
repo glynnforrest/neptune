@@ -6,6 +6,7 @@ use Neptune\Core\Neptune;
 use Neptune\Config\Exception\ConfigKeyException;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Types\Type;
 use Neptune\Database\PsrSqlLogger;
 use Pimple\Container;
 
@@ -31,8 +32,18 @@ class DatabaseService implements ServiceInterface
         $neptune['dbs'] = function ($neptune) {
             $dbs = new Container();
 
-            foreach ($neptune['db.config'] as $name => $config) {
-                $dbs[$name] = function ($dbs) use ($name, $config, $neptune) {
+            $config = $neptune['db.config'];
+
+            //register types
+            if (isset($config['_types'])) {
+                foreach ($config['_types'] as $name => $classname) {
+                    Type::addType($name, $classname);
+                }
+                unset($config['_types']);
+            }
+
+            foreach ($config as $name => $config) {
+                $dbs[$name] = function ($dbs) use ($config, $neptune) {
                     $configuration = new Configuration();
                     if (isset($config['logger'])) {
                         $configuration->setSQLLogger(new PsrSqlLogger($neptune[$config['logger']]));
