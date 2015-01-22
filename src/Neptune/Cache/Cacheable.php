@@ -37,7 +37,7 @@ abstract class Cacheable {
 			$key = md5($key);
 			//check for a cached version. if it does, return the value
 			$result = $this->cache->fetch($key);
-			if(!is_null($result)) {
+			if(false !== $result) {
 				return $result;
 			}
 			//doesn't, lets call the function and cache it

@@ -34,7 +34,8 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $key = md5('Neptune\Tests\Cache\FooCacheable:foo');
         $this->cache->expects($this->once())
                     ->method('fetch')
-                    ->with($key);
+                    ->with($key)
+                    ->will($this->returnValue(false));
         $this->cache->expects($this->once())
                     ->method('save')
                     ->with($key, 'Foo');
@@ -69,7 +70,8 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $key = $this->createKey([$arg1, $arg2, $arg3]);
         $this->cache->expects($this->once())
                     ->method('fetch')
-                    ->with($key);
+                    ->with($key)
+                    ->will($this->returnValue(false));
         $this->cache->expects($this->once())
                     ->method('save')
                     ->with($key, 'Foo');
@@ -107,12 +109,12 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Config value', $this->obj->configUsingMethodCached());
     }
 
-    public function testMethodIsNotCalledWhenCacheReturnsFalse()
+    public function testMethodIsNotCalledWhenCacheReturnsNull()
     {
         $this->cache->expects($this->once())
                     ->method('fetch')
                     ->with(md5('Neptune\Tests\Cache\FooCacheable:configUsingMethod'))
-                    ->will($this->returnValue(false));
+                    ->will($this->returnValue(null));
         $this->cache->expects($this->never())
                     ->method('save');
         $this->obj->setCache($this->cache);
@@ -122,7 +124,7 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $config->expects($this->never())
                ->method('get');
         $this->obj->setConfig($config);
-        $this->assertSame(false, $this->obj->configUsingMethodCached());
+        $this->assertSame(null, $this->obj->configUsingMethodCached());
     }
 
     public function testDifferentArgsDifferentResults()
