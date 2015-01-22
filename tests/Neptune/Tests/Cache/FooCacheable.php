@@ -3,6 +3,7 @@
 namespace Neptune\Tests\Cache;
 
 use Neptune\Cache\Cacheable;
+use Neptune\Config\Config;
 
 /**
  * FooCacheable
@@ -11,18 +12,17 @@ use Neptune\Cache\Cacheable;
  **/
 class FooCacheable extends Cacheable {
 
-	protected $bar;
+	protected $config;
 
 	public function foo() {
 		return 'Foo';
 	}
 
-	public function setBar(\stdClass $bar) {
-		$this->bar = $bar;
+	public function setConfig(Config $config) {
+		$this->config = $config;
 	}
 
-	public function bar() {
-		return $this->bar->baz();
+	public function configUsingMethod() {
+        return $this->config->get('foo');
 	}
-
 }
