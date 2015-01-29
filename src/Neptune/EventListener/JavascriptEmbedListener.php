@@ -37,7 +37,7 @@ class JavascriptEmbedListener implements EventSubscriberInterface
 
         $scripts = '';
         foreach ($this->urls as $url) {
-            PHP_EOL . $scripts .= sprintf('<script type="text/javascript" src="%s"></script>', $url);
+            $scripts .= sprintf('<script type="text/javascript" src="%s"></script>', $url . PHP_EOL);
         }
 
         $response->setContent(str_replace('</body>', $scripts . '</body>', $response->getContent()));
