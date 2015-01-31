@@ -5,6 +5,7 @@ namespace Neptune\Service;
 use Neptune\Core\Neptune;
 use Neptune\Swiftmailer\SwiftmailerFactory;
 use Neptune\EventListener\SwiftmailerListener;
+use Neptune\Swiftmailer\LoggerAwareMailer;
 
 /**
  * SwiftmailerService
@@ -42,10 +43,19 @@ class SwiftmailerService implements ServiceInterface
             if ($neptune['config']->get('mailer.spool', false)) {
                 $neptune['mailer.spool_used'] = true;
 
-                return new \Swift_Mailer($neptune['mailer.transport.spool']);
+                $transport = $neptune['mailer.transport.spool'];
+            } else {
+                $transport = $neptune['mailer.transport'];
             }
 
-            return new \Swift_Mailer($neptune['mailer.transport']);
+            if (!$logger = $neptune['config']->get('mailer.logger', false)) {
+                return new \Swift_Mailer($transport);
+            }
+
+            $mailer = new LoggerAwareMailer($transport);
+            $mailer->setLogger($neptune[$logger]);
+
+            return $mailer;
         };
 
         $neptune['mailer.dispatcher'] = function () {
