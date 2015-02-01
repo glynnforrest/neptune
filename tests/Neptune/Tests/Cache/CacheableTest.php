@@ -24,11 +24,6 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->cache, $this->obj->getCache());
     }
 
-    public function testCallMethodWithoutCache()
-    {
-        $this->assertSame('Foo', $this->obj->fooCached());
-    }
-
     public function testCallMethod()
     {
         $key = md5('Neptune\Tests\Cache\FooCacheable:foo');
@@ -143,5 +138,54 @@ class CacheableTest extends \PHPUnit_Framework_TestCase
         $this->obj->setCache($this->cache);
         $this->assertSame('Foo1', $this->obj->fooCached(1));
         $this->assertSame('Foo2', $this->obj->fooCached(2));
+    }
+
+    public function testSetDefaultLifetime()
+    {
+        $this->assertSame($this->obj, $this->obj->setDefaultLifetime(20));
+    }
+
+    public function testLifetime()
+    {
+        $this->assertSame($this->obj, $this->obj->lifetime(80));
+    }
+
+    public function testDefaultLifetimeUsedToSaveCache()
+    {
+        $this->cache->expects($this->any())
+                    ->method('fetch')
+                    ->will($this->returnValue(false));
+        $this->cache->expects($this->exactly(2))
+                    ->method('save')
+                    ->withConsecutive(
+                        [$this->anything(), $this->anything(), 0],
+                        [$this->anything(), $this->anything(), 20]
+                    );
+        $this->obj->setCache($this->cache);
+
+        $this->obj->fooCached();
+
+        $this->obj->setDefaultLifetime(20);
+        $this->obj->fooCached();
+    }
+
+    public function testLifetimeHasPrecedenceOverDefault()
+    {
+        $this->cache->expects($this->any())
+                    ->method('fetch')
+                    ->will($this->returnValue(false));
+        $this->cache->expects($this->exactly(2))
+                    ->method('save')
+                    ->withConsecutive(
+                        [$this->anything(), $this->anything(), 30],
+                        [$this->anything(), $this->anything(), 20]
+                    );
+        $this->obj->setCache($this->cache);
+        $this->obj->setDefaultLifetime(20);
+
+        $this->obj->lifetime(30)->fooCached();
+
+        //30s lifetime should have been reset. It's now the default, 20
+        $this->obj->fooCached();
     }
 }

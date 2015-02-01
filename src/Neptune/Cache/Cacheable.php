@@ -12,6 +12,8 @@ use Doctrine\Common\Cache\Cache;
 abstract class Cacheable
 {
     private $cache;
+    private $lifetime;
+    private $default_lifetime = 0;
 
     public function __call($method, $args)
     {
@@ -42,9 +44,40 @@ abstract class Cacheable
 
         //doesn't, call the function and cache it
         $result = call_user_func_array(array($this, $method), $args);
-        $this->cache->save($key, $result);
+
+        $lifetime = $this->lifetime !== null ? $this->lifetime : $this->default_lifetime;
+        $this->cache->save($key, $result, $lifetime);
+        $this->lifetime = null;
 
         return $result;
+    }
+
+    /**
+     * Set the cache lifetime for the next cached method. The cache
+     * lifetime will be reset to the default after a cached method is
+     * called.
+     *
+     * @param  int   $lifetime
+     * @return mixed This object
+     */
+    public function lifetime($lifetime)
+    {
+        $this->lifetime = (int) $lifetime;
+
+        return $this;
+    }
+
+    /**
+     * Set the default cache lifetime.
+     *
+     * @param  int   $lifetime
+     * @return mixed This object
+     */
+    public function setDefaultLifetime($lifetime)
+    {
+        $this->default_lifetime = (int) $lifetime;
+
+        return $this;
     }
 
     public function setCache(Cache $cache)
