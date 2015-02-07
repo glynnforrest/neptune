@@ -38,7 +38,7 @@ class EnvListCommand extends Command
         }
         sort($envs);
 
-        return array_unique($envs);
+        return array_values(array_unique($envs));
     }
 
     protected function getEnvsHighlightCurrent()
