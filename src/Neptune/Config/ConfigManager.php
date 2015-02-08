@@ -16,6 +16,7 @@ class ConfigManager
     protected $config;
     protected $loaders = [];
     protected $processors = [];
+    protected $loaded_files = [];
 
     public function __construct(Config $config)
     {
@@ -57,6 +58,35 @@ class ConfigManager
     }
 
     /**
+     * Get a suitable message to accompany a cache of the current
+     * configuration.
+     *
+     * @return string the message
+     */
+    public function getCacheMessage()
+    {
+        $message = 'Configuration cache generated '.date('Y/m/d H:i:s').PHP_EOL;
+
+        $message .= PHP_EOL.'Loaded files:'.PHP_EOL;
+
+        foreach ($this->loaded_files as $file) {
+            $message .= $file[0];
+            if ($file[1]) {
+                $message .= sprintf(' (prefix "%s")', $file[1]);
+            }
+            $message .= PHP_EOL;
+        }
+
+        $message .= PHP_EOL.'Active processors:'.PHP_EOL;
+
+        foreach ($this->processors as $processor) {
+            $message .= get_class($processor).PHP_EOL;
+        }
+
+        return $message;
+    }
+
+    /**
      * Load configuration settings from a file.
      *
      * @param string      $filename
@@ -79,6 +109,8 @@ class ConfigManager
         if (!isset($values)) {
             throw new ConfigFileException(sprintf('No configuration loader available for "%s"', $filename));
         }
+
+        $this->loaded_files[] = [$filename, $prefix];
 
         return $this->loadValues($values, $prefix);
     }
