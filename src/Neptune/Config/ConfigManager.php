@@ -29,6 +29,10 @@ class ConfigManager
      */
     public function getConfig()
     {
+        foreach ($this->processors as $processor) {
+            $processor->processBuild($this->config);
+        }
+
         return $this->config;
     }
 
