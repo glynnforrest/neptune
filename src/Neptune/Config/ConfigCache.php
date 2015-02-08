@@ -51,10 +51,16 @@ class ConfigCache
      *
      * @param Config $config
      */
-    public function save(Config $config)
+    public function save(Config $config, $message = null)
     {
         $cache = '<?php'.PHP_EOL;
-        $cache .= '// configuration cache generated '.date('Y/m/d h:i:s').PHP_EOL;
+
+        if ($message) {
+            $cache .= '/*'.PHP_EOL;
+            $cache .= $message.PHP_EOL;
+            $cache .= '*/'.PHP_EOL;
+        }
+
         $cache .= sprintf('return %s;', var_export($config->get(), true));
 
         $directory = dirname($this->cache_file);
