@@ -165,4 +165,33 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $neptune->set('some.absolute.dir', '/my-dir');
         $this->assertSame('/my-dir', $neptune->getPath('some.absolute.dir'));
     }
+
+    public function testLoop()
+    {
+        $config = new Config([
+            'one' => 1,
+            'two' => [
+                'one' => 1,
+                'two' => [
+                    'one' => 1,
+                    'two' => 2,
+                ],
+                'three' => 3
+            ],
+            'three' => 3
+        ]);
+
+        $keys = [];
+        $values = [];
+        foreach ($config as $key => $value) {
+            $keys[] = $key;
+            $values[] = $value;
+        }
+
+        $expected_keys = ['one', 'two.one', 'two.two.one', 'two.two.two', 'two.three', 'three'];
+        $this->assertSame($expected_keys, $keys);
+
+        $expected_values = [1, 1, 1, 2, 3, 3];
+        $this->assertSame($expected_values, $values);
+    }
 }

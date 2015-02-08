@@ -4,12 +4,14 @@ namespace Neptune\Config;
 
 use Neptune\Config\Exception\ConfigKeyException;
 use Crutches\DotArray;
+use IteratorAggregate;
+use ArrayIterator;
 
 /**
  * Config
  * @author Glynn Forrest <me@glynnforrest.com>
  */
-class Config extends DotArray
+class Config extends DotArray implements IteratorAggregate
 {
     protected $root_dir;
 
@@ -108,5 +110,24 @@ class Config extends DotArray
     public function getRootDirectory()
     {
         return $this->root_dir;
+    }
+
+    public function getIterator()
+    {
+        return new ArrayIterator($this->flatten($this->get()));
+    }
+
+    private function flatten(array $array, $key_prefix = '')
+    {
+        $values = [];
+        foreach ($array as $key => $value) {
+            if (!is_array($value)) {
+                $values[$key_prefix.$key] = $value;
+                continue;
+            }
+            $values = array_merge($values, $this->flatten($value, $key_prefix.$key.'.'));
+        }
+
+        return $values;
     }
 }
