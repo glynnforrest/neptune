@@ -13,8 +13,6 @@ use ArrayIterator;
  */
 class Config extends DotArray implements IteratorAggregate
 {
-    protected $root_dir;
-
     /**
      * Get a configuration value that matches $key in the same way as
      * get(), but a ConfigKeyException will be thrown if
@@ -27,29 +25,6 @@ class Config extends DotArray implements IteratorAggregate
             return $value;
         }
         throw new ConfigKeyException("Required value not found: $key");
-    }
-
-    /**
-     * Get a directory path from the configuration value that matches
-     * $key. The value will be added to the root directory to form a
-     * complete directory path. If the value begins with a slash it
-     * will be treated as an absolute path and returned explicitly. A
-     * ConfigKeyException will be thrown if the path can't be
-     * resolved.
-     *
-     * @param string $key The key in the config file
-     */
-    public function getPath($key)
-    {
-        $path = $this->getRequired($key);
-        if (substr($path, 0, 1) === '/') {
-            return $path;
-        }
-        if (!$this->root_dir) {
-            throw new \Exception('Configuration root directory has not been set.');
-        }
-
-        return $this->root_dir.$path;
     }
 
     /**
@@ -87,29 +62,6 @@ class Config extends DotArray implements IteratorAggregate
     {
         //merge the incoming array
         $this->merge($array);
-    }
-
-    /**
-     * Set the path of the root directory of the application. The
-     * directory is used in the getPath() method.
-     *
-     * @return string The root directory, with a trailing slash
-     */
-    public function setRootDirectory($directory)
-    {
-        $this->root_dir = $directory;
-
-        return $this;
-    }
-
-    /**
-     * Get the path of the root directory of the application.
-     *
-     * @return string The root directory, with a trailing slash.
-     */
-    public function getRootDirectory()
-    {
-        return $this->root_dir;
     }
 
     public function getIterator()

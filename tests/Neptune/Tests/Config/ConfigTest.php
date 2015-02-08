@@ -151,21 +151,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('two-three', $this->config->get('two.three'));
     }
 
-    public function testGetPath()
-    {
-        $neptune = new Config();
-        $neptune->setRootDirectory('/path/to/root/');
-        $neptune->set('some.dir', 'my-dir');
-        $this->assertSame('/path/to/root/my-dir', $neptune->getPath('some.dir'));
-    }
-
-    public function testGetPathAbsolute()
-    {
-        $neptune = new Config();
-        $neptune->set('some.absolute.dir', '/my-dir');
-        $this->assertSame('/my-dir', $neptune->getPath('some.absolute.dir'));
-    }
-
     public function testLoop()
     {
         $config = new Config([

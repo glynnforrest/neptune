@@ -206,7 +206,6 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $neptune = new Neptune($this->temp->getDirectory());
         $config = $neptune['config'];
         $this->assertInstanceOf('Neptune\Config\Config', $config);
-        $this->assertSame($this->temp->getDirectory(), $config->getRootDirectory());
         $this->assertSame('bar', $config->get('foo'));
     }
 
