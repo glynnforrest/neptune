@@ -16,28 +16,33 @@ class OptionsProcessor implements ProcessorInterface
     const OPTION_COMBINE = 'combine';
     const OPTION_MERGE = 'merge';
 
-    public function processLoad(Config $config, array $values, $prefix = null)
+    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
     {
-        $override = new DotArray($values);
-
         $options_key = $prefix ? $prefix.'._options' : '_options';
-
-        $incoming_options = $override->exists($options_key) ? $override->get($options_key) : [];
-        $override->remove($options_key);
+        $incoming_options = $incoming->exists($options_key) ? $incoming->get($options_key) : [];
 
         $config->merge(['_options' => $incoming_options]);
 
         foreach ($config->get('_options') as $key => $option) {
-            if ($option !== self::OPTION_OVERWRITE) {
+            switch ($option) {
+            case self::OPTION_OVERWRITE:
+                $value = $incoming->get($key);
+                if (!$value && $value !== []) {
+                    continue;
+                }
+                $config->set($key, $value);
+                continue;
+            case self::OPTION_COMBINE:
+                $current = $config->get($key, []);
+                $value = $incoming->get($key, []);
+                if (!is_array($current) || !is_array($value)) {
+                    continue;
+                }
+                $config->set($key, array_merge(array_values($current), array_values($value)));
+                continue;
+            default:
                 continue;
             }
-
-            $value = $override->get($key);
-            if (!$value && $value !== []) {
-                continue;
-            }
-            $config->set($key, $value);
-            $override->remove($key);
         }
     }
 

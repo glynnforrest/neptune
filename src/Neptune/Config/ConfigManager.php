@@ -5,6 +5,7 @@ namespace Neptune\Config;
 use Neptune\Config\Exception\ConfigFileException;
 use Neptune\Config\Loader\LoaderInterface;
 use Neptune\Config\Processor\ProcessorInterface;
+use Crutches\DotArray;
 
 /**
  * ConfigManager
@@ -127,10 +128,12 @@ class ConfigManager
             $values = [$prefix => $values];
         }
 
+        $values = new DotArray($values);
+
         foreach ($this->processors as $processor) {
             $processor->processLoad($this->config, $values, $prefix);
         }
 
-        $this->config->merge($values);
+        $this->config->merge($values->get());
     }
 }

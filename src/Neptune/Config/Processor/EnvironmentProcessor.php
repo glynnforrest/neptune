@@ -4,6 +4,7 @@ namespace Neptune\Config\Processor;
 
 use Neptune\Config\Config;
 use Neptune\Core\Neptune;
+use Crutches\DotArray;
 
 /**
  * EnvironmentProcessor
@@ -19,7 +20,7 @@ class EnvironmentProcessor implements ProcessorInterface
         $this->neptune = $neptune;
     }
 
-    public function processLoad(Config $config, array $values, $prefix = null)
+    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
     {
     }
 

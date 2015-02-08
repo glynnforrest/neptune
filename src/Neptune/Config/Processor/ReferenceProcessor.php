@@ -3,6 +3,7 @@
 namespace Neptune\Config\Processor;
 
 use Neptune\Config\Config;
+use Crutches\DotArray;
 
 /**
  * ReferenceProcessor resolves references to other configuration keys
@@ -12,7 +13,7 @@ use Neptune\Config\Config;
  **/
 class ReferenceProcessor implements ProcessorInterface
 {
-    public function processLoad(Config $config, array $values, $prefix = null)
+    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
     {
     }
 
