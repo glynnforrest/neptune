@@ -4,6 +4,7 @@ namespace Neptune\Config;
 
 use Neptune\Config\Exception\ConfigFileException;
 use Neptune\Config\Loader\LoaderInterface;
+use Neptune\Config\Processor\ProcessorInterface;
 
 /**
  * ConfigManager
@@ -14,6 +15,7 @@ class ConfigManager
 {
     protected $config;
     protected $loaders = [];
+    protected $processors = [];
 
     public function __construct(Config $config)
     {
@@ -38,6 +40,16 @@ class ConfigManager
     public function addLoader(LoaderInterface $loader)
     {
         array_unshift($this->loaders, $loader);
+    }
+
+    /**
+     * Add a configuration processor.
+     *
+     * @param ProcessorInterface $processor
+     */
+    public function addProcessor(ProcessorInterface $processor)
+    {
+        $this->processors[] = $processor;
     }
 
     /**
@@ -69,18 +81,20 @@ class ConfigManager
 
     /**
      * Load an array of configuration settings.
+     *
+     * @param array       $values The configuration to load
+     * @param string|null $prefix The prefix of the values, if any
      */
     public function loadValues(array $values, $prefix = null)
     {
-        $options = isset($values['_options']) ? $values['_options'] : [];
-        unset($values['_options']);
-
         if ($prefix) {
             $values = [$prefix => $values];
         }
 
-        $values['_options'] = $options;
+        foreach ($this->processors as $processor) {
+            $processor->processLoad($this->config, $values, $prefix);
+        }
 
-        $this->config->override($values);
+        $this->config->merge($values);
     }
 }

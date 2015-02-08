@@ -9,6 +9,7 @@ use Neptune\Config\Config;
 
 use Temping\Temping;
 use Neptune\Config\Loader\PhpLoader;
+use Neptune\Config\Processor\OptionsProcessor;
 
 /**
  * ConfigManagerTest
@@ -90,13 +91,20 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->manager->load($path);
     }
 
+    public function testAddProcessor()
+    {
+        $processor = $this->getMock('Neptune\Config\Processor\ProcessorInterface');
+        $this->manager->addProcessor($processor);
+    }
+
     public function testLoadValuesContainingOptionsKey()
     {
-        $this->config->set('_options', ['foo' => 'no_merge']);
+        $this->manager->addProcessor(new OptionsProcessor());
+        $this->config->set('_options', ['foo' => 'overwrite']);
 
         $module_config = [
             '_options' => [
-                'my-module.array_key' => 'no_merge'
+                'my-module.array_key' => 'overwrite'
             ],
             'array_key' => ['foo', 'bar']
         ];
@@ -106,8 +114,8 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         //_options should have been merged with the global options
         $expected_options = [
-            'foo' => 'no_merge',
-            'my-module.array_key' => 'no_merge'
+            'foo' => 'overwrite',
+            'my-module.array_key' => 'overwrite'
         ];
         $this->assertSame($expected_options, $this->config->get('_options'));
 
@@ -117,11 +125,12 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadValuesContainingOptionsKeyAndOverride()
     {
+        $this->manager->addProcessor(new OptionsProcessor());
         $this->config->set('my-module.array_key', ['foo', 'bar']);
 
         $module_config = [
             '_options' => [
-                'my-module.array_key' => 'no_merge'
+                'my-module.array_key' => 'overwrite'
             ],
             'array_key' => ['bar']
         ];
@@ -135,7 +144,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         //_options should have been merged with the global options
         $expected_options = [
-            'my-module.array_key' => 'no_merge',
+            'my-module.array_key' => 'overwrite',
         ];
         $this->assertSame($expected_options, $this->config->get('_options'));
     }
