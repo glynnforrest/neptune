@@ -22,7 +22,7 @@ class MonologService implements ServiceInterface
         };
 
         $neptune['logger.path'] = function ($neptune) {
-            return $neptune['config']->getPath('logger.path');
+            return $neptune['config']->getRequired('logger.path');
         };
 
         $neptune['logger.level'] = function ($neptune) {
