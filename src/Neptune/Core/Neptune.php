@@ -10,6 +10,7 @@ use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Config;
 use Neptune\Config\Loader;
+use Neptune\Config\Processor;
 use Neptune\Config\ConfigManager;
 use Neptune\Config\ConfigCache;
 use Neptune\Config\Exception\ConfigFileException;
@@ -59,10 +60,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
             if ($this->cache_enabled) {
                 $cache = $this['config.cache'];
                 if ($cache->isSaved()) {
-                    $config = $cache->getConfig();
-                    $config->setRootDirectory($this->root_directory);
-
-                    return $config;
+                    return $cache->getConfig();
                 }
             }
 
@@ -78,19 +76,21 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
 
             $config = $manager->getConfig();
             if ($this->cache_enabled) {
-                $cache->save($config);
+                $cache->save($config, $manager->getCacheMessage());
             }
-
-            $config->setRootDirectory($this->root_directory);
 
             return $config;
         };
 
-        $this['config.manager'] = function() {
+        $this['config.manager'] = function($neptune) {
             $manager = new ConfigManager(new Config);
 
             $manager->addLoader(new Loader\YamlLoader());
             $manager->addLoader(new Loader\PhpLoader());
+
+            $manager->addProcessor(new Processor\OptionsProcessor());
+            $manager->addProcessor(new Processor\EnvironmentProcessor($neptune));
+            $manager->addProcessor(new Processor\ReferenceProcessor());
 
             return $manager;
         };
