@@ -38,7 +38,8 @@ class OptionsProcessor implements ProcessorInterface
                 if (!is_array($current) || !is_array($value)) {
                     continue;
                 }
-                $config->set($key, array_merge(array_values($current), array_values($value)));
+                $combined = array_unique(array_merge(array_values($current), array_values($value)));
+                $config->set($key, $combined);
                 continue;
             default:
                 continue;
