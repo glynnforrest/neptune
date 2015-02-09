@@ -16,11 +16,10 @@ use Neptune\View\Extension\AssetsExtension;
  **/
 class AssetsModule extends AbstractModule
 {
-
     public function register(Neptune $neptune)
     {
         $neptune['assets.url'] = function ($neptune) {
-            $url =  $neptune['config']->get('assets.url', 'assets/');
+            $url =  $neptune['config']->get('neptune.assets.url', 'assets/');
             //add a slash if the given url doesn't end with one
             if (substr($url, -1, 1) !== '/') {
                 $url .= '/';
@@ -32,8 +31,8 @@ class AssetsModule extends AbstractModule
         $neptune['assets'] = function ($neptune) {
             $url = $neptune['url']->to($neptune['assets.url']);
             $config = $neptune['config'];
-            $cache_bust = $config->get('assets.cache_bust', false);
-            $concat = $config->get('assets.concat_groups', false);
+            $cache_bust = $config->get('neptune.assets.cache_bust', false);
+            $concat = $config->get('neptune.assets.concat_groups', false);
 
             return new AssetManager($neptune['config'], new TagGenerator($url, $cache_bust), $concat);
         };
@@ -65,5 +64,4 @@ class AssetsModule extends AbstractModule
     {
         return 'neptune-assets';
     }
-
 }
