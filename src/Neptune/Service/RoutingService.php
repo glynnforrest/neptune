@@ -21,12 +21,12 @@ class RoutingService implements ServiceInterface
     public function register(Neptune $neptune)
     {
         $neptune['url'] = function ($neptune) {
-            return new Url($neptune['config']->getRequired('routing.root_url'));
+            return new Url($neptune['config']->getRequired('neptune.routing.root_url'));
         };
 
         $neptune['router'] = function ($neptune) {
             $router = new Router($neptune['url']);
-            if ($cache = $neptune['config']->get('routing.cache')) {
+            if ($cache = $neptune['config']->get('neptune.routing.cache')) {
                 $router->setCache($neptune[$cache]);
             }
 
