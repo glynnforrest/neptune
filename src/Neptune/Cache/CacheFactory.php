@@ -23,7 +23,7 @@ class CacheFactory extends AbstractFactory
     protected function create($name = null)
     {
         if (!$name) {
-            $names = array_keys($this->config->get('cache', array()));
+            $names = array_keys($this->config->get('neptune.cache', array()));
             if (empty($names)) {
                 throw new ConfigKeyException(
                     'Cache configuration array is empty');
@@ -31,7 +31,7 @@ class CacheFactory extends AbstractFactory
             $name = $names[0];
         }
         //if the entry in the config is a string, load it as a service
-        $maybe_service = $this->config->getRequired("cache.$name");
+        $maybe_service = $this->config->getRequired("neptune.cache.$name");
         if (is_string($maybe_service)) {
             //check the service implements cache interface first
             $service = $this->neptune[$maybe_service];
@@ -44,7 +44,7 @@ class CacheFactory extends AbstractFactory
                 $maybe_service));
         }
 
-        $driver = $this->config->getRequired("cache.$name.driver");
+        $driver = $this->config->getRequired("neptune.cache.$name.driver");
 
         $method = 'create' . ucfirst($driver) . 'Driver';
         if (method_exists($this, $method)) {
@@ -64,8 +64,8 @@ class CacheFactory extends AbstractFactory
 
     protected function createFileDriver($name)
     {
-        $namespace = $this->config->getRequired("cache.$name.namespace");
-        $dir = $this->config->get("cache.$name.dir", sys_get_temp_dir());
+        $namespace = $this->config->getRequired("neptune.cache.$name.namespace");
+        $dir = $this->config->get("neptune.cache.$name.dir", sys_get_temp_dir());
         if (substr($dir, 0, 1) !== '/') {
             $dir = $this->neptune->getRootDirectory() . $dir;
         }
@@ -78,13 +78,13 @@ class CacheFactory extends AbstractFactory
 
     protected function createMemcachedDriver($name)
     {
-        $host = $this->config->get("cache.$name.host", '127.0.0.1');
-        $port = $this->config->get("cache.$name.port", '11211');
+        $host = $this->config->get("neptune.cache.$name.host", '127.0.0.1');
+        $port = $this->config->get("neptune.cache.$name.port", '11211');
         $memcached = new Memcached();
         $memcached->addserver($host, $port);
 
         $driver = new MemcachedCache();
-        $driver->setNamespace($this->config->getRequired("cache.$name.namespace"));
+        $driver->setNamespace($this->config->getRequired("neptune.cache.$name.namespace"));
         $driver->setMemcached($memcached);
 
         return $driver;

@@ -22,17 +22,17 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 		$this->config = new Config();
         $this->temping = new Temping();
 
-		$this->config->set('cache.array', array(
+		$this->config->set('neptune.cache.array', array(
 			'driver' => 'array',
 		));
 
-		$this->config->set('cache.file', array(
+		$this->config->set('neptune.cache.file', array(
 			'driver' => 'file',
 			'namespace' => 'testing_',
 			'dir' => $this->temping->getDirectory()
 		));
 
-		$this->config->set('cache.memcached', array(
+		$this->config->set('neptune.cache.memcached', array(
 			'driver' => 'memcached',
 			'namespace' => 'testing_',
 			'host' => 'localhost',
@@ -71,7 +71,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetFileDriverRelativeDir() {
 		//a dir without a leading slash should be appended to dir.root
-		$this->config->set('cache.file.dir', 'cache/');
+		$this->config->set('neptune.cache.file.dir', 'cache/');
         $this->neptune->expects($this->once())
                       ->method('getRootDirectory')
                       ->will($this->returnValue($this->temping->getDirectory() . 'foo/'));
@@ -83,14 +83,14 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetFileDriverNoDir() {
-		$this->config->set('cache.file.dir', null);
+		$this->config->set('neptune.cache.file.dir', null);
 		$driver = $this->factory->get('file');
         $this->assertSame(realpath(sys_get_temp_dir()), $driver->getDirectory());
 	}
 
 	public function testGetFileDriverNoNamespace() {
 		$this->setExpectedException('\Neptune\Config\Exception\ConfigKeyException');
-		$this->config->set('cache.file.namespace', null);
+		$this->config->set('neptune.cache.file.namespace', null);
 		$this->factory->get('file');
 	}
 
@@ -113,7 +113,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 		if(!class_exists('\\Memcached')) {
 			$this->markTestSkipped('Memcached extension not installed.');
 		}
-        $this->config->set('cache.memcached', array(
+        $this->config->set('neptune.cache.memcached', array(
             'driver' => 'memcached',
             'namespace' => 'testing_'
             //no host or port
@@ -133,7 +133,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 			$this->markTestSkipped('Memcached extension not installed.');
 		}
 		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
-		$this->config->set('cache.memcached.namespace', null);
+		$this->config->set('neptune.cache.memcached.namespace', null);
 		$this->factory->get('memcached');
 	}
 
@@ -150,7 +150,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetNoDriver() {
 		$this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
-		$this->config->set('cache.wrong', array(
+		$this->config->set('neptune.cache.wrong', array(
 			'namespace' => 'testing:'
 			//no driver
 		));
@@ -159,7 +159,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
 
 	public function testGetUndefinedDriver() {
 		$this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-		$this->config->set('cache.unknown', array('driver' => 'unicorn', 'namespace' => 'testing_'));
+		$this->config->set('neptune.cache.unknown', array('driver' => 'unicorn', 'namespace' => 'testing_'));
 		$this->factory->get('unknown');
 	}
 
@@ -170,7 +170,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('cache.foo', 'service.foo');
+        $this->config->set('neptune.cache.foo', 'service.foo');
         $this->assertSame($driver, $this->factory->get('foo'));
     }
 
@@ -181,7 +181,7 @@ class CacheFactoryTest extends \PHPUnit_Framework_TestCase {
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('cache.foo', 'service.foo');
+        $this->config->set('neptune.cache.foo', 'service.foo');
         $msg = "Cache driver 'foo' requested service 'service.foo' which does not implement Neptune\Cache\Driver\CacheDriverInterface";
         $this->setExpectedException('\Neptune\Exceptions\DriverNotFoundException');
         $this->factory->get('foo');
