@@ -35,13 +35,15 @@ class DatabaseServiceTest extends \PHPUnit_Framework_TestCase
     {
         $neptune = new Neptune('/app');
         $neptune['config'] = new Config([
-            'database' => [
-                'test' => [
-                    'driver' => 'pdo_sqlite',
-                    'memory' => true,
-                ],
-                '_types' => [
-                    'foo' => 'Neptune\Tests\Service\Fixtures\FooType',
+            'neptune' => [
+                'database' => [
+                    'test' => [
+                        'driver' => 'pdo_sqlite',
+                        'memory' => true,
+                    ],
+                    '_types' => [
+                        'foo' => 'Neptune\Tests\Service\Fixtures\FooType',
+                    ],
                 ],
             ],
         ]);
