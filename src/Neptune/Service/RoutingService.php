@@ -8,6 +8,7 @@ use Neptune\Routing\Url;
 use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
+use Neptune\View\Extension\UrlExtension;
 
 /**
  * RoutingService
@@ -38,6 +39,10 @@ class RoutingService implements ServiceInterface
 
         $neptune['router.listener'] = function ($neptune) {
             return new RouterListener($neptune['router'], $neptune);
+        };
+
+        $neptune['view.extension.url'] = function ($neptune) {
+            return new UrlExtension($neptune['router'], $neptune['url']);
         };
     }
 
