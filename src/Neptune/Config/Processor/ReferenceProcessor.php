@@ -4,6 +4,7 @@ namespace Neptune\Config\Processor;
 
 use Neptune\Config\Config;
 use Crutches\DotArray;
+use Neptune\Config\Exception\ConfigKeyException;
 
 /**
  * ReferenceProcessor resolves references to other configuration keys
@@ -19,8 +20,12 @@ class ReferenceProcessor implements ProcessorInterface
 
     public function processBuild(Config $config)
     {
-        foreach ($config as $key => $value) {
-            $config->set($key, $this->resolveValue($config, $value));
+        try {
+            foreach ($config as $key => $value) {
+                $config->set($key, $this->resolveValue($config, $value));
+            }
+        } catch (ConfigKeyException $e) {
+            throw new ConfigKeyException(sprintf('Error resolving references in configuration key "%s"', $key), 1, $e);
         }
     }
 
