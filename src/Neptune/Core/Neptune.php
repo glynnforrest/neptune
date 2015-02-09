@@ -258,7 +258,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     }
 
     /**
-     * Load configuration for this application.
+     * Load configuration specific to this application.
      *
      * @param ConfigManager $config
      */

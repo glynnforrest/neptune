@@ -79,9 +79,6 @@ class OptionsProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $config->get());
     }
 
-    /**
-     * @group combine
-     */
     public function testProcessLoadWithCombine()
     {
         $config = new Config();
