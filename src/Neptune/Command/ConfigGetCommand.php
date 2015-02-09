@@ -5,6 +5,8 @@ namespace Neptune\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * ConfigGetCommand
@@ -24,6 +26,12 @@ class ConfigGetCommand extends Command
                  'key',
                  InputArgument::OPTIONAL,
                  'The configuration key.'
+             )
+             ->addOption(
+                 'php',
+                 '',
+                 InputOption::VALUE_NONE,
+                 'Output php instead of yaml'
              );
     }
 
@@ -31,6 +39,12 @@ class ConfigGetCommand extends Command
     {
         $key = $input->hasArgument('key') ? $input->getArgument('key') : '';
         $value = $this->neptune['config']->getRequired($key);
-        $output->write(var_export($value).PHP_EOL);
+
+        if ($input->getOption('php')) {
+            $output->write(var_export($value).PHP_EOL);
+            return;
+        }
+
+        $output->write(Yaml::dump($value, 100, 2));
     }
 }
