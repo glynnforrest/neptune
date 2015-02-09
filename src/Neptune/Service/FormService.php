@@ -18,7 +18,7 @@ class FormService implements ServiceInterface
     {
         $neptune['form'] = function ($neptune) {
             //register csrf by default
-            if ($neptune['config']->get('security.csrf', true)) {
+            if ($neptune['config']->get('neptune.security.csrf', true)) {
                 $neptune['dispatcher']->addSubscriber($neptune['security.csrf']);
             }
 
@@ -29,8 +29,8 @@ class FormService implements ServiceInterface
             $config = $neptune['config'];
 
             //get the session and form tokens
-            $session_token = $config->get('security.csrf.session_token', 'security.csrf.token');
-            $form_token = $config->get('security.csrf.form_token', '_token');
+            $session_token = $config->get('neptune.security.csrf.session_token', 'security.csrf.token');
+            $form_token = $config->get('neptune.security.csrf.form_token', '_token');
 
             $manager = new CsrfChecker($neptune['session'], $session_token);
 
