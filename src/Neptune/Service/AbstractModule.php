@@ -58,7 +58,7 @@ abstract class AbstractModule implements ServiceInterface
     {
         $file = $this->getDirectory() . 'config.yml';
         if (file_exists($file)) {
-            $config->load($file, $this->getName());
+            $config->load($file);
         }
     }
 
