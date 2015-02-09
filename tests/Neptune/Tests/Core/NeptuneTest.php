@@ -267,4 +267,26 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->neptune->enableCache();
         $this->assertSame($config, $this->neptune['config']);
     }
+
+    public function testGetTaggedServices()
+    {
+        $foo = new \stdClass();
+        $this->neptune['foo'] = $foo;
+        $bar = new \stdClass();
+        $this->neptune['bar'] = $bar;
+        $baz = new \stdClass();
+        $this->neptune['baz'] = $baz;
+
+        $this->neptune['config'] = new Config([
+            'my-app' => [
+                'magic-services' => ['foo', 'baz'],
+                'string' => 'foo',
+            ],
+        ]);
+
+        $this->assertSame([$foo, $baz], $this->neptune->getTaggedServices('my-app.magic-services'));
+        $this->assertSame([$foo], $this->neptune->getTaggedServices('my-app.string'));
+        $this->assertSame([], $this->neptune->getTaggedServices('my-app.null'));
+    }
+
 }

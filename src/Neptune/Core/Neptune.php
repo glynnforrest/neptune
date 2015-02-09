@@ -157,6 +157,25 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
     }
 
     /**
+     * Get a collection of services whose names are referenced in a
+     * configuration key.
+     *
+     * @param string $tag            The configuration key
+     * @param string $config_service The config service containing the key
+     */
+    public function getTaggedServices($tag, $config_service = 'config')
+    {
+        $services = [];
+        $service_names = (array) $this[$config_service]->get($tag, []);
+
+        foreach ($service_names as $service) {
+            $services[] = $this->offsetGet($service);
+        }
+
+        return $services;
+    }
+
+    /**
      * Boot up the application services. This is called automatically
      * by handle().
      */
