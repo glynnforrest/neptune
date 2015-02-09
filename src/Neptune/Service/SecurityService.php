@@ -6,6 +6,7 @@ use Neptune\Core\Neptune;
 use Neptune\Config\Config;
 use Neptune\Security\SecurityFactory;
 use Neptune\Security\SecurityRequestListener;
+use Neptune\View\Extension\SecurityExtension;
 use Blockade\Firewall;
 use Blockade\EventListener\FirewallListener;
 use Blockade\EventListener\BlockadeExceptionListener;
@@ -42,6 +43,10 @@ class SecurityService implements ServiceInterface
 
         $neptune['security.request'] = function ($neptune) {
             return new SecurityRequestListener($neptune['security']);
+        };
+
+        $neptune['view.extension.security'] = function ($neptune) {
+            return new SecurityExtension($neptune['security']);
         };
     }
 
