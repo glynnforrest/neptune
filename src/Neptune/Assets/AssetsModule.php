@@ -7,6 +7,7 @@ use Neptune\Service\AbstractModule;
 use Neptune\Routing\Router;
 use Neptune\Core\Neptune;
 use Neptune\Controller\AssetsController;
+use Neptune\View\Extension\AssetsExtension;
 
 /**
  * AssetsModule
@@ -35,6 +36,10 @@ class AssetsModule extends AbstractModule
             $concat = $config->get('assets.concat_groups', false);
 
             return new AssetManager($neptune['config'], new TagGenerator($url, $cache_bust), $concat);
+        };
+
+        $neptune['view.extension.assets'] = function ($neptune) {
+            return new AssetsExtension($neptune['assets']);
         };
 
         $neptune['controller.assets'] = function ($neptune) {
