@@ -20,7 +20,7 @@ class DatabaseService implements ServiceInterface
     public function register(Neptune $neptune)
     {
         $neptune['db.config'] = function ($neptune) {
-            $config = $neptune['config']->get('database', []);
+            $config = $neptune['config']->get('neptune.database', []);
 
             if (empty($config)) {
                 throw new ConfigKeyException('Database configuration is empty');
