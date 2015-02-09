@@ -4,12 +4,7 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\View\ViewCreator;
-
 use Neptune\EventListener\ViewListener;
-
-use Neptune\View\Extension\AssetsExtension;
-use Neptune\View\Extension\SecurityExtension;
-use Neptune\View\Extension\UrlExtension;
 
 /**
  * ViewService
@@ -18,22 +13,13 @@ use Neptune\View\Extension\UrlExtension;
  **/
 class ViewService implements ServiceInterface
 {
-
     public function register(Neptune $neptune)
     {
-        $neptune['view'] = function($neptune) {
+        $neptune['view'] = function ($neptune) {
             $creator = new ViewCreator($neptune);
 
-            if ($neptune->offsetExists('assets')) {
-                $creator->addExtension(new AssetsExtension($neptune['assets']));
-            }
-
-            if ($neptune->offsetExists('security')) {
-                $creator->addExtension(new SecurityExtension($neptune['security']));
-            }
-
-            if ($neptune->offsetExists('router')) {
-                $creator->addExtension(new UrlExtension($neptune['router'], $neptune['url']));
+            foreach ($neptune->getTaggedServices('neptune.view.extensions') as $service) {
+                $creator->addExtension($service);
             }
 
             return $creator;
@@ -44,5 +30,4 @@ class ViewService implements ServiceInterface
     {
         $neptune['dispatcher']->addSubscriber(new ViewListener($neptune, 'view'));
     }
-
 }
