@@ -18,15 +18,15 @@ class MonologService implements ServiceInterface
     public function register(Neptune $neptune)
     {
         $neptune['logger.name'] = function ($neptune) {
-            return $neptune['config']->get('logger.name', 'neptune');
+            return $neptune['config']->get('monolog.name', 'neptune');
         };
 
         $neptune['logger.path'] = function ($neptune) {
-            return $neptune['config']->getRequired('logger.path');
+            return $neptune['config']->getRequired('monolog.path');
         };
 
         $neptune['logger.level'] = function ($neptune) {
-            $level = $neptune['config']->get('logger.level', Logger::DEBUG);
+            $level = $neptune['config']->get('monolog.level', Logger::DEBUG);
 
             if (is_int($level)) {
                 return $level;
