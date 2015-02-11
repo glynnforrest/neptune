@@ -96,7 +96,13 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         };
 
         $this['dispatcher'] = function () {
-            return new EventDispatcher;
+            $dispatcher = new EventDispatcher();
+
+            foreach ($this->getTaggedServices('neptune.dispatcher.subscribers') as $subscriber) {
+                $dispatcher->addSubscriber($subscriber);
+            }
+
+            return $dispatcher;
         };
 
         $this['request_stack'] = function () {
