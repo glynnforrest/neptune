@@ -29,7 +29,7 @@ class SecurityService implements ServiceInterface
             $listener = new FirewallListener();
             $config = $neptune['config'];
 
-            foreach ($config->get('security.firewalls', []) as $name => $firewall) {
+            foreach ($config->get('neptune.security.firewalls', []) as $name => $firewall) {
                 $listener->addFirewall($this->createFirewall($neptune, $config, $name));
             }
 
@@ -52,18 +52,18 @@ class SecurityService implements ServiceInterface
 
     protected function createFirewall(Neptune $neptune, Config $config, $name)
     {
-        $driver_key = $config->get("security.firewalls.$name.driver");
+        $driver_key = $config->get("neptune.security.firewalls.$name.driver");
         $driver = $neptune['security']->get($driver_key);
         $firewall = new Firewall($name, $driver);
 
         // register rules
-        $rules = $config->get("security.firewalls.$name.rules", array());
+        $rules = $config->get("neptune.security.firewalls.$name.rules", array());
         foreach ($rules as $rule => $permission) {
             $firewall->addRule(new RequestMatcher($rule), $permission);
         }
 
         // register exemptions
-        $exemptions = $config->get("security.firewalls.$name.exemptions", array());
+        $exemptions = $config->get("neptune.security.firewalls.$name.exemptions", array());
         foreach ($exemptions as $exemption => $permission) {
             $firewall->addExemption(new RequestMatcher($exemption), $permission);
         }

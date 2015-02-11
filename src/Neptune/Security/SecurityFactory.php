@@ -36,7 +36,7 @@ class SecurityFactory extends AbstractFactory
     protected function create($name = null)
     {
         if (!$name) {
-            $names = array_keys($this->config->get('security.drivers', array()));
+            $names = array_keys($this->config->get('neptune.security.drivers', array()));
             if (empty($names)) {
                 throw new ConfigKeyException(
                     'Security drivers configuration array is empty');
@@ -44,7 +44,7 @@ class SecurityFactory extends AbstractFactory
             $name = $names[0];
         }
         //if the entry in the config is a string, load it as a service
-        $maybe_service = $this->config->getRequired("security.drivers.$name");
+        $maybe_service = $this->config->getRequired("neptune.security.drivers.$name");
         if (is_string($maybe_service)) {
             //check the service implements security interface first
             $service = $this->neptune[$maybe_service];
@@ -57,7 +57,7 @@ class SecurityFactory extends AbstractFactory
                 $maybe_service));
         }
 
-        $driver = $this->config->getRequired("security.drivers.$name.driver");
+        $driver = $this->config->getRequired("neptune.security.drivers.$name.driver");
 
         $method = 'create' . ucfirst($driver) . 'Driver';
         if (method_exists($this, $method)) {
@@ -90,8 +90,8 @@ class SecurityFactory extends AbstractFactory
 
     public function createConfigDriver($name)
     {
-        $user_key = "security.drivers.$name.user";
-        $pass_key = "security.drivers.$name.pass";
+        $user_key = "neptune.security.drivers.$name.user";
+        $pass_key = "neptune.security.drivers.$name.pass";
 
         return new ConfigDriver($this->config, $user_key, $pass_key);
     }
