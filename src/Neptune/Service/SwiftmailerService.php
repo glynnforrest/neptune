@@ -69,6 +69,5 @@ class SwiftmailerService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
-        $neptune['dispatcher']->addSubscriber($neptune['mailer.listener']);
     }
 }

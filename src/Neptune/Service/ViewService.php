@@ -24,10 +24,13 @@ class ViewService implements ServiceInterface
 
             return $creator;
         };
+
+        $neptune['view.listener'] = function ($neptune) {
+            return new ViewListener($neptune, 'view');
+        };
     }
 
     public function boot(Neptune $neptune)
     {
-        $neptune['dispatcher']->addSubscriber(new ViewListener($neptune, 'view'));
     }
 }

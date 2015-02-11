@@ -48,7 +48,5 @@ class RoutingService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
-        $neptune['dispatcher']->addSubscriber($neptune['router.listener']);
     }
-
 }
