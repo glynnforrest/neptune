@@ -20,11 +20,11 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->config = new Config();
 
-        $this->config->set('security.drivers.driver1', array(
+        $this->config->set('neptune.security.drivers.driver1', array(
             'driver' => 'pass',
         ));
 
-        $this->config->set('security.drivers.driver2', array(
+        $this->config->set('neptune.security.drivers.driver2', array(
             'driver' => 'fail',
         ));
 
@@ -71,7 +71,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetNoDriver()
     {
         $this->setExpectedException('\\Neptune\\Config\Exception\\ConfigKeyException');
-        $this->config->set('security.wrong', array(
+        $this->config->set('neptune.security.wrong', array(
             //no driver
         ));
         $this->factory->get('wrong');
@@ -80,7 +80,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetUndefinedDriver()
     {
         $this->setExpectedException('\\Neptune\\Exceptions\\DriverNotFoundException');
-        $this->config->set('security.drivers.unknown', array('driver' => 'unicorn'));
+        $this->config->set('neptune.security.drivers.unknown', array('driver' => 'unicorn'));
         $this->factory->get('unknown');
     }
 
@@ -91,7 +91,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('security.drivers.foo', 'service.foo');
+        $this->config->set('neptune.security.drivers.foo', 'service.foo');
         $this->assertSame($driver, $this->factory->get('foo'));
     }
 
@@ -102,7 +102,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('security.drivers.foo', 'service.foo');
+        $this->config->set('neptune.security.drivers.foo', 'service.foo');
         $msg = "Security driver 'foo' requested service 'service.foo' which does not implement Blockade\Driver\DriverInterface";
         $this->setExpectedException('\Neptune\Exceptions\DriverNotFoundException', $msg);
         $this->factory->get('foo');
@@ -115,7 +115,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('security.drivers.foo', 'service.foo');
+        $this->config->set('neptune.security.drivers.foo', 'service.foo');
 
         $request = $this->getMock('Symfony\Component\HttpFoundation\Request');
         $this->factory->setRequest($request);
@@ -134,7 +134,7 @@ class SecurityFactoryTest extends \PHPUnit_Framework_TestCase
                       ->method('offsetGet')
                       ->with('service.foo')
                       ->will($this->returnValue($driver));
-        $this->config->set('security.drivers.foo', 'service.foo');
+        $this->config->set('neptune.security.drivers.foo', 'service.foo');
 
         $request = $this->getMock('Symfony\Component\HttpFoundation\Request');
         $this->factory->setRequest($request);
