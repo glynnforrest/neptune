@@ -3,6 +3,7 @@
 namespace Neptune\Tests\Service;
 
 use Neptune\Service\SessionService;
+use Neptune\Core\Neptune;
 
 /**
  * SessionServiceTest
@@ -11,29 +12,20 @@ use Neptune\Service\SessionService;
  **/
 class SessionServiceTest extends \PHPUnit_Framework_TestCase
 {
-
-    protected $neptune;
     protected $service;
 
     public function setUp()
     {
-        $this->neptune = $this->getMockBuilder('\\Neptune\\Core\\Neptune')
-                              ->disableOriginalConstructor()
-                              ->getMock();
         $this->service = new SessionService();
-    }
-
-    public function testIsAService()
-    {
-        $this->assertInstanceOf('\Neptune\Service\ServiceInterface', $this->service);
     }
 
     public function testRegister()
     {
-        $this->neptune->expects($this->once())
-                   ->method('offsetSet')
-                   ->with('session');
-        $this->service->register($this->neptune);
+        $neptune = new Neptune('/path/to/root');
+        $this->service->register($neptune);
+        $services = $neptune->keys();
+        foreach (['session', 'session.listener'] as $service) {
+            $this->assertTrue(in_array($service, $services));
+        }
     }
-
 }

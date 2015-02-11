@@ -21,12 +21,13 @@ class SessionService implements ServiceInterface
         $neptune['session'] = function ($neptune) {
             return new Session();
         };
+
+        $neptune['session.listener'] = function ($neptune) {
+            return new SessionListener($neptune);
+        };
     }
 
     public function boot(Neptune $neptune)
     {
-        //register a listener that will attach the session driver to the request
-        $neptune['dispatcher']->addSubscriber(new SessionListener($neptune));
     }
-
 }
