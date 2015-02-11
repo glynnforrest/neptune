@@ -145,6 +145,7 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
                 ->method('boot')
                 ->with($this->neptune);
         $this->neptune->addService($service);
+        $this->neptune['config'] = new Config();
         $this->neptune->boot();
         //check it is only called once
         $this->neptune->boot();
