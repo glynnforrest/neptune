@@ -73,10 +73,5 @@ class SecurityService implements ServiceInterface
 
     public function boot(Neptune $neptune)
     {
-        $dispatcher = $neptune['dispatcher'];
-
-        $dispatcher->addSubscriber($neptune['security.resolver']);
-        $dispatcher->addSubscriber($neptune['security.request']);
-        $dispatcher->addSubscriber($neptune['security.firewall']);
     }
 }
