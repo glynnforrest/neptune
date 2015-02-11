@@ -21,11 +21,11 @@ class SwiftmailerService implements ServiceInterface
         };
 
         $neptune['mailer.transport'] = function ($neptune) {
-           return $neptune['mailer.factory']->createTransport($neptune['config']->get('mailer', []));
+           return $neptune['mailer.factory']->createTransport($neptune['config']->get('swiftmailer', []));
         };
 
         $neptune['mailer.spool'] = function ($neptune) {
-            $spool_config = $neptune['config']->get('mailer.spool', []);
+            $spool_config = $neptune['config']->get('swiftmailer.spool', []);
 
             if (is_string($spool_config)) {
                 //the spool is a service
@@ -40,7 +40,7 @@ class SwiftmailerService implements ServiceInterface
         };
 
         $neptune['mailer'] = function ($neptune) {
-            if ($neptune['config']->get('mailer.spool', false)) {
+            if ($neptune['config']->get('swiftmailer.spool', false)) {
                 $neptune['mailer.spool_used'] = true;
 
                 $transport = $neptune['mailer.transport.spool'];
@@ -48,7 +48,7 @@ class SwiftmailerService implements ServiceInterface
                 $transport = $neptune['mailer.transport'];
             }
 
-            if (!$logger = $neptune['config']->get('mailer.logger', false)) {
+            if (!$logger = $neptune['config']->get('swiftmailer.logger', false)) {
                 return new \Swift_Mailer($transport);
             }
 
