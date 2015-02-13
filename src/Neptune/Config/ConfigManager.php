@@ -14,15 +14,10 @@ use Crutches\DotArray;
  **/
 class ConfigManager
 {
-    protected $config;
+    protected $configs = [];
     protected $loaders = [];
     protected $processors = [];
     protected $loaded_files = [];
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
 
     /**
      * Get the configuration.
@@ -31,11 +26,20 @@ class ConfigManager
      */
     public function getConfig()
     {
+        $configuration = new Config();
         foreach ($this->processors as $processor) {
-            $processor->processBuild($this->config);
+            $processor->onPreMerge($configuration, $this->configs);
         }
 
-        return $this->config;
+        foreach ($this->configs as $config) {
+            $configuration->merge($config->get());
+        }
+
+        foreach ($this->processors as $processor) {
+            $processor->onPostMerge($configuration);
+        }
+
+        return $configuration;
     }
 
     /**
@@ -128,12 +132,12 @@ class ConfigManager
             $values = [$prefix => $values];
         }
 
-        $values = new DotArray($values);
+        $incoming = new DotArray($values);
 
         foreach ($this->processors as $processor) {
-            $processor->processLoad($this->config, $values, $prefix);
+            $processor->onLoad($incoming, $prefix);
         }
 
-        $this->config->merge($values->get());
+        $this->configs[] = $incoming;
     }
 }

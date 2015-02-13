@@ -4,9 +4,7 @@ namespace Neptune\Tests\Core;
 
 use Neptune\Config\ConfigManager;
 use Neptune\Core\Neptune;
-use Neptune\Config\NeptuneConfig;
 use Neptune\Config\Config;
-
 use Temping\Temping;
 use Neptune\Config\Loader\PhpLoader;
 use Neptune\Config\Processor\OptionsProcessor;
@@ -28,11 +26,10 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->temp = new Temping();
         $this->temp->init();
-        $this->config = new Config();
-        $this->manager = new ConfigManager($this->config);
+        $this->manager = new ConfigManager();
         $this->manager->addLoader(new PhpLoader());
-        $this->file =  __DIR__ . '/fixtures/config.php';
-        $this->file2 = __DIR__ . '/fixtures/config2.php';
+        $this->file =  __DIR__.'/fixtures/config.php';
+        $this->file2 = __DIR__.'/fixtures/config2.php';
     }
 
     public function tearDown()
@@ -42,7 +39,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConfig()
     {
-        $this->assertSame($this->config, $this->manager->getConfig());
+        $this->assertInstanceOf('Neptune\Config\Config', $this->manager->getConfig());
     }
 
     public function testLoad()
@@ -62,10 +59,12 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     public function testLoadWithOverride()
     {
         $this->manager->load($this->file);
-        $this->assertSame('bar', $this->config->get('foo'));
+        $config = $this->manager->getConfig();
+        $this->assertSame('bar', $config->get('foo'));
 
         $this->manager->load($this->file2);
-        $this->assertSame('bar-override', $this->config->get('foo'));
+        $config = $this->manager->getConfig();
+        $this->assertSame('bar-override', $config->get('foo'));
     }
 
     public function testLoadNonExistentFileThrowsException()
@@ -79,7 +78,7 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->temp->create('invalid.php', 'foo');
         $path = $this->temp->getPathname('invalid.php');
-        $this->setExpectedException('Neptune\Config\Exception\ConfigFileException', $path . ' does not return a php array');
+        $this->setExpectedException('Neptune\Config\Exception\ConfigFileException', $path.' does not return a php array');
         $this->manager->load($path);
     }
 
@@ -100,52 +99,84 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
     public function testLoadValuesContainingOptionsKey()
     {
         $this->manager->addProcessor(new OptionsProcessor());
-        $this->config->set('_options', ['foo' => 'overwrite']);
+        $this->manager->loadValues(['_options' => ['foo' => 'overwrite']]);
 
         $module_config = [
             '_options' => [
-                'my-module.array_key' => 'overwrite'
+                'my-module.array_key' => 'overwrite',
             ],
-            'array_key' => ['foo', 'bar']
+            'array_key' => ['foo', 'bar'],
         ];
 
         $this->manager->loadValues($module_config, 'my-module');
-        $this->assertSame(['foo', 'bar'], $this->config->get('my-module.array_key'));
+        $config = $this->manager->getConfig();
 
         //_options should have been merged with the global options
         $expected_options = [
             'foo' => 'overwrite',
-            'my-module.array_key' => 'overwrite'
+            'my-module.array_key' => 'overwrite',
         ];
-        $this->assertSame($expected_options, $this->config->get('_options'));
+        $this->assertSame($expected_options, $config->get('_options'));
 
+        $this->assertSame(['foo', 'bar'], $config->get('my-module.array_key'));
+
+        //now overwrite the key with another config
         $this->manager->loadValues(['my-module' => ['array_key' => ['bar']]]);
-        $this->assertSame(['bar'], $this->config->get('my-module.array_key'));
+        $config = $this->manager->getConfig();
+
+        $expected = [
+            'my-module' => [
+                'array_key' => ['bar'],
+            ],
+            '_options' => [
+                'foo' => 'overwrite',
+                'my-module.array_key' => 'overwrite',
+            ],
+        ];
+        $this->assertSame($expected, $config->get());
     }
 
     public function testLoadValuesContainingOptionsKeyAndOverride()
     {
         $this->manager->addProcessor(new OptionsProcessor());
-        $this->config->set('my-module.array_key', ['foo', 'bar']);
+        $this->manager->loadValues(['my-module.array_key' => ['foo', 'bar']]);
 
         $module_config = [
             '_options' => [
-                'my-module.array_key' => 'overwrite'
+                'my-module.array_key' => 'overwrite',
             ],
-            'array_key' => ['bar']
+            'array_key' => ['bar'],
         ];
 
         $this->manager->loadValues($module_config, 'my-module');
 
+        $config = $this->manager->getConfig();
+
         //options should have been loaded in advance before merging
         //the module config, specifying that my-module.array_key
         //should not be merged.
-        $this->assertSame(['bar'], $this->config->get('my-module.array_key'));
+        $this->assertSame(['bar'], $config->get('my-module.array_key'));
 
         //_options should have been merged with the global options
         $expected_options = [
             'my-module.array_key' => 'overwrite',
         ];
-        $this->assertSame($expected_options, $this->config->get('_options'));
+        $this->assertSame($expected_options, $config->get('_options'));
+    }
+
+    public function testLoadWhenOptionsKeyIsDefinedLate()
+    {
+        $this->manager->addProcessor(new OptionsProcessor());
+
+        $this->manager->loadValues(['foo' => ['one']]);
+        $this->manager->loadValues(['foo' => ['two']]);
+        $this->manager->loadValues(['foo' => ['three'], '_options' => ['foo' => 'combine']]);
+        $this->manager->loadValues(['foo' => ['four']]);
+
+        $expected = [
+            'foo' => ['one', 'two', 'three', 'four'],
+            '_options' => ['foo' => 'combine'],
+        ];
+        $this->assertSame($expected, $this->manager->getConfig()->get());
     }
 }
