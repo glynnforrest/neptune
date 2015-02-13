@@ -14,18 +14,25 @@ interface ProcessorInterface
 {
     /**
      * Process incoming configuration values. Any modifications made
-     * to the current configuration or incoming values will be kept.
+     * to the incoming values will be kept.
      *
-     * @param Config      $config   The current configuration
      * @param DotArray    $incoming The incoming values
      * @param string|null $prefix   The prefix of the values, if any
      */
-    public function processLoad(Config $config, DotArray $incoming, $prefix = null);
+    public function onLoad(DotArray $incoming, $prefix = null);
 
     /**
-     * Process the configuration before it is completed.
+     * Process configuration values before they are merged.
      *
-     * @param Config $config The current configuration
+     * @param Config     $config   An empty configuration
+     * @param DotArray[] $incoming An array of configurations to be merged
      */
-    public function processBuild(Config $config);
+    public function onPreMerge(Config $config, array $incoming);
+
+    /**
+     * Process the configuration after merging.
+     *
+     * @param Config $config The merged configuration
+     */
+    public function onPostMerge(Config $config);
 }
