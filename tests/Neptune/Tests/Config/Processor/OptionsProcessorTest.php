@@ -18,22 +18,30 @@ class OptionsProcessorTest extends \PHPUnit_Framework_TestCase
         $this->processor = new OptionsProcessor();
     }
 
-    public function testProcessLoadWithOverwrite()
+    public function testOverwrite()
     {
-        $config = new Config();
-        $config->set('my-module.array_key', ['bar']);
-        $config->set('_options', ['foo' => 'overwrite']);
-
+        $default = new DotArray([
+            '_options' => [
+                'foo' => 'overwrite',
+            ],
+            'my-module' => [
+                'array_key' => ['bar'],
+            ]
+        ]);
         $module_config = new DotArray([
             '_options' => [
                 'my-module.array_key' => 'overwrite',
             ],
             'my-module' => [
                 'array_key' => ['foo', 'bar'],
-            ],
+            ]
         ]);
 
-        $this->processor->processLoad($config, $module_config);
+        $this->processor->onLoad($default);
+        $this->processor->onLoad($module_config);
+
+        $config = new Config();
+        $this->processor->onPreMerge($config, [$default, $module_config]);
 
         $this->assertSame(['foo', 'bar'], $config->get('my-module.array_key'));
 
@@ -49,12 +57,16 @@ class OptionsProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $config->get());
     }
 
-    public function testProcessLoadWithOverwriteAndPrefix()
+    public function testOverwriteAndPrefix()
     {
-        $config = new Config();
-        $config->set('my-module.array_key', ['bar']);
-        $config->set('_options', ['foo' => 'overwrite']);
-
+        $default = new DotArray([
+            '_options' => [
+                'foo' => 'overwrite',
+            ],
+            'my-module' => [
+                'array_key' => ['bar'],
+            ]
+        ]);
         $module_config = new DotArray([
             'my-module' => [
                 '_options' => [
@@ -64,7 +76,11 @@ class OptionsProcessorTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
 
-        $this->processor->processLoad($config, $module_config, 'my-module');
+        $this->processor->onLoad($default);
+        $this->processor->onLoad($module_config, 'my-module');
+
+        $config = new Config();
+        $this->processor->onPreMerge($config, [$default, $module_config]);
 
         $this->assertSame(['foo', 'bar'], $config->get('my-module.array_key'));
         $expected = [
@@ -79,20 +95,50 @@ class OptionsProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $config->get());
     }
 
-    public function testProcessLoadWithCombine()
+    public function testCombine()
     {
-        $config = new Config();
-        $config->set('_options.foo', 'combine');
-        $config->set('foo', ['foo', 'bar']);
+        $one = new DotArray([
+            '_options' => [
+                'foo' => 'combine',
+            ],
+            'foo' => ['foo', 'bar'],
+        ]);
+        $two = new DotArray([
+            'foo' => ['baz', 'quo']
+        ]);
 
-        $this->processor->processLoad($config, new DotArray(['foo' => ['baz', 'quo']]));
+        $this->processor->onLoad($one);
+        $this->processor->onLoad($two);
+
+        $config = new Config();
+        $this->processor->onPreMerge($config, [$one, $two]);
 
         $this->assertSame(['foo', 'bar', 'baz', 'quo'], $config->get('foo'));
+        $expected = [
+            'foo' => ['foo', 'bar', 'baz', 'quo'],
+            '_options' => [
+                'foo' => 'combine',
+            ],
+        ];
+        $this->assertSame($expected, $config->get());
+    }
+
+    public function testCombineEmpty()
+    {
+        $values = new DotArray([
+            '_options' => [
+                'foo' => 'combine'
+            ]
+        ]);
+        $this->processor->onLoad($values);
+
+        $config = new Config();
+        $this->processor->onPreMerge($config, [$values]);
+
         $expected = [
             '_options' => [
                 'foo' => 'combine',
             ],
-            'foo' => ['foo', 'bar', 'baz', 'quo'],
         ];
         $this->assertSame($expected, $config->get());
     }

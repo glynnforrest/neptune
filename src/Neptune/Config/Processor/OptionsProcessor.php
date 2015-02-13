@@ -10,44 +10,71 @@ use Crutches\DotArray;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class OptionsProcessor implements ProcessorInterface
+class OptionsProcessor extends AbstractProcessor
 {
     const OPTION_OVERWRITE = 'overwrite';
     const OPTION_COMBINE = 'combine';
     const OPTION_MERGE = 'merge';
 
-    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
+    protected $options = [];
+
+    public function onLoad(DotArray $incoming, $prefix = null)
     {
         $options_key = $prefix ? $prefix.'._options' : '_options';
         $incoming_options = $incoming->exists($options_key) ? $incoming->get($options_key) : [];
 
-        $config->merge(['_options' => $incoming_options]);
+        $this->options = array_merge($this->options, $incoming_options);
+        $incoming->remove($options_key);
+    }
 
-        foreach ($config->get('_options') as $key => $option) {
+    public function onPreMerge(Config $config, array $incoming)
+    {
+        foreach ($this->options as $key => $option) {
             switch ($option) {
             case self::OPTION_OVERWRITE:
-                $value = $incoming->get($key);
-                if (!$value && $value !== []) {
-                    continue;
+                if ($value = $this->resolveOverwrite($key, $incoming)) {
+                    $config->set($key, $value);
                 }
-                $config->set($key, $value);
                 continue;
             case self::OPTION_COMBINE:
-                $current = $config->get($key, []);
-                $value = $incoming->get($key, []);
-                if (!is_array($current) || !is_array($value)) {
-                    continue;
+                if ($value = $this->resolveCombined($key, $incoming)) {
+                    $config->set($key, $value);
                 }
-                $combined = array_unique(array_merge(array_values($current), array_values($value)));
-                $config->set($key, $combined);
                 continue;
             default:
                 continue;
             }
         }
+        $config->set('_options', $this->options);
     }
 
-    public function processBuild(Config $config)
+    protected function resolveOverwrite($key, array $incoming_configs)
     {
+        $overwrite = null;
+        foreach ($incoming_configs as $incoming) {
+            $value = $incoming->get($key);
+            if (!$value && $value !== []) {
+                continue;
+            }
+            $overwrite = $value;
+            $incoming->remove($key);
+        }
+
+        return $overwrite;
+    }
+
+    protected function resolveCombined($key, array $incoming_configs)
+    {
+        $combined = [];
+        foreach ($incoming_configs as $incoming) {
+            $value = $incoming->get($key, []);
+            if (!is_array($value)) {
+                continue;
+            }
+            $combined = array_merge($combined, array_values($value));
+            $incoming->remove($key);
+        }
+
+        return $combined;
     }
 }
