@@ -31,7 +31,7 @@ class RouterListenerTest extends \PHPUnit_Framework_TestCase
         $this->listener = new RouterListener($this->router, $this->neptune);
     }
 
-    public function testOnKernelRequestNoCache()
+    public function testOnKernelRequest()
     {
         $request = new Request();
         $event = $this->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseEvent')
@@ -41,6 +41,9 @@ class RouterListenerTest extends \PHPUnit_Framework_TestCase
         $event->expects($this->once())
               ->method('getRequest')
               ->will($this->returnValue($request));
+        $event->expects($this->once())
+              ->method('isMasterRequest')
+              ->will($this->returnValue(true));
 
         $this->router->expects($this->once())
                      ->method('routeModules')
@@ -49,32 +52,6 @@ class RouterListenerTest extends \PHPUnit_Framework_TestCase
                      ->method('match')
                      ->with($request)
                      ->will($this->returnValue(['test_controller', 'test_method', 'test_args']));
-
-        $this->listener->onKernelRequest($event);
-        $this->assertSame('test_controller', $request->attributes->get('_controller'));
-        $this->assertSame('test_method', $request->attributes->get('_method'));
-        $this->assertSame('test_args', $request->attributes->get('_args'));
-    }
-
-    public function testOnKernelRequestWithCache()
-    {
-        $request = new Request();
-        $event = $this->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseEvent')
-                      ->disableOriginalConstructor()
-                      ->getMock();
-
-        $event->expects($this->once())
-              ->method('getRequest')
-              ->will($this->returnValue($request));
-
-        $this->router->expects($this->once())
-                     ->method('matchCached')
-                     ->with($request)
-                     ->will($this->returnValue(['test_controller', 'test_method', 'test_args']));
-        $this->router->expects($this->never())
-                     ->method('routeModules');
-        $this->router->expects($this->never())
-                     ->method('match');
 
         $this->listener->onKernelRequest($event);
         $this->assertSame('test_controller', $request->attributes->get('_controller'));

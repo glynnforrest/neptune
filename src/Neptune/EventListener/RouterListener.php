@@ -39,13 +39,10 @@ class RouterListener implements EventSubscriberInterface
             return;
         }
 
-        //attempt to fetch a matched route from the cache. If this
-        //isn't successful, load routes from all registered modules
-        //and match.
-        if (!$action = $this->router->matchCached($request)) {
+        if ($event->isMasterRequest()) {
             $this->router->routeModules($this->neptune);
-            $action = $this->router->match($request);
         }
+        $action = $this->router->match($request);
 
         $request->attributes->set('_controller', $action[0]);
         $request->attributes->set('_method', $action[1]);
