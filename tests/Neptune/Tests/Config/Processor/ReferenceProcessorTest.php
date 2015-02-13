@@ -17,7 +17,7 @@ class ReferenceProcessorTest extends \PHPUnit_Framework_TestCase
         $this->processor = new ReferenceProcessor();
     }
 
-    public function processBuildProvider()
+    public function postMergeProvider()
     {
         return [
             [
@@ -70,12 +70,12 @@ class ReferenceProcessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider processBuildProvider
+     * @dataProvider postMergeProvider
      */
-    public function testProcessBuild($original, $expected)
+    public function testPostMerge($original, $expected)
     {
         $config = new Config($original);
-        $this->processor->processBuild($config);
+        $this->processor->onPostMerge($config);
         $this->assertSame($expected, $config->get());
     }
 }

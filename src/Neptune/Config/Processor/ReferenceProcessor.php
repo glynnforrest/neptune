@@ -3,7 +3,6 @@
 namespace Neptune\Config\Processor;
 
 use Neptune\Config\Config;
-use Crutches\DotArray;
 use Neptune\Config\Exception\ConfigKeyException;
 
 /**
@@ -12,13 +11,9 @@ use Neptune\Config\Exception\ConfigKeyException;
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class ReferenceProcessor implements ProcessorInterface
+class ReferenceProcessor extends AbstractProcessor
 {
-    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
-    {
-    }
-
-    public function processBuild(Config $config)
+    public function onPostMerge(Config $config)
     {
         try {
             foreach ($config as $key => $value) {
