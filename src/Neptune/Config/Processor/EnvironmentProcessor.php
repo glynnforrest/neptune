@@ -4,14 +4,13 @@ namespace Neptune\Config\Processor;
 
 use Neptune\Config\Config;
 use Neptune\Core\Neptune;
-use Crutches\DotArray;
 
 /**
  * EnvironmentProcessor
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class EnvironmentProcessor implements ProcessorInterface
+class EnvironmentProcessor extends AbstractProcessor
 {
     protected $neptune;
 
@@ -20,11 +19,7 @@ class EnvironmentProcessor implements ProcessorInterface
         $this->neptune = $neptune;
     }
 
-    public function processLoad(Config $config, DotArray $incoming, $prefix = null)
-    {
-    }
-
-    public function processBuild(Config $config)
+    public function onPostMerge(Config $config)
     {
         $config->set('ROOT', $this->neptune->getRootDirectory());
         $config->set('ENV', $this->neptune->getEnv());
