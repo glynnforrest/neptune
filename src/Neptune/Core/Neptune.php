@@ -320,13 +320,4 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
 
         return key($this->modules);
     }
-
-	public function handleErrors() {
-		set_error_handler('\Neptune\Core\Neptune::dealWithError');
-	}
-
-	public static function dealWithError($errno, $errstr, $errfile, $errline, $errcontext) {
-		throw new NeptuneError($errno, $errstr, $errfile, $errline, $errcontext);
-	}
-
 }
