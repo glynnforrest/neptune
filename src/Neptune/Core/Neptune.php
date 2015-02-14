@@ -3,12 +3,10 @@
 namespace Neptune\Core;
 
 use Neptune\Exceptions\NeptuneError;
-use Neptune\Core\Events;
 use Neptune\Service\ServiceInterface;
 use Neptune\Service\AbstractModule;
 use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
-use Neptune\Config\Config;
 use Neptune\Config\Loader;
 use Neptune\Config\Processor;
 use Neptune\Config\ConfigManager;
@@ -83,7 +81,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         };
 
         $this['config.manager'] = function($neptune) {
-            $manager = new ConfigManager(new Config);
+            $manager = new ConfigManager();
 
             $manager->addLoader(new Loader\YamlLoader());
             $manager->addLoader(new Loader\PhpLoader());
