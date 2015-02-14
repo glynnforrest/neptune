@@ -2,17 +2,13 @@
 
 namespace Neptune\Core;
 
-use Neptune\Exceptions\NeptuneError;
 use Neptune\Service\ServiceInterface;
 use Neptune\Service\AbstractModule;
-use Neptune\Core\ComponentException;
 use Neptune\EventListener\StringResponseListener;
 use Neptune\Config\Loader;
 use Neptune\Config\Processor;
 use Neptune\Config\ConfigManager;
 use Neptune\Config\ConfigCache;
-use Neptune\Config\Exception\ConfigFileException;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -20,7 +16,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-
 use Pimple\Container;
 
 class Neptune extends Container implements HttpKernelInterface, TerminableInterface
@@ -46,13 +41,13 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         }
         $this->root_directory = $root_directory;
 
-        $this['config.cache'] = function() {
+        $this['config.cache'] = function () {
             $cache_file = $this->root_directory.'storage/cache/config-'.$this->env.'.php';
 
             return new ConfigCache($cache_file);
         };
 
-        $this['config'] = function() {
+        $this['config'] = function () {
             $this->env_locked = true;
 
             if ($this->cache_enabled) {
@@ -80,7 +75,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
             return $config;
         };
 
-        $this['config.manager'] = function($neptune) {
+        $this['config.manager'] = function ($neptune) {
             $manager = new ConfigManager();
 
             $manager->addLoader(new Loader\YamlLoader());
@@ -107,7 +102,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
             return new RequestStack();
         };
 
-        $this['kernel'] = function() {
+        $this['kernel'] = function () {
             return new HttpKernel($this['dispatcher'], $this['resolver'], $this['request_stack']);
         };
     }
@@ -185,7 +180,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
      */
     public function boot()
     {
-        if(!$this->booted) {
+        if (!$this->booted) {
             $dispatcher = $this['dispatcher'];
             $dispatcher->addSubscriber(new StringResponseListener());
 
@@ -194,6 +189,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
             }
         }
         $this->booted = true;
+
         return true;
     }
 
@@ -286,15 +282,15 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
         return $this->root_directory;
     }
 
-	/**
-	 * Get the absolute path of a module directory.
-	 *
-	 * @param string $module The name of the module
-	 */
-	public function getModuleDirectory($module)
+    /**
+     * Get the absolute path of a module directory.
+     *
+     * @param string $module The name of the module
+     */
+    public function getModuleDirectory($module)
     {
-		return $this->getModule($module)->getDirectory();
-	}
+        return $this->getModule($module)->getDirectory();
+    }
 
     /**
      * Get the namespace of a module with no beginning slash.
