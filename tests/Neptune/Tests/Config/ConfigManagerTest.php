@@ -179,4 +179,20 @@ class ConfigManagerTest extends \PHPUnit_Framework_TestCase
         ];
         $this->assertSame($expected, $this->manager->getConfig()->get());
     }
+
+    public function testLoadWhenOptionsOverwriteKeyIsDefinedLate()
+    {
+        $this->manager->addProcessor(new OptionsProcessor());
+
+        $this->manager->loadValues(['foo' => ['one']]);
+        $this->manager->loadValues(['foo' => ['two']]);
+        $this->manager->loadValues(['foo' => ['three'], '_options' => ['foo' => 'combine']]);
+        $this->manager->loadValues(['foo' => ['four'], '_options' => ['foo' => 'overwrite']]);
+
+        $expected = [
+            'foo' => ['four'],
+            '_options' => ['foo' => 'overwrite'],
+        ];
+        $this->assertSame($expected, $this->manager->getConfig()->get());
+    }
 }
