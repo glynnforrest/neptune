@@ -130,6 +130,7 @@ class MigrationRunner
             $migration = $r->newInstance();
             $migrations[$migration->getVersion()] = $migration;
         }
+        ksort($migrations);
 
         return $migrations;
     }
