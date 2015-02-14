@@ -48,7 +48,13 @@ class CacheFactory extends AbstractFactory
 
         $method = 'create' . ucfirst($driver) . 'Driver';
         if (method_exists($this, $method)) {
-            $this->instances[$name] = $this->$method($name);
+            $cache = $this->$method($name);
+
+            if ($logger = $this->config->get("neptune.cache.$name.logger")) {
+                $cache = new LoggerAwareCache($cache, $this->neptune[$logger]);
+            }
+
+            $this->instances[$name] = $cache;
 
             return $this->instances[$name];
         } else {
