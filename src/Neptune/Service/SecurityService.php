@@ -36,9 +36,13 @@ class SecurityService implements ServiceInterface
             return $listener;
         };
 
-        $neptune['security.resolver'] = function () {
-            return new BlockadeExceptionListener();
-            //add resolvers automatically
+        $neptune['security.resolver'] = function ($neptune) {
+            $listener = new BlockadeExceptionListener();
+            foreach ($neptune->getTaggedServices('neptune.security.resolvers') as $resolver) {
+                $listener->addResolver($resolver);
+            }
+
+            return $listener;
         };
 
         $neptune['security.request'] = function ($neptune) {
