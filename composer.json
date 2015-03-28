@@ -28,10 +28,12 @@
         "phpunit/phpunit": "4.*",
         "glynnforrest/temping": "0.5.*",
         "ircmaxell/password-compat": "1.0.*",
-        "swiftmailer/swiftmailer": "~5.3"
+        "swiftmailer/swiftmailer": "~5.3",
+        "twig/twig": "~1.18"
     },
     "suggest": {
-        "sensiolabs/security-checker": "Add a command to check for security vulnerabilities"
+        "sensiolabs/security-checker": "Add a command to check for security vulnerabilities",
+        "twig/twig": "Use twig templates"
     },
     "autoload": {
         "psr-4": {
