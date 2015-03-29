@@ -7,7 +7,8 @@ use Neptune\Service\AbstractModule;
 use Neptune\Routing\Router;
 use Neptune\Core\Neptune;
 use Neptune\Controller\AssetsController;
-use Neptune\View\Extension\AssetsExtension;
+use Neptune\View;
+use Neptune\Twig;
 
 /**
  * AssetsModule
@@ -38,7 +39,11 @@ class AssetsModule extends AbstractModule
         };
 
         $neptune['view.extension.assets'] = function ($neptune) {
-            return new AssetsExtension($neptune['assets']);
+            return new View\Extension\AssetsExtension($neptune['assets']);
+        };
+
+        $neptune['twig.extension.assets'] = function ($neptune) {
+            return new Twig\Extension\AssetsExtension($neptune['assets']);
         };
 
         $neptune['controller.assets'] = function ($neptune) {
