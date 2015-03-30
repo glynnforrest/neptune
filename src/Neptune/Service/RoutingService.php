@@ -9,6 +9,7 @@ use Neptune\Routing\Router;
 use Neptune\Routing\ControllerResolver;
 use Neptune\EventListener\RouterListener;
 use Neptune\View\Extension\UrlExtension;
+use Neptune\Twig\Extension\RoutingExtension;
 
 /**
  * RoutingService
@@ -43,6 +44,10 @@ class RoutingService implements ServiceInterface
 
         $neptune['view.extension.url'] = function ($neptune) {
             return new UrlExtension($neptune['router'], $neptune['url']);
+        };
+
+        $neptune['twig.extension.routing'] = function ($neptune) {
+            return new RoutingExtension($neptune['router'], $neptune['url']);
         };
     }
 
