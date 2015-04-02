@@ -25,9 +25,11 @@ class AssetsExtension extends \Twig_Extension
 
     public function getFunctions()
     {
+        $options = ['is_safe' => ['html']];
+
         return [
-            new \Twig_SimpleFunction('js', [$this, 'js']),
-            new \Twig_SimpleFunction('css', [$this, 'css']),
+            new \Twig_SimpleFunction('js', [$this, 'js'], $options),
+            new \Twig_SimpleFunction('css', [$this, 'css'], $options),
         ];
     }
 
