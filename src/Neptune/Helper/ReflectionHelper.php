@@ -10,16 +10,26 @@ namespace Neptune\Helper;
 class ReflectionHelper
 {
     /**
-     * Get the arguments of a function as a string, including default
-     * arguments and type hints.
+     * Get the parameters of a function as a string, including default
+     * parameters and type hints.
      *
      * @return string
      */
-    public function formatArguments($function)
+    public function displayFunctionParameters($function)
+    {
+        return $this->displayParameters($this->getParameters($function));
+    }
+
+    /**
+     * Get the parameters of a method or function.
+     *
+     * @return <ReflectionParameter> An array of parameters
+     */
+    public function getParameters($function)
     {
         if (is_array($function)) {
             if (!method_exists($function[0], $function[1])) {
-                return;
+                throw new \InvalidArgumentException('Invalid callable supplied');
             }
             $reflection = new \ReflectionMethod($function[0], $function[1]);
         } elseif (is_object($function) && is_callable($function)) {
@@ -32,9 +42,20 @@ class ReflectionHelper
             throw new \InvalidArgumentException('Invalid callable supplied');
         }
 
-        $args = $reflection->getParameters();
+        return $reflection->getParameters();
+    }
 
-        $args = array_map(function ($param) {
+    /**
+     * Convert a list of ReflectionParameters to a string representing
+     * a function definition, including default parameters and type
+     * hints.
+     *
+     * @param <ReflectionParameter> $parameters
+     * @return string
+     */
+    public function displayParameters(array $parameters)
+    {
+        $parameters = array_map(function ($param) {
             $class = $param->getClass();
             $name = $class ? $class->getName().' $'.$param->getName() : '$'.$param->getName();
 
@@ -43,11 +64,11 @@ class ReflectionHelper
             }
 
             return $name;
-        }, $args);
+        }, $parameters);
 
         $signature = '(';
-        foreach ($args as $arg) {
-            $signature .= $arg.', ';
+        foreach ($parameters as $param) {
+            $signature .= $param.', ';
         }
 
         return trim($signature, ', ').')';

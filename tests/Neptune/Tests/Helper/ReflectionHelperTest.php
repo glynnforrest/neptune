@@ -16,7 +16,7 @@ class ReflectionHelperTest extends \PHPUnit_Framework_TestCase
         $this->helper = new ReflectionHelper();
     }
 
-    public function formatArgumentsProvider()
+    public function displayFunctionParametersProvider()
     {
         return [
             ['()', [$this, 'setUp']],
@@ -32,10 +32,10 @@ class ReflectionHelperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider formatArgumentsProvider
+     * @dataProvider displayFunctionParametersProvider
      */
-    public function testFormatArguments($expected, $function)
+    public function testDisplayFunctionParameters($expected, $function)
     {
-        $this->assertSame($expected, $this->helper->formatArguments($function));
+        $this->assertSame($expected, $this->helper->displayFunctionParameters($function));
     }
 }
