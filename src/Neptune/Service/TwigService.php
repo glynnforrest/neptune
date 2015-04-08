@@ -4,7 +4,6 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Twig\Loader\FilesystemLoader;
-use Neptune\Twig\Extension\AssetsExtension;
 
 /**
  * TwigService
@@ -15,12 +14,16 @@ class TwigService implements ServiceInterface
 {
     public function register(Neptune $neptune)
     {
-        $neptune['twig'] = function ($neptune) {
-            $options = [
-                'strict_variables' => true
+        $neptune['twig.options'] = function ($neptune) {
+            $defaults = [
+                'strict_variables' => true,
             ];
 
-            $environment = new \Twig_Environment($neptune['twig.loader'], $options);
+            return array_merge($defaults, $neptune['config']->get('twig'));
+        };
+
+        $neptune['twig'] = function ($neptune) {
+            $environment = new \Twig_Environment($neptune['twig.loader'], $neptune['twig.options']);
 
             foreach ($neptune->getTaggedServices('twig.extensions') as $service) {
                 $environment->addExtension($service);
