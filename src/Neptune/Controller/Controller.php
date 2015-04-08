@@ -72,6 +72,14 @@ abstract class Controller implements NeptuneAwareInterface
         return $this->neptune['view']->load($view, $values);
     }
 
+    /**
+     * Render a twig template.
+     */
+    public function render($template, array $values = [])
+    {
+        return $this->neptune['twig']->render($template, $values);
+    }
+
     public function form($name = null, $action = null)
     {
         return $this->neptune['form']->create($name, $action);
