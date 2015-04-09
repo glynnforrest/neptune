@@ -19,7 +19,7 @@ class TwigService implements ServiceInterface
                 'strict_variables' => true,
             ];
 
-            return array_merge($defaults, $neptune['config']->get('twig'));
+            return array_merge($defaults, $neptune['config']->get('twig', []));
         };
 
         $neptune['twig'] = function ($neptune) {
@@ -28,6 +28,8 @@ class TwigService implements ServiceInterface
             foreach ($neptune->getTaggedServices('twig.extensions') as $service) {
                 $environment->addExtension($service);
             }
+
+            $environment->addGlobal('app', $neptune);
 
             return $environment;
         };
