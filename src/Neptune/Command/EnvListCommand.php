@@ -38,6 +38,10 @@ class EnvListCommand extends Command
         }
         sort($envs);
 
+        if (empty($envs)) {
+            throw new \Exception('No environments found.');
+        }
+
         return array_values(array_unique($envs));
     }
 
