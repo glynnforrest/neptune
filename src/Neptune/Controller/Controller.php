@@ -28,6 +28,17 @@ abstract class Controller implements NeptuneAwareInterface
     }
 
     /**
+     * Retrieve a named service.
+     *
+     * @param string $service
+     * @return mixed The service
+     */
+    public function get($service)
+    {
+        return $this->neptune[$service];
+    }
+
+    /**
      * Add a message to the request flash bag.
      *
      * @param Request $request
