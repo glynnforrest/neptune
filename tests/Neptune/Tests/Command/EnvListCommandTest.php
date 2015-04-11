@@ -43,8 +43,8 @@ class EnvListCommandTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testListNoEnvs() {
+        $this->setExpectedException('\Exception');
 		$this->tester->execute(array());
-		$this->assertSame('', $this->tester->getDisplay());
 	}
 
 	public function testListOneEnv() {
