@@ -3,6 +3,7 @@
 namespace Neptune\Error;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
  * TwigExceptionHandler
@@ -18,8 +19,10 @@ class TwigExceptionHandler implements ExceptionHandlerInterface
 
     public function handleException(\Exception $exception)
     {
-        return new Response($this->twig->render('errors/404.html.twig', [
+        $code = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
+
+        return new Response($this->twig->render(sprintf('errors/%s.html.twig', $code), [
             'exception' => $exception,
-        ]), $exception->getStatusCode());
+        ]), $code);
     }
 }
