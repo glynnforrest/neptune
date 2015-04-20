@@ -4,6 +4,7 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Twig\Loader\FilesystemLoader;
+use Neptune\EventListener\TwigExceptionListener;
 
 /**
  * TwigService
@@ -36,6 +37,10 @@ class TwigService implements ServiceInterface
 
         $neptune['twig.loader'] = function ($neptune) {
             return new FilesystemLoader($neptune);
+        };
+
+        $neptune['twig.exception_listener'] = function ($neptune) {
+            return new TwigExceptionListener($neptune['twig']);
         };
     }
 
