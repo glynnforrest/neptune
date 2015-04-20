@@ -6,6 +6,7 @@ use Neptune\Core\Neptune;
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Neptune\EventListener\LoggerExceptionListener;
 
 /**
  * MonologService
@@ -47,6 +48,10 @@ class MonologService implements ServiceInterface
             $logger->pushHandler(new StreamHandler($neptune['logger.path'], $neptune['logger.level']));
 
             return $logger;
+        };
+
+        $neptune['logger.exception_listener'] = function ($neptune) {
+            return new LoggerExceptionListener($neptune['logger']);
         };
     }
 
