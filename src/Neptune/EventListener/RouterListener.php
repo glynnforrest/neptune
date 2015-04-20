@@ -10,6 +10,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\Request;
 
 use Neptune\Core\Neptune;
+use Neptune\Routing\RouteNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * RouterListener
@@ -42,7 +44,11 @@ class RouterListener implements EventSubscriberInterface
         if ($event->isMasterRequest()) {
             $this->router->routeModules($this->neptune);
         }
-        $action = $this->router->match($request);
+        try {
+            $action = $this->router->match($request);
+        } catch (RouteNotFoundException $e) {
+            throw new NotFoundHttpException($e->getMessage(), $e);
+        }
 
         $request->attributes->set('_controller', $action[0]);
         $request->attributes->set('_method', $action[1]);
