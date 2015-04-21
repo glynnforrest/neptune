@@ -4,6 +4,7 @@ namespace Neptune\Service;
 
 use Neptune\Core\Neptune;
 use Neptune\Twig\Loader\FilesystemLoader;
+use Neptune\Twig\TwigEnvironment;
 use Neptune\EventListener\TwigExceptionListener;
 
 /**
@@ -24,7 +25,7 @@ class TwigService implements ServiceInterface
         };
 
         $neptune['twig'] = function ($neptune) {
-            $environment = new \Twig_Environment($neptune['twig.loader'], $neptune['twig.options']);
+            $environment = new TwigEnvironment($neptune['twig.loader'], $neptune['twig.options']);
 
             foreach ($neptune->getTaggedServices('twig.extensions') as $service) {
                 $environment->addExtension($service);
