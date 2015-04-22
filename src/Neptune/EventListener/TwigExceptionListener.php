@@ -7,6 +7,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Neptune\Twig\TwigEnvironment;
 
 /**
  * TwigExceptionListener
@@ -15,7 +16,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  **/
 class TwigExceptionListener implements EventSubscriberInterface
 {
-    public function __construct(\Twig_Environment $twig)
+    public function __construct(TwigEnvironment $twig)
     {
         $this->twig = $twig;
     }
@@ -24,7 +25,10 @@ class TwigExceptionListener implements EventSubscriberInterface
     {
         $exception = $event->getException();
         $code = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
-        $content = $this->twig->render(sprintf('errors/%s.html.twig', $code), [
+
+        $template = $this->twig->exists($specific = sprintf('errors/%s.html.twig', $code)) ? $specific : 'errors/500.html.twig';
+
+        $content = $this->twig->render($template, [
             'exception' => $exception,
         ]);
         $event->setResponse(new Response($content, $code));
