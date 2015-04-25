@@ -6,7 +6,8 @@ use Neptune\Core\Neptune;
 use Neptune\Config\Config;
 use Neptune\Config\NeptuneConfig;
 use Neptune\Tests\Routing\TestModule;
-
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Temping\Temping;
 
 /**
@@ -149,6 +150,19 @@ class NeptuneTest extends \PHPUnit_Framework_TestCase {
         $this->neptune->boot();
         //check it is only called once
         $this->neptune->boot();
+    }
+
+    public function testHandle()
+    {
+        $kernel = $this->getMock('Symfony\Component\HttpKernel\HttpKernelInterface');
+        $this->neptune['kernel'] = $kernel;
+        $this->neptune['config'] = new Config();
+        $request = new Request();
+        $kernel->expects($this->once())
+            ->method('handle')
+            ->with($request, HttpKernelInterface::MASTER_REQUEST, true)
+            ->will($this->returnValue('response'));
+        $this->assertSame('response', $this->neptune->handle($request));
     }
 
     public function testAddModule()
