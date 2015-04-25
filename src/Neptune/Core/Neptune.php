@@ -79,6 +79,7 @@ class Neptune extends Container implements HttpKernelInterface, TerminableInterf
             $manager = new ConfigManager();
 
             $manager->addLoader(new Loader\YamlLoader());
+            $manager->addLoader(new Loader\JsonLoader());
             $manager->addLoader(new Loader\PhpLoader());
 
             $manager->addProcessor(new Processor\OptionsProcessor());
