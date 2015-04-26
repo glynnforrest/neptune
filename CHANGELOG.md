@@ -1,6 +1,17 @@
 Changelog
 =========
 
+### 0.2.3 2013-12-15
+
+Improvements on forms and the start of using symfony/console for
+console commands.
+
+* Adding symfony/console, along with custom `Application`, `Command`,
+  `Shell`, and `OutputFormatter` classes.
+* Adding option methods to `FormRow`.
+* Adding checkbox support to forms.
+* Simplifying `Config` class by using `Crutches\DotArray`.
+
 ### 0.2.2 2013-11-27
 
 * Fully incorporating the Stringy library.
