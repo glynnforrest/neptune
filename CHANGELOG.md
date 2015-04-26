@@ -1,6 +1,15 @@
 Changelog
 =========
 
+### 0.3.0 2014-01-13
+
+Cache and command improvements.
+
+* Adding file cache driver.
+* Console commands from other modules are autoloaded.
+* Add `cache:flush` command.
+* Add global --env option to console commands.
+
 ### 0.2.4 2013-12-30
 
 Console commands and helpers.
