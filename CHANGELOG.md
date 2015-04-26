@@ -1,6 +1,21 @@
 Changelog
 =========
 
+### 0.2.4 2013-12-30
+
+Console commands and helpers.
+
+* `env:list`, `env:switch`, `env:create`, `env:remove` commands to
+  manage environments.
+* `create:controller`, `create:model`, `create:module`, `create:thing`
+  for class creation.
+* `setup` and `config:dirs` to set up a new application.
+* `shell` to run commands in a shell.
+* `assets:build` to build assets.
+* Various helper methods to `Console`.
+* Removal of `Bitmask` - this now lives in glynnforrest/crutches.
+* Removal of old console task classes.
+
 ### 0.2.3 2013-12-15
 
 Improvements on forms and the start of using symfony/console for
