@@ -1,6 +1,35 @@
 Changelog
 =========
 
+### 0.4.0 2014-04-02
+
+Major internal rewrite using http-foundation, http-kernel and
+pimple. Improvements to database code and active record classes, and
+introduction of database migrations. Lots security improvements.
+Replacing form and validation with glynnforrest/reform. Adding monolog
+for logging.
+
+* Replacing the `Neptune\Http` namespace with symfony/http-foundation.
+* The request / response process is now done using symfony/http-kernel.
+* Routing is handled by `RouterListener`, which listens to the
+  `kernel.request` event.
+* Using pimple/pimple as the dependency injection container for the
+  framework. Services are now registered by implementing
+  `ServiceInterface` and registering objects with the container.
+* Adding built in services: `DatabaseService`, `FormService`,
+  `MonologService`, `SecurityService`, `SessionService`.
+* Renaming `Thing` and `ThingCollection` to `Entity` and `EntityCollection`.
+* Beginning to implement relations between entities.
+* Creating a `MigrationRunner` which can be called using
+  `database:migrate:latest` and `database:migrate:version`.
+* Simplifying database drivers and factory.
+* Replacing form and validation with glynnforrest/reform.
+* Rewrite of security code to use the http-kernel. Security exceptions
+  are thrown, caught by the kernel and handled by `Resolver`
+  instances, returning a response. `Firewall` can check incoming
+  requests and throw these exceptions automatically.
+* Adding `CsrfManager` to check CSRF tokens.
+
 ### 0.3.0 2014-01-13
 
 Cache and command improvements.
