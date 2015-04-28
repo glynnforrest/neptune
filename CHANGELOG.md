@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### 0.4.1 2014-04-13
+
+* Replacing cache component with doctrine/cache.
+* Adding `CacheService`.
+* Updating router to use doctrine/cache.
+* Removal of RMT for versioning.
+
 ### 0.4.0 2014-04-02
 
 Major internal rewrite using http-foundation, http-kernel and
