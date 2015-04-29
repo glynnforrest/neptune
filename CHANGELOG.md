@@ -1,6 +1,13 @@
 Changelog
 =========
 
+### 0.4.2 2014-04-22
+
+* Adding modules, which provide services, routes and configuration.
+* Routes must now be registered through a module.
+* Adding security `ConfigDriver` which reads credentials from configuration.
+* Adding go() shortcut method to create a request, handle it and terminate.
+
 ### 0.4.1 2014-04-13
 
 * Replacing cache component with doctrine/cache.
