@@ -78,4 +78,48 @@ class ReferenceProcessorTest extends \PHPUnit_Framework_TestCase
         $this->processor->onPostMerge($config);
         $this->assertSame($expected, $config->get());
     }
+
+    public function testOptionsAreNotModified()
+    {
+        $config = new Config([
+            'foo' => '%bar%',
+            'bar' => 'something',
+            '_options' => [
+                'foo.bar.baz' => 'combine'
+            ]
+        ]);
+        $this->processor->onPostMerge($config);
+
+        // _options must be ignored, otherwise there will be an array like this:
+        // '_options' => [
+        //     'foo.bar.baz' => 'combine',
+        //     'foo' => [
+        //         'bar' => [
+        //             'baz' => 'combine'
+        //         ]
+        //     ]
+        // ]
+        $expected = [
+            'foo' => 'something',
+            'bar' => 'something',
+            '_options' => [
+                'foo.bar.baz' => 'combine'
+            ]
+        ];
+        $this->assertSame($expected, $config->get());
+    }
+
+    public function testAKeyCanHaveOptionsInTheName()
+    {
+        $config = new Config([
+            'options_service' => 'service.options',
+            '_options_processor' => '%options_service%',
+        ]);
+        $this->processor->onPostMerge($config);
+        $expected = [
+            'options_service' => 'service.options',
+            '_options_processor' => 'service.options',
+        ];
+        $this->assertSame($expected, $config->get());
+    }
 }

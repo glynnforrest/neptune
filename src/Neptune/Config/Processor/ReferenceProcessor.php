@@ -17,6 +17,23 @@ class ReferenceProcessor extends AbstractProcessor
     {
         try {
             foreach ($config as $key => $value) {
+                // _options must be ignored, otherwise this
+                // '_options' => [
+                //     'foo.bar.baz' => 'combine',
+                // ]
+                // will become
+                // '_options' => [
+                //     'foo.bar.baz' => 'combine',
+                //     'foo' => [
+                //         'bar' => [
+                //             'baz' => 'combine'
+                //         ]
+                //     ]
+                // ]
+                if (substr($key, 0, 9) === '_options.') {
+                    continue;
+                }
+
                 $config->set($key, $this->resolveValue($config, $value));
             }
         } catch (ConfigKeyException $e) {
