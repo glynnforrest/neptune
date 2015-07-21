@@ -41,7 +41,9 @@ class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
         $loader = new FixtureLoader();
         $loader->setLogger(new ConsoleLogger($output));
 
-        $fixtures = $this->getAllFixtures();
+        $fixtures = $input->getOption('module') ?
+                  $this->getModuleFixtures($this->neptune->getModule($input->getOption('module'))) :
+                  $this->getAllFixtures();
         $count = 0;
         foreach ($fixtures as $fixture) {
             ++$count;
