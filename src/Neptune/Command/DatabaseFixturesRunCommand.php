@@ -38,7 +38,7 @@ class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $db = $this->neptune['db'];
-        $loader = new FixtureLoader();
+        $loader = new FixtureLoader($this->neptune);
         $loader->setLogger(new ConsoleLogger($output));
 
         $fixtures = $input->getOption('module') ?
