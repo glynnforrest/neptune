@@ -13,7 +13,10 @@ class FixtureLoaderTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->loader = new FixtureLoader();
+        $neptune = $this->getMockBuilder('Neptune\Core\Neptune')
+                    ->disableOriginalConstructor()
+                    ->getMock();
+        $this->loader = new FixtureLoader($neptune);
         $this->conn = $this->getMockBuilder('Doctrine\DBAL\Connection')
                     ->disableOriginalConstructor()
                     ->getMock();
