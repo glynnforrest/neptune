@@ -41,7 +41,7 @@ class FixtureLoader extends BaseFixtureLoader implements LoggerAwareInterface
         $msg .= 'Running '.get_class($fixture);
 
         if ($this->logger) {
-            $this->logger->info($msg);
+            $this->logger->notice($msg);
         }
 
         parent::runFixture($connection, $fixture);
