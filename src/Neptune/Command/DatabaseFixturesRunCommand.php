@@ -17,7 +17,28 @@ use Neptune\Database\FixtureLoader;
 class DatabaseFixturesRunCommand extends Command
 {
     protected $name = 'database:fixtures:run';
-    protected $description = 'Run fixtures';
+    protected $description = 'Run database fixtures';
+    protected $help = <<<HELP
+Run database fixtures from a group of modules.
+
+Use <info>--modules</info> and <info>--exclude-modules</info> to specify which modules to use.
+<info>--modules</info> always takes precedence over <info>--exclude-modules</info>.
+
+Examples:
+
+<info>database:fixtures:run --modules app --modules admin</info>
+'app' and 'admin' modules
+
+<info>database:fixtures:run --exclude-modules admin</info>
+All modules except 'admin'
+
+<info>database:fixtures:run --exclude-modules admin --modules admin</info>
+'admin' module only
+
+<info>database:fixtures:run</info>
+All modules
+
+HELP;
 
     protected function configure()
     {
