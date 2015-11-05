@@ -19,7 +19,7 @@ class EnvironmentProcessor extends AbstractProcessor
         $this->neptune = $neptune;
     }
 
-    public function onPostMerge(Config $config)
+    public function onPreMerge(Config $config, array $incoming)
     {
         $config->set('ROOT', $this->neptune->getRootDirectory());
         $config->set('ENV', $this->neptune->getEnv());
