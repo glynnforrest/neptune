@@ -8,13 +8,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Neptune\Service\AbstractModule;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Neptune\Database\FixtureLoader;
+use Neptune\Command\Command;
 
 /**
  * DatabaseFixturesRunCommand.
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
+class DatabaseFixturesRunCommand extends Command
 {
     protected $name = 'database:fixtures:run';
     protected $description = 'Run fixtures';
@@ -23,10 +24,10 @@ class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
     {
         parent::configure();
         $this->addOption(
-            'module',
+            'modules',
             'm',
-            InputOption::VALUE_REQUIRED,
-            'Only run fixtures for a certain module'
+            InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+            'Only run fixtures for the given modules'
         )->addOption(
             'append',
             '',
@@ -41,9 +42,17 @@ class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
         $loader = new FixtureLoader($this->neptune);
         $loader->setLogger(new ConsoleLogger($output));
 
-        $fixtures = $input->getOption('module') ?
-                  $this->getModuleFixtures($this->neptune->getModule($input->getOption('module'))) :
-                  $this->getAllFixtures();
+        $modules = $input->getOption('modules') ?
+                 array_map(function($moduleName) {
+                     return $this->neptune->getModule($moduleName);
+                 }, $input->getOption('modules')) :
+                 $this->neptune->getModules();
+
+        $fixtures = [];
+        foreach ($modules as $module) {
+            $fixtures = array_merge($fixtures, $this->getModuleFixtures($module));
+        }
+
         $count = 0;
         foreach ($fixtures as $fixture) {
             ++$count;
@@ -75,16 +84,6 @@ class DatabaseFixturesRunCommand extends DatabaseMigrateListCommand
                 continue;
             }
             $fixtures[] = $r->newInstance();
-        }
-
-        return $fixtures;
-    }
-
-    protected function getAllFixtures()
-    {
-        $fixtures = [];
-        foreach ($this->neptune->getModules() as $module) {
-            $fixtures = array_merge($fixtures, $this->getModuleFixtures($module));
         }
 
         return $fixtures;
