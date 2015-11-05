@@ -1,25 +1,21 @@
 # Configuration options
 
 Here is a summary of all available configuration options for the
-framework. This includes global options, placed in
-`config/neptune.php`, and module options, placed in
-`/path/to/module/config.php`.
+framework.
 
-Remember that global options can be overridden per-environment with
-`config/env/<environment>.php`, and module options with
-`config/modules/<module>.php`.
+# Neptune
 
-## assets
+## Assets
 
 ### Global
 
-#### assets.url
+#### neptune.assets.url
 
 Default: `assets/`
 
 The base url all assets are served under.
 
-#### assets.concat_groups
+#### neptune.assets.concat_groups
 
 Default: `false`
 
@@ -27,19 +23,17 @@ The `assets:build` command has the option to concatenate asset groups
 into a single file. Set this option to `true` to link to these
 concatenated files instead of individual assets.
 
-#### assets.cache_bust
+#### neptune.assets.cache_bust
 
 Default `false`
 
 Set to `true` to enable a simple cache-busting query string to be
 appended to asset links.
 
-### Module
+#### <module>.assets.css
 
-#### assets.css
+#### <module>.assets.js
 
-#### assets.js
+#### <module>.assets.install_cmd
 
-#### assets.install_cmd
-
-#### assets.build_cmd
+#### <module>.assets.build_cmd
