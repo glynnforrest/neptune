@@ -37,7 +37,7 @@ class FixtureLoaderTest extends \PHPUnit_Framework_TestCase
         $logger = $this->getMock('Psr\Log\LoggerInterface');
         $this->loader->setLogger($logger);
         $logger->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Running '.get_class($fixture1)],
                 ['Running '.get_class($fixture2)]
@@ -63,7 +63,7 @@ class FixtureLoaderTest extends \PHPUnit_Framework_TestCase
         $logger = $this->getMock('Psr\Log\LoggerInterface');
         $this->loader->setLogger($logger);
         $logger->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['(1) Running '.get_class($fixture1)],
                 ['(5) Running '.get_class($fixture2)]
