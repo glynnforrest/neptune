@@ -16,10 +16,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class Command extends SymfonyCommand {
 
     protected $neptune;
-	protected $config;
+    protected $config;
 
-	protected $name;
-	protected $description;
+    protected $name;
+    protected $description;
+    protected $help;
 
     public function __construct(Neptune $neptune)
     {
@@ -31,7 +32,8 @@ abstract class Command extends SymfonyCommand {
     protected function configure()
     {
         $this->setName($this->name)
-             ->setDescription($this->description);
+            ->setDescription($this->description)
+            ->setHelp($this->help);
     }
 
     public function getRootDirectory()
