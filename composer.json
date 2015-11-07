@@ -15,7 +15,7 @@
         "glynnforrest/crutches": "0.3.*",
         "glynnforrest/reform": "0.4.*",
         "glynnforrest/blockade": "0.2.*",
-        "glynnforrest/active-doctrine": "0.2.*",
+        "glynnforrest/active-doctrine": "dev-master",
         "symfony/http-kernel": "~2.4",
         "symfony/console": "~2.4",
         "symfony/yaml": "~2.4",
