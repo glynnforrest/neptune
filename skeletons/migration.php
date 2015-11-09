@@ -7,7 +7,6 @@ use Doctrine\DBAL\Schema\Schema;
 <?=$this->class_info;?>
 class <?=$this->class_name;?> extends AbstractMigration
 {
-
     protected $description = '<?=$this->description;?>';
 
     public function up(Schema $schema)
@@ -25,5 +24,4 @@ class <?=$this->class_name;?> extends AbstractMigration
     {
         $schema->dropTable('');
     }
-
 }

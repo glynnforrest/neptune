@@ -11,7 +11,6 @@ use Symfony\Component\Console\Input\InputArgument;
 <?=$this->class_info;?>
 class <?=$this->class_name;?> extends Command
 {
-
     protected $name = '<?=$this->name?>';
     protected $description = '<?=$this->description;?>';
 
@@ -19,5 +18,4 @@ class <?=$this->class_name;?> extends Command
     {
         $output->writeln('Hello from <?=$this->name;?> command');
     }
-
 }
