@@ -3,6 +3,7 @@
 namespace Neptune\Assets;
 
 use Neptune\Config\Config;
+use Neptune\Service\AbstractModule;
 
 /**
  * AssetManager
@@ -201,4 +202,21 @@ class AssetManager
         }
     }
 
+    /**
+     * Run the command to install assets for a module.
+     *
+     * @param AbstractModule $module
+     */
+    public function installAssets(AbstractModule $module)
+    {
+        if (!$command = $this->config->get("{$module->getName()}.assets.install_cmd", false)) {
+            return false;
+        }
+
+        $dir = $module->getDirectory();
+
+        passthru("cd $dir && $command");
+
+        return true;
+    }
 }

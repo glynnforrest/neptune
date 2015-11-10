@@ -45,23 +45,19 @@ class AssetsInstallCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $modules = $this->getModulesToProcess($input);
+        $asset_manager = $this->neptune['assets'];
 
-        $config = $this->neptune['config'];
-
-        foreach ($modules as $name => $module) {
-            if (!$command = $config->get("$name.assets.install_cmd", false)) {
+        foreach ($this->getModulesToProcess($input) as $name => $module) {
+            if (!$asset_manager->installAssets($module)) {
                 $output->writeln("Skipping <info>$name</info>");
                 continue;
             }
 
-            $output->writeln("Installing <info>$name</info>");
-            $dir = $module->getDirectory();
-
-            passthru("cd $dir && $command");
+            $output->writeln("Installed <info>$name</info>");
         }
+
         $output->writeln('');
-        $output->writeln(sprintf('Installed assets'));
+        $output->writeln('Installed assets');
     }
 
 }
