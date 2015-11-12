@@ -7,6 +7,7 @@ use Neptune\Config\Exception\ConfigFileException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * AssetsInstallCommand
@@ -59,6 +60,7 @@ class AssetsInstallCommand extends Command
 
         //link each group to the public directory
         $build_dir = $this->setupBuildDir($output);
+        $filesystem = new Filesystem();
 
         foreach ($modules as $name => $module) {
             $src = $module->getDirectory() . 'assets';
@@ -67,14 +69,11 @@ class AssetsInstallCommand extends Command
             }
 
             $target = $build_dir . $name;
-            if (file_exists($target)) {
-                if (!is_link($target)) {
-                    throw new \Exception(sprintf('Unable to link to %s - %s already exists.', $src, $target));
-                }
-                unlink($target);
+            if (file_exists($target) && !is_link($target)) {
+                throw new \Exception(sprintf('Unable to link to %s - %s already exists.', $src, $target));
             }
 
-            symlink($src, $target);
+            $filesystem->symlink($src, $target);
             $output->writeln(sprintf('Linked <info>%s</info> to <info>%s</info>', $src, $target));
         }
 
