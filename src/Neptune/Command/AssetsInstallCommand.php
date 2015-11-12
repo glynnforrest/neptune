@@ -46,8 +46,9 @@ class AssetsInstallCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $asset_manager = $this->neptune['assets'];
+        $modules = $this->getModulesToProcess($input);
 
-        foreach ($this->getModulesToProcess($input) as $name => $module) {
+        foreach ($modules as $name => $module) {
             if (!$asset_manager->installAssets($module)) {
                 $output->writeln("Skipping <info>$name</info>");
                 continue;
@@ -56,8 +57,44 @@ class AssetsInstallCommand extends Command
             $output->writeln("Installed <info>$name</info>");
         }
 
+        //link each group to the public directory
+        $build_dir = $this->setupBuildDir($output);
+
+        foreach ($modules as $name => $module) {
+            $src = $module->getDirectory() . 'assets';
+            if (!is_dir($src)) {
+                continue;
+            }
+
+            $target = $build_dir . $name;
+            if (file_exists($target)) {
+                unlink($target);
+            }
+
+            symlink($src, $target);
+            $output->writeln(sprintf('Linked <info>%s</info> to <info>%s</info>', $src, $target));
+        }
+
         $output->writeln('');
         $output->writeln('Installed assets');
     }
 
+    protected function setupBuildDir(OutputInterface $output)
+    {
+        $build_dir = $this->getRootDirectory() . 'public/' . $this->config->get('assets.url', 'assets/');
+        //make sure build_dir has a trailing slash
+        if (substr($build_dir, -1) !== '/') {
+            $build_dir .= '/';
+        }
+        if (!file_exists($build_dir)) {
+            mkdir($build_dir, 0755, true);
+            $output->writeln("Creating $build_dir");
+        }
+        if (!is_dir($build_dir) | !is_writeable($build_dir)) {
+            throw new \Exception(
+                "Unable to write to $build_dir. Check file paths and permissions are correct.");
+        }
+
+        return $build_dir;
+    }
 }
