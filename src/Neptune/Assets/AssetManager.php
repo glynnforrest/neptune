@@ -169,13 +169,14 @@ class AssetManager
     }
 
     /**
-     * Create concatenated asset files for a given module. Make sure
-     * the build directory is a root directory for all modules
-     * (public/assets/), not for a single module
-     * (public/assets/module/).
+     * Create concatenated asset files for a module. A file will be
+     * created for every asset group in the module configuration.
+     *
+     * Assets must already exist in $build_directory
+     * (usually the public folder).
      *
      * @param string $module_name
-     * @param string $build_directory The directory containing all built assets
+     * @param string $build_directory The directory to place the concatenated assets
      */
     public function concatenateAssets($module_name, $build_directory)
     {
@@ -185,8 +186,14 @@ class AssetManager
             foreach ($groups as $group) {
                 $group_name = $module_name . ':' . $group;
                 $files = $this->getGroupAssets($group_name, $type);
-                $group_file = new \SplFileObject($build_directory . $this->hashGroup($group_name, $type), 'w');
 
+                foreach ($files as $file) {
+                    if (!file_exists($build_directory . $file)) {
+                        throw new \Exception(sprintf('%s not found. Unable to concatenate asset group %s.', $build_directory. $file, $group_name));
+                    }
+                }
+
+                $group_file = new \SplFileObject($build_directory . $this->hashGroup($group_name, $type), 'w');
                 foreach ($files as $file) {
                     $group_file->fwrite(file_get_contents($build_directory . $file));
                     $group_file->fwrite(PHP_EOL . PHP_EOL);
