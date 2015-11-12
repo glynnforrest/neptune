@@ -68,6 +68,9 @@ class AssetsInstallCommand extends Command
 
             $target = $build_dir . $name;
             if (file_exists($target)) {
+                if (!is_link($target)) {
+                    throw new \Exception(sprintf('Unable to link to %s - %s already exists.', $src, $target));
+                }
                 unlink($target);
             }
 
