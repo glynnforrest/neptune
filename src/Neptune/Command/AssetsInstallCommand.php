@@ -34,6 +34,12 @@ class AssetsInstallCommand extends Command
                  '',
                  InputOption::VALUE_NONE,
                  'Don\'t link the assets into the public folder'
+             )
+             ->addOption(
+                 'no-install',
+                 '',
+                 InputOption::VALUE_NONE,
+                 'Don\'t run the install commands in each module'
              );
     }
 
@@ -53,6 +59,17 @@ class AssetsInstallCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!$input->getOption('no-install')) {
+            $this->install($input, $output);
+        }
+
+        if (!$input->getOption('no-link')) {
+            $this->link($input, $output);
+        }
+    }
+
+    protected function install(InputInterface $input, OutputInterface $output)
+    {
         $asset_manager = $this->neptune['assets'];
         $modules = $this->getModulesToProcess($input);
 
@@ -64,12 +81,14 @@ class AssetsInstallCommand extends Command
 
             $output->writeln("Installed <info>$name</info>");
         }
+    }
 
-        if ($input->getOption('no-link')) {
-            return;
-        }
-
-        //link each group to the public directory
+    /**
+     * Link each group to the public directory
+     */
+    protected function link(InputInterface $input, OutputInterface $output)
+    {
+        $modules = $this->getModulesToProcess($input);
         $build_dir = $this->setupBuildDir($output);
         $filesystem = new Filesystem();
 
@@ -87,9 +106,6 @@ class AssetsInstallCommand extends Command
             $filesystem->symlink($src, $target);
             $output->writeln(sprintf('Linked <info>%s</info> to <info>%s</info>', $src, $target));
         }
-
-        $output->writeln('');
-        $output->writeln('Installed assets');
     }
 
     protected function setupBuildDir(OutputInterface $output)
