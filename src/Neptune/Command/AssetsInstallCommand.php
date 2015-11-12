@@ -7,6 +7,7 @@ use Neptune\Config\Exception\ConfigFileException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -27,6 +28,12 @@ class AssetsInstallCommand extends Command
                  'modules',
                  InputArgument::IS_ARRAY,
                  'A list of modules to install instead of all.'
+             )
+             ->addOption(
+                 'no-link',
+                 '',
+                 InputOption::VALUE_NONE,
+                 'Don\'t link the assets into the public folder'
              );
     }
 
@@ -56,6 +63,10 @@ class AssetsInstallCommand extends Command
             }
 
             $output->writeln("Installed <info>$name</info>");
+        }
+
+        if ($input->getOption('no-link')) {
+            return;
         }
 
         //link each group to the public directory
