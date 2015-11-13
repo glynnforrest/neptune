@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class AssetsBuildCommand extends AssetsInstallCommand
 {
     protected $name = 'assets:build';
-    protected $description = 'Build module assets and link to the public folder';
+    protected $description = 'Concatenate group assets in a module and place in the public folder';
     protected $build_dir;
     protected $progress;
     protected $assets_count;
@@ -42,49 +42,24 @@ class AssetsBuildCommand extends AssetsInstallCommand
         $manager = $this->neptune['assets'];
 
         foreach ($modules as $name => $module) {
-            $output->writeln('');
-            $config = $this->neptune['config'];
-
-            if (!$command = $config->get("$name.assets.build_cmd", false)) {
-                $output->writeln("Skipping <info>$name</info>");
-                continue;
-            }
-
-            $output->writeln("Building <info>$name</info>");
-            $dir = $module->getDirectory();
-
-            passthru("cd $dir && $command");
-
-            //move built assets into public dir
-            $build_dir = $dir . 'assets_built/';
-            if (!file_exists($build_dir)) {
-                throw new \Exception(sprintf('Assets build command for "%s" must create directory "%s"', $name, $build_dir));
-            }
-
-            $public_dir = $this->neptune->getRootDirectory() . 'public/assets/';
-            $group_dir = $public_dir . $name;
-            if (file_exists($group_dir)) {
-                unlink($group_dir);
-            }
-
-            symlink($build_dir, $group_dir);
-            $output->writeln(sprintf('Linking %s to %s', $build_dir, $group_dir));
-
-            //generate concatenated asset files
-            $manager->concatenateAssets($name, $public_dir);
-            $output->writeln('Creating concatenated group files');
+            $manager->concatenateAssets($name, $this->build_dir);
         }
-        $output->writeln('');
-        $output->writeln(sprintf('Built assets to <info>%s</info>', $this->build_dir));
+
+        $output->writeln(sprintf('Built concatenated assets to <info>%s</info>', $this->build_dir));
+
+        //check if assets.concat is true, otherwise write a helper msg
+        if (true !== $concat = $this->config->get('neptune.assets.concat_groups')) {
+            $output->writeln('');
+            $output->writeln(sprintf('Config setting <info>neptune.assets.concat_groups</info> needs to be set to <info>true</info> (currently <info>%s</info>)', var_export($concat, true)));
+        }
     }
 
     protected function setupBuildDir(OutputInterface $output)
     {
         $build_dir = $this->getRootDirectory() . 'public/' . $this->config->get('assets.url', 'assets/');
         //make sure build_dir has a trailing slash
-        if (substr($build_dir, -1) !== '/') {
-            $build_dir .= '/';
-        }
+        $build_dir = rtrim($build_dir, '/').'/';
+
         //create build_dir if it doesn't exist
         if (!file_exists($build_dir)) {
             mkdir($build_dir, 0755, true);
