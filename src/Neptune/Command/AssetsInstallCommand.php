@@ -89,7 +89,7 @@ class AssetsInstallCommand extends Command
     protected function link(InputInterface $input, OutputInterface $output)
     {
         $modules = $this->getModulesToProcess($input);
-        $build_dir = $this->setupBuildDir($output);
+        $build_dir = $this->getRootDirectory() . 'public/' . $this->config->get('neptune.assets.url', 'assets/');
         $filesystem = new Filesystem();
 
         foreach ($modules as $name => $module) {
@@ -106,24 +106,5 @@ class AssetsInstallCommand extends Command
             $filesystem->symlink($src, $target);
             $output->writeln(sprintf('Linked <info>%s</info> to <info>%s</info>', $src, $target));
         }
-    }
-
-    protected function setupBuildDir(OutputInterface $output)
-    {
-        $build_dir = $this->getRootDirectory() . 'public/' . $this->config->get('assets.url', 'assets/');
-        //make sure build_dir has a trailing slash
-        if (substr($build_dir, -1) !== '/') {
-            $build_dir .= '/';
-        }
-        if (!file_exists($build_dir)) {
-            mkdir($build_dir, 0755, true);
-            $output->writeln("Creating $build_dir");
-        }
-        if (!is_dir($build_dir) | !is_writeable($build_dir)) {
-            throw new \Exception(
-                "Unable to write to $build_dir. Check file paths and permissions are correct.");
-        }
-
-        return $build_dir;
     }
 }

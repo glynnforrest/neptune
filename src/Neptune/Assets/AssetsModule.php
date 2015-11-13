@@ -20,13 +20,13 @@ class AssetsModule extends AbstractModule
     public function register(Neptune $neptune)
     {
         $neptune['assets.url'] = function ($neptune) {
-            $url =  $neptune['config']->get('neptune.assets.url', 'assets/');
-            //add a slash if the given url doesn't end with one
-            if (substr($url, -1, 1) !== '/') {
-                $url .= '/';
-            }
+            $url = $neptune['config']->get('neptune.assets.url', 'assets/');
 
-            return $url;
+            return rtrim($url, '/') . '/';
+        };
+
+        $neptune['assets.build_dir'] = function ($neptune) {
+            return $neptune->getRootDirectory() . 'public/' . $neptune['assets.url'];
         };
 
         $neptune['assets'] = function ($neptune) {

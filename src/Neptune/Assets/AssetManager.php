@@ -4,6 +4,7 @@ namespace Neptune\Assets;
 
 use Neptune\Config\Config;
 use Neptune\Service\AbstractModule;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * AssetManager
@@ -180,6 +181,9 @@ class AssetManager
      */
     public function concatenateAssets($module_name, $build_directory)
     {
+        $filesystem = new Filesystem();
+        $filesystem->mkdir($build_directory, 0755);
+
         foreach (['css', 'js'] as $type) {
             $groups = array_keys($this->config->get("$module_name.assets.$type", []));
 
