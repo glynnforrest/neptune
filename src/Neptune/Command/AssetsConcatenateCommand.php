@@ -7,13 +7,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * AssetsBuildCommand.
+ * AssetsConcatenateCommand.
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
-class AssetsBuildCommand extends AssetsInstallCommand
+class AssetsConcatenateCommand extends AssetsInstallCommand
 {
-    protected $name = 'assets:build';
+    protected $name = 'assets:concatenate';
     protected $description = 'Concatenate group assets in a module and place in the public folder';
 
     protected function configure()
