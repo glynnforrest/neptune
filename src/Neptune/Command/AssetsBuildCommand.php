@@ -2,17 +2,12 @@
 
 namespace Neptune\Command;
 
-use Neptune\Output\Output;
-use Neptune\Assets\Asset;
-
-use Neptune\Config\Exception\ConfigFileException;
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * AssetsBuildCommand
+ * AssetsBuildCommand.
  *
  * @author Glynn Forrest <me@glynnforrest.com>
  **/
@@ -20,9 +15,6 @@ class AssetsBuildCommand extends AssetsInstallCommand
 {
     protected $name = 'assets:build';
     protected $description = 'Concatenate group assets in a module and place in the public folder';
-    protected $build_dir;
-    protected $progress;
-    protected $assets_count;
 
     protected function configure()
     {
