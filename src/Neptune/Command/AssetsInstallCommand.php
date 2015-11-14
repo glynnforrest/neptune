@@ -18,7 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class AssetsInstallCommand extends Command
 {
     protected $name = 'assets:install';
-    protected $description = 'Install module assets';
+    protected $description = 'Install module assets and link them into the public folder';
 
     protected function configure()
     {
