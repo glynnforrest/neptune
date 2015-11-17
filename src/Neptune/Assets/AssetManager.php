@@ -12,16 +12,8 @@ use Symfony\Component\Filesystem\Filesystem;
  **/
 class AssetManager
 {
-
-    const LINK = 1;
-    const INLINE = 2;
-
     protected $config;
     protected $generator;
-
-    protected $concat;
-    protected $css = [];
-    protected $js = [];
 
     public function __construct(Config $config, TagGenerator $generator, $concatenate = false)
     {
@@ -93,19 +85,22 @@ class AssetManager
         }, $this->getGroupAssets($group, $type));
     }
 
-    public function addCss($src)
+    public function css($src)
     {
-        $this->css[] = [self::LINK, $src];
+        return $this->generator->css($src);
     }
 
-    public function addCssGroup($name)
+    public function cssGroup($name)
     {
         if ($this->concat) {
-            $this->css[] = [self::LINK, $this->hashGroup($name, 'css')];
-
-            return;
+            return $this->generator->css($this->hashGroup($name, 'css'));
         }
-        $this->css = array_merge($this->css, $this->getGroupAssetsFormatted($name, 'css'));
+        $html = '';
+        foreach ($this->getGroupAssets($name, 'css') as $css) {
+            $html .= $this->generator->css($css);
+        }
+
+        return $html;
     }
 
     /**
@@ -113,60 +108,45 @@ class AssetManager
      *
      * @param string $css The css code
      */
-    public function addInlineCss($css)
+    public function inlineCss($css)
     {
-        $this->css[] = [self::INLINE, $css];
-    }
-
-    public function css()
-    {
-        $content ='';
-        foreach ($this->css as $css) {
-            $content .= $css[0] === self::INLINE ? $this->generator->inlineCss($css[1]) : $this->generator->css($css[1]);
-        }
-
-        return $content;
-    }
-
-    public function addJs($src)
-    {
-        $this->js[] = [self::LINK, $src];
-    }
-
-    public function addJsGroup($name)
-    {
-        if ($this->concat) {
-            $this->js[] = [self::LINK, $this->hashGroup($name, 'js')];
-
-            return;
-        }
-        $this->js = array_merge($this->js, $this->getGroupAssetsFormatted($name, 'js'));
+        return $this->generator->inlineCss($css);
     }
 
     /**
-     * Add an inline javascript tag.
+     * Render a javascript tag.
+     *
+     * @param string $src The source of the javascript file
+     */
+    public function js($src)
+    {
+        return $this->generator->js($src);
+    }
+
+    /**
+     * Render an inline javascript tag.
      *
      * @param string $js The javascript code
      */
-    public function addInlineJs($js)
+    public function inlineJs($js)
     {
-        $this->js[] = [self::INLINE, $js];
+        return $this->generator->inlineJs($js);
     }
 
-    public function js()
+    /**
+     * Render javascript tags for all files in an asset group.
+     */
+    public function jsGroup($name)
     {
-        $content ='';
-        foreach ($this->js as $js) {
-            $content .= $js[0] === self::INLINE ? $this->generator->inlineJs($js[1]) : $this->generator->js($js[1]);
+        if ($this->concat) {
+            return $this->generator->js($this->hashGroup($name, 'js'));
+        }
+        $html = '';
+        foreach ($this->getGroupAssets($name, 'js') as $js) {
+            $html .= $this->generator->js($js);
         }
 
-        return $content;
-    }
-
-    public function clear()
-    {
-        $this->css = [];
-        $this->js = [];
+        return $html;
     }
 
     /**
