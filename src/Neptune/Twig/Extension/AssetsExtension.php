@@ -28,18 +28,12 @@ class AssetsExtension extends \Twig_Extension
         $options = ['is_safe' => ['html']];
 
         return [
-            new \Twig_SimpleFunction('js', [$this, 'js'], $options),
-            new \Twig_SimpleFunction('css', [$this, 'css'], $options),
+            new \Twig_SimpleFunction('js', [$this->manager, 'js'], $options),
+            new \Twig_SimpleFunction('inlineJs', [$this->manager, 'inlineJs'], $options),
+            new \Twig_SimpleFunction('jsGroup', [$this->manager, 'jsGroup'], $options),
+            new \Twig_SimpleFunction('css', [$this->manager, 'css'], $options),
+            new \Twig_SimpleFunction('inlineCss', [$this->manager, 'inlineCss'], $options),
+            new \Twig_SimpleFunction('cssGroup', [$this->manager, 'cssGroup'], $options),
         ];
-    }
-
-    public function js()
-    {
-        return $this->manager->js();
-    }
-
-    public function css()
-    {
-        return $this->manager->css();
     }
 }
