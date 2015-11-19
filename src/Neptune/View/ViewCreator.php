@@ -143,7 +143,11 @@ class ViewCreator
         //helpers array
         $helpers = (array) $extension->getHelpers();
         foreach ($helpers as $name => $method) {
-            $this->helpers[$name] = array($extension, $method);
+            if (is_string($method)) {
+                $this->helpers[$name] = [$extension, $method];
+            } else {
+                $this->helpers[$name] = $method;
+            }
         }
 
         return $this;
