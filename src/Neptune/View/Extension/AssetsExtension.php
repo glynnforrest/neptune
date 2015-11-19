@@ -23,25 +23,12 @@ class AssetsExtension implements ExtensionInterface
     public function getHelpers()
     {
         return [
-            'js' => 'js',
-            'css' => 'css',
-            'assets' => 'assets'
+            'css' => [$this->manager, 'css'],
+            'inlineCss' => [$this->manager, 'inlineCss'],
+            'cssGroup' => [$this->manager, 'cssGroup'],
+            'js' => [$this->manager, 'js'],
+            'inlineJs' => [$this->manager, 'inlineJs'],
+            'jsGroup' => [$this->manager, 'jsGroup'],
         ];
     }
-
-    public function assets()
-    {
-        return $this->manager;
-    }
-
-    public function js()
-    {
-        return $this->manager->js();
-    }
-
-    public function css()
-    {
-        return $this->manager->css();
-    }
-
 }
