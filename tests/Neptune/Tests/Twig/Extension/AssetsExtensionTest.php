@@ -13,6 +13,7 @@ class AssetsExtensionTest extends \PHPUnit_Framework_TestCase
 {
     protected $manager;
     protected $extension;
+    protected $twig;
 
     protected static $templates = [
         'css' => "<head>{{ css('main.css') }}</head>",
