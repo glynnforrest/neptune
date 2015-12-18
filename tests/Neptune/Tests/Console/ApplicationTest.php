@@ -29,6 +29,6 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
      */
     public function testRegisterNeptuneCommands()
     {
-        $this->app->registerNamespace('Neptune', __DIR__ . '/../../../../src/Neptune/Command/');
+        $this->app->registerNamespace('Neptune\\Command', __DIR__ . '/../../../../src/Neptune/Command/');
     }
 }
