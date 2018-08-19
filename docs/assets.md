@@ -1,56 +1,107 @@
-#Managing frontend assets without going mad
+# Managing assets
 
-There are a lot of things to think about when managing assets in a web
-application. Personally I like to see:
+Neptune has asset utilities that are designed to work with frontend
+build tools such as grunt and gulp.
 
-- Integration with grunt, gulp and whatever hot new build tool I
-  decide to use. I want to use the tools designed for frontend
-  development, not a PHP version that attempts to duplicate this
-  functionality.
-- Support for working with vendor libraries without committing them to
-  version control.
-- First class support for keeping assets in different application
-  modules, with the ability to reference assets in other modules.
-- Separating assets into logical groups, and then compressing them all
-  down into one file when it comes to deployment.
+## Linking to assets
 
-There have been many attempts to accomplish these goals by different
-frameworks in the past. They developed their own solutions for
-managing assets before tools such as grunt or bower became
-popular. Now they're tasked with supporting their own tools and
-duplicating the amazing work of grunt, bower, yeoman, etc.
+Both twig and php views have `js` and `css` helpers to link to assets.
 
-Fortunately for me these tools exist now so I can just mash them all
-together. For Neptune, I've tried to implement sane asset management
-in the simplest possible way, allowing you to work with all these
-wonderful tools.
+Twig:
 
-##Adding assets
-
-The AssetManager class is responsible for, well, managing
-assets. Adding a css or javascript file to be included is as simple as
-calling the relevant method.
-
-```php
-// $am is an AssetManager, trust me
-$am->addCss('/css/styles.css');
-$am->addJs('/js/app.js');
-$am->addJs('/js/analytics.js');
-//external assets are fine too
-$am->addJs('http://cdn.example.org/js/library.js');
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Personal Home Page Page</title>
+    {{ css('my-module/css/main.css') }}
+  </head>
+  <body>
+    {{ js('my-module/js/admin.js') }}
+  </body>
+</html>
 ```
 
-The asset manager can be accessed with `$neptune['assets']`, or
-`$this->assets()` if you're in a controller. I can show you how to
-instantiate it manually later if you need to. Make sure to have
-registered the AssetsModule.
+PHP:
 
-##Using groups
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Personal Home Page Page</title>
+    <?=$this->css('css/main.css');?>
+  </head>
+  <body>
+    <?=$this->js('js/admin.js');?>
+  </body>
+</html>
+```
 
-Adding assets one-by-one is a pain - what works better is using asset
-groups. These are defined in configuration files and makes referring
-to a collection of assets very easy. Even better, we can crunch them
-down into one file when it comes to deployment time.
+> As both PHP and Twig methods are extremely similar,
+> the rest of this guide will just show the Twig way only.
+
+Each method takes the name of an asset,
+relative to the config setting `neptune.assets.url`.
+This defaults to `/assets`, so `css/main.css` will create a stylesheet
+tag linking to `/assets/css/main.css`.
+This file will be at `/<project>/public/assets/css/main.css`.
+
+If the supplied asset begins with `/` or has a scheme (`://`),
+it will be taken as-is.
+
+### Inline assets
+
+Use `inlineCss` and `inlineJs` to render css and js inline,
+e.g. dynamically generated code.
+
+```html
+<head>
+  {{ inlineCss({{ cssFromTheme }})}}
+</head>
+<body>
+  {{ inlineJs({{ jsFromDatabase }})}}
+</body>
+```
+
+## Module assets
+
+Instead of putting all assets in the public directory,
+assets can come from different modules and linked into the public directory.
+
+```bash
+neptune php assets:install
+```
+
+This will take the `assets` folder from each module and link it into the public folder.
+
+Additionally, each set of assets may require an installation step
+(e.g. installation with bower, sass compilation with grunt).
+
+
+```php
+//inside my-module/config.php
+'assets' => [
+    'css' => [
+    //you get the idea
+    ],
+    'js' => [
+    //...
+    ],
+    'install' => 'bower install && grunt',
+    'build' => 'grunt build'
+]
+```
+
+
+## Group assets
+
+> asset groups are really only useful when not using a javascript
+> module system already (e.g. require.js)
+
+Often a page requires multiple asset files, which can be a pain to
+render individually in a template.  Asset groups solve this problem by
+defining a list of assets in configuration, which can be used in
+multiple places with a single line of code.
 
 ```php
 //inside my-module/config.php
@@ -75,10 +126,45 @@ down into one file when it comes to deployment time.
 ]
 ```
 
-It's fairly straightforward - keep seperate sections for css and
-javascript, then include a subsection for each group. Note how the
-first part of the path is the module name. I'll explain how these
-paths are resolved in a minute.
+You can then use `cssGroup` and `jsGroup` template helpers to reference these groups
+
+### Concatenating group assets
+
+The added bonus with asset groups is the ability to concatenate assets
+to a single file to reduce the overhead of making many HTTP requests.
+
+You can concatenate the files in asset groups together by running
+
+```bash
+neptune php assets:concatenate
+```
+
+and setting the config option `neptune.assets.concat_groups` to `true`.
+
+Your templates should remain unmodified, but now a call to
+`cssGroup('my-module:main')` will link to a single css file with
+everything included, instead of many.
+
+## Behind the scenes
+
+The AssetManager class is responsible for, well, managing
+assets. Adding a css or javascript file to be included is as simple as
+calling the relevant method.
+
+```php
+// $am is an AssetManager, trust me
+$am->addCss('/css/styles.css');
+$am->addJs('/js/app.js');
+$am->addJs('/js/analytics.js');
+//external assets are fine too
+$am->addJs('http://cdn.example.org/js/library.js');
+```
+
+The asset manager can be accessed with `$neptune['assets']`, or
+`$this->assets()` if you're in a controller. I can show you how to
+instantiate it manually later if you need to. Make sure to have
+registered the AssetsModule.
+
 
 In this config, css files from 'site-module' were included, and the
 'admin' javascript group imports the whole of the 'main' group using
@@ -92,40 +178,6 @@ $am->addCssGroup('my-module:main');
 $am->addJsGroup('my-module:admin');
 ```
 
-##Including assets in views
-
-Having done all the prep work, we can now include these assets in
-templates with code that never references assets by name. This
-allows for alteration of the included assets (perhaps a nice holiday
-css theme) without changing the template code. The AssetsExtension
-class registers `css()` and `js()` functions which covers everything you
-need.
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My Personal Home Page Page</title>
-    <!-- css here -->
-    <?=$this->css();?>
-  </head>
-  <body>
-    <!-- amazing site content here -->
-    <img src="/images/self-portrait.jpg" alt="My beautiful mugshot"/>
-
-    <!-- js here -->
-    <?=$this->js();?>
-  </body>
-</html>
-```
-
-It's that easy. Now, onto modules, build tools, cache busting urls and some
-examples.
-
-##Modules and resolving paths
-
-##The AssetsController
-
 ##Cache busting
 
 It's also useful during development to make sure the browser is not
@@ -134,7 +186,7 @@ config/neptune.php to add cache busting to all asset urls. It's no
 replacement for a properly configured development server, and make sure
 you don't leave it on for production, unless you enjoy large bandwidth bills.
 
-##Working with build tools
+## Working with build tools
 
 Ok, now for the good stuff. Since each module can be considered its
 own little assets nursery, we can create seperate processes for
